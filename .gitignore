@@ -1,0 +1,37 @@
+# ============================================================
+# TradingResearch - Git Ignore
+# ============================================================
+
+# Python virtual environments
+.venv/
+venv/
+
+# Python generated files
+__pycache__/
+*.py[cod]
+
+# Secrets / environment variables
+.env
+.env.*
+!.env.example
+
+# Market data cache
+market_cache/
+
+# Runtime logs
+logs/
+*.log
+
+# Generated research output
+output/
+outputs/
+
+# Test/cache artifacts
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE / OS
+.vscode/
+.DS_Store
+Thumbs.db
