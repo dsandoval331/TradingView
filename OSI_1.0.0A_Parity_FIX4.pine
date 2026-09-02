@@ -1,0 +1,1060 @@
+//@version=6
+indicator("Opening Signal Intelligence - OSI 1.0.0A Parity FIX4", shorttitle="OSI 1.0.0A F4", overlay=true, max_labels_count=500)
+
+string BUILD_ID = "OSI_1.0.0A_PARITY_FIX4"
+string MODEL_ID = "TRADE_HEALTH_V3"
+string SIGNAL_QUALITY_MODEL = "SIGNAL_QUALITY_V1"
+string TZ = "America/New_York"
+
+// ============================================================================
+// OSI 1.0.0A PARITY
+// Derived from frozen S1M_FTHC_1.0.3A Core signal/outcome mechanics.
+//
+// IMPORTANT RESEARCH BOUNDARIES
+// 1) Existing C1/C2 research-event detector is preserved unchanged.
+// 2) Signal Quality V1 is immutable once the C2 event is created.
+// 3) Trade Health V3 uses only information observable through each checkpoint.
+// 4) No future outcome/minutes-to-target fields participate in Trade Health.
+// 5) C3..C10 must be a complete consecutive 1-minute sequence.
+// 6) A checkpoint is active only if neither +/-0.50% threshold has been touched
+//    through that checkpoint close.
+// ============================================================================
+
+// ---------- Inputs ----------
+atrType = input.string(
+     "Previous 5 Days 1M ATR",
+     "Production ATR Method",
+     options=["Previous Daily ATR","Previous Day 1M ATR","Previous 5 Days 1M ATR","First 2 Candles 1M ATR"],
+     group="Legacy Core")
+
+dailyATRLength = input.int(14, "Daily ATR Length", minval=1, group="Legacy Core")
+enableDeltaFilter = input.bool(false, "Enable Production Delta Filter", group="Legacy Core")
+minimumDelta = input.float(0.0, "Minimum Delta %", minval=0.0, step=1.0, group="Legacy Core")
+maximumDelta = input.float(100.0, "Maximum Delta %", minval=0.0, step=1.0, group="Legacy Core")
+
+showStatusTable = input.bool(true, "Show OSI Status Table", group="OSI Parity")
+showEventMarker = input.bool(true, "Show Research Event Marker", group="OSI Parity")
+showCheckpointMarkers = input.bool(true, "Show C6-C10 Health Markers", group="OSI Parity")
+historicalParityMode = input.bool(false, "Historical Parity Mode", group="OSI Parity Target")
+targetYear = input.int(2026, "Target Year", minval=2000, maxval=2100, group="OSI Parity Target")
+targetMonth = input.int(8, "Target Month", minval=1, maxval=12, group="OSI Parity Target")
+targetDay = input.int(24, "Target Day", minval=1, maxval=31, group="OSI Parity Target")
+targetCheckpoint = input.int(6, "Target Checkpoint", minval=6, maxval=10, group="OSI Parity Target")
+int targetDateKey = targetYear * 10000 + targetMonth * 100 + targetDay
+
+bool native1M = timeframe.in_seconds() == 60
+if timeframe.in_seconds() < 60
+    runtime.error("OSI 1.0.0A supports 1-minute or higher chart timeframes.")
+
+string engineName = native1M ? "Native 1M" : "Lower-TF 1M"
+extendedTicker = ticker.new(syminfo.prefix, syminfo.ticker, session.extended)
+
+// ---------- Helpers ----------
+f_avg5(float a, float b, float c, float d, float e) =>
+    float s = 0.0
+    int n = 0
+    if not na(a)
+        s += a
+        n += 1
+    if not na(b)
+        s += b
+        n += 1
+    if not na(c)
+        s += c
+        n += 1
+    if not na(d)
+        s += d
+        n += 1
+    if not na(e)
+        s += e
+        n += 1
+    n > 0 ? s / n : na
+
+f_dateKey(int t) =>
+    year(t, TZ) * 10000 + month(t, TZ) * 100 + dayofmonth(t, TZ)
+
+f_fmt(float x) =>
+    na(x) ? "NA" : str.tostring(x, "#.####")
+
+f_qualityCode(string q) =>
+    q == "HIGH_QUALITY" ? 3 : q == "STANDARD" ? 2 : q == "LOW_QUALITY" ? 1 : 0
+
+f_healthCode(string h) =>
+    h == "STRONG" ? 1 : h == "FAVORABLE" ? 2 : h == "CAUTION" ? 3 : h == "HIGH RISK" ? 4 : 0
+
+f_relationshipCode(string r) =>
+    r == "CONFIRMED_STRONG" ? 1 :
+     r == "STRENGTHENED_AFTER_ENTRY" ? 2 :
+     r == "RECOVERED_AFTER_WEAK_ENTRY" ? 3 :
+     r == "CONSTRUCTIVE" ? 4 :
+     r == "HIGH_QUALITY_DETERIORATED" ? 5 :
+     r == "CAUTION" ? 6 :
+     r == "HIGH_QUALITY_MATERIALLY_DETERIORATED" ? 7 :
+     r == "HIGH_RISK" ? 8 : 0
+
+f_extContext() =>
+    var int pmDate = na
+    var float pmH = na
+    var float pmL = na
+    var float pmVol = 0.0
+    var float pmO = na
+    var float pmLast = na
+    var int ahDate = na
+    var float ahH = na
+    var float ahL = na
+    var float ahVol = 0.0
+    int dk = f_dateKey(time)
+    int hh = hour(time, TZ)
+    int mm = minute(time, TZ)
+    bool isPM = (hh >= 4 and hh < 9) or (hh == 9 and mm < 30)
+    bool isAH = hh >= 16 and hh < 20
+    if isPM
+        if na(pmDate) or pmDate != dk
+            pmDate := dk
+            pmH := high
+            pmL := low
+            pmVol := volume
+            pmO := open
+            pmLast := close
+        else
+            pmH := math.max(pmH, high)
+            pmL := math.min(pmL, low)
+            pmVol += volume
+            pmLast := close
+    if isAH
+        if na(ahDate) or ahDate != dk
+            ahDate := dk
+            ahH := high
+            ahL := low
+            ahVol := volume
+        else
+            ahH := math.max(ahH, high)
+            ahL := math.min(ahL, low)
+            ahVol += volume
+    [pmDate, pmH, pmL, pmVol, pmO, pmLast, ahDate, ahH, ahL, ahVol]
+
+[canonicalPMDate,canonicalPMH,canonicalPML,canonicalPMVolume,canonicalPMOpen,canonicalPMLast,canonicalAHDate,canonicalAHHigh,canonicalAHLow,canonicalAHVolume] = request.security(extendedTicker, "1", f_extContext(), lookahead=barmerge.lookahead_off)
+
+f_canonicalATR() =>
+    var float sumTR = 0.0
+    var int countTR = 0
+    var float a1 = na
+    var float a2 = na
+    var float a3 = na
+    var float a4 = na
+    var float a5 = na
+    var float prev1 = na
+    var float prev5 = na
+    var int activeDate = na
+    int dk = f_dateKey(time)
+    int hh = hour(time, TZ)
+    int mm = minute(time, TZ)
+    bool isRTH = (hh > 9 or (hh == 9 and mm >= 30)) and hh < 16
+    bool newSession = isRTH and (na(activeDate) or dk != activeDate)
+    if newSession
+        if countTR > 0
+            float completed = sumTR / countTR
+            a5 := a4
+            a4 := a3
+            a3 := a2
+            a2 := a1
+            a1 := completed
+            prev1 := completed
+        prev5 := f_avg5(a1,a2,a3,a4,a5)
+        sumTR := 0.0
+        countTR := 0
+        activeDate := dk
+    if isRTH
+        sumTR += ta.tr(true)
+        countTR += 1
+    [prev1, prev5]
+
+[atrPrevDay1M, atrPrev5Day1M] = request.security(extendedTicker, "1", f_canonicalATR(), lookahead=barmerge.lookahead_off)
+
+atrPrevDaily = request.security(syminfo.tickerid, "D", ta.atr(dailyATRLength)[1], lookahead=barmerge.lookahead_on)
+
+f_prevRTHLevels() =>
+    var int activeDate = na
+    var float curH = na
+    var float curL = na
+    var float curC = na
+    var float prevH = na
+    var float prevL = na
+    var float prevC = na
+
+    int dk = f_dateKey(time)
+    int hh = hour(time, TZ)
+    int mm = minute(time, TZ)
+    bool isRTH = (hh > 9 or (hh == 9 and mm >= 30)) and hh < 16
+    bool newSession = isRTH and (na(activeDate) or dk != activeDate)
+
+    if newSession
+        if not na(activeDate)
+            prevH := curH
+            prevL := curL
+            prevC := curC
+        activeDate := dk
+        curH := high
+        curL := low
+        curC := close
+    else if isRTH
+        curH := na(curH) ? high : math.max(curH, high)
+        curL := na(curL) ? low : math.min(curL, low)
+        curC := close
+
+    [prevH, prevL, prevC]
+
+[prevRTHHigh, prevRTHLow, prevRTHClose] = request.security(extendedTicker, "1", f_prevRTHLevels(), lookahead=barmerge.lookahead_off)
+
+[tArr,oArr,hArr,lArr,cArr,vArr,trArr] = request.security_lower_tf(extendedTicker, "1", [time,open,high,low,close,volume,ta.tr(true)])
+
+// ============================================================================
+// Persistent state
+// ============================================================================
+var int lastProcessed1MTime = na
+var int activeRTHDate = na
+var float rthPV = 0.0
+var float rthVol = 0.0
+var float rthVWAP = na
+
+var float c1O = na
+var float c1H = na
+var float c1L = na
+var float c1C = na
+var float c1V = na
+var float c1TR = na
+var float c1VWAP = na
+var int c1Date = na
+
+var float c2O = na
+var float c2H = na
+var float c2L = na
+var float c2C = na
+var float c2V = na
+var float c2TR = na
+var float c2VWAP = na
+
+var float c1Hist1 = na
+var float c1Hist2 = na
+var float c1Hist3 = na
+var float c1Hist4 = na
+var float c1Hist5 = na
+var float c2Hist1 = na
+var float c2Hist2 = na
+var float c2Hist3 = na
+var float c2Hist4 = na
+var float c2Hist5 = na
+var float c1RelVol = na
+var float c2RelVol = na
+var float combinedRelVol = na
+
+var bool researchEvent = false
+var bool productionSignal = false
+var int eventDirection = 0
+var int eventDateKey = na
+var int eventTimestamp = na
+var float referencePrice = na
+
+var float signalPMH = na
+var float signalPML = na
+var float signalPMOpen = na
+var float signalPMLast = na
+var float signalPMVol = na
+var float signalAHHigh = na
+var float signalAHLow = na
+var float signalAHVol = na
+var float signalPDH = na
+var float signalPDL = na
+var float signalPrevRTHClose = na
+
+var float first2ATR = na
+var float selectedATR = na
+var float vwapDistance = na
+var float deltaPct = na
+
+// Legacy outcome tracking preserved from 1.0.3A.
+var bool tracking = false
+var float highestAfter = na
+var float lowestAfter = na
+var float finalMFE = na
+var float finalMAE = na
+var float mfe1 = na
+var float mae1 = na
+var float mfe2 = na
+var float mae2 = na
+var float mfe3 = na
+var float mae3 = na
+var float mfe5 = na
+var float mae5 = na
+var float mfe10 = na
+var float mae10 = na
+var int min025 = na
+var int min050 = na
+var int min075 = na
+var int min100 = na
+var int minAdv050 = na
+var int outcome050 = 0
+var int outcome100 = 0
+
+// ---------- Signal Quality V1 ----------
+var string signalQualityState = "NONE"
+var int signalQualityCode = 0
+var float favorableC2VWAPDistancePct = na
+var float favorableC1ToC2CloseDeltaPct = na
+var float c2FavorableCloseLocationPct = na
+var int c1DirectionAlignedCode = na
+var int c2DirectionAlignedCode = na
+var int directionLossCode = na
+
+// ---------- Strict V3 opening sequence ----------
+var bool openingSequenceComplete = false
+var int lastOpeningElapsed = 0
+var float cumulativeFavExcursionPct = na
+var float cumulativeAdvExcursionPct = na
+
+var float c3Progress = na
+var float c4Progress = na
+var float c5Progress = na
+var float c6Progress = na
+var float c7Progress = na
+var float c8Progress = na
+var float c9Progress = na
+var float c10Progress = na
+
+var float c3CumFav = na
+var float c3CumAdv = na
+var float c4CumFav = na
+var float c4CumAdv = na
+var float c5CumFav = na
+var float c5CumAdv = na
+var float c6CumFav = na
+var float c6CumAdv = na
+var float c7CumFav = na
+var float c7CumAdv = na
+var float c8CumFav = na
+var float c8CumAdv = na
+var float c9CumFav = na
+var float c9CumAdv = na
+var float c10CumFav = na
+var float c10CumAdv = na
+
+var float c6FavorableWickPct = na
+
+var bool f1C6Warning = false
+var bool f1C7Confirmed = false
+var int firstF2Checkpoint = na
+
+var int currentCheckpoint = na
+var int currentCheckpointTimestamp = na
+var bool currentSequenceComplete = false
+var bool currentActiveAtClose = false
+var float currentProgressPct = na
+var string currentProgressState = "NONE"
+var int currentTradeHealthTier = 0
+var string currentTradeHealthState = "NONE"
+var string currentHealthReason = "NONE"
+var string currentRelationshipState = "UNKNOWN"
+var string currentRelationshipMessage = ""
+var int currentRelationshipCode = 0
+var bool currentPriorF2 = false
+var bool currentHadF2 = false
+var bool currentHadF1 = false
+
+// ---------- Historical parity display snapshot (observational only) ----------
+var bool parityTargetDaySeen = false
+var bool parityEventSeen = false
+var bool paritySnapshotReady = false
+var int parityDirection = 0
+var string paritySignalQualityState = "NONE"
+var int parityCheckpoint = na
+var float parityProgressPct = na
+var bool parityActiveAtClose = false
+var bool parityF1C6Warning = false
+var bool parityF1C7Confirmed = false
+var int parityFirstF2Checkpoint = na
+var string parityTradeHealthState = "NONE"
+var string parityRelationshipState = "UNKNOWN"
+
+// ============================================================================
+// Canonical 1-minute engine
+// ============================================================================
+int processCount = native1M ? 1 : array.size(tArr)
+
+if processCount > 0
+    for i = 0 to processCount - 1
+        int t = native1M ? time : array.get(tArr,i)
+        float o = native1M ? open : array.get(oArr,i)
+        float h = native1M ? high : array.get(hArr,i)
+        float l = native1M ? low : array.get(lArr,i)
+        float c = native1M ? close : array.get(cArr,i)
+        float v = native1M ? volume : array.get(vArr,i)
+        float tr = native1M ? ta.tr(true) : array.get(trArr,i)
+
+        bool isNew = na(lastProcessed1MTime) or t > lastProcessed1MTime
+
+        if isNew
+            int dk = f_dateKey(t)
+            int hh = hour(t,TZ)
+            int mm = minute(t,TZ)
+            bool isRTH = (hh > 9 or (hh == 9 and mm >= 30)) and hh < 16
+            bool isC1 = hh == 9 and mm == 30
+            bool isC2 = hh == 9 and mm == 31
+            bool newRTH = isRTH and (na(activeRTHDate) or dk != activeRTHDate)
+
+            if newRTH
+                int priorRTHDateKey = activeRTHDate
+                if dk == targetDateKey
+                    parityTargetDaySeen := true
+                    parityEventSeen := false
+                    paritySnapshotReady := false
+
+                if canonicalPMDate == dk
+                    signalPMH := canonicalPMH
+                    signalPML := canonicalPML
+                    signalPMOpen := canonicalPMOpen
+                    signalPMLast := canonicalPMLast
+                    signalPMVol := canonicalPMVolume
+                else
+                    signalPMH := na
+                    signalPML := na
+                    signalPMOpen := na
+                    signalPMLast := na
+                    signalPMVol := na
+
+                if not na(priorRTHDateKey) and canonicalAHDate == priorRTHDateKey
+                    signalAHHigh := canonicalAHHigh
+                    signalAHLow := canonicalAHLow
+                    signalAHVol := canonicalAHVolume
+                else
+                    signalAHHigh := na
+                    signalAHLow := na
+                    signalAHVol := na
+
+                signalPDH := prevRTHHigh
+                signalPDL := prevRTHLow
+                signalPrevRTHClose := prevRTHClose
+
+                if not na(c1V)
+                    c1Hist5 := c1Hist4
+                    c1Hist4 := c1Hist3
+                    c1Hist3 := c1Hist2
+                    c1Hist2 := c1Hist1
+                    c1Hist1 := c1V
+
+                if not na(c2V)
+                    c2Hist5 := c2Hist4
+                    c2Hist4 := c2Hist3
+                    c2Hist3 := c2Hist2
+                    c2Hist2 := c2Hist1
+                    c2Hist1 := c2V
+
+                activeRTHDate := dk
+                rthPV := 0.0
+                rthVol := 0.0
+                rthVWAP := na
+
+                c1O := na
+                c1H := na
+                c1L := na
+                c1C := na
+                c1V := na
+                c1TR := na
+                c1VWAP := na
+                c1Date := na
+
+                c2O := na
+                c2H := na
+                c2L := na
+                c2C := na
+                c2V := na
+                c2TR := na
+                c2VWAP := na
+
+                c1RelVol := na
+                c2RelVol := na
+                combinedRelVol := na
+
+                tracking := false
+                researchEvent := false
+                productionSignal := false
+                eventDirection := 0
+                eventDateKey := na
+                eventTimestamp := na
+                referencePrice := na
+                selectedATR := na
+                vwapDistance := na
+                deltaPct := na
+                first2ATR := na
+
+                highestAfter := na
+                lowestAfter := na
+                finalMFE := na
+                finalMAE := na
+                mfe1 := na
+                mae1 := na
+                mfe2 := na
+                mae2 := na
+                mfe3 := na
+                mae3 := na
+                mfe5 := na
+                mae5 := na
+                mfe10 := na
+                mae10 := na
+                min025 := na
+                min050 := na
+                min075 := na
+                min100 := na
+                minAdv050 := na
+                outcome050 := 0
+                outcome100 := 0
+
+                signalQualityState := "NONE"
+                signalQualityCode := 0
+                favorableC2VWAPDistancePct := na
+                favorableC1ToC2CloseDeltaPct := na
+                c2FavorableCloseLocationPct := na
+                c1DirectionAlignedCode := na
+                c2DirectionAlignedCode := na
+                directionLossCode := na
+
+                openingSequenceComplete := false
+                lastOpeningElapsed := 0
+                cumulativeFavExcursionPct := na
+                cumulativeAdvExcursionPct := na
+
+                c3Progress := na
+                c4Progress := na
+                c5Progress := na
+                c6Progress := na
+                c7Progress := na
+                c8Progress := na
+                c9Progress := na
+                c10Progress := na
+
+                c3CumFav := na
+                c3CumAdv := na
+                c4CumFav := na
+                c4CumAdv := na
+                c5CumFav := na
+                c5CumAdv := na
+                c6CumFav := na
+                c6CumAdv := na
+                c7CumFav := na
+                c7CumAdv := na
+                c8CumFav := na
+                c8CumAdv := na
+                c9CumFav := na
+                c9CumAdv := na
+                c10CumFav := na
+                c10CumAdv := na
+
+                c6FavorableWickPct := na
+
+                f1C6Warning := false
+                f1C7Confirmed := false
+                firstF2Checkpoint := na
+
+                currentCheckpoint := na
+                currentCheckpointTimestamp := na
+                currentSequenceComplete := false
+                currentActiveAtClose := false
+                currentProgressPct := na
+                currentProgressState := "NONE"
+                currentTradeHealthTier := 0
+                currentTradeHealthState := "NONE"
+                currentHealthReason := "NONE"
+                currentRelationshipState := "UNKNOWN"
+                currentRelationshipMessage := ""
+                currentRelationshipCode := 0
+                currentPriorF2 := false
+                currentHadF2 := false
+                currentHadF1 := false
+
+            if isRTH
+                float tp = (h + l + c) / 3.0
+                rthPV += tp * v
+                rthVol += v
+                rthVWAP := rthVol > 0 ? rthPV / rthVol : na
+
+            if isC1
+                c1O := o
+                c1H := h
+                c1L := l
+                c1C := c
+                c1V := v
+                c1TR := tr
+                c1VWAP := rthVWAP
+                c1Date := dk
+
+                float avgC1 = f_avg5(c1Hist1,c1Hist2,c1Hist3,c1Hist4,c1Hist5)
+                if not na(avgC1) and avgC1 > 0
+                    c1RelVol := c1V / avgC1
+
+            if isC2 and c1Date == dk and not na(c1C)
+                c2O := o
+                c2H := h
+                c2L := l
+                c2C := c
+                c2V := v
+                c2TR := tr
+                c2VWAP := rthVWAP
+
+                float avgC2 = f_avg5(c2Hist1,c2Hist2,c2Hist3,c2Hist4,c2Hist5)
+                if not na(avgC2) and avgC2 > 0
+                    c2RelVol := c2V / avgC2
+
+                float comb1 = not na(c1Hist1) and not na(c2Hist1) ? c1Hist1 + c2Hist1 : na
+                float comb2 = not na(c1Hist2) and not na(c2Hist2) ? c1Hist2 + c2Hist2 : na
+                float comb3 = not na(c1Hist3) and not na(c2Hist3) ? c1Hist3 + c2Hist3 : na
+                float comb4 = not na(c1Hist4) and not na(c2Hist4) ? c1Hist4 + c2Hist4 : na
+                float comb5 = not na(c1Hist5) and not na(c2Hist5) ? c1Hist5 + c2Hist5 : na
+                float avgComb = f_avg5(comb1,comb2,comb3,comb4,comb5)
+
+                if not na(avgComb) and avgComb > 0
+                    combinedRelVol := (c1V + c2V) / avgComb
+
+                // Frozen 1.0.3A event detector — intentionally unchanged.
+                bool bull = c1C > c1O and c1C > c1VWAP and c2C > c2O and c2C > c2VWAP and c2L > c2VWAP
+
+                bool bear = c1C < c1O and c1C < c1VWAP and c2C < c2O and c2C < c2VWAP and c2H < c2VWAP
+
+                bool newResearchEvent = bull or bear
+
+                first2ATR := (c1TR + c2TR) / 2.0
+
+                if atrType == "Previous Daily ATR"
+                    selectedATR := atrPrevDaily
+                else if atrType == "Previous Day 1M ATR"
+                    selectedATR := atrPrevDay1M
+                else if atrType == "Previous 5 Days 1M ATR"
+                    selectedATR := atrPrev5Day1M
+                else
+                    selectedATR := first2ATR
+
+                if newResearchEvent
+                    eventDirection := bull ? 1 : -1
+                    researchEvent := true
+                    eventDateKey := dk
+                    eventTimestamp := t
+                    referencePrice := c2C
+
+                    vwapDistance := bull ? c2L - c2VWAP : c2VWAP - c2H
+                    deltaPct := not na(selectedATR) and selectedATR > 0 ? vwapDistance / selectedATR * 100.0 : na
+
+                    bool deltaPass = not enableDeltaFilter or (not na(deltaPct) and deltaPct >= minimumDelta and deltaPct <= maximumDelta)
+
+                    productionSignal := deltaPass
+                    tracking := true
+                    highestAfter := referencePrice
+                    lowestAfter := referencePrice
+                    finalMFE := 0.0
+                    finalMAE := 0.0
+
+                    // --------------------------------------------------------
+                    // Signal Quality V1 — frozen at C2.
+                    // --------------------------------------------------------
+                    float rawC2VWAPDistancePct = not na(c2VWAP) and c2VWAP > 0 ? (c2C - c2VWAP) / c2VWAP * 100.0 : na
+
+                    float rawC1ToC2CloseDeltaPct = c1C > 0 ? (c2C - c1C) / c1C * 100.0 : na
+
+                    float rawC2CLV = c2H > c2L ? (c2C - c2L) / (c2H - c2L) * 100.0 : na
+
+                    favorableC2VWAPDistancePct := eventDirection == 1 ? rawC2VWAPDistancePct : eventDirection == -1 and not na(rawC2VWAPDistancePct) ? -rawC2VWAPDistancePct : na
+
+                    favorableC1ToC2CloseDeltaPct := eventDirection == 1 ? rawC1ToC2CloseDeltaPct : eventDirection == -1 and not na(rawC1ToC2CloseDeltaPct) ? -rawC1ToC2CloseDeltaPct : na
+
+                    c2FavorableCloseLocationPct := eventDirection == 1 ? rawC2CLV : eventDirection == -1 and not na(rawC2CLV) ? 100.0 - rawC2CLV : na
+
+                    bool c1Aligned = eventDirection == 1 ? c1C > c1O : eventDirection == -1 ? c1C < c1O : false
+
+                    bool c2Aligned = eventDirection == 1 ? c2C > c2O : eventDirection == -1 ? c2C < c2O : false
+
+                    c1DirectionAlignedCode := c1Aligned ? 1 : 0
+                    c2DirectionAlignedCode := c2Aligned ? 1 : 0
+                    directionLossCode := c1Aligned and not c2Aligned ? 1 : 0
+
+                    bool highQuality = not na(favorableC2VWAPDistancePct) and not na(favorableC1ToC2CloseDeltaPct) and not na(c2FavorableCloseLocationPct) and favorableC2VWAPDistancePct >= 0.05 and favorableC2VWAPDistancePct < 0.15 and favorableC1ToC2CloseDeltaPct >= 0.20 and favorableC1ToC2CloseDeltaPct < 0.40 and c2FavorableCloseLocationPct >= 70.0
+
+                    bool lowQuality = eventDirection == -1 and c1Aligned and not c2Aligned
+
+                    signalQualityState := highQuality ? "HIGH_QUALITY" : lowQuality ? "LOW_QUALITY" : "STANDARD"
+
+                    signalQualityCode := f_qualityCode(signalQualityState)
+
+                    // Strict V3 sequence starts immediately after C2.
+                    openingSequenceComplete := true
+                    lastOpeningElapsed := 0
+                    cumulativeFavExcursionPct := 0.0
+                    cumulativeAdvExcursionPct := 0.0
+
+                    if dk == targetDateKey
+                        parityEventSeen := true
+                        parityDirection := eventDirection
+                        paritySignalQualityState := signalQualityState
+
+            // ----------------------------------------------------------------
+            // Post-signal engine. One-minute bars C3..C10 are elapsed 1..8.
+            // ----------------------------------------------------------------
+            if tracking and isRTH and dk == eventDateKey and not na(eventTimestamp) and t > eventTimestamp
+                int elapsed = int((t - eventTimestamp) / 60000)
+
+                // Legacy outcome tracking preserved.
+                highestAfter := math.max(highestAfter, h)
+                lowestAfter := math.min(lowestAfter, l)
+
+                float barFav = eventDirection == 1 ? (h - referencePrice) / referencePrice * 100.0 : (referencePrice - l) / referencePrice * 100.0
+
+                float barAdv = eventDirection == 1 ? (referencePrice - l) / referencePrice * 100.0 : (h - referencePrice) / referencePrice * 100.0
+
+                float curMFE = eventDirection == 1 ? (highestAfter - referencePrice) / referencePrice * 100.0 : (referencePrice - lowestAfter) / referencePrice * 100.0
+
+                float curMAE = eventDirection == 1 ? (referencePrice - lowestAfter) / referencePrice * 100.0 : (highestAfter - referencePrice) / referencePrice * 100.0
+
+                finalMFE := math.max(curMFE, 0.0)
+                finalMAE := math.max(curMAE, 0.0)
+
+                if elapsed == 1 and na(mfe1)
+                    mfe1 := finalMFE
+                    mae1 := finalMAE
+                if elapsed == 2 and na(mfe2)
+                    mfe2 := finalMFE
+                    mae2 := finalMAE
+                if elapsed == 3 and na(mfe3)
+                    mfe3 := finalMFE
+                    mae3 := finalMAE
+                if elapsed == 5 and na(mfe5)
+                    mfe5 := finalMFE
+                    mae5 := finalMAE
+                if elapsed == 10 and na(mfe10)
+                    mfe10 := finalMFE
+                    mae10 := finalMAE
+
+                if na(min025) and barFav >= 0.25
+                    min025 := elapsed
+                if na(min050) and barFav >= 0.50
+                    min050 := elapsed
+                if na(min075) and barFav >= 0.75
+                    min075 := elapsed
+                if na(min100) and barFav >= 1.00
+                    min100 := elapsed
+                if na(minAdv050) and barAdv >= 0.50
+                    minAdv050 := elapsed
+
+                if outcome050 == 0
+                    bool f050 = barFav >= 0.50
+                    bool a050 = barAdv >= 0.50
+                    if f050 and a050
+                        outcome050 := 3
+                    else if f050
+                        outcome050 := 1
+                    else if a050
+                        outcome050 := 2
+
+                if outcome100 == 0
+                    bool f100 = barFav >= 1.00
+                    bool a050b = barAdv >= 0.50
+                    if f100 and a050b
+                        outcome100 := 3
+                    else if f100
+                        outcome100 := 1
+                    else if a050b
+                        outcome100 := 2
+
+                // ------------------------------------------------------------
+                // Strict V3 point-in-time checkpoint calculations.
+                // ------------------------------------------------------------
+                if elapsed >= 1 and elapsed <= 8
+                    if openingSequenceComplete and elapsed != lastOpeningElapsed + 1
+                        openingSequenceComplete := false
+
+                    lastOpeningElapsed := elapsed
+
+                    float progressPct = eventDirection == 1 ? (c / referencePrice - 1.0) * 100.0 : (referencePrice / c - 1.0) * 100.0
+
+                    float favExcursionPct = eventDirection == 1 ? (h / referencePrice - 1.0) * 100.0 : (referencePrice / l - 1.0) * 100.0
+
+                    float advExcursionPct = eventDirection == 1 ? (referencePrice / l - 1.0) * 100.0 : (h / referencePrice - 1.0) * 100.0
+
+                    cumulativeFavExcursionPct := math.max(cumulativeFavExcursionPct, favExcursionPct)
+                    cumulativeAdvExcursionPct := math.max(cumulativeAdvExcursionPct, advExcursionPct)
+
+                    bool activeAtClose = openingSequenceComplete and cumulativeFavExcursionPct < 0.50 and cumulativeAdvExcursionPct < 0.50
+
+                    int checkpoint = elapsed + 2
+
+                    if checkpoint == 3
+                        c3Progress := progressPct
+                        c3CumFav := cumulativeFavExcursionPct
+                        c3CumAdv := cumulativeAdvExcursionPct
+                    else if checkpoint == 4
+                        c4Progress := progressPct
+                        c4CumFav := cumulativeFavExcursionPct
+                        c4CumAdv := cumulativeAdvExcursionPct
+                    else if checkpoint == 5
+                        c5Progress := progressPct
+                        c5CumFav := cumulativeFavExcursionPct
+                        c5CumAdv := cumulativeAdvExcursionPct
+                    else if checkpoint == 6
+                        c6Progress := progressPct
+                        c6CumFav := cumulativeFavExcursionPct
+                        c6CumAdv := cumulativeAdvExcursionPct
+
+                        c6FavorableWickPct := h > l ? (eventDirection == 1 ? (h - math.max(o,c)) / (h-l) * 100.0 : (math.min(o,c) - l) / (h-l) * 100.0) : na
+
+                        f1C6Warning := activeAtClose and c6Progress > -0.20 and c6Progress < 0.00 and not na(c4Progress) and not na(c5Progress) and c4Progress > c5Progress and c5Progress > c6Progress and not na(c6FavorableWickPct) and c6FavorableWickPct < 50.0
+                    else if checkpoint == 7
+                        c7Progress := progressPct
+                        c7CumFav := cumulativeFavExcursionPct
+                        c7CumAdv := cumulativeAdvExcursionPct
+                        f1C7Confirmed := f1C6Warning and c7Progress < 0.0
+                    else if checkpoint == 8
+                        c8Progress := progressPct
+                        c8CumFav := cumulativeFavExcursionPct
+                        c8CumAdv := cumulativeAdvExcursionPct
+                    else if checkpoint == 9
+                        c9Progress := progressPct
+                        c9CumFav := cumulativeFavExcursionPct
+                        c9CumAdv := cumulativeAdvExcursionPct
+                    else if checkpoint == 10
+                        c10Progress := progressPct
+                        c10CumFav := cumulativeFavExcursionPct
+                        c10CumAdv := cumulativeAdvExcursionPct
+
+                    // F2: first ACTIVE checkpoint C3..C10 with progress <= -0.20%.
+                    if na(firstF2Checkpoint) and activeAtClose and progressPct <= -0.20
+                        firstF2Checkpoint := checkpoint
+
+                    // Trade Health begins at C6.
+                    if checkpoint >= 6 and checkpoint <= 10
+                        currentCheckpoint := checkpoint
+                        currentCheckpointTimestamp := t
+                        currentSequenceComplete := openingSequenceComplete
+                        currentActiveAtClose := activeAtClose
+                        currentProgressPct := progressPct
+
+                        currentProgressState := na(progressPct) ? "UNKNOWN" : progressPct >= 0.20 ? "STRONG" : progressPct >= 0.00 ? "POSITIVE" : progressPct > -0.20 ? "ADVERSE" : "DEEP"
+
+                        currentPriorF2 := not na(firstF2Checkpoint) and firstF2Checkpoint < checkpoint
+
+                        currentHadF2 := not na(firstF2Checkpoint) and firstF2Checkpoint <= checkpoint
+
+                        currentHadF1 := f1C6Warning and checkpoint >= 6
+
+                        int tier = 0
+                        if openingSequenceComplete and activeAtClose and not na(progressPct)
+                            if progressPct >= 0.20
+                                tier := 1
+                            else if progressPct >= 0.00 and progressPct < 0.20 and not currentPriorF2
+                                tier := 2
+                            else if progressPct >= 0.00 and progressPct < 0.20 and currentPriorF2
+                                tier := 3
+                            else if progressPct <= -0.20
+                                tier := 4
+                            else if progressPct > -0.20 and progressPct < 0.00 and currentHadF1
+                                tier := 4
+                            else if progressPct > -0.20 and progressPct < 0.00
+                                tier := 3
+
+                        currentTradeHealthTier := tier
+                        currentTradeHealthState := tier == 1 ? "STRONG" : tier == 2 ? "FAVORABLE" : tier == 3 ? "CAUTION" : tier == 4 ? "HIGH RISK" : "NONE"
+
+                        currentHealthReason := tier == 1 ? "CURRENT_STRONG" : tier == 2 ? "CURRENT_POSITIVE" : tier == 3 and currentProgressState == "POSITIVE" and currentPriorF2 ? "POSITIVE_AFTER_F2" : tier == 3 ? "CURRENT_ADVERSE" : tier == 4 and currentProgressState == "DEEP" ? "CURRENT_DEEP_F2" : tier == 4 and currentProgressState == "ADVERSE" and currentHadF1 ? "ADVERSE_WITH_F1_HISTORY" : "NONE"
+
+                        // Combined relationship is descriptive only.
+                        currentRelationshipState := tier == 0 ? "UNKNOWN" : currentTradeHealthState == "STRONG" and signalQualityState == "HIGH_QUALITY" ? "CONFIRMED_STRONG" : currentTradeHealthState == "STRONG" and signalQualityState == "STANDARD" ? "STRENGTHENED_AFTER_ENTRY" : currentTradeHealthState == "STRONG" and signalQualityState == "LOW_QUALITY" ? "RECOVERED_AFTER_WEAK_ENTRY" : currentTradeHealthState == "FAVORABLE" ? "CONSTRUCTIVE" : currentTradeHealthState == "CAUTION" and signalQualityState == "HIGH_QUALITY" ? "HIGH_QUALITY_DETERIORATED" : currentTradeHealthState == "CAUTION" ? "CAUTION" : currentTradeHealthState == "HIGH RISK" and signalQualityState == "HIGH_QUALITY" ? "HIGH_QUALITY_MATERIALLY_DETERIORATED" : currentTradeHealthState == "HIGH RISK" ? "HIGH_RISK" : "UNKNOWN"
+
+                        currentRelationshipMessage := tier == 0 ? "" : currentTradeHealthState == "STRONG" and signalQualityState == "HIGH_QUALITY" ? "Initial quality confirmed" : currentTradeHealthState == "STRONG" and signalQualityState == "STANDARD" ? "Strengthened after entry" : currentTradeHealthState == "STRONG" and signalQualityState == "LOW_QUALITY" ? "Recovered after weak entry" : currentTradeHealthState == "FAVORABLE" ? "Constructive" : currentTradeHealthState == "CAUTION" and signalQualityState == "HIGH_QUALITY" ? "High-quality setup has deteriorated" : currentTradeHealthState == "CAUTION" ? "Caution" : currentTradeHealthState == "HIGH RISK" and signalQualityState == "HIGH_QUALITY" ? "High-quality setup has materially deteriorated" : currentTradeHealthState == "HIGH RISK" ? "High risk" : ""
+
+                        currentRelationshipCode := f_relationshipCode(currentRelationshipState)
+
+                        if dk == targetDateKey and checkpoint == targetCheckpoint
+                            paritySnapshotReady := true
+                            parityDirection := eventDirection
+                            paritySignalQualityState := signalQualityState
+                            parityCheckpoint := checkpoint
+                            parityProgressPct := currentProgressPct
+                            parityActiveAtClose := currentActiveAtClose
+                            parityF1C6Warning := f1C6Warning
+                            parityF1C7Confirmed := f1C7Confirmed
+                            parityFirstF2Checkpoint := firstF2Checkpoint
+                            parityTradeHealthState := currentTradeHealthState
+                            parityRelationshipState := currentRelationshipState
+
+            lastProcessed1MTime := t
+
+// ============================================================================
+// Chart markers
+// ============================================================================
+bool eventOnChartBar = not na(eventTimestamp) and (native1M ? time == eventTimestamp : eventTimestamp >= time and eventTimestamp < time_close)
+
+plotshape(
+    showEventMarker and eventOnChartBar and eventDirection == 1,
+    title="Bullish Research Event",
+    style=shape.triangleup,
+    location=location.belowbar,
+    color=color.green,
+    size=size.tiny,
+    text="OSI")
+
+plotshape(
+    showEventMarker and eventOnChartBar and eventDirection == -1,
+    title="Bearish Research Event",
+    style=shape.triangledown,
+    location=location.abovebar,
+    color=color.red,
+    size=size.tiny,
+    text="OSI")
+
+bool checkpointOnChartBar = showCheckpointMarkers and not na(currentCheckpointTimestamp) and (native1M ? time == currentCheckpointTimestamp : currentCheckpointTimestamp >= time and currentCheckpointTimestamp < time_close)
+
+plotshape(
+    checkpointOnChartBar and currentTradeHealthState == "STRONG",
+    title="OSI Strong",
+    style=shape.circle,
+    location=location.belowbar,
+    color=color.green,
+    size=size.tiny,
+    text="S")
+
+plotshape(
+    checkpointOnChartBar and currentTradeHealthState == "HIGH RISK",
+    title="OSI High Risk",
+    style=shape.circle,
+    location=location.abovebar,
+    color=color.red,
+    size=size.tiny,
+    text="HR")
+
+// ============================================================================
+// Legacy-core Data Window exports (kept for source parity)
+// ============================================================================
+plot(eventDateKey, "FTHC_EventDateKey", display=display.data_window)
+plot(eventTimestamp, "FTHC_EventTimestamp", display=display.data_window)
+plot(eventDirection, "FTHC_Direction", display=display.data_window)
+plot(researchEvent ? 1 : 0, "FTHC_ResearchEvent", display=display.data_window)
+plot(referencePrice, "FTHC_ReferencePrice", display=display.data_window)
+plot(c1O, "FTHC_C1_Open", display=display.data_window)
+plot(c1C, "FTHC_C1_Close", display=display.data_window)
+plot(c1VWAP, "FTHC_C1_VWAP", display=display.data_window)
+plot(c2O, "FTHC_C2_Open", display=display.data_window)
+plot(c2C, "FTHC_C2_Close", display=display.data_window)
+plot(c2VWAP, "FTHC_C2_VWAP", display=display.data_window)
+
+// ============================================================================
+// OSI parity exports
+// ============================================================================
+plot(signalQualityCode, "OSI_SignalQualityCode", display=display.data_window)
+plot(favorableC2VWAPDistancePct, "OSI_SQ_FavC2VWAPDistPct", display=display.data_window)
+plot(favorableC1ToC2CloseDeltaPct, "OSI_SQ_FavC1ToC2CloseDeltaPct", display=display.data_window)
+plot(c2FavorableCloseLocationPct, "OSI_SQ_C2FavCLVPct", display=display.data_window)
+plot(c1DirectionAlignedCode, "OSI_SQ_C1Aligned", display=display.data_window)
+plot(c2DirectionAlignedCode, "OSI_SQ_C2Aligned", display=display.data_window)
+plot(directionLossCode, "OSI_SQ_DirectionLoss", display=display.data_window)
+
+plot(c3Progress, "OSI_C3_ProgressPct", display=display.data_window)
+plot(c4Progress, "OSI_C4_ProgressPct", display=display.data_window)
+plot(c5Progress, "OSI_C5_ProgressPct", display=display.data_window)
+plot(c6Progress, "OSI_C6_ProgressPct", display=display.data_window)
+plot(c7Progress, "OSI_C7_ProgressPct", display=display.data_window)
+plot(c8Progress, "OSI_C8_ProgressPct", display=display.data_window)
+plot(c9Progress, "OSI_C9_ProgressPct", display=display.data_window)
+plot(c10Progress, "OSI_C10_ProgressPct", display=display.data_window)
+
+plot(c3CumFav, "OSI_C3_CumFavPct", display=display.data_window)
+plot(c3CumAdv, "OSI_C3_CumAdvPct", display=display.data_window)
+plot(c4CumFav, "OSI_C4_CumFavPct", display=display.data_window)
+plot(c4CumAdv, "OSI_C4_CumAdvPct", display=display.data_window)
+plot(c5CumFav, "OSI_C5_CumFavPct", display=display.data_window)
+plot(c5CumAdv, "OSI_C5_CumAdvPct", display=display.data_window)
+plot(c6CumFav, "OSI_C6_CumFavPct", display=display.data_window)
+plot(c6CumAdv, "OSI_C6_CumAdvPct", display=display.data_window)
+plot(c7CumFav, "OSI_C7_CumFavPct", display=display.data_window)
+plot(c7CumAdv, "OSI_C7_CumAdvPct", display=display.data_window)
+plot(c8CumFav, "OSI_C8_CumFavPct", display=display.data_window)
+plot(c8CumAdv, "OSI_C8_CumAdvPct", display=display.data_window)
+plot(c9CumFav, "OSI_C9_CumFavPct", display=display.data_window)
+plot(c9CumAdv, "OSI_C9_CumAdvPct", display=display.data_window)
+plot(c10CumFav, "OSI_C10_CumFavPct", display=display.data_window)
+plot(c10CumAdv, "OSI_C10_CumAdvPct", display=display.data_window)
+
+plot(c6FavorableWickPct, "OSI_C6_FavorableWickPct", display=display.data_window)
+plot(f1C6Warning ? 1 : 0, "OSI_F1_C6_Warning", display=display.data_window)
+plot(f1C7Confirmed ? 1 : 0, "OSI_F1_C7_Confirmed", display=display.data_window)
+plot(firstF2Checkpoint, "OSI_FirstF2Checkpoint", display=display.data_window)
+
+plot(currentCheckpoint, "OSI_CurrentCheckpoint", display=display.data_window)
+plot(currentSequenceComplete ? 1 : 0, "OSI_SequenceComplete", display=display.data_window)
+plot(currentActiveAtClose ? 1 : 0, "OSI_ActiveAtCheckpointClose", display=display.data_window)
+plot(currentProgressPct, "OSI_CurrentProgressPct", display=display.data_window)
+plot(currentPriorF2 ? 1 : 0, "OSI_PriorF2", display=display.data_window)
+plot(currentHadF2 ? 1 : 0, "OSI_HadF2", display=display.data_window)
+plot(currentHadF1 ? 1 : 0, "OSI_HadF1", display=display.data_window)
+plot(currentTradeHealthTier, "OSI_TradeHealthTier", display=display.data_window)
+plot(f_healthCode(currentTradeHealthState), "OSI_TradeHealthCode", display=display.data_window)
+plot(currentRelationshipCode, "OSI_RelationshipCode", display=display.data_window)
+
+// ============================================================================
+// Status table
+// ============================================================================
+var table status = table.new(position.top_right, 2, 14, frame_color=color.gray, frame_width=1)
+
+if barstate.islast
+    table.clear(status, 0, 0, 1, 13)
+
+    if showStatusTable
+        bool displayEvent = historicalParityMode ? parityEventSeen : researchEvent
+        int displayDirection = historicalParityMode ? parityDirection : eventDirection
+        string displayQuality = historicalParityMode ? paritySignalQualityState : signalQualityState
+        int displayCheckpoint = historicalParityMode ? parityCheckpoint : currentCheckpoint
+        float displayProgress = historicalParityMode ? parityProgressPct : currentProgressPct
+        bool displayActive = historicalParityMode ? parityActiveAtClose : currentActiveAtClose
+        bool displayF1 = historicalParityMode ? parityF1C6Warning : f1C6Warning
+        bool displayF1Confirmed = historicalParityMode ? parityF1C7Confirmed : f1C7Confirmed
+        int displayFirstF2 = historicalParityMode ? parityFirstF2Checkpoint : firstF2Checkpoint
+        string displayHealth = historicalParityMode ? parityTradeHealthState : currentTradeHealthState
+        string displayRelationship = historicalParityMode ? parityRelationshipState : currentRelationshipState
+        string targetText = str.tostring(targetYear) + "-" + str.tostring(targetMonth) + "-" + str.tostring(targetDay) + " C" + str.tostring(targetCheckpoint)
+        string parityStatus = not historicalParityMode ? "LIVE/CURRENT" : not parityTargetDaySeen ? "TARGET DATE NOT LOADED" : not parityEventSeen ? "NO EVENT ON TARGET DATE" : not paritySnapshotReady ? "TARGET CHECKPOINT UNAVAILABLE" : "SNAPSHOT READY"
+
+        table.cell(status,0,0,"BUILD")
+        table.cell(status,1,0,BUILD_ID)
+
+        table.cell(status,0,1,"Engine")
+        table.cell(status,1,1,engineName)
+
+        table.cell(status,0,2,"Mode")
+        table.cell(status,1,2,historicalParityMode ? "HISTORICAL PARITY" : "CURRENT")
+
+        table.cell(status,0,3,"Target")
+        table.cell(status,1,3,historicalParityMode ? targetText : "-")
+
+        table.cell(status,0,4,"Parity Status")
+        table.cell(status,1,4,parityStatus)
+
+        table.cell(status,0,5,"Research Event")
+        table.cell(status,1,5,displayEvent ? "YES" : "NO")
+
+        table.cell(status,0,6,"Direction")
+        table.cell(status,1,6,displayDirection == 1 ? "BULL" : displayDirection == -1 ? "BEAR" : "NONE")
+
+        table.cell(status,0,7,"Signal Quality")
+        table.cell(status,1,7,displayQuality)
+
+        table.cell(status,0,8,"Checkpoint")
+        table.cell(status,1,8,na(displayCheckpoint) ? "NONE" : "C" + str.tostring(displayCheckpoint))
+
+        table.cell(status,0,9,"Progress")
+        table.cell(status,1,9,f_fmt(displayProgress) + "%")
+
+        table.cell(status,0,10,"Active @ Close")
+        table.cell(status,1,10,displayActive ? "YES" : "NO")
+
+        table.cell(status,0,11,"F1 / F2")
+        table.cell(status,1,11,(displayF1 ? (displayF1Confirmed ? "F1✓" : "F1") : "-") + " / " + (na(displayFirstF2) ? "-" : "C" + str.tostring(displayFirstF2)))
+
+        table.cell(status,0,12,"Trade Health")
+        table.cell(status,1,12,displayHealth)
+
+        table.cell(status,0,13,"Relationship")
+        table.cell(status,1,13,displayRelationship)
+

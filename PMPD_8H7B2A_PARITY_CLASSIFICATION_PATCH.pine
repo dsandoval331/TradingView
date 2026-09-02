@@ -1,0 +1,591 @@
+//=============================================================================
+// 8H-7B-2A — TEMPORARY PINE V4 PARITY CLASSIFICATION CAPTURE
+//
+// PURPOSE
+//   Read-only capture layer for a single candidate symbol/date.
+//   Uses the EXISTING frozen V4 signal/state/scoring variables.
+//   Does not alter bullAlert/bearAlert, filters, state machine, or historical logic.
+//
+// INSERTION
+//   Add this entire section AFTER the existing ARM -> CONFIRM -> SCORE -> ALERT
+//   state-machine section, and BEFORE the existing historical-signal capture/finalize
+//   sections.
+//
+// IMPORTANT
+//   This module assumes these identifiers already exist in the frozen V4 script:
+//   tz, newConfirmationCandle, confTime, confTimeClose, confHigh, confLow,
+//   confClose, confATR, pmh, pml, pdh, pdl, bullishFinalLevel,
+//   bearishFinalLevel, bullAlert, bearAlert, bullArmedBars, bearArmedBars,
+//   bullPenATR, bearPenATR, bodyRatio, rangeATR, bullClosePosition,
+//   bearClosePosition, bullTotalScore, bearTotalScore, bullGrade, bearGrade,
+//   bullPenScore, bearPenScore, bullBodyScore, bearBodyScore, bullCloseScore,
+//   bearCloseScore, bullRangeScore, bearRangeScore, bullSpeedScore,
+//   bearSpeedScore, bullDirectionalPass, bearDirectionalPass, bullPenPass,
+//   bearPenPass, bodyPass, rangePass, bullClosePosPass, bearClosePosPass,
+//   f_v4CombinationProfile(), f_profileName(), FIRST_NONE, FIRST_FAVORABLE,
+//   FIRST_ADVERSE, FIRST_BOTH.
+//=============================================================================
+
+//-----------------------------------------------------------------------------
+// Inputs
+//-----------------------------------------------------------------------------
+
+string parityGroup = "7. 8H-7 Parity Classification Capture"
+
+bool parityCaptureEnabled = input.bool(
+     false,
+     "Enable Parity Candidate Capture",
+     tooltip = "Temporary 8H-7 reference-truth capture. Does not alter V4 signal logic.",
+     group = parityGroup)
+
+string parityCandidateId = input.string(
+     "SET_1_01_EXAMPLE_2025-01-02",
+     "Candidate ID",
+     tooltip = "Copy the candidate_id from PMPD_V4_PARITY_SAMPLE_CANDIDATES_V1.csv.",
+     group = parityGroup)
+
+int parityTargetDate = input.time(
+     timestamp("02 Jan 2025 00:00 -0500"),
+     "Candidate Trade Date",
+     tooltip = "Set to the candidate trade date in New York time.",
+     group = parityGroup)
+
+int parityDetailSignal = input.int(
+     1,
+     "Detail Signal #",
+     minval = 1,
+     maxval = 6,
+     tooltip = "Select which captured signal is shown in the detail panel.",
+     group = parityGroup)
+
+// Frozen parity outcome benchmark.
+float PARITY_FAV_PCT = 0.50
+float PARITY_ADV_PCT = 0.50
+
+//-----------------------------------------------------------------------------
+// Helpers
+//-----------------------------------------------------------------------------
+
+f_paritySameNyDate(int ts, int target) =>
+    not na(ts) and
+    year(ts, tz) == year(target, tz) and
+    month(ts, tz) == month(target, tz) and
+    dayofmonth(ts, tz) == dayofmonth(target, tz)
+
+f_parityTimeText(int ts) =>
+    na(ts) ?
+    "-" :
+    str.format_time(
+         ts,
+         "yyyy-MM-dd HH:mm",
+         tz)
+
+f_parityOutcomeName(int outcome) =>
+    string result = "NEITHER"
+    if outcome == FIRST_FAVORABLE
+        result := "FAVORABLE_FIRST"
+    else if outcome == FIRST_ADVERSE
+        result := "ADVERSE_FIRST"
+    else if outcome == FIRST_BOTH
+        result := "BOTH"
+    result
+
+f_parityBool(bool value) =>
+    value ? "PASS" : "FAIL"
+
+f_parityNum(float value) =>
+    na(value) ? "-" : str.tostring(value, "#.####")
+
+//-----------------------------------------------------------------------------
+// Candidate-date common level storage
+//-----------------------------------------------------------------------------
+
+var bool parityDateSeen = false
+var float parityDatePMH = na
+var float parityDatePML = na
+var float parityDatePDH = na
+var float parityDatePDL = na
+
+if parityCaptureEnabled and
+   newConfirmationCandle and
+   f_paritySameNyDate(confTimeClose, parityTargetDate)
+
+    parityDateSeen := true
+    parityDatePMH := pmh
+    parityDatePML := pml
+    parityDatePDH := pdh
+    parityDatePDL := pdl
+
+//-----------------------------------------------------------------------------
+// Signal arrays — every frozen V4 alert on the selected candidate date
+//-----------------------------------------------------------------------------
+
+var array<int> parityDirection = array.new_int()
+var array<int> paritySignalTime = array.new_int()
+var array<float> parityReference = array.new_float()
+var array<float> parityPMH = array.new_float()
+var array<float> parityPML = array.new_float()
+var array<float> parityPDH = array.new_float()
+var array<float> parityPDL = array.new_float()
+var array<float> parityFinalLevel = array.new_float()
+
+var array<float> parityATR = array.new_float()
+var array<float> parityPen = array.new_float()
+var array<float> parityBody = array.new_float()
+var array<float> parityRangeATR = array.new_float()
+var array<float> parityClosePos = array.new_float()
+var array<int> parityBarsToConfirm = array.new_int()
+
+var array<float> parityTotalScore = array.new_float()
+var array<string> parityGrade = array.new_string()
+var array<int> parityProfile = array.new_int()
+
+var array<float> parityPenScore = array.new_float()
+var array<float> parityBodyScore = array.new_float()
+var array<float> parityCloseScore = array.new_float()
+var array<float> parityRangeScore = array.new_float()
+var array<float> paritySpeedScore = array.new_float()
+
+var array<bool> parityDirectionalPass = array.new_bool()
+var array<bool> parityPenPass = array.new_bool()
+var array<bool> parityBodyPass = array.new_bool()
+var array<bool> parityRangePass = array.new_bool()
+var array<bool> parityClosePass = array.new_bool()
+
+var array<float> parityMFE = array.new_float()
+var array<float> parityMAE = array.new_float()
+var array<int> parityFirstOutcome = array.new_int()
+
+//-----------------------------------------------------------------------------
+// Update OUTCOMES for already-captured signals.
+//
+// This executes BEFORE new signals are appended below, so the signal candle is
+// excluded exactly as required by PMPD_V4_PARITY_SPEC_V1.
+//-----------------------------------------------------------------------------
+
+if parityCaptureEnabled and newConfirmationCandle
+    int parityActiveCount = array.size(parityDirection)
+
+    if parityActiveCount > 0
+        for i = 0 to parityActiveCount - 1
+            int signalTime = array.get(paritySignalTime, i)
+
+            bool laterBar =
+                 not na(confTimeClose) and
+                 confTimeClose > signalTime
+
+            bool sameTargetSession =
+                 f_paritySameNyDate(confTimeClose, parityTargetDate)
+
+            if laterBar and sameTargetSession
+                int direction = array.get(parityDirection, i)
+                float reference = array.get(parityReference, i)
+
+                float oldMFE = array.get(parityMFE, i)
+                float oldMAE = array.get(parityMAE, i)
+                int oldOutcome = array.get(parityFirstOutcome, i)
+
+                float mfeCandidate = 0.0
+                float maeCandidate = 0.0
+                bool hitFavNow = false
+                bool hitAdvNow = false
+
+                if direction == 1
+                    mfeCandidate :=
+                         (confHigh - reference) /
+                         reference *
+                         100.0
+
+                    maeCandidate :=
+                         (confLow - reference) /
+                         reference *
+                         100.0
+
+                    float favPrice =
+                         reference *
+                         (1.0 + PARITY_FAV_PCT / 100.0)
+
+                    float advPrice =
+                         reference *
+                         (1.0 - PARITY_ADV_PCT / 100.0)
+
+                    hitFavNow := confHigh >= favPrice
+                    hitAdvNow := confLow <= advPrice
+
+                else
+                    mfeCandidate :=
+                         (reference - confLow) /
+                         reference *
+                         100.0
+
+                    maeCandidate :=
+                         (reference - confHigh) /
+                         reference *
+                         100.0
+
+                    float favPrice =
+                         reference *
+                         (1.0 - PARITY_FAV_PCT / 100.0)
+
+                    float advPrice =
+                         reference *
+                         (1.0 + PARITY_ADV_PCT / 100.0)
+
+                    hitFavNow := confLow <= favPrice
+                    hitAdvNow := confHigh >= advPrice
+
+                float newMFE = math.max(oldMFE, mfeCandidate)
+                float newMAE = math.min(oldMAE, maeCandidate)
+                int newOutcome = oldOutcome
+
+                if oldOutcome == FIRST_NONE
+                    if hitFavNow and hitAdvNow
+                        newOutcome := FIRST_BOTH
+                    else if hitFavNow
+                        newOutcome := FIRST_FAVORABLE
+                    else if hitAdvNow
+                        newOutcome := FIRST_ADVERSE
+
+                array.set(parityMFE, i, newMFE)
+                array.set(parityMAE, i, newMAE)
+                array.set(parityFirstOutcome, i, newOutcome)
+
+//-----------------------------------------------------------------------------
+// Capture frozen V4 alerts on the target date.
+//-----------------------------------------------------------------------------
+
+if parityCaptureEnabled and
+   bullAlert and
+   f_paritySameNyDate(confTimeClose, parityTargetDate)
+
+    int v4Profile =
+         f_v4CombinationProfile(
+             bullPenATR,
+             rangeATR,
+             bodyRatio,
+             bullClosePosition,
+             bullArmedBars)
+
+    array.push(parityDirection, 1)
+    array.push(paritySignalTime, confTimeClose)
+    array.push(parityReference, confClose)
+
+    array.push(parityPMH, pmh)
+    array.push(parityPML, pml)
+    array.push(parityPDH, pdh)
+    array.push(parityPDL, pdl)
+    array.push(parityFinalLevel, bullishFinalLevel)
+
+    array.push(parityATR, confATR)
+    array.push(parityPen, bullPenATR)
+    array.push(parityBody, bodyRatio)
+    array.push(parityRangeATR, rangeATR)
+    array.push(parityClosePos, bullClosePosition)
+    array.push(parityBarsToConfirm, bullArmedBars)
+
+    array.push(parityTotalScore, bullTotalScore)
+    array.push(parityGrade, bullGrade)
+    array.push(parityProfile, v4Profile)
+
+    array.push(parityPenScore, bullPenScore)
+    array.push(parityBodyScore, bullBodyScore)
+    array.push(parityCloseScore, bullCloseScore)
+    array.push(parityRangeScore, bullRangeScore)
+    array.push(paritySpeedScore, bullSpeedScore)
+
+    array.push(parityDirectionalPass, bullDirectionalPass)
+    array.push(parityPenPass, bullPenPass)
+    array.push(parityBodyPass, bodyPass)
+    array.push(parityRangePass, rangePass)
+    array.push(parityClosePass, bullClosePosPass)
+
+    array.push(parityMFE, 0.0)
+    array.push(parityMAE, 0.0)
+    array.push(parityFirstOutcome, FIRST_NONE)
+
+if parityCaptureEnabled and
+   bearAlert and
+   f_paritySameNyDate(confTimeClose, parityTargetDate)
+
+    int v4Profile =
+         f_v4CombinationProfile(
+             bearPenATR,
+             rangeATR,
+             bodyRatio,
+             bearClosePosition,
+             bearArmedBars)
+
+    array.push(parityDirection, -1)
+    array.push(paritySignalTime, confTimeClose)
+    array.push(parityReference, confClose)
+
+    array.push(parityPMH, pmh)
+    array.push(parityPML, pml)
+    array.push(parityPDH, pdh)
+    array.push(parityPDL, pdl)
+    array.push(parityFinalLevel, bearishFinalLevel)
+
+    array.push(parityATR, confATR)
+    array.push(parityPen, bearPenATR)
+    array.push(parityBody, bodyRatio)
+    array.push(parityRangeATR, rangeATR)
+    array.push(parityClosePos, bearClosePosition)
+    array.push(parityBarsToConfirm, bearArmedBars)
+
+    array.push(parityTotalScore, bearTotalScore)
+    array.push(parityGrade, bearGrade)
+    array.push(parityProfile, v4Profile)
+
+    array.push(parityPenScore, bearPenScore)
+    array.push(parityBodyScore, bearBodyScore)
+    array.push(parityCloseScore, bearCloseScore)
+    array.push(parityRangeScore, bearRangeScore)
+    array.push(paritySpeedScore, bearSpeedScore)
+
+    array.push(parityDirectionalPass, bearDirectionalPass)
+    array.push(parityPenPass, bearPenPass)
+    array.push(parityBodyPass, bodyPass)
+    array.push(parityRangePass, rangePass)
+    array.push(parityClosePass, bearClosePosPass)
+
+    array.push(parityMFE, 0.0)
+    array.push(parityMAE, 0.0)
+    array.push(parityFirstOutcome, FIRST_NONE)
+
+//-----------------------------------------------------------------------------
+// Summary table
+//-----------------------------------------------------------------------------
+
+var table paritySummaryTable =
+     table.new(
+         position.bottom_left,
+         8,
+         8,
+         border_width = 1)
+
+var table parityDetailTable =
+     table.new(
+         position.bottom_right,
+         3,
+         21,
+         border_width = 1)
+
+if barstate.islast
+    if parityCaptureEnabled
+        color parityHeader = color.new(color.blue, 35)
+        color parityBodyColor = color.new(color.black, 15)
+
+        table.clear(paritySummaryTable, 0, 0, 7, 7)
+
+        table.cell(
+             paritySummaryTable,
+             0,
+             0,
+             "8H-7 PINE REFERENCE",
+             text_color = color.white,
+             bgcolor = parityHeader)
+
+        table.cell(
+             paritySummaryTable,
+             1,
+             0,
+             parityCandidateId,
+             text_color = color.white,
+             bgcolor = parityHeader)
+
+        table.cell(
+             paritySummaryTable,
+             2,
+             0,
+             syminfo.ticker,
+             text_color = color.white,
+             bgcolor = parityHeader)
+
+        table.cell(
+             paritySummaryTable,
+             3,
+             0,
+             str.format_time(parityTargetDate, "yyyy-MM-dd", tz),
+             text_color = color.white,
+             bgcolor = parityHeader)
+
+        int signalCount = array.size(parityDirection)
+
+        table.cell(
+             paritySummaryTable,
+             4,
+             0,
+             signalCount == 0 ? "NO_SIGNAL" : str.tostring(signalCount) + " SIGNAL(S)",
+             text_color = color.white,
+             bgcolor = parityHeader)
+
+        table.cell(
+             paritySummaryTable,
+             5,
+             0,
+             "PMPD V4",
+             text_color = color.white,
+             bgcolor = parityHeader)
+
+        table.cell(
+             paritySummaryTable,
+             6,
+             0,
+             "5m",
+             text_color = color.white,
+             bgcolor = parityHeader)
+
+        table.cell(
+             paritySummaryTable,
+             7,
+             0,
+             parityDateSeen ? "DATE_LOADED" : "DATE_NOT_LOADED",
+             text_color = color.white,
+             bgcolor = parityHeader)
+
+        // Common candidate-date levels.
+        table.cell(paritySummaryTable, 0, 1, "PMH", text_color = color.silver, bgcolor = parityBodyColor)
+        table.cell(paritySummaryTable, 1, 1, f_parityNum(parityDatePMH), text_color = color.white, bgcolor = parityBodyColor)
+        table.cell(paritySummaryTable, 2, 1, "PDH", text_color = color.silver, bgcolor = parityBodyColor)
+        table.cell(paritySummaryTable, 3, 1, f_parityNum(parityDatePDH), text_color = color.white, bgcolor = parityBodyColor)
+        table.cell(paritySummaryTable, 4, 1, "PML", text_color = color.silver, bgcolor = parityBodyColor)
+        table.cell(paritySummaryTable, 5, 1, f_parityNum(parityDatePML), text_color = color.white, bgcolor = parityBodyColor)
+        table.cell(paritySummaryTable, 6, 1, "PDL", text_color = color.silver, bgcolor = parityBodyColor)
+        table.cell(paritySummaryTable, 7, 1, f_parityNum(parityDatePDL), text_color = color.white, bgcolor = parityBodyColor)
+
+        // Headers.
+        string[] headers = array.from("#", "Dir", "Signal ET", "Reference", "Grade", "V4 Profile", "0.5 First", "MFE / MAE")
+        for c = 0 to 7
+            table.cell(
+                 paritySummaryTable,
+                 c,
+                 2,
+                 array.get(headers, c),
+                 text_color = color.silver,
+                 bgcolor = parityBodyColor)
+
+        int rowsToShow = math.min(signalCount, 5)
+
+        if rowsToShow > 0
+            for i = 0 to rowsToShow - 1
+                int row = i + 3
+                int direction = array.get(parityDirection, i)
+                int outcome = array.get(parityFirstOutcome, i)
+
+                table.cell(paritySummaryTable, 0, row, str.tostring(i + 1), text_color = color.white, bgcolor = parityBodyColor)
+                table.cell(paritySummaryTable, 1, row, direction == 1 ? "BULL" : "BEAR", text_color = color.white, bgcolor = parityBodyColor)
+                table.cell(paritySummaryTable, 2, row, f_parityTimeText(array.get(paritySignalTime, i)), text_color = color.white, bgcolor = parityBodyColor)
+                table.cell(paritySummaryTable, 3, row, f_parityNum(array.get(parityReference, i)), text_color = color.white, bgcolor = parityBodyColor)
+                table.cell(paritySummaryTable, 4, row, array.get(parityGrade, i), text_color = color.white, bgcolor = parityBodyColor)
+                table.cell(paritySummaryTable, 5, row, f_profileName(array.get(parityProfile, i)), text_color = color.white, bgcolor = parityBodyColor)
+                table.cell(paritySummaryTable, 6, row, f_parityOutcomeName(outcome), text_color = color.white, bgcolor = parityBodyColor)
+                table.cell(
+                     paritySummaryTable,
+                     7,
+                     row,
+                     str.tostring(array.get(parityMFE, i), "#.###") + "% / " +
+                     str.tostring(array.get(parityMAE, i), "#.###") + "%",
+                     text_color = color.white,
+                     bgcolor = parityBodyColor)
+
+        if signalCount > 5
+            table.cell(
+                 paritySummaryTable,
+                 0,
+                 7,
+                 "More than 5 signals; use Detail Signal # and preserve screenshot.",
+                 text_color = color.yellow,
+                 bgcolor = parityBodyColor)
+
+        // Detail panel.
+        table.clear(parityDetailTable, 0, 0, 2, 20)
+
+        table.cell(
+             parityDetailTable,
+             0,
+             0,
+             "8H-7 SIGNAL DETAIL",
+             text_color = color.white,
+             bgcolor = parityHeader)
+
+        int detailIndex = parityDetailSignal - 1
+
+        if detailIndex >= 0 and detailIndex < signalCount
+            int direction = array.get(parityDirection, detailIndex)
+
+            table.cell(parityDetailTable, 1, 0, "#" + str.tostring(parityDetailSignal), text_color = color.white, bgcolor = parityHeader)
+            table.cell(parityDetailTable, 2, 0, direction == 1 ? "BULL" : "BEAR", text_color = color.white, bgcolor = parityHeader)
+
+            string[] names = array.from(
+                 "Signal ET",
+                 "Reference",
+                 "Final Level",
+                 "ATR",
+                 "Pen %ATR",
+                 "Body %",
+                 "Range %ATR",
+                 "Close Pos %",
+                 "Bars Confirm",
+                 "Total Score",
+                 "Grade",
+                 "V4 Profile",
+                 "Pen Score",
+                 "Body Score",
+                 "Close Score",
+                 "Range Score",
+                 "Speed Score",
+                 "Core Filters",
+                 "Outcome",
+                 "MFE / MAE")
+
+            string filterText =
+                 "Dir " + f_parityBool(array.get(parityDirectionalPass, detailIndex)) +
+                 " | Pen " + f_parityBool(array.get(parityPenPass, detailIndex)) +
+                 " | Body " + f_parityBool(array.get(parityBodyPass, detailIndex)) +
+                 " | Range " + f_parityBool(array.get(parityRangePass, detailIndex)) +
+                 " | Close " + f_parityBool(array.get(parityClosePass, detailIndex))
+
+            string[] values = array.from(
+                 f_parityTimeText(array.get(paritySignalTime, detailIndex)),
+                 f_parityNum(array.get(parityReference, detailIndex)),
+                 f_parityNum(array.get(parityFinalLevel, detailIndex)),
+                 f_parityNum(array.get(parityATR, detailIndex)),
+                 f_parityNum(array.get(parityPen, detailIndex)),
+                 f_parityNum(array.get(parityBody, detailIndex)),
+                 f_parityNum(array.get(parityRangeATR, detailIndex)),
+                 f_parityNum(array.get(parityClosePos, detailIndex)),
+                 str.tostring(array.get(parityBarsToConfirm, detailIndex)),
+                 f_parityNum(array.get(parityTotalScore, detailIndex)),
+                 array.get(parityGrade, detailIndex),
+                 f_profileName(array.get(parityProfile, detailIndex)),
+                 f_parityNum(array.get(parityPenScore, detailIndex)),
+                 f_parityNum(array.get(parityBodyScore, detailIndex)),
+                 f_parityNum(array.get(parityCloseScore, detailIndex)),
+                 f_parityNum(array.get(parityRangeScore, detailIndex)),
+                 f_parityNum(array.get(paritySpeedScore, detailIndex)),
+                 filterText,
+                 f_parityOutcomeName(array.get(parityFirstOutcome, detailIndex)),
+                 str.tostring(array.get(parityMFE, detailIndex), "#.###") + "% / " +
+                 str.tostring(array.get(parityMAE, detailIndex), "#.###") + "%")
+
+            for r = 0 to 19
+                table.cell(parityDetailTable, 0, r + 1, array.get(names, r), text_color = color.silver, bgcolor = parityBodyColor)
+                table.cell(parityDetailTable, 1, r + 1, array.get(values, r), text_color = color.white, bgcolor = parityBodyColor)
+                table.cell(parityDetailTable, 2, r + 1, "", bgcolor = parityBodyColor)
+
+        else
+            table.cell(
+                 parityDetailTable,
+                 0,
+                 1,
+                 signalCount == 0 ? "NO SIGNAL ON TARGET DATE" : "SELECT VALID SIGNAL #",
+                 text_color = signalCount == 0 ? color.yellow : color.white,
+                 bgcolor = parityBodyColor)
+
+    else
+        table.clear(paritySummaryTable, 0, 0, 7, 7)
+        table.clear(parityDetailTable, 0, 0, 2, 20)
+
+//=============================================================================
+// END 8H-7B-2A PARITY CLASSIFICATION CAPTURE
+//=============================================================================
