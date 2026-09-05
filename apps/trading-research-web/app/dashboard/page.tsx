@@ -13,8 +13,8 @@ export default async function DashboardPage() {
 
   const { data: strategies, error } = await supabase
     .from("strategies")
-    .select("*")
-    .order("id", { ascending: true })
+    .select("strategy_id,strategy_code,strategy_name,strategy_type,status,baseline_model,description,created_at,updated_at")
+    .order("strategy_code", { ascending: true })
     .limit(25);
 
   return (
