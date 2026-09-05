@@ -21,16 +21,14 @@ returns boolean language sql stable security definer set search_path = '' as $$
 $$;
 
 revoke all on function public.is_trading_research_web_user() from public;
+revoke execute on function public.is_trading_research_web_user() from anon;
 grant execute on function public.is_trading_research_web_user() to authenticated;
 
-create policy "Trading Research web users can read strategies"
-on public.strategies for select to authenticated
-using (public.is_trading_research_web_user());
+drop policy if exists "Trading Research web users can read strategies" on public.strategies;
+create policy "Trading Research web users can read strategies" on public.strategies for select to authenticated using (public.is_trading_research_web_user());
 
-create policy "Trading Research web users can read datasets"
-on public.datasets for select to authenticated
-using (public.is_trading_research_web_user());
+drop policy if exists "Trading Research web users can read datasets" on public.datasets;
+create policy "Trading Research web users can read datasets" on public.datasets for select to authenticated using (public.is_trading_research_web_user());
 
-create policy "Trading Research web users can read project state"
-on public.project_state for select to authenticated
-using (public.is_trading_research_web_user());
+drop policy if exists "Trading Research web users can read project state" on public.project_state;
+create policy "Trading Research web users can read project state" on public.project_state for select to authenticated using (public.is_trading_research_web_user());
