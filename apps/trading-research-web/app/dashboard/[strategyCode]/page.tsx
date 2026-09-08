@@ -11,9 +11,9 @@ function prettyStatus(value: string | number | null | undefined) {
   return String(value).replaceAll("_", " ").toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-function formatDate(value: string | null | undefined) {
+function formatDateTime(value: string | null | undefined) {
   if (!value) return "—";
-  return new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "America/Chicago" }).format(new Date(value));
+  return new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit", timeZone: "America/Chicago", timeZoneName: "short" }).format(new Date(value));
 }
 
 export default async function ProjectDetailPage({ params }: Props) {
@@ -39,7 +39,7 @@ export default async function ProjectDetailPage({ params }: Props) {
     supabase.from("program_phases").select("phase_id,phase_code,phase_name,objective,status,sequence_order,entry_criteria,exit_criteria,started_at,completed_at,next_phase_code,notes,updated_at").eq("strategy_id", strategy.strategy_id).order("sequence_order", { ascending: true }),
     supabase.from("project_decisions").select("decision_id,decision_date,title,decision,rationale,evidence,affects_model_version,status").eq("strategy_id", strategy.strategy_id).order("decision_date", { ascending: false }).limit(12),
     supabase.from("project_backlog").select("backlog_id,title,description,category,priority,status,origin_phase,blocking_current_phase,why_it_matters,promoted_to_phase,created_at,resolved_at,updated_at").eq("strategy_id", strategy.strategy_id).order("created_at", { ascending: false }),
-    supabase.from("datasets").select("dataset_id,dataset_key,dataset_name,dataset_version,start_date,end_date,symbol_count,is_frozen,notes").eq("strategy_id", strategy.strategy_id).order("created_at", { ascending: false }),
+    supabase.from("datasets").select("dataset_id,dataset_key,dataset_name,dataset_version,start_date,end_date,symbol_count,is_frozen,notes,updated_at").eq("strategy_id", strategy.strategy_id).order("created_at", { ascending: false }),
   ]);
 
   const queryError = stateResult.error || phasesResult.error || decisionsResult.error || backlogResult.error || datasetsResult.error;
@@ -78,6 +78,7 @@ export default async function ProjectDetailPage({ params }: Props) {
           <p className="eyebrow">{strategy.strategy_code} · {prettyStatus(strategy.status)}</p>
           <h1>{strategy.strategy_name}</h1>
           <p className="lede">{strategy.description ?? "No project description recorded."}</p>
+          <p className="sectionDescription">Project state updated: {formatDateTime(state?.updated_at)}</p>
         </div>
         <span className="securityBadge">Authenticated · Allowlisted · Read-only</span>
       </section>
@@ -128,7 +129,7 @@ export default async function ProjectDetailPage({ params }: Props) {
         </section>}
 
         <section className="projectSection" id="status-plan">
-          <div className="sectionHeader"><div><p className="eyebrow">STATUS & PLAN</p><h2>Where the project stands</h2></div><span>{state?.roadmap_version ?? "Roadmap not tracked"}</span></div>
+          <div className="sectionHeader"><div><p className="eyebrow">STATUS & PLAN</p><h2>Where the project stands</h2></div><span>Updated {formatDateTime(state?.updated_at)}</span></div>
           <div className="statusPlanGrid">
             <article className="detailPanel">
               <span className="fieldLabel">Current objective</span>
@@ -145,6 +146,7 @@ export default async function ProjectDetailPage({ params }: Props) {
               {nextPhase?.entry_criteria && <details><summary>Next-phase entry criteria</summary><p>{nextPhase.entry_criteria}</p></details>}
               <span className="fieldLabel spacedLabel">Latest recorded decision</span>
               <p>{state?.last_decision ?? "No decision summary recorded."}</p>
+              <small>Project state updated: {formatDateTime(state?.updated_at)}</small>
             </article>
           </div>
         </section>
@@ -154,17 +156,17 @@ export default async function ProjectDetailPage({ params }: Props) {
           <div className="timeline">
             {phases.map((phase) => {
               const isCurrent = phase.phase_code === state?.active_phase_code;
-              return <article className={`timelineItem timeline-${phase.status}${isCurrent ? " timeline-current" : ""}`} key={phase.phase_id}><div className="timelineMarker"/><div><div className="timelineTop"><strong>{phase.phase_code} · {phase.phase_name}</strong><div className="timelineBadges">{isCurrent && <span className="currentBadge">CURRENT</span>}<span className="statusPill">{prettyStatus(phase.status)}</span></div></div><p>{phase.objective ?? "No objective recorded."}</p><div className="timelineMeta"><span>Started: {formatDate(phase.started_at)}</span><span>Completed: {formatDate(phase.completed_at)}</span>{phase.next_phase_code && <span>Next: {phase.next_phase_code}</span>}</div>{phase.exit_criteria && <details><summary>Exit criteria</summary><p>{phase.exit_criteria}</p></details>}</div></article>;
+              return <article className={`timelineItem timeline-${phase.status}${isCurrent ? " timeline-current" : ""}`} key={phase.phase_id}><div className="timelineMarker"/><div><div className="timelineTop"><strong>{phase.phase_code} · {phase.phase_name}</strong><div className="timelineBadges">{isCurrent && <span className="currentBadge">CURRENT</span>}<span className="statusPill">{prettyStatus(phase.status)}</span></div></div><p>{phase.objective ?? "No objective recorded."}</p><div className="timelineMeta"><span>Started: {formatDateTime(phase.started_at)}</span><span>Completed: {formatDateTime(phase.completed_at)}</span><span>Updated: {formatDateTime(phase.updated_at)}</span>{phase.next_phase_code && <span>Next: {phase.next_phase_code}</span>}</div>{phase.exit_criteria && <details><summary>Exit criteria</summary><p>{phase.exit_criteria}</p></details>}</div></article>;
             })}
           </div>
         </section>
 
         <section className="projectSection twoColumnSection">
-          <div id="decisions"><div className="sectionHeader"><div><p className="eyebrow">DECISIONS</p><h2>Recent decisions</h2></div></div><div className="stackList">{decisions.length ? decisions.map((item) => <article className="detailPanel" key={item.decision_id}><div className="listTop"><strong>{item.title}</strong><time>{formatDate(item.decision_date)}</time></div><p>{item.decision}</p>{item.rationale && <small>{item.rationale}</small>}</article>) : <p className="emptyState">No decisions recorded.</p>}</div></div>
-          <div id="backlog"><div className="sectionHeader"><div><p className="eyebrow">BACKLOG</p><h2>Plan queue</h2></div></div><div className="stackList">{backlog.length ? backlog.map((item) => <article className={`detailPanel${item.blocking_current_phase && !["complete", "rejected", "cancelled"].includes(item.status) ? " blockingPanel" : ""}`} key={item.backlog_id}><div className="listTop"><strong>{item.title}</strong><span className="statusPill">{prettyStatus(item.status)}</span></div><p>{item.description ?? item.why_it_matters ?? "No description recorded."}</p><small>{item.priority ? `Priority: ${prettyStatus(item.priority)}` : "Priority not set"}{item.origin_phase ? ` · Origin: ${item.origin_phase}` : ""}{item.blocking_current_phase && !["complete", "rejected", "cancelled"].includes(item.status) ? ` · ${isPmpd ? "REQUIRED GATE" : "BLOCKING"}` : ""}</small></article>) : <p className="emptyState">No backlog items recorded.</p>}</div></div>
+          <div id="decisions"><div className="sectionHeader"><div><p className="eyebrow">DECISIONS</p><h2>Recent decisions</h2></div></div><div className="stackList">{decisions.length ? decisions.map((item) => <article className="detailPanel" key={item.decision_id}><div className="listTop"><strong>{item.title}</strong><time>{formatDateTime(item.decision_date)}</time></div><p>{item.decision}</p>{item.rationale && <small>{item.rationale}</small>}</article>) : <p className="emptyState">No decisions recorded.</p>}</div></div>
+          <div id="backlog"><div className="sectionHeader"><div><p className="eyebrow">BACKLOG</p><h2>Plan queue</h2></div></div><div className="stackList">{backlog.length ? backlog.map((item) => <article className={`detailPanel${item.blocking_current_phase && !["complete", "rejected", "cancelled"].includes(item.status) ? " blockingPanel" : ""}`} key={item.backlog_id}><div className="listTop"><strong>{item.title}</strong><span className="statusPill">{prettyStatus(item.status)}</span></div><p>{item.description ?? item.why_it_matters ?? "No description recorded."}</p><small>{item.priority ? `Priority: ${prettyStatus(item.priority)}` : "Priority not set"}{item.origin_phase ? ` · Origin: ${item.origin_phase}` : ""}{item.blocking_current_phase && !["complete", "rejected", "cancelled"].includes(item.status) ? ` · ${isPmpd ? "REQUIRED GATE" : "BLOCKING"}` : ""}</small><small>Updated: {formatDateTime(item.updated_at ?? item.created_at)}</small></article>) : <p className="emptyState">No backlog items recorded.</p>}</div></div>
         </section>
 
-        <section className="projectSection" id="datasets"><div className="sectionHeader"><div><p className="eyebrow">DATASETS</p><h2>Research evidence</h2></div></div><div className="datasetList">{datasets.length ? datasets.map((dataset) => <article className="detailPanel" key={dataset.dataset_id}><div className="listTop"><strong>{dataset.dataset_name ?? dataset.dataset_key}</strong><span className="statusPill">{dataset.is_frozen ? "Frozen" : "Active"}</span></div><p>{dataset.dataset_version ?? "No version"}{dataset.symbol_count ? ` · ${dataset.symbol_count} symbols` : ""}</p><small>{dataset.start_date ?? "?"} → {dataset.end_date ?? "?"}</small></article>) : <p className="emptyState">No datasets registered for this project.</p>}</div></section>
+        <section className="projectSection" id="datasets"><div className="sectionHeader"><div><p className="eyebrow">DATASETS</p><h2>Research evidence</h2></div></div><div className="datasetList">{datasets.length ? datasets.map((dataset) => <article className="detailPanel" key={dataset.dataset_id}><div className="listTop"><strong>{dataset.dataset_name ?? dataset.dataset_key}</strong><span className="statusPill">{dataset.is_frozen ? "Frozen" : "Active"}</span></div><p>{dataset.dataset_version ?? "No version"}{dataset.symbol_count ? ` · ${dataset.symbol_count} symbols` : ""}</p><small>{dataset.start_date ?? "?"} → {dataset.end_date ?? "?"}</small><small>Updated: {formatDateTime(dataset.updated_at)}</small></article>) : <p className="emptyState">No datasets registered for this project.</p>}</div></section>
       </>}
     </main>
   );
