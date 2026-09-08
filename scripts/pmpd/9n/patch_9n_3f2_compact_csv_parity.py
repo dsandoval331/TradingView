@@ -1,4 +1,4 @@
-from pathlib import Path
+﻿from pathlib import Path
 import hashlib, sys
 
 try:
@@ -7,8 +7,8 @@ except Exception:
     pass
 
 ROOT = Path.cwd()
-SOURCE = ROOT / "PM_PD_Breakout_V4_8H7_Parity_Capture_FULL.pine"
-OUTPUT = ROOT / "PM_PD_Breakout_V4_9N_3F2_COMPACT_CSV_Parity_Export.pine"
+SOURCE = ROOT / "pine" / "pmpd" / "v4" / "frozen" / "PM_PD_Breakout_V4_8H7_Parity_Capture_FULL.pine"
+OUTPUT = ROOT / "pine" / "pmpd" / "v4" / "parity_exports" / "PM_PD_Breakout_V4_9N_3F2_COMPACT_CSV_Parity_Export.pine"
 EXPECTED_SHA = "79b9d80f0ec2c254bd69607ff626c2007ae7e617018d984f083ba2a25e7ba681"
 
 raw = SOURCE.read_bytes()
@@ -129,3 +129,7 @@ print("V5_MODIFIED=False")
 print("PRODUCTION_RULE_AUTHORIZED=False")
 print("TRADINGVIEW_PARITY_VALIDATED=False")
 print("9N_3F2_COMPACT_PATCH_GATE=PASS")
+
+
+
+

@@ -1,4 +1,4 @@
-from pathlib import Path
+﻿from pathlib import Path
 import json, hashlib, math
 import numpy as np
 import pandas as pd
@@ -7,7 +7,7 @@ import v4_parity_engine_v2 as v4
 ROOT=Path.cwd()
 CACHE=ROOT/"data"/"second1m_alt_entry_cache_v1"/"partitions"
 V5_PATH=ROOT/"pmpd_v5_9m_oos_candidate_dp4_v1.parquet"
-ENGINE=ROOT/"v4_parity_engine_v2.py"
+ENGINE=Path(__file__).resolve().parent/"v4_parity_engine_v2.py"
 EXPECTED_ENGINE_SHA="cab75475f0bf4f4a9d8cf86561d9959957d660aeae7926769e26c53599be4b22"
 
 START=pd.Timestamp("2026-01-05").date()
@@ -58,7 +58,7 @@ def counts_rate(df, outcome_col="outcome"):
         "resolved_favorable_rate":None if res==0 else fav/res
     }
 
-print("=== PMPD V5 9N-3S2 FINAL V4-vs-V5 HEAD-TO-HEAD ===")
+print("=== PMPD V5 9N-3S FINAL V4-vs-V5 HEAD-TO-HEAD ===")
 if not ENGINE.exists(): raise SystemExit("MISSING_ENGINE")
 if sha(ENGINE)!=EXPECTED_ENGINE_SHA: raise SystemExit("ENGINE_SHA_MISMATCH")
 if not V5_PATH.exists(): raise SystemExit(f"MISSING_V5_ARTIFACT {V5_PATH}")
@@ -102,7 +102,7 @@ for i,p in enumerate(parts,1):
     if "timestamp_utc" not in raw.columns:
         raise RuntimeError(f"{sym}: missing timestamp_utc")
     raw.index=pd.DatetimeIndex(pd.to_datetime(raw["timestamp_utc"],utc=True))
-    sig=v4.evaluate_v4(raw,symbol=sym)
+    sig=v4.evaluate_v4_signals(raw,symbol=sym)
     if sig.empty: continue
 
     sdate=pick(sig.columns,["trade_date","date"],"V4 trade date")
@@ -124,7 +124,7 @@ for i,p in enumerate(parts,1):
         ("profile","profile"),
         ("priority","priority"),
         ("trade_type","trade_type"),
-        ("mfe_pct","mfe_pct"),("mae_pct","mae_pct")
+        ("mfe","mfe"),("mae","mae")
     ]:
         if src in sig.columns: x[dst]=sig[src].values
     x=x[x.trade_date.between(START,END)]
@@ -277,4 +277,6 @@ print("V4_EVENTS =",OUT_V4)
 print("V4_MODIFIED=False")
 print("V5_MODIFIED=False")
 print("PRODUCTION_RULE_AUTHORIZED=False")
-print("9N_3S2_FINAL_H2H=PASS")
+print("9N_3S_FINAL_H2H=PASS")
+
+

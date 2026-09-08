@@ -1,9 +1,9 @@
-from pathlib import Path
+﻿from pathlib import Path
 import hashlib, re, sys
 
 ROOT = Path.cwd()
-SOURCE = ROOT / "PM_PD_Breakout_V4_9N_3F3_COMPACT_CSV_Parity_Export.pine"
-OUTPUT = ROOT / "PM_PD_Breakout_V4_9N_3F4_DATA_WINDOW_CSV_Parity_Export.pine"
+SOURCE = ROOT / "pine" / "pmpd" / "v4" / "parity_exports" / "PM_PD_Breakout_V4_9N_3F3_COMPACT_CSV_Parity_Export.pine"
+OUTPUT = ROOT / "pine" / "pmpd" / "v4" / "parity_exports" / "PM_PD_Breakout_V4_9N_3F4_DATA_WINDOW_CSV_Parity_Export.pine"
 EXPECTED_SHA = "44a47d3d02bb18bcb6a624cc3a608782f7dd207f44ce01ae936f20656f8788b4"
 
 if not SOURCE.exists():
@@ -50,3 +50,6 @@ print("V5_MODIFIED=False")
 print("PRODUCTION_RULE_AUTHORIZED=False")
 print("TRADINGVIEW_PARITY_VALIDATED=False")
 print("9N_3F4_PATCH_GATE=PASS")
+
+
+

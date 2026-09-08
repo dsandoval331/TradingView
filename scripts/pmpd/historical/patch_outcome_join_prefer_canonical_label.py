@@ -1,6 +1,6 @@
-from pathlib import Path
+﻿from pathlib import Path
 
-p = Path("join_and_audit_frozen_9h_outcomes.py")
+p = Path(__file__).resolve().parent / "join_and_audit_frozen_9h_outcomes.py"
 s = p.read_text(encoding="utf-8")
 
 start = s.index("# Case 1: direct favorable-first boolean.")
@@ -21,3 +21,4 @@ s = s.replace(old, new, 1)
 
 p.write_text(s, encoding="utf-8")
 print("OUTCOME_JOIN_CANONICAL_LABEL_PATCH_APPLIED=PASS")
+

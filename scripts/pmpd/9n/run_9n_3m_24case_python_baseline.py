@@ -1,8 +1,8 @@
-from pathlib import Path
+﻿from pathlib import Path
 import pandas as pd, json, hashlib, sys
 
 ROOT=Path.cwd()
-ENGINE=ROOT/"v4_parity_engine_v2.py"
+ENGINE=Path(__file__).resolve().parent/"v4_parity_engine_v2.py"
 CACHE=ROOT/"data"/"second1m_alt_entry_cache_v1"/"partitions"
 SAMPLE=ROOT/"PMPD_V4_PARITY_RECAPTURE_24_V1.csv"
 EXPECTED_ENGINE_SHA="cab75475f0bf4f4a9d8cf86561d9959957d660aeae7926769e26c53599be4b22"
@@ -84,3 +84,5 @@ print("CSV =",OUT); print("SUMMARY =",SUMMARY)
 print("V4_MODIFIED=False"); print("V5_MODIFIED=False")
 print("TRADINGVIEW_FULL_24_CASE_PARITY_VALIDATED=False")
 print("9N_3M_24CASE_PYTHON_BASELINE=PASS")
+
+

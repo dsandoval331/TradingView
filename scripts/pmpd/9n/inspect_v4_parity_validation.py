@@ -1,7 +1,7 @@
-from pathlib import Path
+﻿from pathlib import Path
 import re
 
-src = Path.cwd() / "PM_PD_Breakout_V4_8H7_Parity_Capture_FULL.pine"
+src = Path.cwd() / "pine" / "pmpd" / "v4" / "frozen" / "PM_PD_Breakout_V4_8H7_Parity_Capture_FULL.pine"
 text = src.read_text(encoding="utf-8", errors="ignore")
 lines = text.splitlines()
 
@@ -24,3 +24,6 @@ for term in terms:
                 print(f"{j+1:5}: {lines[j]}")
     if not found:
         print("NOT FOUND")
+
+
+

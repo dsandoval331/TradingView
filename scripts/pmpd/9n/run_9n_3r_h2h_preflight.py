@@ -1,8 +1,8 @@
-from pathlib import Path
+﻿from pathlib import Path
 import json, hashlib, pandas as pd, re
 
 ROOT=Path.cwd()
-ENGINE=ROOT/"v4_parity_engine_v2.py"
+ENGINE=Path(__file__).resolve().parent/"v4_parity_engine_v2.py"
 CACHE=ROOT/"data"/"second1m_alt_entry_cache_v1"/"partitions"
 EXPECTED_ENGINE_SHA="cab75475f0bf4f4a9d8cf86561d9959957d660aeae7926769e26c53599be4b22"
 OUT=ROOT/"pmpd_v5_9n_3r_h2h_preflight.json"
@@ -80,3 +80,5 @@ result={
 OUT.write_text(json.dumps(result,indent=2),encoding="utf-8")
 print("REPORT =",OUT)
 print("9N_3R_H2H_PREFLIGHT=PASS")
+
+

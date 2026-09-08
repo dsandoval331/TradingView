@@ -1,4 +1,4 @@
-from pathlib import Path
+﻿from pathlib import Path
 import hashlib, math, json
 import numpy as np
 
@@ -77,8 +77,8 @@ print("PINE_RMA_REFERENCE=PASS")
 
 # 7. Verify recovered Pine source SHA when present.
 pine_candidates=[
-    ROOT/"PM_PD_Breakout_V4_8H7_Parity_Capture_FULL.pine",
-    ROOT/"PM_PD_Breakout_V4_8H7_Parity_Capture.pine",
+    ROOT/"pine"/"pmpd"/"v4"/"frozen"/"PM_PD_Breakout_V4_8H7_Parity_Capture_FULL.pine",
+    ROOT/"pine"/"pmpd"/"v4"/"frozen"/"PM_PD_Breakout_V4_8H7_Parity_Capture.pine",
 ]
 pine=next((p for p in pine_candidates if p.exists()),None)
 pine_sha=None
@@ -111,3 +111,5 @@ print("V4_MODIFIED=False")
 print("V5_MODIFIED=False")
 print("PRODUCTION_RULE_AUTHORIZED=False")
 print("9N_3E_V4_ENGINE_SEMANTIC_GATE=PASS")
+
+

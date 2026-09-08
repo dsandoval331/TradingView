@@ -1,6 +1,6 @@
-from pathlib import Path
+﻿from pathlib import Path
 
-p = Path("join_and_audit_frozen_9h_outcomes.py")
+p = Path(__file__).resolve().parent / "join_and_audit_frozen_9h_outcomes.py"
 s = p.read_text(encoding="utf-8")
 
 old = """        neither_pat = z.str.contains(r"neither|none|unresolved|censor|no_hit|no hit", regex=True, na=False)
@@ -22,3 +22,4 @@ if old not in s:
 
 p.write_text(s.replace(old, new, 1), encoding="utf-8")
 print("OUTCOME_JOIN_AMBIGUOUS_LABEL_PATCH_APPLIED=PASS")
+

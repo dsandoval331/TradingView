@@ -1,4 +1,4 @@
-from pathlib import Path
+﻿from pathlib import Path
 import hashlib, json, sys
 import pandas as pd
 
@@ -6,10 +6,10 @@ ROOT = Path.cwd()
 SYMBOL = "VRTX"
 TARGET_DATE = pd.Timestamp("2026-07-01").date()
 
-ENGINE = ROOT / "v4_parity_engine_v2.py"
+ENGINE = Path(__file__).resolve().parent / "v4_parity_engine_v2.py"
 DATA = ROOT / "data" / "second1m_alt_entry_cache_v1" / "partitions" / SYMBOL / f"{SYMBOL}_2026.parquet"
-REPORT = ROOT / "pmpd_v5_9n_3g4_vrtx_2026-07-01_parity_report.json"
-SIGNALS_CSV = ROOT / "pmpd_v5_9n_3g4_vrtx_2026_signals.csv"
+REPORT = ROOT / "pmpd_v5_9n_3g3_vrtx_2026-07-01_parity_report.json"
+SIGNALS_CSV = ROOT / "pmpd_v5_9n_3g3_vrtx_2026_signals.csv"
 
 EXPECTED_ENGINE_SHA256 = "cab75475f0bf4f4a9d8cf86561d9959957d660aeae7926769e26c53599be4b22"
 
@@ -30,7 +30,7 @@ def close_enough(a, b, tol=1e-6):
         return a is None and b is None
     return abs(float(a) - float(b)) <= tol
 
-print("=== PMPD V5 9N-3G4 FIRST PINE ↔ PYTHON PARITY CASE ===")
+print("=== PMPD V5 9N-3G3 FIRST PINE â†” PYTHON PARITY CASE ===")
 print("CASE =", SYMBOL, TARGET_DATE)
 print("PINE_OBSERVED = DATE_LOADED / NO_SIGNAL")
 print("PINE_LEVELS =", {k: PINE[k] for k in ("pmh","pml","pdh","pdl")})
@@ -55,33 +55,28 @@ raw = pd.read_parquet(DATA)
 print("RAW_ROWS =", len(raw))
 print("RAW_COLUMNS =", list(raw.columns))
 
-# Compatibility adapter only.
-# The frozen engine's _ensure_et_index() correctly handles a DatetimeIndex,
-# while its column branch treats a Series like a DatetimeIndex (.tz/.tz_convert).
-# Preserve the engine byte-for-byte and supply the canonical UTC timestamps as
-# a DatetimeIndex instead.
-if "timestamp_utc" not in raw.columns:
-    raise SystemExit("MISSING_TIMESTAMP_UTC")
+# Adapter only: the frozen 9N-3E engine accepts timestamp/time/datetime/ts.
+# The located cache uses timestamp_utc/timestamp_et. Preserve the engine untouched
+# and add a compatibility alias in the runner.
+if "timestamp" not in raw.columns:
+    if "timestamp_utc" in raw.columns:
+        raw = raw.copy()
+        raw["timestamp"] = raw["timestamp_utc"]
+        print("TIMESTAMP_ADAPTER = timestamp <- timestamp_utc")
+    elif "timestamp_et" in raw.columns:
+        # Only use ET as a fallback and preserve tz information.
+        raw = raw.copy()
+        raw["timestamp"] = raw["timestamp_et"]
+        print("TIMESTAMP_ADAPTER = timestamp <- timestamp_et")
+    else:
+        raise SystemExit("NO_COMPATIBLE_TIMESTAMP_SOURCE")
 
-idx = pd.DatetimeIndex(pd.to_datetime(raw["timestamp_utc"], utc=True, errors="raise"))
-raw = raw.copy()
-raw.index = idx
-raw.index.name = "timestamp_index_utc"
-print("TIMESTAMP_ADAPTER = DatetimeIndex(timestamp_utc)")
-print("INDEX_TZ =", str(raw.index.tz))
-
-# Verify target date using the explicit ET field from the cache.
+# Verify target date from explicit ET column where available.
 if "timestamp_et" in raw.columns:
     et = pd.to_datetime(raw["timestamp_et"])
-    if getattr(et.dt, "tz", None) is None:
-        # If cache ET is naive, it already represents New York wall-clock.
-        target_dates = set(et.dt.date)
-    else:
-        target_dates = set(et.dt.tz_convert("America/New_York").dt.date)
 else:
-    target_dates = set(raw.index.tz_convert("America/New_York").date)
-
-if TARGET_DATE not in target_dates:
+    et = pd.to_datetime(raw["timestamp"], utc=True).dt.tz_convert("America/New_York")
+if TARGET_DATE not in set(et.dt.date):
     raise SystemExit("TARGET_DATE_NOT_IN_PARTITION")
 print("TARGET_DATE_PRESENT=PASS")
 
@@ -117,7 +112,7 @@ levels_match = all(level_matches.values())
 case_gate = "PASS" if count_match and levels_match else "FAIL"
 
 report = {
-    "protocol_step": "9N-3G4-FIRST-PINE-PYTHON-PARITY",
+    "protocol_step": "9N-3G3-FIRST-PINE-PYTHON-PARITY",
     "symbol": SYMBOL,
     "target_date": str(TARGET_DATE),
     "pine_observed": PINE,
@@ -134,7 +129,7 @@ report = {
     "engine_sha256": engine_sha,
     "data_path": str(DATA),
     "data_sha256": sha256(DATA),
-    "timestamp_adapter_only": "DatetimeIndex(timestamp_utc)",
+    "timestamp_adapter_only": True,
     "v4_modified": False,
     "v5_modified": False,
     "production_rule_authorized": False,
@@ -154,7 +149,9 @@ print("V4_MODIFIED=False")
 print("V5_MODIFIED=False")
 print("PRODUCTION_RULE_AUTHORIZED=False")
 print("TRADINGVIEW_FULL_24_CASE_PARITY_VALIDATED=False")
-print("9N_3G4_FIRST_CASE_GATE=" + case_gate)
+print("9N_3G3_FIRST_CASE_GATE=" + case_gate)
 
 if case_gate != "PASS":
     sys.exit(2)
+
+

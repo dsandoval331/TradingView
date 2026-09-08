@@ -1,4 +1,4 @@
-from pathlib import Path
+﻿from pathlib import Path
 import hashlib, json, sys
 import pandas as pd
 
@@ -6,7 +6,7 @@ ROOT = Path.cwd()
 SYMBOL = "VRTX"
 TARGET_DATE = pd.Timestamp("2026-07-01").date()
 
-ENGINE = ROOT / "v4_parity_engine_v2.py"
+ENGINE = Path(__file__).resolve().parent / "v4_parity_engine_v2.py"
 DATA = ROOT / "market_cache" / "MARKET_CACHE_V1" / "1m" / SYMBOL / "2026.parquet"
 REPORT = ROOT / "pmpd_v5_9n_3g_vrtx_2026-07-01_parity_report.json"
 SIGNALS_CSV = ROOT / "pmpd_v5_9n_3g_vrtx_2026_signals.csv"
@@ -18,7 +18,7 @@ PINE_OBSERVED_DATE_LOADED = True
 def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
-print("=== PMPD V5 9N-3G FIRST PINE ↔ PYTHON PARITY CASE ===")
+print("=== PMPD V5 9N-3G FIRST PINE â†” PYTHON PARITY CASE ===")
 print("CASE =", SYMBOL, TARGET_DATE)
 print("PINE_OBSERVED = DATE_LOADED / NO_SIGNAL")
 
@@ -142,3 +142,5 @@ print("9N_3G_FIRST_CASE_GATE=" + case_gate)
 
 if not count_match:
     sys.exit(2)
+
+

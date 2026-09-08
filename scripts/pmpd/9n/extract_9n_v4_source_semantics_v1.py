@@ -1,13 +1,13 @@
-from pathlib import Path
+﻿from pathlib import Path
 import json, hashlib
 
 ROOT = Path.cwd()
 TARGETS = [
-    ROOT/"PM_PD_Breakout_V4_8H7_Parity_Capture_FULL.pine",
-    ROOT/"PM_PD_Breakout_V4_8H7_Parity_Capture.pine",
-    ROOT/"PM + PD Breakout Monitor - V4 8H-7 Parity Capture.pine",
+    ROOT/"pine"/"pmpd"/"v4"/"frozen"/"PM_PD_Breakout_V4_8H7_Parity_Capture_FULL.pine",
+    ROOT/"pine"/"pmpd"/"v4"/"frozen"/"PM_PD_Breakout_V4_8H7_Parity_Capture.pine",
+    ROOT/"pine"/"pmpd"/"v4"/"frozen"/"PM + PD Breakout Monitor - V4 8H-7 Parity Capture.pine",
     ROOT/"OlderProjectFolders"/"OlderTradingViewPineScriptWork"/"PM_Previous_Day_Breakout_Monitor_V4_Forward_Validation_FINAL.pine",
-    ROOT/"PM + PD Breakout Monitor - V4 Forward Validation FINAL.pine",
+    ROOT/"pine"/"pmpd"/"v4"/"frozen"/"PM + PD Breakout Monitor - V4 Forward Validation FINAL.pine",
     ROOT/"OlderProjectFolders"/"OlderTradingViewPineScriptWork"/"PM_Previous_Day_Breakout_Monitor_V3_4A6_V4_Grade_Profile_TQS_Capture.pine",
 ]
 target = next((p for p in TARGETS if p.exists()), None)
@@ -84,3 +84,5 @@ print("V4_MODIFIED=False")
 print("V5_MODIFIED=False")
 print("PRODUCTION_RULE_AUTHORIZED=False")
 print("9N_3D_B_SOURCE_SEMANTICS_GATE=PASS")
+
+

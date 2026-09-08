@@ -1,4 +1,4 @@
-from pathlib import Path
+﻿from pathlib import Path
 import hashlib, json
 import pandas as pd
 import v4_parity_engine_v2 as eng
@@ -6,7 +6,7 @@ import v4_parity_engine_v2 as eng
 ROOT=Path.cwd()
 CACHE=ROOT/"data"/"second1m_alt_entry_cache_v1"/"partitions"
 EXPECTED_SHA="cab75475f0bf4f4a9d8cf86561d9959957d660aeae7926769e26c53599be4b22"
-ENGINE=ROOT/"v4_parity_engine_v2.py"
+ENGINE=Path(__file__).resolve().parent/"v4_parity_engine_v2.py"
 
 CASES={
 "VRTX":{"date":"2026-07-01","pine_pmh":503.00,"pine_pml":494.15,"pine_count":0,"python_count":0},
@@ -99,3 +99,5 @@ out_json.write_text(json.dumps(summary,indent=2),encoding="utf-8")
 print("CSV =",out_csv); print("SUMMARY =",out_json)
 print("V4_MODIFIED=False"); print("V5_MODIFIED=False")
 print("9N_3Q_COUNTERFACTUAL=PASS")
+
+

@@ -1,4 +1,4 @@
-from pathlib import Path
+﻿from pathlib import Path
 import hashlib, re, sys
 
 try:
@@ -7,8 +7,8 @@ except Exception:
     pass
 
 ROOT = Path.cwd()
-SOURCE = ROOT / "PM_PD_Breakout_V4_8H7_Parity_Capture_FULL.pine"
-OUTPUT = ROOT / "PM_PD_Breakout_V4_9N_3F3_COMPACT_CSV_Parity_Export.pine"
+SOURCE = ROOT / "pine" / "pmpd" / "v4" / "frozen" / "PM_PD_Breakout_V4_8H7_Parity_Capture_FULL.pine"
+OUTPUT = ROOT / "pine" / "pmpd" / "v4" / "parity_exports" / "PM_PD_Breakout_V4_9N_3F3_COMPACT_CSV_Parity_Export.pine"
 EXPECTED_SHA = "79b9d80f0ec2c254bd69607ff626c2007ae7e617018d984f083ba2a25e7ba681"
 
 if not SOURCE.exists():
@@ -33,7 +33,7 @@ lines = text.splitlines()
 # for the distinctive text independent of box-drawing/comment formatting.
 end_idx = None
 for i, line in enumerate(lines):
-    normalized = line.upper().replace("–", "-").replace("—", "-")
+    normalized = line.upper().replace("â€“", "-").replace("â€”", "-")
     if "END 8H-7B-2K" in normalized and "PARITY CLASSIFICATION CAPTURE" in normalized:
         end_idx = i
         break
@@ -189,3 +189,6 @@ print("V5_MODIFIED=False")
 print("PRODUCTION_RULE_AUTHORIZED=False")
 print("TRADINGVIEW_PARITY_VALIDATED=False")
 print("9N_3F3_PATCH_GATE=PASS")
+
+
+

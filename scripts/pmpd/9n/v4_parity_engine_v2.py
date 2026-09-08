@@ -1,6 +1,6 @@
-"""
+﻿"""
 PMPD V4 parity reference engine v2
-9N-3E — reconstructed from the recovered frozen V4 Pine parity source.
+9N-3E â€” reconstructed from the recovered frozen V4 Pine parity source.
 
 This is a RESEARCH/PARITY implementation only.
 It does not modify V4 or V5 and does not authorize production rules.
@@ -514,7 +514,7 @@ def evaluate_v4_signals(raw_1m: pd.DataFrame, symbol: Optional[str] = None,
                 "close_pass": bool(close_pass),
             })
 
-        # Pine sequential state semantics — BULL.
+        # Pine sequential state semantics â€” BULL.
         if bull_state == 2:
             if row.close <= lv.bull_final:
                 bull_state = 0; bull_armed_time = None; bull_armed_bars = 0; bull_initial_pen = math.nan
@@ -554,7 +554,7 @@ def evaluate_v4_signals(raw_1m: pd.DataFrame, symbol: Optional[str] = None,
                         emit("BULL", 0, bull_initial_pen)
                         bull_state = 2
 
-        # Pine sequential state semantics — BEAR.
+        # Pine sequential state semantics â€” BEAR.
         if bear_state == 2:
             if row.close >= lv.bear_final:
                 bear_state = 0; bear_armed_time = None; bear_armed_bars = 0; bear_initial_pen = math.nan
@@ -664,3 +664,5 @@ def load_parquet_and_evaluate(path: str | Path, symbol: Optional[str] = None) ->
     path = Path(path)
     df = pd.read_parquet(path)
     return evaluate_v4(df, symbol=symbol or path.stem)
+
+
