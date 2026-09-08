@@ -53,6 +53,12 @@ export default async function ProjectDetailPage({ params }: Props) {
   const currentPhase = phases.find((p) => p.phase_code === state?.active_phase_code);
   const nextPhase = phases.find((p) => p.phase_code === state?.next_phase_code);
   const activePhaseRows = phases.filter((p) => p.status === "active");
+  const isPmpd = strategy.strategy_code === "PMPD";
+  const metadata = (state?.metadata_json ?? {}) as Record<string, unknown>;
+  const v4TrackStatus = typeof metadata.v4_track_status === "string" ? metadata.v4_track_status : "FROZEN_BENCHMARK";
+  const v5TrackStatus = typeof metadata.v5_track_status === "string" ? metadata.v5_track_status : "ACTIVE_RESEARCH";
+  const legacyRoadmapStatus = typeof metadata.legacy_8h_roadmap_status === "string" ? metadata.legacy_8h_roadmap_status : "SUPERSEDED_PRESERVED";
+  const legacyRoadmapVersion = typeof metadata.legacy_roadmap_version === "string" ? metadata.legacy_roadmap_version : "PMPD-RM-1.0";
 
   const healthIssues: string[] = [];
   if (!state) healthIssues.push("No project_state record is present, so current status and next-step tracking are not yet configured.");
@@ -61,7 +67,7 @@ export default async function ProjectDetailPage({ params }: Props) {
   if (currentPhase && currentPhase.status !== "active") healthIssues.push(`project_state says ${currentPhase.phase_code} is current, but program_phases marks it ${prettyStatus(currentPhase.status)}.`);
   if (activePhaseRows.length > 1) healthIssues.push(`program_phases contains ${activePhaseRows.length} phases marked Active (${activePhaseRows.map((p) => p.phase_code).join(", ")}).`);
   if (activePhaseRows.length === 1 && state?.active_phase_code && activePhaseRows[0].phase_code !== state.active_phase_code) healthIssues.push(`program_phases marks ${activePhaseRows[0].phase_code} Active while project_state identifies ${state.active_phase_code} as current.`);
-  if ((state?.blocker_count ?? 0) !== openBlockingBacklog.length) healthIssues.push(`Blocker count differs: project_state reports ${state?.blocker_count ?? 0}, while the open backlog contains ${openBlockingBacklog.length} blocking item${openBlockingBacklog.length === 1 ? "" : "s"}.`);
+  if ((state?.blocker_count ?? 0) !== openBlockingBacklog.length) healthIssues.push(`Gate count differs: project_state reports ${state?.blocker_count ?? 0}, while the open backlog contains ${openBlockingBacklog.length} required phase-closing item${openBlockingBacklog.length === 1 ? "" : "s"}.`);
   if (state && !state.roadmap_version) healthIssues.push("No roadmap version is recorded in project_state.");
 
   return (
@@ -78,6 +84,7 @@ export default async function ProjectDetailPage({ params }: Props) {
 
       {queryError ? <section className="alertPanel"><strong>Project query failed.</strong><span>{queryError.message}</span></section> : <>
         <nav className="projectNav" aria-label="Project sections">
+          {isPmpd && <a href="#model-tracks">Model Tracks</a>}
           <a href="#status-plan">Status & Plan</a>
           <a href="#roadmap">Roadmap</a>
           <a href="#decisions">Decisions</a>
@@ -88,7 +95,7 @@ export default async function ProjectDetailPage({ params }: Props) {
         <section className="metricGrid">
           <article className="metricCard"><span>Current phase</span><strong className="metricText">{state?.active_phase_code ?? "—"}</strong><small>{state?.active_phase_name ?? "No active phase recorded"}</small></article>
           <article className="metricCard"><span>Next phase</span><strong className="metricText">{state?.next_phase_code ?? "—"}</strong><small>{state?.next_phase_name ?? "No next phase recorded"}</small></article>
-          <article className="metricCard"><span>Open backlog</span><strong>{openBacklog.length}</strong><small>{openBlockingBacklog.length} blocking current phase</small></article>
+          <article className="metricCard"><span>{isPmpd ? "Required gates" : "Open backlog"}</span><strong>{isPmpd ? openBlockingBacklog.length : openBacklog.length}</strong><small>{isPmpd ? "Unresolved phase-close requirements" : `${openBlockingBacklog.length} blocking current phase`}</small></article>
           <article className="metricCard"><span>Datasets</span><strong>{datasets.length}</strong><small>{datasets.filter((d) => d.is_frozen).length} frozen</small></article>
         </section>
 
@@ -97,8 +104,28 @@ export default async function ProjectDetailPage({ params }: Props) {
             <span className="fieldLabel">Tracking health</span>
             <strong>{healthIssues.length ? `${healthIssues.length} data-quality issue${healthIssues.length === 1 ? "" : "s"} detected` : "Project tracking is aligned"}</strong>
           </div>
-          {healthIssues.length ? <ul>{healthIssues.map((issue) => <li key={issue}>{issue}</li>)}</ul> : <p>Current phase, roadmap state, and blocker tracking are internally consistent.</p>}
+          {healthIssues.length ? <ul>{healthIssues.map((issue) => <li key={issue}>{issue}</li>)}</ul> : <p>Current phase, roadmap state, and required-gate tracking are internally consistent.</p>}
         </section>
+
+        {isPmpd && <section className="projectSection" id="model-tracks">
+          <div className="sectionHeader"><div><p className="eyebrow">MODEL TRACKS</p><h2>One PM+PD program, two versions</h2></div><span>Shared governance · separate purposes</span></div>
+          <div className="statusPlanGrid">
+            <article className="detailPanel">
+              <div className="listTop"><strong>V4 · Benchmark / Forward Validation</strong><span className="statusPill">{prettyStatus(v4TrackStatus)}</span></div>
+              <p>Frozen reference implementation used for forward validation, live comparison, trade review, and benchmark performance.</p>
+              <dl className="detailGrid"><div><dt>Role</dt><dd>Benchmark</dd></div><div><dt>Baseline</dt><dd>{state?.baseline_model ?? strategy.baseline_model ?? "V4"}</dd></div><div><dt>Validation</dt><dd>{prettyStatus(state?.forward_validation_status)}</dd></div><div><dt>Change policy</dt><dd>Frozen / controlled</dd></div></dl>
+            </article>
+            <article className="detailPanel">
+              <div className="listTop"><strong>V5 · Active Research Successor</strong><span className="statusPill status-active">{prettyStatus(v5TrackStatus)}</span></div>
+              <p>Active research track for the successor architecture. The main PM+PD project status follows this track.</p>
+              <dl className="detailGrid"><div><dt>Current phase</dt><dd>{state?.active_phase_code ?? "—"} · {state?.active_phase_name ?? "Not tracked"}</dd></div><div><dt>Next phase</dt><dd>{state?.next_phase_code ?? "—"}</dd></div><div><dt>Active roadmap</dt><dd>{state?.roadmap_version ?? "Not tracked"}</dd></div><div><dt>Required gates</dt><dd>{openBlockingBacklog.length}</dd></div></dl>
+            </article>
+          </div>
+          <article className="detailPanel" style={{ marginTop: 18 }}>
+            <span className="fieldLabel">Roadmap governance</span>
+            <p><strong>{state?.roadmap_version ?? "PMPD-V5-RM-2.0"}</strong> is the authoritative current V5 roadmap. <strong>{legacyRoadmapVersion}</strong> is preserved as {prettyStatus(legacyRoadmapStatus)} history rather than treated as a competing active track.</p>
+          </article>
+        </section>}
 
         <section className="projectSection" id="status-plan">
           <div className="sectionHeader"><div><p className="eyebrow">STATUS & PLAN</p><h2>Where the project stands</h2></div><span>{state?.roadmap_version ?? "Roadmap not tracked"}</span></div>
@@ -107,7 +134,7 @@ export default async function ProjectDetailPage({ params }: Props) {
               <span className="fieldLabel">Current objective</span>
               <h3>{state?.active_phase_code ?? "No active phase"}{state?.active_phase_name ? ` · ${state.active_phase_name}` : ""}</h3>
               <p>{currentPhase?.objective ?? "No phase objective recorded."}</p>
-              <dl className="detailGrid"><div><dt>Baseline</dt><dd>{state?.baseline_model ?? strategy.baseline_model ?? "Not set"}</dd></div><div><dt>Baseline status</dt><dd>{prettyStatus(state?.baseline_status)}</dd></div><div><dt>Forward validation</dt><dd>{prettyStatus(state?.forward_validation_status)}</dd></div><div><dt>Blockers</dt><dd>{state?.blocker_count ?? 0}</dd></div></dl>
+              <dl className="detailGrid"><div><dt>Baseline</dt><dd>{state?.baseline_model ?? strategy.baseline_model ?? "Not set"}</dd></div><div><dt>Baseline status</dt><dd>{prettyStatus(state?.baseline_status)}</dd></div><div><dt>Forward validation</dt><dd>{prettyStatus(state?.forward_validation_status)}</dd></div><div><dt>{isPmpd ? "Required gates" : "Blockers"}</dt><dd>{state?.blocker_count ?? 0}</dd></div></dl>
               {currentPhase?.entry_criteria && <details><summary>Entry criteria</summary><p>{currentPhase.entry_criteria}</p></details>}
               {currentPhase?.exit_criteria && <details open><summary>Exit criteria / definition of done</summary><p>{currentPhase.exit_criteria}</p></details>}
             </article>
@@ -134,7 +161,7 @@ export default async function ProjectDetailPage({ params }: Props) {
 
         <section className="projectSection twoColumnSection">
           <div id="decisions"><div className="sectionHeader"><div><p className="eyebrow">DECISIONS</p><h2>Recent decisions</h2></div></div><div className="stackList">{decisions.length ? decisions.map((item) => <article className="detailPanel" key={item.decision_id}><div className="listTop"><strong>{item.title}</strong><time>{formatDate(item.decision_date)}</time></div><p>{item.decision}</p>{item.rationale && <small>{item.rationale}</small>}</article>) : <p className="emptyState">No decisions recorded.</p>}</div></div>
-          <div id="backlog"><div className="sectionHeader"><div><p className="eyebrow">BACKLOG</p><h2>Plan queue</h2></div></div><div className="stackList">{backlog.length ? backlog.map((item) => <article className={`detailPanel${item.blocking_current_phase && !["complete", "rejected", "cancelled"].includes(item.status) ? " blockingPanel" : ""}`} key={item.backlog_id}><div className="listTop"><strong>{item.title}</strong><span className="statusPill">{prettyStatus(item.status)}</span></div><p>{item.description ?? item.why_it_matters ?? "No description recorded."}</p><small>{item.priority ? `Priority: ${prettyStatus(item.priority)}` : "Priority not set"}{item.origin_phase ? ` · Origin: ${item.origin_phase}` : ""}{item.blocking_current_phase && !["complete", "rejected", "cancelled"].includes(item.status) ? " · BLOCKING" : ""}</small></article>) : <p className="emptyState">No backlog items recorded.</p>}</div></div>
+          <div id="backlog"><div className="sectionHeader"><div><p className="eyebrow">BACKLOG</p><h2>Plan queue</h2></div></div><div className="stackList">{backlog.length ? backlog.map((item) => <article className={`detailPanel${item.blocking_current_phase && !["complete", "rejected", "cancelled"].includes(item.status) ? " blockingPanel" : ""}`} key={item.backlog_id}><div className="listTop"><strong>{item.title}</strong><span className="statusPill">{prettyStatus(item.status)}</span></div><p>{item.description ?? item.why_it_matters ?? "No description recorded."}</p><small>{item.priority ? `Priority: ${prettyStatus(item.priority)}` : "Priority not set"}{item.origin_phase ? ` · Origin: ${item.origin_phase}` : ""}{item.blocking_current_phase && !["complete", "rejected", "cancelled"].includes(item.status) ? ` · ${isPmpd ? "REQUIRED GATE" : "BLOCKING"}` : ""}</small></article>) : <p className="emptyState">No backlog items recorded.</p>}</div></div>
         </section>
 
         <section className="projectSection" id="datasets"><div className="sectionHeader"><div><p className="eyebrow">DATASETS</p><h2>Research evidence</h2></div></div><div className="datasetList">{datasets.length ? datasets.map((dataset) => <article className="detailPanel" key={dataset.dataset_id}><div className="listTop"><strong>{dataset.dataset_name ?? dataset.dataset_key}</strong><span className="statusPill">{dataset.is_frozen ? "Frozen" : "Active"}</span></div><p>{dataset.dataset_version ?? "No version"}{dataset.symbol_count ? ` · ${dataset.symbol_count} symbols` : ""}</p><small>{dataset.start_date ?? "?"} → {dataset.end_date ?? "?"}</small></article>) : <p className="emptyState">No datasets registered for this project.</p>}</div></section>
