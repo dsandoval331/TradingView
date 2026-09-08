@@ -37,7 +37,7 @@ export default async function DashboardPage() {
   const blockerCount = states.reduce((sum, state) => sum + (state.blocker_count ?? 0), 0);
 
   const tradeReviewCodes = new Set(["TRADE_REVIEW"]);
-  const toolCodes = new Set(["PLATFORM", "REALTIME_ADVISOR", "TV_AUTOMATION"]);
+  const toolCodes = new Set(["PLATFORM", "REALTIME_ADVISOR", "TV_AUTOMATION", "PREMARKET_SCANNER"]);
   const tradeReviews = strategies.filter((strategy) => tradeReviewCodes.has(strategy.strategy_code));
   const tools = strategies.filter((strategy) => toolCodes.has(strategy.strategy_code));
   const indicatorStrategies = strategies.filter((strategy) => !tradeReviewCodes.has(strategy.strategy_code) && !toolCodes.has(strategy.strategy_code));
