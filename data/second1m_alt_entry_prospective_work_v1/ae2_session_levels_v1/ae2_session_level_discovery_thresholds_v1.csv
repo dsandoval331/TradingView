@@ -1,0 +1,5 @@
+level_family,feature,discovery_ahead_q20,discovery_ahead_q80,discovery_ahead_n
+PM,pm_directional_distance_pct,0.10261456098626402,0.7607120283451277,2008
+AH,ah_directional_distance_pct,0.15034977997959456,1.0450190520157239,1614
+PD,pd_directional_distance_pct,0.3805685942477832,2.103026494228164,2975
+COMBINED,relevant_level_cluster_span_pct,0.45051809581018454,2.073037099984342,4241

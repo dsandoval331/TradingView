@@ -1,0 +1,65 @@
+A35.4 / R14 - FINAL TEMPORAL + 2025Q3 FAILURE AUDIT V1
+
+This is model-development research, not untouched OOS validation.
+
+QUARTERLY TRIAGE STATES
+quarter candidate_triage_state  total_n  binary_n  favorable_n  adverse_n  favorable_first_pct  avg_mfe_pct  avg_mae_pct  median_mfe_pct  median_mae_pct  symbol_n  trade_date_n
+ 2025Q2                  AVOID      174       171           89         82                52.05         1.13         1.13            0.84            0.78        85            22
+ 2025Q2                NEUTRAL      474       467          242        225                51.82         1.16         1.19            0.84            0.93       108            25
+ 2025Q2              PREFERRED       41        40           27         13                67.50         1.71         1.14            1.29            0.83        35            15
+ 2025Q3                  AVOID      393       383          153        230                39.95         1.00         1.36            0.75            0.98       105            63
+ 2025Q3                NEUTRAL     1073      1055          523        532                49.57         1.21         1.17            0.88            0.87       112            64
+ 2025Q3              PREFERRED      159       152           67         85                44.08         1.14         1.46            0.85            1.17        83            53
+ 2025Q4                  AVOID      471       457          231        226                50.55         1.47         1.23            1.00            0.86       110            62
+ 2025Q4                NEUTRAL     1090      1059          552        507                52.12         1.35         1.28            0.96            0.86       112            64
+ 2025Q4              PREFERRED      141       137           85         52                62.04         1.45         1.51            1.09            0.93        79            44
+ 2026Q1                  AVOID      331       325          155        170                47.69         1.34         1.55            1.00            1.15       109            57
+ 2026Q1                NEUTRAL     1060      1041          548        493                52.64         1.69         1.45            1.23            1.09       112            61
+ 2026Q1              PREFERRED      178       175          107         68                61.14         2.06         1.25            1.58            0.88        87            43
+ 2026Q2                  AVOID      389       380          163        217                42.89         1.63         1.76            1.20            1.19       108            60
+ 2026Q2                NEUTRAL     1074      1053          546        507                51.85         1.80         1.55            1.18            1.07       112            62
+ 2026Q2              PREFERRED      164       160           90         70                56.25         1.85         1.37            1.55            1.02        78            47
+ 2026Q3                  AVOID      296       282          117        165                41.49         1.60         1.48            1.14            1.13        96            41
+ 2026Q3                NEUTRAL      710       692          330        362                47.69         1.59         1.57            1.11            1.13       112            41
+ 2026Q3              PREFERRED       89        89           53         36                59.55         1.89         2.10            1.36            1.30        64            32
+
+QUARTERLY STATE SPREADS
+quarter  preferred_binary_n  neutral_binary_n  avoid_binary_n  preferred_ff_pct  neutral_ff_pct  avoid_ff_pct  preferred_minus_neutral_pp  neutral_minus_avoid_pp  preferred_minus_avoid_pp  strict_order_pass  missing_state
+ 2025Q2                  40               467             171             67.50           51.82         52.05                       15.68                   -0.23                     15.45              False          False
+ 2025Q3                 152              1055             383             44.08           49.57         39.95                       -5.49                    9.63                      4.13              False          False
+ 2025Q4                 137              1059             457             62.04           52.12         50.55                        9.92                    1.58                     11.50               True          False
+ 2026Q1                 175              1041             325             61.14           52.64         47.69                        8.50                    4.95                     13.45               True          False
+ 2026Q2                 160              1053             380             56.25           51.85         42.89                        4.40                    8.96                     13.36               True          False
+ 2026Q3                  89               692             282             59.55           47.69         41.49                       11.86                    6.20                     18.06               True          False
+
+Strict ordering pass: 4/6
+
+2025Q3 DIRECTION
+                  sample direction  total_n  binary_n  favorable_n  adverse_n  favorable_first_pct  avg_mfe_pct  avg_mae_pct  median_mfe_pct  median_mae_pct  symbol_n  trade_date_n
+                  2025Q3      BEAR      107       101           41         60                40.59         1.16         1.48            0.95            1.17        68            37
+                  2025Q3      BULL       52        51           26         25                50.98         1.10         1.43            0.68            1.23        43            16
+OTHER_PREFERRED_QUARTERS      BEAR      348       340          199        141                58.53         1.86         1.49            1.42            0.99       105           107
+OTHER_PREFERRED_QUARTERS      BULL      265       261          163         98                62.45         1.75         1.41            1.32            0.90       102            74
+
+2025Q3 FROZEN CONTEXT
+                     feature              state                   sample  share_of_sample_binary_pct  total_n  binary_n  favorable_n  adverse_n  favorable_first_pct  avg_mfe_pct  avg_mae_pct  median_mfe_pct  median_mae_pct  symbol_n  trade_date_n
+   market_prior_5d_consensus CONSENSUS_OPPOSING                   2025Q3                      100.00      152       152           67         85                44.08         1.09         1.43            0.82            1.16        81            53
+   market_prior_5d_consensus CONSENSUS_OPPOSING OTHER_PREFERRED_QUARTERS                      100.00      601       601          362        239                60.23         1.82         1.45            1.38            0.95       110           181
+  market_3idx_prior_5d_state     ALL_3_OPPOSING                   2025Q3                       77.63      118       118           54         64                45.76         1.05         1.48            0.79            1.18        75            42
+  market_3idx_prior_5d_state     ALL_3_OPPOSING OTHER_PREFERRED_QUARTERS                       78.04      469       469          281        188                59.91         1.75         1.49            1.32            0.96       110           143
+  market_3idx_prior_5d_state  MAJORITY_OPPOSING                   2025Q3                       22.37       34        34           13         21                38.24         1.21         1.28            1.14            1.09        29            11
+  market_3idx_prior_5d_state  MAJORITY_OPPOSING OTHER_PREFERRED_QUARTERS                       21.96      132       132           81         51                61.36         2.05         1.32            1.57            0.86        77            38
+relative_multi_horizon_state              MIXED                   2025Q3                       37.50       57        57           28         29                49.12         1.23         1.39            1.10            1.20        42            37
+relative_multi_horizon_state              MIXED OTHER_PREFERRED_QUARTERS                       33.11      199       199          125         74                62.81         1.80         1.53            1.39            1.00        91           112
+relative_multi_horizon_state   RELATIVE_ALIGNED                   2025Q3                       35.53       54        54           18         36                33.33         0.95         1.46            0.75            1.07        45            36
+relative_multi_horizon_state   RELATIVE_ALIGNED OTHER_PREFERRED_QUARTERS                       50.75      305       305          176        129                57.70         1.74         1.41            1.31            0.93       101           138
+relative_multi_horizon_state  RELATIVE_OPPOSING                   2025Q3                       26.97       41        41           21         20                51.22         1.07         1.46            0.68            1.23        34            26
+relative_multi_horizon_state  RELATIVE_OPPOSING OTHER_PREFERRED_QUARTERS                       16.14       97        97           61         36                62.89         2.09         1.41            1.55            0.87        60            66
+   session_level_clear_state      ALL_3_CLEARED                   2025Q3                      100.00      152       152           67         85                44.08         1.09         1.43            0.82            1.16        81            53
+   session_level_clear_state      ALL_3_CLEARED OTHER_PREFERRED_QUARTERS                      100.00      601       601          362        239                60.23         1.82         1.45            1.38            0.95       110           181
+            exhaustion_state           MULTIPLE                   2025Q3                       44.74       68        68           29         39                42.65         1.20         1.66            0.89            1.48        49            33
+            exhaustion_state           MULTIPLE OTHER_PREFERRED_QUARTERS                       42.93      258       258          145        113                56.20         2.13         1.71            1.64            1.24        91           130
+            exhaustion_state               NONE                   2025Q3                       38.82       59        59           26         33                44.07         0.97         1.09            0.76            0.82        46            36
+            exhaustion_state               NONE OTHER_PREFERRED_QUARTERS                       39.27      236       236          148         88                62.71         1.50         1.19            1.17            0.87        95           126
+            exhaustion_state                ONE                   2025Q3                       16.45       25        25           12         13                48.00         1.04         1.61            0.90            1.17        21            20
+            exhaustion_state                ONE OTHER_PREFERRED_QUARTERS                       17.80      107       107           69         38                64.49         1.77         1.39            1.40            0.81        70            75

@@ -1,0 +1,2477 @@
+[
+  {
+    "name": "15M_ORB_Post_Breakout_Research_Build_6_0_2_CSV_Export_VISIBILITY_FIX.pine",
+    "project": "orb",
+    "phase": "legacy",
+    "proposed_destination": "pine\\orb\\legacy\\15M_ORB_Post_Breakout_Research_Build_6_0_2_CSV_Export_VISIBILITY_FIX.pine",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "15M_ORB_Post_Breakout_Research_Build_6_0_V1_1_CSV_Export_FIX.pine",
+    "project": "orb",
+    "phase": "legacy",
+    "proposed_destination": "pine\\orb\\legacy\\15M_ORB_Post_Breakout_Research_Build_6_0_V1_1_CSV_Export_FIX.pine",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "15M_ORB_Post_Breakout_Research_Build_6_0_V1_CSV_Export.pine",
+    "project": "orb",
+    "phase": "legacy",
+    "proposed_destination": "pine\\orb\\legacy\\15M_ORB_Post_Breakout_Research_Build_6_0_V1_CSV_Export.pine",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "6_2.pine",
+    "project": "orb",
+    "phase": "legacy",
+    "proposed_destination": "pine\\orb\\legacy\\6_2.pine",
+    "reference_count": 7,
+    "references": "cleanup_tradingresearch_stage2.py | cleanup_tradingresearch_stage2_fixed.py | cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "a56_1g_raw_bar_audit_v1.py",
+    "project": "second1m",
+    "phase": "a37_a56",
+    "proposed_destination": "scripts\\second1m\\a37_a56\\a56_1g_raw_bar_audit_v1.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "acquire_second1m_alt_entry_dia.py",
+    "project": "second1m",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\second1m\\legacy\\acquire_second1m_alt_entry_dia.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "acquire_second1m_alt_entry_universe.py",
+    "project": "second1m",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\second1m\\legacy\\acquire_second1m_alt_entry_universe.py",
+    "reference_count": 13,
+    "references": "run_altc2_prospective_validation_v1.py | run_altc2_prospective_validation_v1_1.py | run_altc2_prospective_validation_v1_2.py | run_altc2_prospective_validation_v1_3.py | run_altc2_prospective_validation_v1_4.py | run_altc2_prospective_validation_v1_5.py | run_altc2_prospective_validation_v1_6.py | cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "Alternative_C2_AE2_Core_Parity_A56_1B_FIX1.pine",
+    "project": "second1m",
+    "phase": "ae2",
+    "proposed_destination": "pine\\second1m\\ae2\\Alternative_C2_AE2_Core_Parity_A56_1B_FIX1.pine",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "archive_second1m_market_benchmark_raw.py",
+    "project": "second1m",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\second1m\\legacy\\archive_second1m_market_benchmark_raw.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "audit_9m_2026_local_inventory.py",
+    "project": "pmpd",
+    "phase": "9m",
+    "proposed_destination": "scripts\\pmpd\\9m\\audit_9m_2026_local_inventory.py",
+    "reference_count": 8,
+    "references": "audit_9m_2026_symbol_partitions.py | audit_9m_2026_symbol_partitions_v2.py | cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "audit_9m_2026_symbol_partitions.py",
+    "project": "pmpd",
+    "phase": "9m",
+    "proposed_destination": "scripts\\pmpd\\9m\\audit_9m_2026_symbol_partitions.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "audit_9m_2026_symbol_partitions_v2.py",
+    "project": "pmpd",
+    "phase": "9m",
+    "proposed_destination": "scripts\\pmpd\\9m\\audit_9m_2026_symbol_partitions_v2.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "audit_9m_engine_interfaces.py",
+    "project": "pmpd",
+    "phase": "9m",
+    "proposed_destination": "scripts\\pmpd\\9m\\audit_9m_engine_interfaces.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "audit_9n_3i_24case_market_data_coverage.py",
+    "project": "pmpd",
+    "phase": "9n",
+    "proposed_destination": "scripts\\pmpd\\9n\\audit_9n_3i_24case_market_data_coverage.py",
+    "reference_count": 7,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt | research_outputs\\pmpd\\docs_history\\README_9N_3I.md",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "audit_9n_3j_alternate_market_data_sources.py",
+    "project": "pmpd",
+    "phase": "9n",
+    "proposed_destination": "scripts\\pmpd\\9n\\audit_9n_3j_alternate_market_data_sources.py",
+    "reference_count": 7,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt | research_outputs\\pmpd\\docs_history\\README_9N_3J.md",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "audit_9n_machine_readable_pine_export_interface_v1.py",
+    "project": "pmpd",
+    "phase": "9n",
+    "proposed_destination": "scripts\\pmpd\\9n\\audit_9n_machine_readable_pine_export_interface_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "audit_9n_preserved_tv_parity_evidence_v1.py",
+    "project": "pmpd",
+    "phase": "9n",
+    "proposed_destination": "scripts\\pmpd\\9n\\audit_9n_preserved_tv_parity_evidence_v1.py",
+    "reference_count": 7,
+    "references": "recover_9n_parity_reference_evidence_v1.py | cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_preserved_tv_parity_evidence_audit_v1.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "audit_9n_v4_runner_forensics.py",
+    "project": "pmpd",
+    "phase": "9n",
+    "proposed_destination": "scripts\\pmpd\\9n\\audit_9n_v4_runner_forensics.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_v4_runner_forensic_audit_v1.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "audit_a37_geometry_candidate_robustness_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\audit_a37_geometry_candidate_robustness_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "audit_a37_geometry_redundancy_interactions_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\audit_a37_geometry_redundancy_interactions_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "audit_a37_geometry_survivor_temporal_direction_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\audit_a37_geometry_survivor_temporal_direction_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "audit_a37_session_level_geometry_replication_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\audit_a37_session_level_geometry_replication_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "audit_a38_candidate_replication_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\audit_a38_candidate_replication_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "audit_a38_remaining_level_breakout_burden_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\audit_a38_remaining_level_breakout_burden_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "audit_a38_survivor_family_overlap_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\audit_a38_survivor_family_overlap_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "audit_a38_vs_a37_independence_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\audit_a38_vs_a37_independence_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "audit_a39_frozen_transition_buckets_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\audit_a39_frozen_transition_buckets_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "audit_a39_transition_candidate_robustness_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\audit_a39_transition_candidate_robustness_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "audit_a39_vwap_q3_exact_a37_independence_v1_1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\audit_a39_vwap_q3_exact_a37_independence_v1_1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "audit_a39_vwap_q3_exhaustion_independence_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\audit_a39_vwap_q3_exhaustion_independence_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "audit_a39_vwap_q3_exhaustion_independence_v1_1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\audit_a39_vwap_q3_exhaustion_independence_v1_1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "audit_a39_vwap_q3_prior_survivor_independence_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\audit_a39_vwap_q3_prior_survivor_independence_v1.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\second1m\\legacy_research\\a55_19_altc2_reference_logic_inventory.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "audit_a41_benchmark_opening_bar_parity_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\audit_a41_benchmark_opening_bar_parity_v1.py",
+    "reference_count": 7,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt | research_outputs\\pmpd\\9n\\pmpd_v5_9n_v4_implementation_preflight_v1.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "audit_a42_candidate_redundancy_a37_a38_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\audit_a42_candidate_redundancy_a37_a38_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "audit_a42_candidate_robustness_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\audit_a42_candidate_robustness_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "audit_a51_4_direction_quarter_distribution_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\audit_a51_4_direction_quarter_distribution_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "audit_a51_a39_bucket_artifact_integrity_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\audit_a51_a39_bucket_artifact_integrity_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "audit_a51_a39_original_bucket_semantics_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\audit_a51_a39_original_bucket_semantics_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "audit_a51_a39_summary_reproducibility_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\audit_a51_a39_summary_reproducibility_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "BUILD_6_1_0A_MTF_PARITY_PROBE.pine",
+    "project": "orb",
+    "phase": "legacy",
+    "proposed_destination": "pine\\orb\\legacy\\BUILD_6_1_0A_MTF_PARITY_PROBE.pine",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "BUILD_6_1_0_MTF_STRUCTURAL_RESEARCH_ENGINE.pine",
+    "project": "orb",
+    "phase": "legacy",
+    "proposed_destination": "pine\\orb\\legacy\\BUILD_6_1_0_MTF_STRUCTURAL_RESEARCH_ENGINE.pine",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "BUILD_6_1_1_MTF_STRUCTURAL_RESEARCH_ENGINE.pine",
+    "project": "orb",
+    "phase": "legacy",
+    "proposed_destination": "pine\\orb\\legacy\\BUILD_6_1_1_MTF_STRUCTURAL_RESEARCH_ENGINE.pine",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "BUILD_6_1_2_MTF_STRUCTURAL_RESEARCH_ENGINE.pine",
+    "project": "orb",
+    "phase": "legacy",
+    "proposed_destination": "pine\\orb\\legacy\\BUILD_6_1_2_MTF_STRUCTURAL_RESEARCH_ENGINE.pine",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "BUILD_6_1_3_MTF_STRUCTURAL_MARKET_CONTEXT.pine",
+    "project": "orb",
+    "phase": "legacy",
+    "proposed_destination": "pine\\orb\\legacy\\BUILD_6_1_3_MTF_STRUCTURAL_MARKET_CONTEXT.pine",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "build_9k_dp4_candidate_matrix_v1.py",
+    "project": "pmpd",
+    "phase": "9k",
+    "proposed_destination": "scripts\\pmpd\\9k\\build_9k_dp4_candidate_matrix_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "build_9m_oos_research_frames_v1.py",
+    "project": "pmpd",
+    "phase": "9m",
+    "proposed_destination": "scripts\\pmpd\\9m\\build_9m_oos_research_frames_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "build_a41_market_open_impulse_features_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\build_a41_market_open_impulse_features_v1.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "build_a42_predeclared_opening_location_features_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\build_a42_predeclared_opening_location_features_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "build_a43_predeclared_opening_relative_strength_features_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\build_a43_predeclared_opening_relative_strength_features_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "build_a44_predeclared_prior_day_structure_features_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\build_a44_predeclared_prior_day_structure_features_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "build_a45_predeclared_overnight_transition_features_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\build_a45_predeclared_overnight_transition_features_v1.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "build_a47_predeclared_entry_area_confluence_features_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\build_a47_predeclared_entry_area_confluence_features_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "build_a49_predeclared_opening_liquidity_features_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\build_a49_predeclared_opening_liquidity_features_v1.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\second1m\\legacy_research\\a55_19_altc2_reference_logic_inventory.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "build_a51_five_candidate_certified_matrix_and_independence_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\build_a51_five_candidate_certified_matrix_and_independence_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "build_a51_retained_v2_evidence_matrix_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\build_a51_retained_v2_evidence_matrix_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "build_a51_retained_v2_evidence_matrix_v2.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\build_a51_retained_v2_evidence_matrix_v2.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "build_a51_retained_v2_evidence_matrix_v3.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\build_a51_retained_v2_evidence_matrix_v3.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "build_a51_retained_v2_evidence_matrix_v4.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\build_a51_retained_v2_evidence_matrix_v4.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_v4_implementation_preflight_v1.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "build_a52_predeclared_v2_architecture_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\build_a52_predeclared_v2_architecture_v1.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\second1m\\legacy_research\\a55_19_altc2_reference_logic_inventory.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "build_a53_candidate_model_v2_prospective_protocol_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\build_a53_candidate_model_v2_prospective_protocol_v1.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_v4_runner_forensic_audit_v1.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "build_a56_1e_ae2_parity_test_set_v1.py",
+    "project": "second1m",
+    "phase": "ae2",
+    "proposed_destination": "scripts\\second1m\\ae2\\build_a56_1e_ae2_parity_test_set_v1.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_v4_implementation_preflight_v1.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "certify_9m_2026_timestamp_coverage.py",
+    "project": "pmpd",
+    "phase": "9m",
+    "proposed_destination": "scripts\\pmpd\\9m\\certify_9m_2026_timestamp_coverage.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "certify_9n_v4_engine_semantics_v2.py",
+    "project": "pmpd",
+    "phase": "9n",
+    "proposed_destination": "scripts\\pmpd\\9n\\certify_9n_v4_engine_semantics_v2.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "certify_9n_v4_reconstruction_static_v1.py",
+    "project": "pmpd",
+    "phase": "9n",
+    "proposed_destination": "scripts\\pmpd\\9n\\certify_9n_v4_reconstruction_static_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "certify_existing_v2.ps1",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\certify_existing_v2.ps1",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "certify_existing_v2.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\certify_existing_v2.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "certify_existing_v2_v2.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\certify_existing_v2_v2.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "certify_v2_full50.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\certify_v2_full50.py",
+    "reference_count": 6,
+    "references": "patch_certify_v2_full50_parity.py | cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "certify_v2_outcome_independence.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\certify_v2_outcome_independence.py",
+    "reference_count": 6,
+    "references": "patch_outcome_independence_comment_filter.py | cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "cleanup_tradingresearch_root.py",
+    "project": "utilities",
+    "phase": "misc",
+    "proposed_destination": "scripts\\utilities\\misc\\cleanup_tradingresearch_root.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "cleanup_tradingresearch_stage2.py",
+    "project": "utilities",
+    "phase": "misc",
+    "proposed_destination": "scripts\\utilities\\misc\\cleanup_tradingresearch_stage2.py",
+    "reference_count": 1,
+    "references": "cleanup_tradingresearch_stage2_fixed.py",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "cleanup_tradingresearch_stage2_fixed.py",
+    "project": "utilities",
+    "phase": "misc",
+    "proposed_destination": "scripts\\utilities\\misc\\cleanup_tradingresearch_stage2_fixed.py",
+    "reference_count": 0,
+    "references": "",
+    "move_status": "CANDIDATE_UNREFERENCED"
+  },
+  {
+    "name": "derive_and_certify_dp4_structural_clearance.py",
+    "project": "pmpd",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\pmpd\\legacy\\derive_and_certify_dp4_structural_clearance.py",
+    "reference_count": 8,
+    "references": "certify_v2_outcome_independence.py | patch_dp4_derivation_duplicate_decision_id.py | patch_dp4_derivation_timezone.py | cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "diagnose_9n_3h_vrtx_level_source.py",
+    "project": "pmpd",
+    "phase": "9n",
+    "proposed_destination": "scripts\\pmpd\\9n\\diagnose_9n_3h_vrtx_level_source.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "diagnose_a37_cluster_span_parity_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\diagnose_a37_cluster_span_parity_v1.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_v4_implementation_preflight_v1.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "diagnose_v2_export_schema.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\diagnose_v2_export_schema.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "diagnose_v2_runtime_vs_artifact.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\diagnose_v2_runtime_vs_artifact.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "diagnose_v2_runtime_vs_artifact_v2.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\diagnose_v2_runtime_vs_artifact_v2.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "evaluate_a52_frozen_v2_architecture_outcomes_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\evaluate_a52_frozen_v2_architecture_outcomes_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "evaluate_a52_v2_robustness_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\evaluate_a52_v2_robustness_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "extract_9n_v4_source_semantics_utf8_v1.py",
+    "project": "pmpd",
+    "phase": "9n",
+    "proposed_destination": "scripts\\pmpd\\9n\\extract_9n_v4_source_semantics_utf8_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "extract_9n_v4_source_semantics_v1.py",
+    "project": "pmpd",
+    "phase": "9n",
+    "proposed_destination": "scripts\\pmpd\\9n\\extract_9n_v4_source_semantics_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "extract_a51_a39_original_predictor_bucketing_scope_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\extract_a51_a39_original_predictor_bucketing_scope_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "extract_a51_original_frozen_candidate_definitions_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\extract_a51_original_frozen_candidate_definitions_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "find_altc2_latest_available_date_v1.py",
+    "project": "second1m",
+    "phase": "altc2",
+    "proposed_destination": "scripts\\second1m\\altc2\\find_altc2_latest_available_date_v1.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "find_vrtx_massive_partition.py",
+    "project": "market_data",
+    "phase": "utilities",
+    "proposed_destination": "scripts\\market_data\\utilities\\find_vrtx_massive_partition.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "freeze_9j_vwap_v2_validation_protocol.py",
+    "project": "pmpd",
+    "phase": "9j",
+    "proposed_destination": "scripts\\pmpd\\9j\\freeze_9j_vwap_v2_validation_protocol.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_v4_runner_forensic_audit_v1.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "freeze_9m_dp4_candidate_population_v1.py",
+    "project": "pmpd",
+    "phase": "9m",
+    "proposed_destination": "scripts\\pmpd\\9m\\freeze_9m_dp4_candidate_population_v1.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "freeze_a52_candidate_model_v2_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\freeze_a52_candidate_model_v2_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "FTHC_Bulk_Daily_Download.py",
+    "project": "second1m",
+    "phase": "fthc",
+    "proposed_destination": "scripts\\second1m\\fthc\\FTHC_Bulk_Daily_Download.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "FTHC_Bulk_Daily_Download_Missing12.py",
+    "project": "second1m",
+    "phase": "fthc",
+    "proposed_destination": "scripts\\second1m\\fthc\\FTHC_Bulk_Daily_Download_Missing12.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "import_second1m_market_reference.py",
+    "project": "second1m",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\second1m\\legacy\\import_second1m_market_reference.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "import_second_candle_intraday_1m.py",
+    "project": "second1m",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\second1m\\legacy\\import_second_candle_intraday_1m.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "initialize_altc2_prospective_validation_v1.py",
+    "project": "second1m",
+    "phase": "altc2",
+    "proposed_destination": "scripts\\second1m\\altc2\\initialize_altc2_prospective_validation_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "inspect_ae2_feature_schemas.py",
+    "project": "second1m",
+    "phase": "ae2",
+    "proposed_destination": "scripts\\second1m\\ae2\\inspect_ae2_feature_schemas.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "inspect_dp_structural_clearance_taxonomy.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\inspect_dp_structural_clearance_taxonomy.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "inspect_v2_build_assembly.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\inspect_v2_build_assembly.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "inspect_v4_parity_validation.py",
+    "project": "pmpd",
+    "phase": "v4",
+    "proposed_destination": "scripts\\pmpd\\v4\\inspect_v4_parity_validation.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "install_and_msft_preflight.ps1",
+    "project": "utilities",
+    "phase": "misc",
+    "proposed_destination": "scripts\\utilities\\misc\\install_and_msft_preflight.ps1",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "inventory_9n_3k_massive_pipeline.py",
+    "project": "pmpd",
+    "phase": "9n",
+    "proposed_destination": "scripts\\pmpd\\9n\\inventory_9n_3k_massive_pipeline.py",
+    "reference_count": 7,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt | research_outputs\\pmpd\\docs_history\\README_9N_3K.md",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "inventory_a39_a37_frozen_geometry_sources_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\inventory_a39_a37_frozen_geometry_sources_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "inventory_a39_c1_c2_transition_existing_evidence_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\inventory_a39_c1_c2_transition_existing_evidence_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "inventory_a40_intraday_timing_existing_evidence_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\inventory_a40_intraday_timing_existing_evidence_v1.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\second1m\\legacy_research\\a55_19_altc2_reference_logic_inventory.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "inventory_a41_benchmark_intraday_sources_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\inventory_a41_benchmark_intraday_sources_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "inventory_a41_market_open_impulse_existing_evidence_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\inventory_a41_market_open_impulse_existing_evidence_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "inventory_a42_opening_location_existing_evidence_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\inventory_a42_opening_location_existing_evidence_v1.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "inventory_a43_opening_relative_strength_existing_evidence_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\inventory_a43_opening_relative_strength_existing_evidence_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "inventory_a44_prior_day_structure_existing_evidence_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\inventory_a44_prior_day_structure_existing_evidence_v1.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "inventory_a45_prior_day_to_premarket_transition_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\inventory_a45_prior_day_to_premarket_transition_v1.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "inventory_a46_premarket_shape_existing_evidence_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\inventory_a46_premarket_shape_existing_evidence_v1.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "inventory_a47_entry_area_technical_confluence_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\inventory_a47_entry_area_technical_confluence_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "inventory_a48_remaining_roadmap_gap_audit_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\inventory_a48_remaining_roadmap_gap_audit_v1.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "inventory_a49_opening_liquidity_existing_evidence_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\inventory_a49_opening_liquidity_existing_evidence_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "inventory_a51_2_frozen_candidate_encodings_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\inventory_a51_2_frozen_candidate_encodings_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "inventory_a51_a39_event_source_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\inventory_a51_a39_event_source_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "inventory_a51_a39_frozen_cutpoints_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\inventory_a51_a39_frozen_cutpoints_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "inventory_a51_a39_frozen_encoding_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\inventory_a51_a39_frozen_encoding_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "inventory_a51_a39_preferred_source_values_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\inventory_a51_a39_preferred_source_values_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "inventory_a51_frozen_quintile_assignments_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\inventory_a51_frozen_quintile_assignments_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "inventory_a51_retained_v2_evidence_sources_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\inventory_a51_retained_v2_evidence_sources_v1.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\second1m\\legacy_research\\a55_19_altc2_reference_logic_inventory.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "inventory_a53_c1_level_timing_inputs_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\inventory_a53_c1_level_timing_inputs_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "inventory_a53_v2_prospective_scoring_sources_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\inventory_a53_v2_prospective_scoring_sources_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "inventory_a55_19_altc2_reference_logic_v1.py",
+    "project": "second1m",
+    "phase": "altc2",
+    "proposed_destination": "scripts\\second1m\\altc2\\inventory_a55_19_altc2_reference_logic_v1.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\second1m\\legacy_research\\a55_19_altc2_reference_logic_inventory.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "join_and_audit_frozen_9h_outcomes.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\join_and_audit_frozen_9h_outcomes.py",
+    "reference_count": 8,
+    "references": "patch_outcome_join_ambiguous_same_bar.py | patch_outcome_join_prefer_canonical_label.py | cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_v4_runner_forensic_audit_v1.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "MassiveAPI_Test.py",
+    "project": "market_data",
+    "phase": "utilities",
+    "proposed_destination": "scripts\\market_data\\utilities\\MassiveAPI_Test.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "Massive_Index_Candidate_Test.py",
+    "project": "market_data",
+    "phase": "utilities",
+    "proposed_destination": "scripts\\market_data\\utilities\\Massive_Index_Candidate_Test.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "Massive_Index_Test.py",
+    "project": "market_data",
+    "phase": "utilities",
+    "proposed_destination": "scripts\\market_data\\utilities\\Massive_Index_Test.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "Massive_Market_Validation.py",
+    "project": "market_data",
+    "phase": "utilities",
+    "proposed_destination": "scripts\\market_data\\utilities\\Massive_Market_Validation.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "OSI_1.0.0A_Parity.pine",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "pine\\utilities\\legacy\\OSI_1.0.0A_Parity.pine",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "OSI_1.0.0A_Parity_FIX1.pine",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "pine\\utilities\\legacy\\OSI_1.0.0A_Parity_FIX1.pine",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "OSI_1.0.0A_Parity_FIX2.pine",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "pine\\utilities\\legacy\\OSI_1.0.0A_Parity_FIX2.pine",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "OSI_1.0.0A_Parity_FIX3.pine",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "pine\\utilities\\legacy\\OSI_1.0.0A_Parity_FIX3.pine",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "OSI_1.0.0A_Parity_FIX4.pine",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "pine\\utilities\\legacy\\OSI_1.0.0A_Parity_FIX4.pine",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "OSI_1.0.0A_Parity_FIX5.pine",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "pine\\utilities\\legacy\\OSI_1.0.0A_Parity_FIX5.pine",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "OSI_1.0.0A_Parity_FIX6.pine",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "pine\\utilities\\legacy\\OSI_1.0.0A_Parity_FIX6.pine",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "OSI_1.0.0A_Parity_FIX7.pine",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "pine\\utilities\\legacy\\OSI_1.0.0A_Parity_FIX7.pine",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "OSI_1.0.0A_Parity_FIX8.pine",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "pine\\utilities\\legacy\\OSI_1.0.0A_Parity_FIX8.pine",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "OSI_1.0.0A_Parity_FIX9.pine",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "pine\\utilities\\legacy\\OSI_1.0.0A_Parity_FIX9.pine",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "parse_9n_3f_tradingview_csv.py",
+    "project": "pmpd",
+    "phase": "9n",
+    "proposed_destination": "scripts\\pmpd\\9n\\parse_9n_3f_tradingview_csv.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\docs_history\\README_9N_3F.md",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "patch_9k_discovery_bool_cast.py",
+    "project": "pmpd",
+    "phase": "9k",
+    "proposed_destination": "scripts\\pmpd\\9k\\patch_9k_discovery_bool_cast.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "patch_9n_3f2_compact_csv_parity.py",
+    "project": "pmpd",
+    "phase": "9n",
+    "proposed_destination": "scripts\\pmpd\\9n\\patch_9n_3f2_compact_csv_parity.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\docs_history\\README_9N_3F2.md",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "patch_9n_3f3_robust_compact_csv_parity.py",
+    "project": "pmpd",
+    "phase": "9n",
+    "proposed_destination": "scripts\\pmpd\\9n\\patch_9n_3f3_robust_compact_csv_parity.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\docs_history\\README_9N_3F3.md",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "patch_9n_3f4_data_window_csv_export.py",
+    "project": "pmpd",
+    "phase": "9n",
+    "proposed_destination": "scripts\\pmpd\\9n\\patch_9n_3f4_data_window_csv_export.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\docs_history\\README_9N_3F4.md",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "patch_9n_3f5_frozen_date_level_export.py",
+    "project": "pmpd",
+    "phase": "9n",
+    "proposed_destination": "scripts\\pmpd\\9n\\patch_9n_3f5_frozen_date_level_export.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\docs_history\\README_9N_3F5.md",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "patch_9n_3f_csv_parity_export.py",
+    "project": "pmpd",
+    "phase": "9n",
+    "proposed_destination": "scripts\\pmpd\\9n\\patch_9n_3f_csv_parity_export.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\docs_history\\README_9N_3F.md",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "patch_certify_v2_full50_parity.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\patch_certify_v2_full50_parity.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_v4_implementation_preflight_v1.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "patch_discovery_stage1_restrict_features.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\patch_discovery_stage1_restrict_features.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "patch_dp4_derivation_duplicate_decision_id.py",
+    "project": "pmpd",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\pmpd\\legacy\\patch_dp4_derivation_duplicate_decision_id.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "patch_dp4_derivation_timezone.py",
+    "project": "pmpd",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\pmpd\\legacy\\patch_dp4_derivation_timezone.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "patch_outcome_independence_comment_filter.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\patch_outcome_independence_comment_filter.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "patch_outcome_join_ambiguous_same_bar.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\patch_outcome_join_ambiguous_same_bar.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_v4_runner_forensic_audit_v1.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "patch_outcome_join_prefer_canonical_label.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\patch_outcome_join_prefer_canonical_label.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_v4_runner_forensic_audit_v1.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "patch_validation_robustness_block_repair_v3.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\patch_validation_robustness_block_repair_v3.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "patch_validation_robustness_corr_scope_v2.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\patch_validation_robustness_corr_scope_v2.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "patch_validation_robustness_no_scipy.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\patch_validation_robustness_no_scipy.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "PM + PD Breakout Monitor - V4 8H-7 Parity Capture.pine",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "pine\\utilities\\legacy\\PM + PD Breakout Monitor - V4 8H-7 Parity Capture.pine",
+    "reference_count": 7,
+    "references": "extract_9n_v4_source_semantics_utf8_v1.py | extract_9n_v4_source_semantics_v1.py | cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "PM + PD Breakout Monitor - V4 Forward Validation FINAL.pine",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "pine\\utilities\\legacy\\PM + PD Breakout Monitor - V4 Forward Validation FINAL.pine",
+    "reference_count": 7,
+    "references": "extract_9n_v4_source_semantics_utf8_v1.py | extract_9n_v4_source_semantics_v1.py | cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "PMPD_8H7B2A_PARITY_CLASSIFICATION_PATCH.pine",
+    "project": "pmpd",
+    "phase": "v4",
+    "proposed_destination": "pine\\pmpd\\v4\\PMPD_8H7B2A_PARITY_CLASSIFICATION_PATCH.pine",
+    "reference_count": 10,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\PMPD_V4_9N_3D_TRADINGVIEW_RECAPTURE_GUIDE.md | research_outputs\\pmpd\\9n\\pmpd_v5_9n_preserved_tv_parity_evidence_audit_v1.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_v4_implementation_preflight_v1.json | research_outputs\\pmpd\\docs_history\\README_8H7B2A.md | research_outputs\\pmpd\\v4\\PMPD_V4_PARITY_RECAPTURE_24_V1.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "pmpd_v5_9j_vwap_event_path_v2.py",
+    "project": "pmpd",
+    "phase": "9j",
+    "proposed_destination": "scripts\\pmpd\\9j\\pmpd_v5_9j_vwap_event_path_v2.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "PM_PD_Breakout_V4_8H7_Parity_Capture.pine",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "pine\\utilities\\legacy\\PM_PD_Breakout_V4_8H7_Parity_Capture.pine",
+    "reference_count": 8,
+    "references": "certify_9n_v4_engine_semantics_v2.py | extract_9n_v4_source_semantics_utf8_v1.py | extract_9n_v4_source_semantics_v1.py | cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "PM_PD_Breakout_V4_8H7_Parity_Capture_FULL.pine",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "pine\\utilities\\legacy\\PM_PD_Breakout_V4_8H7_Parity_Capture_FULL.pine",
+    "reference_count": 13,
+    "references": "certify_9n_v4_engine_semantics_v2.py | extract_9n_v4_source_semantics_utf8_v1.py | extract_9n_v4_source_semantics_v1.py | inspect_v4_parity_validation.py | patch_9n_3f2_compact_csv_parity.py | patch_9n_3f3_robust_compact_csv_parity.py | patch_9n_3f_csv_parity_export.py | cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3d_b2_v4_source_semantics_utf8_v1.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "PM_PD_Breakout_V4_8H7_Parity_Capture_PRE_PATCH_BACKUP.pine",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "pine\\utilities\\legacy\\PM_PD_Breakout_V4_8H7_Parity_Capture_PRE_PATCH_BACKUP.pine",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "PM_PD_Breakout_V4_8H7_Parity_Capture_PRE_SYMBOL_GUARD.pine",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "pine\\utilities\\legacy\\PM_PD_Breakout_V4_8H7_Parity_Capture_PRE_SYMBOL_GUARD.pine",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "PM_PD_Breakout_V4_9N_3F3_COMPACT_CSV_Parity_Export.pine",
+    "project": "pmpd",
+    "phase": "9n",
+    "proposed_destination": "pine\\pmpd\\9n\\PM_PD_Breakout_V4_9N_3F3_COMPACT_CSV_Parity_Export.pine",
+    "reference_count": 8,
+    "references": "patch_9n_3f3_robust_compact_csv_parity.py | patch_9n_3f4_data_window_csv_export.py | cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\docs_history\\README_9N_3F3.md",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "PM_PD_Breakout_V4_9N_3F4_DATA_WINDOW_CSV_Parity_Export.pine",
+    "project": "pmpd",
+    "phase": "9n",
+    "proposed_destination": "pine\\pmpd\\9n\\PM_PD_Breakout_V4_9N_3F4_DATA_WINDOW_CSV_Parity_Export.pine",
+    "reference_count": 8,
+    "references": "patch_9n_3f4_data_window_csv_export.py | patch_9n_3f5_frozen_date_level_export.py | cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\docs_history\\README_9N_3F4.md",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "PM_PD_Breakout_V4_9N_3F5_FROZEN_DATE_LEVEL_CSV_Parity_Export.pine",
+    "project": "pmpd",
+    "phase": "9n",
+    "proposed_destination": "pine\\pmpd\\9n\\PM_PD_Breakout_V4_9N_3F5_FROZEN_DATE_LEVEL_CSV_Parity_Export.pine",
+    "reference_count": 7,
+    "references": "patch_9n_3f5_frozen_date_level_export.py | cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\docs_history\\README_9N_3F5.md",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "PM_PD_Breakout_V4_9N_3F_CSV_Parity_Export.pine",
+    "project": "pmpd",
+    "phase": "9n",
+    "proposed_destination": "pine\\pmpd\\9n\\PM_PD_Breakout_V4_9N_3F_CSV_Parity_Export.pine",
+    "reference_count": 7,
+    "references": "patch_9n_3f_csv_parity_export.py | cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\docs_history\\README_9N_3F.md",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "preflight_9k_dp4_candidate_matrix.py",
+    "project": "pmpd",
+    "phase": "9k",
+    "proposed_destination": "scripts\\pmpd\\9k\\preflight_9k_dp4_candidate_matrix.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "preflight_9m_dp4_candidate_extraction.py",
+    "project": "pmpd",
+    "phase": "9m",
+    "proposed_destination": "scripts\\pmpd\\9m\\preflight_9m_dp4_candidate_extraction.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "preflight_9m_oos_engine.py",
+    "project": "pmpd",
+    "phase": "9m",
+    "proposed_destination": "scripts\\pmpd\\9m\\preflight_9m_oos_engine.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "preflight_9n_v4_implementation.py",
+    "project": "pmpd",
+    "phase": "9n",
+    "proposed_destination": "scripts\\pmpd\\9n\\preflight_9n_v4_implementation.py",
+    "reference_count": 7,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_v4_implementation_preflight_v1.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_v4_runner_forensic_audit_v1.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "probe_9n_3l_vrtx_live_vendor_vs_cache.py",
+    "project": "pmpd",
+    "phase": "9n",
+    "proposed_destination": "scripts\\pmpd\\9n\\probe_9n_3l_vrtx_live_vendor_vs_cache.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\docs_history\\README_9N_3L.md",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "recover_9n_parity_reference_evidence_v1.py",
+    "project": "pmpd",
+    "phase": "9n",
+    "proposed_destination": "scripts\\pmpd\\9n\\recover_9n_parity_reference_evidence_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "report_a53_v2_prospective_checkpoint_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\report_a53_v2_prospective_checkpoint_v1.py",
+    "reference_count": 6,
+    "references": "update_altc2_prospective_v1_v2.py | cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "report_altc2_prospective_checkpoint_v1.py",
+    "project": "second1m",
+    "phase": "altc2",
+    "proposed_destination": "scripts\\second1m\\altc2\\report_altc2_prospective_checkpoint_v1.py",
+    "reference_count": 6,
+    "references": "update_altc2_prospective_v1.py | cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "rerun_full_v2_current_core.ps1",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\rerun_full_v2_current_core.ps1",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "research_a39_predeclared_transition_screen_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\research_a39_predeclared_transition_screen_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "research_a39_predeclared_transition_screen_v1_1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\research_a39_predeclared_transition_screen_v1_1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "research_a39_predeclared_transition_screen_v1_2.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\research_a39_predeclared_transition_screen_v1_2.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "research_a41_predeclared_market_open_state_screen_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\research_a41_predeclared_market_open_state_screen_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "research_a42_discovery_frozen_quintile_screen_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\research_a42_discovery_frozen_quintile_screen_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "research_a43_discovery_frozen_quintile_screen_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\research_a43_discovery_frozen_quintile_screen_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "research_a44_discovery_frozen_quintile_screen_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\research_a44_discovery_frozen_quintile_screen_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "research_a45_predeclared_path_state_screen_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\research_a45_predeclared_path_state_screen_v1.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "research_a47_discovery_frozen_confluence_quintile_screen_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\research_a47_discovery_frozen_confluence_quintile_screen_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "research_a49_discovery_frozen_opening_liquidity_quintile_screen_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\research_a49_discovery_frozen_opening_liquidity_quintile_screen_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "research_second1m_ae2_c2_predictors_v1.py",
+    "project": "second1m",
+    "phase": "ae2",
+    "proposed_destination": "scripts\\second1m\\ae2\\research_second1m_ae2_c2_predictors_v1.py",
+    "reference_count": 15,
+    "references": "extract_a51_a39_original_predictor_bucketing_scope_v1.py | run_altc2_prospective_validation_v1.py | run_altc2_prospective_validation_v1_1.py | run_altc2_prospective_validation_v1_2.py | run_altc2_prospective_validation_v1_3.py | run_altc2_prospective_validation_v1_4.py | run_altc2_prospective_validation_v1_5.py | run_altc2_prospective_validation_v1_6.py | cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\second1m\\legacy_research\\a55_19_altc2_reference_logic_inventory.txt | research_outputs\\second1m\\legacy_research\\altc2_prospective_run_2026-09-03_v1_6.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "research_second1m_ae2_calendar_v1.py",
+    "project": "second1m",
+    "phase": "ae2",
+    "proposed_destination": "scripts\\second1m\\ae2\\research_second1m_ae2_calendar_v1.py",
+    "reference_count": 8,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt | research_outputs\\pmpd\\9n\\pmpd_v5_9n_v4_runner_forensic_audit_v1.json | research_outputs\\second1m\\legacy_research\\a55_19_altc2_reference_logic_inventory.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "research_second1m_ae2_candidate_models_v1.py",
+    "project": "second1m",
+    "phase": "ae2",
+    "proposed_destination": "scripts\\second1m\\ae2\\research_second1m_ae2_candidate_models_v1.py",
+    "reference_count": 7,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_v4_runner_forensic_audit_v1.json | research_outputs\\second1m\\legacy_research\\a55_19_altc2_reference_logic_inventory.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "research_second1m_ae2_daily_trend_v1.py",
+    "project": "second1m",
+    "phase": "ae2",
+    "proposed_destination": "scripts\\second1m\\ae2\\research_second1m_ae2_daily_trend_v1.py",
+    "reference_count": 16,
+    "references": "run_altc2_prospective_validation_v1.py | run_altc2_prospective_validation_v1_1.py | run_altc2_prospective_validation_v1_2.py | run_altc2_prospective_validation_v1_3.py | run_altc2_prospective_validation_v1_4.py | run_altc2_prospective_validation_v1_5.py | run_altc2_prospective_validation_v1_6.py | cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt | research_outputs\\pmpd\\9n\\pmpd_v5_9n_v4_runner_forensic_audit_v1.json | research_outputs\\second1m\\legacy_research\\a55_19_altc2_reference_logic_inventory.txt | research_outputs\\second1m\\legacy_research\\altc2_prospective_run_2026-09-03_v1_6.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "research_second1m_ae2_final_temporal_audit_v1.py",
+    "project": "second1m",
+    "phase": "ae2",
+    "proposed_destination": "scripts\\second1m\\ae2\\research_second1m_ae2_final_temporal_audit_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "research_second1m_ae2_interactions_v1.py",
+    "project": "second1m",
+    "phase": "ae2",
+    "proposed_destination": "scripts\\second1m\\ae2\\research_second1m_ae2_interactions_v1.py",
+    "reference_count": 8,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt | research_outputs\\pmpd\\9n\\pmpd_v5_9n_v4_runner_forensic_audit_v1.json | research_outputs\\second1m\\legacy_research\\a55_19_altc2_reference_logic_inventory.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "research_second1m_ae2_interaction_promotion_v1.py",
+    "project": "second1m",
+    "phase": "ae2",
+    "proposed_destination": "scripts\\second1m\\ae2\\research_second1m_ae2_interaction_promotion_v1.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\second1m\\legacy_research\\a55_19_altc2_reference_logic_inventory.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "research_second1m_ae2_market_regime_robustness_v1.py",
+    "project": "second1m",
+    "phase": "ae2",
+    "proposed_destination": "scripts\\second1m\\ae2\\research_second1m_ae2_market_regime_robustness_v1.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_v4_runner_forensic_audit_v1.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "research_second1m_ae2_market_regime_v1.py",
+    "project": "second1m",
+    "phase": "ae2",
+    "proposed_destination": "scripts\\second1m\\ae2\\research_second1m_ae2_market_regime_v1.py",
+    "reference_count": 15,
+    "references": "run_altc2_prospective_validation_v1.py | run_altc2_prospective_validation_v1_1.py | run_altc2_prospective_validation_v1_2.py | run_altc2_prospective_validation_v1_3.py | run_altc2_prospective_validation_v1_4.py | run_altc2_prospective_validation_v1_5.py | run_altc2_prospective_validation_v1_6.py | cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt | research_outputs\\pmpd\\9n\\pmpd_v5_9n_v4_runner_forensic_audit_v1.json | research_outputs\\second1m\\legacy_research\\altc2_prospective_run_2026-09-03_v1_6.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "research_second1m_ae2_ma_context_v1.py",
+    "project": "second1m",
+    "phase": "ae2",
+    "proposed_destination": "scripts\\second1m\\ae2\\research_second1m_ae2_ma_context_v1.py",
+    "reference_count": 16,
+    "references": "run_altc2_prospective_validation_v1.py | run_altc2_prospective_validation_v1_1.py | run_altc2_prospective_validation_v1_2.py | run_altc2_prospective_validation_v1_3.py | run_altc2_prospective_validation_v1_4.py | run_altc2_prospective_validation_v1_5.py | run_altc2_prospective_validation_v1_6.py | cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt | research_outputs\\pmpd\\9n\\pmpd_v5_9n_v4_runner_forensic_audit_v1.json | research_outputs\\second1m\\legacy_research\\a55_19_altc2_reference_logic_inventory.txt | research_outputs\\second1m\\legacy_research\\altc2_prospective_run_2026-09-03_v1_6.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "research_second1m_ae2_opening_volume_v1.py",
+    "project": "second1m",
+    "phase": "ae2",
+    "proposed_destination": "scripts\\second1m\\ae2\\research_second1m_ae2_opening_volume_v1.py",
+    "reference_count": 15,
+    "references": "run_altc2_prospective_validation_v1.py | run_altc2_prospective_validation_v1_1.py | run_altc2_prospective_validation_v1_2.py | run_altc2_prospective_validation_v1_3.py | run_altc2_prospective_validation_v1_4.py | run_altc2_prospective_validation_v1_5.py | run_altc2_prospective_validation_v1_6.py | cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt | research_outputs\\pmpd\\9n\\pmpd_v5_9n_v4_runner_forensic_audit_v1.json | research_outputs\\second1m\\legacy_research\\altc2_prospective_run_2026-09-03_v1_6.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "research_second1m_ae2_postsignal_paths_v1.py",
+    "project": "second1m",
+    "phase": "ae2",
+    "proposed_destination": "scripts\\second1m\\ae2\\research_second1m_ae2_postsignal_paths_v1.py",
+    "reference_count": 8,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt | research_outputs\\pmpd\\9n\\pmpd_v5_9n_v4_runner_forensic_audit_v1.json | research_outputs\\second1m\\legacy_research\\a55_19_altc2_reference_logic_inventory.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "research_second1m_ae2_preferred_level_timing_v1.py",
+    "project": "second1m",
+    "phase": "ae2",
+    "proposed_destination": "scripts\\second1m\\ae2\\research_second1m_ae2_preferred_level_timing_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "research_second1m_ae2_premarket_context_v1.py",
+    "project": "second1m",
+    "phase": "ae2",
+    "proposed_destination": "scripts\\second1m\\ae2\\research_second1m_ae2_premarket_context_v1.py",
+    "reference_count": 8,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt | research_outputs\\pmpd\\9n\\pmpd_v5_9n_v4_runner_forensic_audit_v1.json | research_outputs\\second1m\\legacy_research\\a55_19_altc2_reference_logic_inventory.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "research_second1m_ae2_premarket_robustness_v1.py",
+    "project": "second1m",
+    "phase": "ae2",
+    "proposed_destination": "scripts\\second1m\\ae2\\research_second1m_ae2_premarket_robustness_v1.py",
+    "reference_count": 7,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt | research_outputs\\pmpd\\9n\\pmpd_v5_9n_v4_runner_forensic_audit_v1.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "research_second1m_ae2_relative_strength_robustness_v1.py",
+    "project": "second1m",
+    "phase": "ae2",
+    "proposed_destination": "scripts\\second1m\\ae2\\research_second1m_ae2_relative_strength_robustness_v1.py",
+    "reference_count": 14,
+    "references": "run_altc2_prospective_validation_v1.py | run_altc2_prospective_validation_v1_1.py | run_altc2_prospective_validation_v1_2.py | run_altc2_prospective_validation_v1_3.py | run_altc2_prospective_validation_v1_4.py | run_altc2_prospective_validation_v1_5.py | run_altc2_prospective_validation_v1_6.py | cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_v4_runner_forensic_audit_v1.json | research_outputs\\second1m\\legacy_research\\altc2_prospective_run_2026-09-03_v1_6.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "research_second1m_ae2_relative_strength_v1.py",
+    "project": "second1m",
+    "phase": "ae2",
+    "proposed_destination": "scripts\\second1m\\ae2\\research_second1m_ae2_relative_strength_v1.py",
+    "reference_count": 14,
+    "references": "run_altc2_prospective_validation_v1.py | run_altc2_prospective_validation_v1_1.py | run_altc2_prospective_validation_v1_2.py | run_altc2_prospective_validation_v1_3.py | run_altc2_prospective_validation_v1_4.py | run_altc2_prospective_validation_v1_5.py | run_altc2_prospective_validation_v1_6.py | cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_v4_runner_forensic_audit_v1.json | research_outputs\\second1m\\legacy_research\\altc2_prospective_run_2026-09-03_v1_6.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "research_second1m_ae2_robustness_v1.py",
+    "project": "second1m",
+    "phase": "ae2",
+    "proposed_destination": "scripts\\second1m\\ae2\\research_second1m_ae2_robustness_v1.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_v4_runner_forensic_audit_v1.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "research_second1m_ae2_session_levels_robustness_v1.py",
+    "project": "second1m",
+    "phase": "ae2",
+    "proposed_destination": "scripts\\second1m\\ae2\\research_second1m_ae2_session_levels_robustness_v1.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_v4_runner_forensic_audit_v1.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "research_second1m_ae2_session_levels_v1.py",
+    "project": "second1m",
+    "phase": "ae2",
+    "proposed_destination": "scripts\\second1m\\ae2\\research_second1m_ae2_session_levels_v1.py",
+    "reference_count": 16,
+    "references": "run_altc2_prospective_validation_v1.py | run_altc2_prospective_validation_v1_1.py | run_altc2_prospective_validation_v1_2.py | run_altc2_prospective_validation_v1_3.py | run_altc2_prospective_validation_v1_4.py | run_altc2_prospective_validation_v1_5.py | run_altc2_prospective_validation_v1_6.py | cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt | research_outputs\\pmpd\\9n\\pmpd_v5_9n_v4_runner_forensic_audit_v1.json | research_outputs\\second1m\\legacy_research\\a55_19_altc2_reference_logic_inventory.txt | research_outputs\\second1m\\legacy_research\\altc2_prospective_run_2026-09-03_v1_6.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "research_second1m_ae2_session_level_geometry_v1.py",
+    "project": "second1m",
+    "phase": "ae2",
+    "proposed_destination": "scripts\\second1m\\ae2\\research_second1m_ae2_session_level_geometry_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "research_second1m_ae2_session_level_geometry_v1_1.py",
+    "project": "second1m",
+    "phase": "ae2",
+    "proposed_destination": "scripts\\second1m\\ae2\\research_second1m_ae2_session_level_geometry_v1_1.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\second1m\\legacy_research\\a55_19_altc2_reference_logic_inventory.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "research_second1m_ae2_short_ma_warning_v1.py",
+    "project": "second1m",
+    "phase": "ae2",
+    "proposed_destination": "scripts\\second1m\\ae2\\research_second1m_ae2_short_ma_warning_v1.py",
+    "reference_count": 15,
+    "references": "run_altc2_prospective_validation_v1.py | run_altc2_prospective_validation_v1_1.py | run_altc2_prospective_validation_v1_2.py | run_altc2_prospective_validation_v1_3.py | run_altc2_prospective_validation_v1_4.py | run_altc2_prospective_validation_v1_5.py | run_altc2_prospective_validation_v1_6.py | cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt | research_outputs\\pmpd\\9n\\pmpd_v5_9n_v4_runner_forensic_audit_v1.json | research_outputs\\second1m\\legacy_research\\altc2_prospective_run_2026-09-03_v1_6.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "research_second1m_ae2_three_index_regime_v1.py",
+    "project": "second1m",
+    "phase": "ae2",
+    "proposed_destination": "scripts\\second1m\\ae2\\research_second1m_ae2_three_index_regime_v1.py",
+    "reference_count": 15,
+    "references": "run_altc2_prospective_validation_v1.py | run_altc2_prospective_validation_v1_1.py | run_altc2_prospective_validation_v1_2.py | run_altc2_prospective_validation_v1_3.py | run_altc2_prospective_validation_v1_4.py | run_altc2_prospective_validation_v1_5.py | run_altc2_prospective_validation_v1_6.py | cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt | research_outputs\\pmpd\\9n\\pmpd_v5_9n_v4_runner_forensic_audit_v1.json | research_outputs\\second1m\\legacy_research\\altc2_prospective_run_2026-09-03_v1_6.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "research_second1m_ae2_trend_exhaustion_robustness_v1.py",
+    "project": "second1m",
+    "phase": "ae2",
+    "proposed_destination": "scripts\\second1m\\ae2\\research_second1m_ae2_trend_exhaustion_robustness_v1.py",
+    "reference_count": 14,
+    "references": "run_altc2_prospective_validation_v1.py | run_altc2_prospective_validation_v1_1.py | run_altc2_prospective_validation_v1_2.py | run_altc2_prospective_validation_v1_3.py | run_altc2_prospective_validation_v1_4.py | run_altc2_prospective_validation_v1_5.py | run_altc2_prospective_validation_v1_6.py | cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_v4_runner_forensic_audit_v1.json | research_outputs\\second1m\\legacy_research\\altc2_prospective_run_2026-09-03_v1_6.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "research_second1m_ae2_volume_robustness_v1.py",
+    "project": "second1m",
+    "phase": "ae2",
+    "proposed_destination": "scripts\\second1m\\ae2\\research_second1m_ae2_volume_robustness_v1.py",
+    "reference_count": 14,
+    "references": "run_altc2_prospective_validation_v1.py | run_altc2_prospective_validation_v1_1.py | run_altc2_prospective_validation_v1_2.py | run_altc2_prospective_validation_v1_3.py | run_altc2_prospective_validation_v1_4.py | run_altc2_prospective_validation_v1_5.py | run_altc2_prospective_validation_v1_6.py | cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_v4_runner_forensic_audit_v1.json | research_outputs\\second1m\\legacy_research\\altc2_prospective_run_2026-09-03_v1_6.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "research_second1m_ae2_warning_context_v1.py",
+    "project": "second1m",
+    "phase": "ae2",
+    "proposed_destination": "scripts\\second1m\\ae2\\research_second1m_ae2_warning_context_v1.py",
+    "reference_count": 8,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt | research_outputs\\pmpd\\9n\\pmpd_v5_9n_v4_runner_forensic_audit_v1.json | research_outputs\\second1m\\legacy_research\\a55_19_altc2_reference_logic_inventory.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "research_second1m_ae2_warning_exit_utility_v1.py",
+    "project": "second1m",
+    "phase": "ae2",
+    "proposed_destination": "scripts\\second1m\\ae2\\research_second1m_ae2_warning_exit_utility_v1.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\second1m\\legacy_research\\a55_19_altc2_reference_logic_inventory.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "research_second1m_ae2_warning_timing_v1.py",
+    "project": "second1m",
+    "phase": "ae2",
+    "proposed_destination": "scripts\\second1m\\ae2\\research_second1m_ae2_warning_timing_v1.py",
+    "reference_count": 7,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_v4_runner_forensic_audit_v1.json | research_outputs\\second1m\\legacy_research\\a55_19_altc2_reference_logic_inventory.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "research_second1m_ae2_weekly_trend_v1.py",
+    "project": "second1m",
+    "phase": "ae2",
+    "proposed_destination": "scripts\\second1m\\ae2\\research_second1m_ae2_weekly_trend_v1.py",
+    "reference_count": 15,
+    "references": "run_altc2_prospective_validation_v1.py | run_altc2_prospective_validation_v1_1.py | run_altc2_prospective_validation_v1_2.py | run_altc2_prospective_validation_v1_3.py | run_altc2_prospective_validation_v1_4.py | run_altc2_prospective_validation_v1_5.py | run_altc2_prospective_validation_v1_6.py | cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt | research_outputs\\pmpd\\9n\\pmpd_v5_9n_v4_runner_forensic_audit_v1.json | research_outputs\\second1m\\legacy_research\\altc2_prospective_run_2026-09-03_v1_6.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "research_second1m_alt_entry_v1.py",
+    "project": "second1m",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\second1m\\legacy\\research_second1m_alt_entry_v1.py",
+    "reference_count": 16,
+    "references": "run_altc2_prospective_validation_v1.py | run_altc2_prospective_validation_v1_1.py | run_altc2_prospective_validation_v1_2.py | run_altc2_prospective_validation_v1_3.py | run_altc2_prospective_validation_v1_4.py | run_altc2_prospective_validation_v1_5.py | run_altc2_prospective_validation_v1_6.py | cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt | research_outputs\\pmpd\\9n\\pmpd_v5_9n_v4_runner_forensic_audit_v1.json | research_outputs\\second1m\\legacy_research\\a55_19_altc2_reference_logic_inventory.txt | research_outputs\\second1m\\legacy_research\\altc2_prospective_run_2026-09-03_v1_6.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "run_9j_vwap_v2_discovery_stage1.py",
+    "project": "pmpd",
+    "phase": "9j",
+    "proposed_destination": "scripts\\pmpd\\9j\\run_9j_vwap_v2_discovery_stage1.py",
+    "reference_count": 7,
+    "references": "patch_discovery_stage1_restrict_features.py | cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_v4_runner_forensic_audit_v1.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "run_9j_vwap_v2_frozen_validation.py",
+    "project": "pmpd",
+    "phase": "9j",
+    "proposed_destination": "scripts\\pmpd\\9j\\run_9j_vwap_v2_frozen_validation.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_v4_runner_forensic_audit_v1.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "run_9k_classifier_discovery_v1.py",
+    "project": "pmpd",
+    "phase": "9k",
+    "proposed_destination": "scripts\\pmpd\\9k\\run_9k_classifier_discovery_v1.py",
+    "reference_count": 6,
+    "references": "patch_9k_discovery_bool_cast.py | cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "run_9k_frozen_ablation_v1.py",
+    "project": "pmpd",
+    "phase": "9k",
+    "proposed_destination": "scripts\\pmpd\\9k\\run_9k_frozen_ablation_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "run_9k_frozen_validation_v1.py",
+    "project": "pmpd",
+    "phase": "9k",
+    "proposed_destination": "scripts\\pmpd\\9k\\run_9k_frozen_validation_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "run_9m_frozen_oos_evaluation_v1.py",
+    "project": "pmpd",
+    "phase": "9m",
+    "proposed_destination": "scripts\\pmpd\\9m\\run_9m_frozen_oos_evaluation_v1.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_v4_runner_forensic_audit_v1.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "run_9n_3g2_vrtx_first_parity_case.py",
+    "project": "pmpd",
+    "phase": "9n",
+    "proposed_destination": "scripts\\pmpd\\9n\\run_9n_3g2_vrtx_first_parity_case.py",
+    "reference_count": 7,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt | research_outputs\\pmpd\\docs_history\\README_9N_3G2.md",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "run_9n_3g3_vrtx_first_parity_case.py",
+    "project": "pmpd",
+    "phase": "9n",
+    "proposed_destination": "scripts\\pmpd\\9n\\run_9n_3g3_vrtx_first_parity_case.py",
+    "reference_count": 7,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt | research_outputs\\pmpd\\docs_history\\README_9N_3G3.md",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "run_9n_3g4_vrtx_first_parity_case.py",
+    "project": "pmpd",
+    "phase": "9n",
+    "proposed_destination": "scripts\\pmpd\\9n\\run_9n_3g4_vrtx_first_parity_case.py",
+    "reference_count": 7,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt | research_outputs\\pmpd\\docs_history\\README_9N_3G4.md",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "run_9n_3g_vrtx_first_parity_case.py",
+    "project": "pmpd",
+    "phase": "9n",
+    "proposed_destination": "scripts\\pmpd\\9n\\run_9n_3g_vrtx_first_parity_case.py",
+    "reference_count": 7,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt | research_outputs\\pmpd\\docs_history\\README_9N_3G.md",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "run_9n_3m_24case_python_baseline.py",
+    "project": "pmpd",
+    "phase": "9n",
+    "proposed_destination": "scripts\\pmpd\\9n\\run_9n_3m_24case_python_baseline.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\docs_history\\README_9N_3M.md",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "run_9n_3q_pine_pm_counterfactual.py",
+    "project": "pmpd",
+    "phase": "9n",
+    "proposed_destination": "scripts\\pmpd\\9n\\run_9n_3q_pine_pm_counterfactual.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\docs_history\\README_9N_3Q.md",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "run_9n_3r_h2h_preflight.py",
+    "project": "pmpd",
+    "phase": "9n",
+    "proposed_destination": "scripts\\pmpd\\9n\\run_9n_3r_h2h_preflight.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\docs_history\\README_9N_3R.md",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "run_9n_3s2_final_h2h.py",
+    "project": "pmpd",
+    "phase": "9n",
+    "proposed_destination": "scripts\\pmpd\\9n\\run_9n_3s2_final_h2h.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\docs_history\\README_9N_3S2.md",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "run_9n_3s_final_h2h.py",
+    "project": "pmpd",
+    "phase": "9n",
+    "proposed_destination": "scripts\\pmpd\\9n\\run_9n_3s_final_h2h.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\docs_history\\README_9N_3S.md",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "run_altc2_prospective_validation_v1.py",
+    "project": "second1m",
+    "phase": "altc2",
+    "proposed_destination": "scripts\\second1m\\altc2\\run_altc2_prospective_validation_v1.py",
+    "reference_count": 8,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt | research_outputs\\pmpd\\9n\\pmpd_v5_9n_v4_runner_forensic_audit_v1.json | research_outputs\\second1m\\legacy_research\\a55_19_altc2_reference_logic_inventory.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "run_altc2_prospective_validation_v1_1.py",
+    "project": "second1m",
+    "phase": "altc2",
+    "proposed_destination": "scripts\\second1m\\altc2\\run_altc2_prospective_validation_v1_1.py",
+    "reference_count": 8,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt | research_outputs\\pmpd\\9n\\pmpd_v5_9n_v4_runner_forensic_audit_v1.json | research_outputs\\second1m\\legacy_research\\a55_19_altc2_reference_logic_inventory.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "run_altc2_prospective_validation_v1_2.py",
+    "project": "second1m",
+    "phase": "altc2",
+    "proposed_destination": "scripts\\second1m\\altc2\\run_altc2_prospective_validation_v1_2.py",
+    "reference_count": 8,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt | research_outputs\\pmpd\\9n\\pmpd_v5_9n_v4_runner_forensic_audit_v1.json | research_outputs\\second1m\\legacy_research\\a55_19_altc2_reference_logic_inventory.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "run_altc2_prospective_validation_v1_3.py",
+    "project": "second1m",
+    "phase": "altc2",
+    "proposed_destination": "scripts\\second1m\\altc2\\run_altc2_prospective_validation_v1_3.py",
+    "reference_count": 8,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt | research_outputs\\pmpd\\9n\\pmpd_v5_9n_v4_runner_forensic_audit_v1.json | research_outputs\\second1m\\legacy_research\\a55_19_altc2_reference_logic_inventory.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "run_altc2_prospective_validation_v1_4.py",
+    "project": "second1m",
+    "phase": "altc2",
+    "proposed_destination": "scripts\\second1m\\altc2\\run_altc2_prospective_validation_v1_4.py",
+    "reference_count": 8,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt | research_outputs\\pmpd\\9n\\pmpd_v5_9n_v4_runner_forensic_audit_v1.json | research_outputs\\second1m\\legacy_research\\a55_19_altc2_reference_logic_inventory.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "run_altc2_prospective_validation_v1_5.py",
+    "project": "second1m",
+    "phase": "altc2",
+    "proposed_destination": "scripts\\second1m\\altc2\\run_altc2_prospective_validation_v1_5.py",
+    "reference_count": 8,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt | research_outputs\\pmpd\\9n\\pmpd_v5_9n_v4_runner_forensic_audit_v1.json | research_outputs\\second1m\\legacy_research\\a55_19_altc2_reference_logic_inventory.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "run_altc2_prospective_validation_v1_6.py",
+    "project": "second1m",
+    "phase": "altc2",
+    "proposed_destination": "scripts\\second1m\\altc2\\run_altc2_prospective_validation_v1_6.py",
+    "reference_count": 10,
+    "references": "find_altc2_latest_available_date_v1.py | update_altc2_prospective_v1.py | cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt | research_outputs\\pmpd\\9n\\pmpd_v5_9n_v4_runner_forensic_audit_v1.json | research_outputs\\second1m\\legacy_research\\a55_19_altc2_reference_logic_inventory.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "run_controlled_batch.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\run_controlled_batch.py",
+    "reference_count": 7,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt | research_outputs\\pmpd\\docs_history\\README_8H6A6D.md",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "run_full_v2_and_certify.ps1",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\run_full_v2_and_certify.ps1",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "run_v2_local.ps1",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\run_v2_local.ps1",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "run_v2_stage1_discovery.ps1",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\run_v2_stage1_discovery.ps1",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "run_v2_stage2_validation.ps1",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\run_v2_stage2_validation.ps1",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "S1M_FTHC_1.0.1A_Core.pine",
+    "project": "second1m",
+    "phase": "fthc",
+    "proposed_destination": "pine\\second1m\\fthc\\S1M_FTHC_1.0.1A_Core.pine",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "S1M_FTHC_1.0.1B_Structure.pine",
+    "project": "second1m",
+    "phase": "fthc",
+    "proposed_destination": "pine\\second1m\\fthc\\S1M_FTHC_1.0.1B_Structure.pine",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "S1M_FTHC_1.0.2A_Core.pine",
+    "project": "second1m",
+    "phase": "fthc",
+    "proposed_destination": "pine\\second1m\\fthc\\S1M_FTHC_1.0.2A_Core.pine",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "S1M_FTHC_1.0.2B_Structure.pine",
+    "project": "second1m",
+    "phase": "fthc",
+    "proposed_destination": "pine\\second1m\\fthc\\S1M_FTHC_1.0.2B_Structure.pine",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "S1M_FTHC_1.0.3A_Core.pine",
+    "project": "second1m",
+    "phase": "fthc",
+    "proposed_destination": "pine\\second1m\\fthc\\S1M_FTHC_1.0.3A_Core.pine",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "S1M_FTHC_1.0.3B_Structure.pine",
+    "project": "second1m",
+    "phase": "fthc",
+    "proposed_destination": "pine\\second1m\\fthc\\S1M_FTHC_1.0.3B_Structure.pine",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "S1M_FTHC_1.0A_Core.pine",
+    "project": "second1m",
+    "phase": "fthc",
+    "proposed_destination": "pine\\second1m\\fthc\\S1M_FTHC_1.0A_Core.pine",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "S1M_FTHC_1.0B_Structure.pine",
+    "project": "second1m",
+    "phase": "fthc",
+    "proposed_destination": "pine\\second1m\\fthc\\S1M_FTHC_1.0B_Structure.pine",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "S1M_FTHC_1.0C_VWAP_Checkpoints.pine",
+    "project": "second1m",
+    "phase": "fthc",
+    "proposed_destination": "pine\\second1m\\fthc\\S1M_FTHC_1.0C_VWAP_Checkpoints.pine",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "S1M_RC_1.2.1A_Core_Research_Collector.pine",
+    "project": "second1m",
+    "phase": "legacy",
+    "proposed_destination": "pine\\second1m\\legacy\\S1M_RC_1.2.1A_Core_Research_Collector.pine",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "S1M_RC_1.2.2A_Core_Research_Collector.pine",
+    "project": "second1m",
+    "phase": "legacy",
+    "proposed_destination": "pine\\second1m\\legacy\\S1M_RC_1.2.2A_Core_Research_Collector.pine",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "S1M_RC_1.2A_Core_Research_Collector.pine",
+    "project": "second1m",
+    "phase": "legacy",
+    "proposed_destination": "pine\\second1m\\legacy\\S1M_RC_1.2A_Core_Research_Collector.pine",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "S1M_RC_1.2B_Raw_HTF_Context_Exporter.pine",
+    "project": "second1m",
+    "phase": "legacy",
+    "proposed_destination": "pine\\second1m\\legacy\\S1M_RC_1.2B_Raw_HTF_Context_Exporter.pine",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "S1M_RC_1.2C_Current_Day_Index_Open_Context.pine",
+    "project": "second1m",
+    "phase": "legacy",
+    "proposed_destination": "pine\\second1m\\legacy\\S1M_RC_1.2C_Current_Day_Index_Open_Context.pine",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "score_a53_v2_prospective_events_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\score_a53_v2_prospective_events_v1.py",
+    "reference_count": 6,
+    "references": "update_altc2_prospective_v1_v2.py | cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "score_altc2_prospective_events_v1.py",
+    "project": "second1m",
+    "phase": "altc2",
+    "proposed_destination": "scripts\\second1m\\altc2\\score_altc2_prospective_events_v1.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\second1m\\legacy_research\\a55_19_altc2_reference_logic_inventory.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "summarize_9j_discovery_evidence.py",
+    "project": "pmpd",
+    "phase": "9j",
+    "proposed_destination": "scripts\\pmpd\\9j\\summarize_9j_discovery_evidence.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "summarize_9j_validation_robustness.py",
+    "project": "pmpd",
+    "phase": "9j",
+    "proposed_destination": "scripts\\pmpd\\9j\\summarize_9j_validation_robustness.py",
+    "reference_count": 8,
+    "references": "patch_validation_robustness_block_repair_v3.py | patch_validation_robustness_corr_scope_v2.py | patch_validation_robustness_no_scipy.py | cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "Test.py",
+    "project": "utilities",
+    "phase": "misc",
+    "proposed_destination": "scripts\\utilities\\misc\\Test.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "trace_a51_a39_original_research_code_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\trace_a51_a39_original_research_code_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "trace_a51_a39_screen_bucket_scope_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\trace_a51_a39_screen_bucket_scope_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "trace_a51_a39_upstream_bucket_creation_v1.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\trace_a51_a39_upstream_bucket_creation_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "trace_a51_a39_upstream_bucket_creation_v2.py",
+    "project": "utilities",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\utilities\\legacy\\trace_a51_a39_upstream_bucket_creation_v2.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "update_altc2_prospective_v1.py",
+    "project": "second1m",
+    "phase": "altc2",
+    "proposed_destination": "scripts\\second1m\\altc2\\update_altc2_prospective_v1.py",
+    "reference_count": 7,
+    "references": "update_altc2_prospective_v1_v2.py | cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "update_altc2_prospective_v1_v2.py",
+    "project": "second1m",
+    "phase": "altc2",
+    "proposed_destination": "scripts\\second1m\\altc2\\update_altc2_prospective_v1_v2.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "v4_parity_engine_v1.py",
+    "project": "pmpd",
+    "phase": "v4",
+    "proposed_destination": "scripts\\pmpd\\v4\\v4_parity_engine_v1.py",
+    "reference_count": 5,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "v4_parity_engine_v2.py",
+    "project": "pmpd",
+    "phase": "v4",
+    "proposed_destination": "scripts\\pmpd\\v4\\v4_parity_engine_v2.py",
+    "reference_count": 15,
+    "references": "run_9n_3g2_vrtx_first_parity_case.py | run_9n_3g3_vrtx_first_parity_case.py | run_9n_3g4_vrtx_first_parity_case.py | run_9n_3g_vrtx_first_parity_case.py | run_9n_3m_24case_python_baseline.py | run_9n_3q_pine_pm_counterfactual.py | run_9n_3r_h2h_preflight.py | run_9n_3s2_final_h2h.py | run_9n_3s_final_h2h.py | cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "validate_second1m_ae4_v1.py",
+    "project": "second1m",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\second1m\\legacy\\validate_second1m_ae4_v1.py",
+    "reference_count": 7,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_v4_runner_forensic_audit_v1.json | research_outputs\\second1m\\legacy_research\\a55_19_altc2_reference_logic_inventory.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "validate_second1m_alt_aapl_overlap.py",
+    "project": "second1m",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\second1m\\legacy\\validate_second1m_alt_aapl_overlap.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "validate_second1m_alt_entry_cache.py",
+    "project": "second1m",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\second1m\\legacy\\validate_second1m_alt_entry_cache.py",
+    "reference_count": 6,
+    "references": "cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json | research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt",
+    "move_status": "REVIEW_REFERENCED"
+  },
+  {
+    "name": "vwap_event_path_v2.py",
+    "project": "pmpd",
+    "phase": "legacy",
+    "proposed_destination": "scripts\\pmpd\\legacy\\vwap_event_path_v2.py",
+    "reference_count": 7,
+    "references": "certify_v2_outcome_independence.py | install_and_msft_preflight.ps1 | cleanup_reports\\root_cleanup_manifest_20260908_144820.json | cleanup_reports\\root_cleanup_manifest_20260908_144912.json | cleanup_reports\\root_cleanup_manifest_20260908_144914.json | cleanup_reports\\root_cleanup_manifest_20260908_145124.json | cleanup_reports\\root_cleanup_manifest_20260908_145125.json",
+    "move_status": "REVIEW_REFERENCED"
+  }
+]

@@ -1,0 +1,170 @@
+MASTER RESEARCH FACTOR ROADMAP — PM + PREVIOUS DAY BREAKOUT
+Saved: 2026-08-27
+
+PURPOSE
+Systematic research backlog. Test factors individually first, then interactions, then combined models.
+Pre-signal factors must use only information available at or before the signal timestamp.
+
+ARCHITECTURE
+Signal Quality Model = Families A + B + C + D
+Trade Health / Warning Model = Family E
+
+PRIORITY 1 — FAMILY E: POST-SIGNAL TRADE HEALTH / WARNING MODEL
+1. Temporal robustness of complete Warning Model V1 (older vs newer periods) — NEXT
+2. Complete-state robustness by BULL vs BEAR — COMPLETED
+3. Composite Warning Model across CP2/CP3/CP5 — COMPLETED
+4. State transitions: escalation, persistence, recovery — COMPLETED
+5. Current Path Score / Path Level — COMPLETED, CORE
+6. Delta Path / Path Momentum — COMPLETED, CORE
+7. VWAP state and lost/not-reclaimed modifier — COMPLETED, CORE MODIFIER
+8. VWAP reclaim behavior — COMPLETED; small-N areas research-only
+9. PM/AH/PD aggregate retention — COMPLETED; research-only for V1
+10. Individual PM/AH/PD state — COMPLETED; research-only for V1
+11. Individual PM/AH/PD loss/reclaim paths — COMPLETED; research-only for V1
+12. Weak-checkpoint count / warning accumulation — COMPLETED; exclude V1
+13. Recovery after warning — VALIDATED conceptually; further model validation possible
+14. Warning persistence/duration — TO TEST
+15. Speed of deterioration — TO TEST
+16. Time since signal / checkpoint-age effect — PARTIALLY TESTED
+17. Direct MFE/MAE trajectory — TO TEST
+
+PRIORITY 2 — FAMILY A: SETUP QUALITY
+18. Breakout penetration beyond required PM/PD levels
+19. Breakout candle body-to-range ratio
+20. Strong-close / close-location percentage
+21. Breakout candle range vs ATR
+22. Directional candle quality
+23. Breakout speed / velocity
+24. Pre-signal 1-minute velocity
+25. Pre-signal 2-minute velocity
+26. Pre-signal 3-minute velocity
+27. Pre-signal acceleration/deceleration
+28. Distance between required PM/PD breakout levels
+29. Which required level was crossed first
+30. Time between first-level and second-level/signal break
+31. Distance traveled before final breakout / pre-signal extension
+32. Volume at breakout, if DB supports it
+33. Relative-volume / volume expansion, if supported
+34. Existing PM+PD strength score and component validation
+
+PRIORITY 3 — FAMILY B: STOCK CONTEXT
+35. Previous-day stock candle direction
+36. Previous-day stock return magnitude
+37. Previous-day candle body strength
+38. Previous-day candle range
+39. Previous-day range normalized by ATR
+40. Previous-day close location
+41. Previous-day candle strength composite
+42. Stock 3-day trend
+43. Stock 5-day trend
+44. Stock 10-day trend
+45. Stock 20-day trend
+46. Multi-day trend strength/slope
+47. HH/HL vs LH/LL structure
+48. Higher-timeframe MA position/slope, if reconstructable
+49. Gap direction
+50. Gap magnitude
+51. Gap alignment with breakout
+52. Premarket direction/trend
+53. Premarket move magnitude
+54. Premarket range
+55. Premarket position relative to previous-day levels
+56. Distance from VWAP at signal
+57. VWAP slope at signal
+58. Signal direction vs VWAP side
+59. ATR-normalized extension from VWAP
+60. ATR / volatility regime
+61. Normal intraday volatility regime
+
+PRIORITY 4 — FAMILY C: MARKET CONTEXT
+62. Previous-day SPY direction/return
+63. Previous-day QQQ direction/return
+64. Previous-day DIA direction/return
+65. Previous-day SPY/QQQ/DIA agreement (3-of-3, 2-of-3, mixed)
+66. Previous-day aggregate bullish/bearish/mixed regime
+67. SPY 3-day trend
+68. QQQ 3-day trend
+69. DIA 3-day trend
+70. Aggregate 3-day market trend
+71. SPY/QQQ/DIA 5-day trends + aggregate
+72. SPY/QQQ/DIA 10-day trends + aggregate
+73. SPY/QQQ/DIA 20-day trends + aggregate
+74. Multi-day market trend strength
+75. Current-day SPY direction at signal
+76. Current-day QQQ direction at signal
+77. Current-day DIA direction at signal
+78. Current-day 3-index agreement
+79. Current-day bullish/bearish/mixed regime
+80. Current-day market move magnitude
+81. Current-day market momentum/velocity into signal
+82. Market acceleration/deceleration into signal
+
+PRIORITY 5 — FAMILY D: RELATIVE / ALIGNMENT CONTEXT
+83. Signal vs previous-day market regime
+84. Signal vs current-day market regime
+85. Signal vs stock previous-day direction
+86. Signal vs stock multi-day trend
+87. Stock trend vs market trend alignment
+88. Stock vs SPY relative strength/weakness
+89. Stock vs QQQ relative strength/weakness
+90. Relative strength/weakness persistence into breakout
+91. Sector direction at signal
+92. Stock vs sector alignment
+93. Sector vs broad-market alignment
+94. Stock + sector + market three-way alignment
+95. Gap + stock trend + signal alignment
+96. Previous-day stock + previous-day market alignment
+97. Setup strength + market regime
+98. Setup strength + stock trend
+99. Setup strength + relative strength
+100. Pre-signal context vs subsequent W2/W3 probability
+
+PRIORITY 6 — HISTORICAL / SYMBOL FACTORS
+101. Individual-symbol FF performance — COMPLETED substantially
+102. Historical prior-N / sample maturity — COMPLETED
+103. Historical 90-day FF rate — COMPLETED
+104. Historical adjusted score — COMPLETED
+105. Historical rank / established rank — COMPLETED; weak predictive value
+106. Established vs insufficient-N — COMPLETED
+107. Recent symbol performance trend/change — TO TEST
+108. Bull-specific vs bear-specific symbol history — PARTIALLY TESTED
+109. Symbol × setup-quality interaction — LATER
+110. Symbol × market-regime interaction — LATER
+
+PRIORITY 7 — TIME / CALENDAR
+111. Time-of-day signal performance — TO TEST systematically
+112. Early vs middle vs later RTH
+113. Minutes since RTH open
+114. Day of week
+115. Month / broad seasonal stability — LOW PRIORITY
+116. Time-of-day × direction
+117. Time-of-day × market regime
+
+RESEARCH RULES
+1. Do not optimize thresholds simply to maximize historical FF%.
+2. Primary benchmark remains +0.50% favorable before -0.50% adverse.
+3. Report N with every rate.
+4. Split BULL/BEAR after establishing overall relationship.
+5. Check checkpoint stability where applicable.
+6. Check temporal robustness before production promotion.
+7. Pre-signal variables use only information available by signal time.
+8. Test individual factors before high-dimensional interactions.
+9. Do not promote small-N high-performing buckets.
+10. Keep Signal Quality (entry-known) separate from Trade Health (post-entry).
+11. Preserve null/rejected findings to prevent repeated data mining.
+12. Freeze model versions before final validation.
+13. Validate frozen candidates with out-of-sample/forward data rather than retuning.
+
+CURRENT SYSTEMATIC SEQUENCE
+20AG — Temporal robustness of Warning Model V1
+20AH — Setup Quality
+20AI — Stock previous-day and higher-timeframe context
+20AJ — Major-index / market regime
+20AK — Multi-day stock and market trends
+20AL — Current intraday market + relative strength
+20AM — Gap, premarket, VWAP extension, volatility
+20AN — Time-of-day / calendar
+20AO — Interactions using validated individual factors only
+20AP — Candidate Signal Quality Model
+20AQ — Combined Signal Quality + Trade Health architecture
+20AR — Out-of-sample / forward validation and production decisions

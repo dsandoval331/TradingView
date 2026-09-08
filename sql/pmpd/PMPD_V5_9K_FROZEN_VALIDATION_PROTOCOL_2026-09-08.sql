@@ -1,0 +1,13 @@
+-- PM+PD V5 9K frozen validation checkpoint — 2026-09-08
+-- Discovery model fit completed and is frozen.
+-- Matrix SHA256:
+-- 6ec9da73cf554469083d35b8866222ae8c66295562bba22557b5b77bfc9d0e57
+--
+-- Validation protocol:
+-- * score VALIDATION_A and VALIDATION_B unchanged
+-- * no refit
+-- * no threshold fitting
+-- * no architecture changes
+-- * report AUC, Brier, log loss, top-bottom 20% spread
+-- * report symbol-level AUC breadth
+-- * no production rule authorization

@@ -1,0 +1,38 @@
+-- PM+PD V5 9M FINAL CLOSEOUT — 2026-09-08
+-- Strategy: 84fb30c1-7600-49bf-a024-022f0500492e
+-- Frozen candidate: PMPD_V5_CANDIDATE_DP4_UNSCORED_V1
+-- Candidate SHA256: 6006b19ae706f02ffced95ba0bef463d10171e90e75e2de8acf08f44540e6035
+-- Frozen OOS window: 2026-01-05 through 2026-09-02
+-- Candidate rows: 16,138
+-- Resolved: 15,309
+-- FAVORABLE_FIRST: 7,689
+-- ADVERSE_FIRST: 7,620
+-- UNRESOLVED: 683
+-- AMBIGUOUS_SAME_BAR: 146
+-- Combined favorable-first rate: 0.5022535763276504
+-- Bull favorable-first rate: 0.5061807060022939
+-- Bear favorable-first rate: 0.4981238273921201
+-- 95% symbol-cluster bootstrap:
+--   lower = 0.49477112874566437
+--   median = 0.5022457067371202
+--   upper = 0.5098769070470124
+-- Fraction of symbols > 0.50: 0.45535714285714285
+--
+-- Preregistered classification: CONDITIONAL
+--
+-- Rationale:
+-- Combined point estimate is > 0.50, but the lower 95% symbol-cluster
+-- bootstrap bound is <= 0.50, and Bear point estimate is <= 0.50.
+-- Therefore SUPPORTED criteria are not met; CONDITIONAL criteria are met.
+--
+-- Governance:
+-- candidate_modified = false
+-- threshold_tuning = false
+-- score_fitting = false
+-- validation_refit = false
+-- production_rule_authorized = false
+--
+-- Phase transition:
+-- 9M COMPLETE
+-- 9N ACTIVE — V4 vs V5 Head-to-Head
+-- 9O next — Prospective Validation

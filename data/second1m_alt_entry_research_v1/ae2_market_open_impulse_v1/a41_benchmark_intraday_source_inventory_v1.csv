@@ -1,0 +1,16 @@
+source,rows,symbol_columns,time_columns,ohlcv_columns,sample_symbols
+data\second1m_alt_entry_cache_v1\DIA\DIA_2025.parquet,74896,symbol,timestamp_utc|timeframe,open|high|low|close|volume,DIA
+data\second1m_alt_entry_cache_v1\DIA\DIA_2026.parquet,89107,symbol,timestamp_utc|timeframe,open|high|low|close|volume,DIA
+data\second1m_alt_entry_cache_v1\partitions\QQQ\QQQ_2025.parquet,134933,symbol,timestamp_utc|timestamp_et|timestamp_ms|timeframe,open|high|low|close|volume,QQQ
+data\second1m_alt_entry_cache_v1\partitions\QQQ\QQQ_2026.parquet,157226,symbol,timestamp_utc|timestamp_et|timestamp_ms|timeframe,open|high|low|close|volume,QQQ
+data\second1m_alt_entry_cache_v1\partitions\SPY\SPY_2025.parquet,129416,symbol,timestamp_utc|timestamp_et|timestamp_ms|timeframe,open|high|low|close|volume,SPY
+data\second1m_alt_entry_cache_v1\partitions\SPY\SPY_2026.parquet,153118,symbol,timestamp_utc|timestamp_et|timestamp_ms|timeframe,open|high|low|close|volume,SPY
+data\second1m_alt_entry_cache_v1\partitions\TQQQ\TQQQ_2025.parquet,141801,symbol,timestamp_utc|timestamp_et|timestamp_ms|timeframe,open|high|low|close|volume,TQQQ
+data\second1m_alt_entry_cache_v1\partitions\TQQQ\TQQQ_2026.parquet,160096,symbol,timestamp_utc|timestamp_et|timestamp_ms|timeframe,open|high|low|close|volume,TQQQ
+data\second1m_alt_entry_prospective_work_v1\ae2_relative_strength_robustness_v1\relative_strength_robustness_features_v1.parquet,8424,symbol,entry_timestamp|first_favorable_timestamp|first_adverse_timestamp,open|high|low|close|volume,"AAPL,VZ,VRTX,UNH,TSLA,TQQQ,QQQ,PLTR,PFE,PANW,NVDA,MA,LRCX,KLAC,JNJ,XOM,INTC,IWM,AMAT,AMD"
+data\second1m_alt_entry_prospective_work_v1\ae2_relative_strength_v1\ae2_relative_strength_features_v1.parquet,8424,symbol,entry_timestamp|first_favorable_timestamp|first_adverse_timestamp,open|high|low|close|volume,"AAPL,VZ,VRTX,UNH,TSLA,TQQQ,QQQ,PLTR,PFE,PANW,NVDA,MA,LRCX,KLAC,JNJ,XOM,INTC,IWM,AMAT,AMD"
+data\second1m_alt_entry_prospective_work_v1\ae2_three_index_regime_v1\ae2_three_index_regime_features_v1.parquet,8424,symbol,entry_timestamp|first_favorable_timestamp|first_adverse_timestamp,open|high|low|close|volume,"AAPL,VZ,VRTX,UNH,TSLA,TQQQ,QQQ,PLTR,PFE,PANW,NVDA,MA,LRCX,KLAC,JNJ,XOM,INTC,IWM,AMAT,AMD"
+data\second1m_alt_entry_research_v1\ae2_relative_strength_robustness_v1\relative_strength_robustness_features_v1.parquet,8307,symbol,entry_timestamp|first_favorable_timestamp|first_adverse_timestamp,open|high|low|close|volume,"AAPL,VZ,VRTX,UNH,TSLA,TQQQ,QQQ,PLTR,PFE,PANW,NVDA,MA,LRCX,KLAC,JNJ,XOM,INTC,IWM,AMAT,AMD"
+data\second1m_alt_entry_research_v1\ae2_relative_strength_v1\ae2_relative_strength_features_v1.parquet,8307,symbol,entry_timestamp|first_favorable_timestamp|first_adverse_timestamp,open|high|low|close|volume,"AAPL,VZ,VRTX,UNH,TSLA,TQQQ,QQQ,PLTR,PFE,PANW,NVDA,MA,LRCX,KLAC,JNJ,XOM,INTC,IWM,AMAT,AMD"
+data\second1m_alt_entry_research_v1\ae2_three_index_regime_v1\ae2_three_index_regime_features_v1.parquet,8307,symbol,entry_timestamp|first_favorable_timestamp|first_adverse_timestamp,open|high|low|close|volume,"AAPL,VZ,VRTX,UNH,TSLA,TQQQ,QQQ,PLTR,PFE,PANW,NVDA,MA,LRCX,KLAC,JNJ,XOM,INTC,IWM,AMAT,AMD"
+data\second1m_archives\second1m_market_benchmark_adjusted_false_raw_v1.parquet,472550,symbol,timestamp_utc|timestamp_ms|timeframe,open|high|low|close|volume,"QQQ,SPY"

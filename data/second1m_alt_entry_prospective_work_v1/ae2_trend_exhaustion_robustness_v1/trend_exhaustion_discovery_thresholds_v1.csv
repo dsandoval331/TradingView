@@ -1,0 +1,5 @@
+lookback_days,feature,discovery_q20,discovery_q80,discovery_n
+3,directional_prior_ret_3d_pct,-2.3745576097884835,2.5818767519308405,4182
+5,directional_prior_ret_5d_pct,-3.137045606860134,3.329631967600273,4129
+10,directional_prior_ret_10d_pct,-4.499507508670848,4.756460791454704,3994
+20,directional_prior_ret_20d_pct,-6.6212720478136395,7.119808476505935,3723

@@ -1,0 +1,38 @@
+-- PM+PD V5 9K FINAL CLOSEOUT — 2026-09-08
+-- Strategy: 84fb30c1-7600-49bf-a024-022f0500492e
+--
+-- Final adjudication:
+-- NO_ROBUST_GENERAL_CLASSIFIER_SUPPORTED
+--
+-- Completed evidence path:
+-- 1) 9K-1 evidence inventory / eligibility
+-- 2) 9K-2 DP4_FULL_STACK_FIRST_CLEAR candidate matrix
+-- 3) Discovery-only A0/A1/A2 classifier comparison
+-- 4) Frozen Validation A / Validation B scoring
+-- 5) Frozen leave-one-feature-out ablation
+--
+-- Frozen matrix SHA256:
+-- 6ec9da73cf554469083d35b8866222ae8c66295562bba22557b5b77bfc9d0e57
+--
+-- Key conclusions:
+-- * A1/A2 show weak Discovery discrimination.
+-- * Bull A1/A2 improve in Validation A but degrade materially in Validation B.
+-- * Bull A2 reverses below AUC 0.50 in Validation B.
+-- * Bear A1/A2 remain weak/inconsistent.
+-- * Bull all-three-positive ablation features:
+--     decision_minutes_from_rth_open
+--     direction_normalized_overnight_gap_pct
+--     event_minutes_since_last_cross
+--     event_vwap_touch_from_dp1
+--   Because this subset was identified after validation review, it is hypothesis-generation only.
+-- * Bear has no feature with positive incremental AUC across Discovery + both validations.
+-- * No validation refit, threshold tuning, architecture change, or production rule authorization.
+-- * Current 2025 evidence does not justify a PM+PD V5 entry-quality score/classifier.
+-- * 9K exit criteria are met because the candidate architecture is documented and reproducible.
+-- * 9L remains unopened.
+--
+-- Applied DB state:
+-- program_phases.9K = complete
+-- project_state metadata v5_9k_status = COMPLETE
+-- v5_9k_final_adjudication = NO_ROBUST_GENERAL_CLASSIFIER_SUPPORTED
+-- v5_9l_opened = false

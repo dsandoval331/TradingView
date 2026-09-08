@@ -1,0 +1,10 @@
+-- PM+PD V5 9M-4 OOS protocol freeze — 2026-09-08
+-- Protocol: PMPD_V5_9M_OOS_PROTOCOL_V1
+-- Candidate: PMPD_V5_CANDIDATE_DP4_UNSCORED_V1
+-- Frozen OOS evaluation window: 2026-01-05 through 2026-09-02.
+-- 2026-01-02 is excluded from evaluation and retained as seed context for prior-RTH/AH levels.
+-- 2026-09-03 is excluded because the common raw tail only extends to 20:07 UTC for the earliest-ending symbol.
+-- Primary outcome: +0.50% favorable before -0.50% adverse.
+-- Primary rate: FAVORABLE_FIRST / (FAVORABLE_FIRST + ADVERSE_FIRST).
+-- Primary CI: 95% symbol-cluster bootstrap, 10,000 reps, seed 9052026.
+-- No candidate modification, threshold tuning, score fitting, validation refit, or production authorization.

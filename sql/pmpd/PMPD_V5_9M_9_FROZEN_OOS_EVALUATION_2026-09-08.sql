@@ -1,0 +1,10 @@
+-- PM+PD V5 9M-9 frozen OOS evaluation — 2026-09-08
+-- Frozen candidate artifact:
+--   PMPD_V5_CANDIDATE_DP4_UNSCORED_V1
+--   SHA256 6006b19ae706f02ffced95ba0bef463d10171e90e75e2de8acf08f44540e6035
+-- Frozen protocol:
+--   PMPD_V5_9M_OOS_PROTOCOL_V1
+--   2026-01-05 through 2026-09-02
+-- Primary outcome: +0.50% favorable before -0.50% adverse.
+-- 95% symbol-cluster bootstrap, 10,000 reps, seed 9052026.
+-- No tuning/refit/model modification permitted.

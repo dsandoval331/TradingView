@@ -1,0 +1,453 @@
+{
+  "created_at": "2026-09-08T16:24:25.778227",
+  "moves": [
+    {
+      "from": "6_2.pine",
+      "to": "pine\\orb\\legacy\\6_2.pine",
+      "sha256": "e18927f14da36304df860c11b0d0b69fb4a063d780cdfc42fa7d091f67591c39",
+      "group_id": 1,
+      "mode": "NORMAL_GROUP",
+      "completed": true
+    },
+    {
+      "from": "Test.py",
+      "to": "scripts\\utilities\\misc\\Test.py",
+      "sha256": "403fedb2be17ad418660b59998c860d070b794843f37db13492c821dcb789861",
+      "group_id": 4,
+      "mode": "NORMAL_GROUP",
+      "completed": true
+    },
+    {
+      "from": "acquire_second1m_alt_entry_universe.py",
+      "to": "archive\\source\\second1m\\dependency_groups\\G005\\acquire_second1m_alt_entry_universe.py",
+      "sha256": "730bfe7ce21a5cfd58491daacaec8e3f13a67ab0e4e4c9417393f9af8290c276",
+      "group_id": 5,
+      "mode": "ARCHIVE_GROUP",
+      "completed": true
+    },
+    {
+      "from": "extract_a51_a39_original_predictor_bucketing_scope_v1.py",
+      "to": "archive\\source\\second1m\\dependency_groups\\G005\\extract_a51_a39_original_predictor_bucketing_scope_v1.py",
+      "sha256": "497325b5701410e0c09babbea4433def99f3467f6a79590126793eab1c608572",
+      "group_id": 5,
+      "mode": "ARCHIVE_GROUP",
+      "completed": true
+    },
+    {
+      "from": "find_altc2_latest_available_date_v1.py",
+      "to": "archive\\source\\second1m\\dependency_groups\\G005\\find_altc2_latest_available_date_v1.py",
+      "sha256": "d6f0a1c3ff101cb008d1d2f2af93fbae832445662274e5d71958c934b73dbef6",
+      "group_id": 5,
+      "mode": "ARCHIVE_GROUP",
+      "completed": true
+    },
+    {
+      "from": "report_a53_v2_prospective_checkpoint_v1.py",
+      "to": "archive\\source\\second1m\\dependency_groups\\G005\\report_a53_v2_prospective_checkpoint_v1.py",
+      "sha256": "71d9a2b6a9270b5ce0b6f71f81b8cd05b37e223cb13863258ca46c870ac4296c",
+      "group_id": 5,
+      "mode": "ARCHIVE_GROUP",
+      "completed": true
+    },
+    {
+      "from": "report_altc2_prospective_checkpoint_v1.py",
+      "to": "archive\\source\\second1m\\dependency_groups\\G005\\report_altc2_prospective_checkpoint_v1.py",
+      "sha256": "80ad61aa462fb253210de63853b40ad21af61475a4da9991c7f4ffbc34da49b3",
+      "group_id": 5,
+      "mode": "ARCHIVE_GROUP",
+      "completed": true
+    },
+    {
+      "from": "research_second1m_ae2_c2_predictors_v1.py",
+      "to": "archive\\source\\second1m\\dependency_groups\\G005\\research_second1m_ae2_c2_predictors_v1.py",
+      "sha256": "90845e5768b4506c1904aee8e456e5602bfad993c325dc758bcce67d3c847d3e",
+      "group_id": 5,
+      "mode": "ARCHIVE_GROUP",
+      "completed": true
+    },
+    {
+      "from": "research_second1m_ae2_daily_trend_v1.py",
+      "to": "archive\\source\\second1m\\dependency_groups\\G005\\research_second1m_ae2_daily_trend_v1.py",
+      "sha256": "720ac1b6570a21c14ad227c083e34b4e03129acdf9ff2970a77dac2c9d0288b9",
+      "group_id": 5,
+      "mode": "ARCHIVE_GROUP",
+      "completed": true
+    },
+    {
+      "from": "research_second1m_ae2_ma_context_v1.py",
+      "to": "archive\\source\\second1m\\dependency_groups\\G005\\research_second1m_ae2_ma_context_v1.py",
+      "sha256": "f739d78f6d76c803ab78715ad189fb38ae90a5293d1dd3f033107470196d8089",
+      "group_id": 5,
+      "mode": "ARCHIVE_GROUP",
+      "completed": true
+    },
+    {
+      "from": "research_second1m_ae2_market_regime_v1.py",
+      "to": "archive\\source\\second1m\\dependency_groups\\G005\\research_second1m_ae2_market_regime_v1.py",
+      "sha256": "a083f5be09e4cc13dd2241017db4017a69d266866d112e019a46c8bc59b9893b",
+      "group_id": 5,
+      "mode": "ARCHIVE_GROUP",
+      "completed": true
+    },
+    {
+      "from": "research_second1m_ae2_opening_volume_v1.py",
+      "to": "archive\\source\\second1m\\dependency_groups\\G005\\research_second1m_ae2_opening_volume_v1.py",
+      "sha256": "ca12647339fdf060d494462171ee94e4709d638e4ad628d5afa388ad76e546c0",
+      "group_id": 5,
+      "mode": "ARCHIVE_GROUP",
+      "completed": true
+    },
+    {
+      "from": "research_second1m_ae2_relative_strength_robustness_v1.py",
+      "to": "archive\\source\\second1m\\dependency_groups\\G005\\research_second1m_ae2_relative_strength_robustness_v1.py",
+      "sha256": "2a006c3fb153ed91b9c920a83fff8325dfb127aa5e8be1727ded6b6f7a902554",
+      "group_id": 5,
+      "mode": "ARCHIVE_GROUP",
+      "completed": true
+    },
+    {
+      "from": "research_second1m_ae2_relative_strength_v1.py",
+      "to": "archive\\source\\second1m\\dependency_groups\\G005\\research_second1m_ae2_relative_strength_v1.py",
+      "sha256": "3c1c8f5f82a4a38c23166c73083da610b479c6877390e1ab5dc9af7b3ebe4925",
+      "group_id": 5,
+      "mode": "ARCHIVE_GROUP",
+      "completed": true
+    },
+    {
+      "from": "research_second1m_ae2_session_levels_v1.py",
+      "to": "archive\\source\\second1m\\dependency_groups\\G005\\research_second1m_ae2_session_levels_v1.py",
+      "sha256": "b73a5742ad8d368888aff4776d131fc4734f868db87dbacc735427b1ffd97d3b",
+      "group_id": 5,
+      "mode": "ARCHIVE_GROUP",
+      "completed": true
+    },
+    {
+      "from": "research_second1m_ae2_short_ma_warning_v1.py",
+      "to": "archive\\source\\second1m\\dependency_groups\\G005\\research_second1m_ae2_short_ma_warning_v1.py",
+      "sha256": "481a807ec6911437d3e3c49ff6b2c0a88077e8530ff306fc187b24f2c72c7673",
+      "group_id": 5,
+      "mode": "ARCHIVE_GROUP",
+      "completed": true
+    },
+    {
+      "from": "research_second1m_ae2_three_index_regime_v1.py",
+      "to": "archive\\source\\second1m\\dependency_groups\\G005\\research_second1m_ae2_three_index_regime_v1.py",
+      "sha256": "0b312bfe7142cad001fd1bda607b7edb8c18cff5bc639137274bb3a15175d0a1",
+      "group_id": 5,
+      "mode": "ARCHIVE_GROUP",
+      "completed": true
+    },
+    {
+      "from": "research_second1m_ae2_trend_exhaustion_robustness_v1.py",
+      "to": "archive\\source\\second1m\\dependency_groups\\G005\\research_second1m_ae2_trend_exhaustion_robustness_v1.py",
+      "sha256": "2f4c4039a87c805dbafab4ec8dcda96b1d1073bd6cf500b119bcbbb0688d4d80",
+      "group_id": 5,
+      "mode": "ARCHIVE_GROUP",
+      "completed": true
+    },
+    {
+      "from": "research_second1m_ae2_volume_robustness_v1.py",
+      "to": "archive\\source\\second1m\\dependency_groups\\G005\\research_second1m_ae2_volume_robustness_v1.py",
+      "sha256": "57ce693672a9e363ea4b794812704659b70d235a828412a6dd6fdaaccadce442",
+      "group_id": 5,
+      "mode": "ARCHIVE_GROUP",
+      "completed": true
+    },
+    {
+      "from": "research_second1m_ae2_weekly_trend_v1.py",
+      "to": "archive\\source\\second1m\\dependency_groups\\G005\\research_second1m_ae2_weekly_trend_v1.py",
+      "sha256": "75a230bbfe412546a991eb713ddc529af91d82aedcf371456022d376b62a0096",
+      "group_id": 5,
+      "mode": "ARCHIVE_GROUP",
+      "completed": true
+    },
+    {
+      "from": "research_second1m_alt_entry_v1.py",
+      "to": "archive\\source\\second1m\\dependency_groups\\G005\\research_second1m_alt_entry_v1.py",
+      "sha256": "a37e192898fa44191938e0a6c9723857a703626e2d92fffd4b40777eb196fcda",
+      "group_id": 5,
+      "mode": "ARCHIVE_GROUP",
+      "completed": true
+    },
+    {
+      "from": "run_altc2_prospective_validation_v1.py",
+      "to": "archive\\source\\second1m\\dependency_groups\\G005\\run_altc2_prospective_validation_v1.py",
+      "sha256": "5f8f4d06c936796cdc68c380479d74d32f47a545aac68cbe97cfd00cd3dce018",
+      "group_id": 5,
+      "mode": "ARCHIVE_GROUP",
+      "completed": true
+    },
+    {
+      "from": "run_altc2_prospective_validation_v1_1.py",
+      "to": "archive\\source\\second1m\\dependency_groups\\G005\\run_altc2_prospective_validation_v1_1.py",
+      "sha256": "4f6ea4c49e7fa4f9122e0d5fd4aa9b734f87112bb168fc6e7b57ea56fb9c282f",
+      "group_id": 5,
+      "mode": "ARCHIVE_GROUP",
+      "completed": true
+    },
+    {
+      "from": "run_altc2_prospective_validation_v1_2.py",
+      "to": "archive\\source\\second1m\\dependency_groups\\G005\\run_altc2_prospective_validation_v1_2.py",
+      "sha256": "cc425505641dd1e9c54682ad652ae242ff5400c92e2d797fb3ef7add2f2824fc",
+      "group_id": 5,
+      "mode": "ARCHIVE_GROUP",
+      "completed": true
+    },
+    {
+      "from": "run_altc2_prospective_validation_v1_3.py",
+      "to": "archive\\source\\second1m\\dependency_groups\\G005\\run_altc2_prospective_validation_v1_3.py",
+      "sha256": "07a0112c38b539aaffb17731ff51f8ef3d48cac624fca0ac4f0e984333ae2b12",
+      "group_id": 5,
+      "mode": "ARCHIVE_GROUP",
+      "completed": true
+    },
+    {
+      "from": "run_altc2_prospective_validation_v1_4.py",
+      "to": "archive\\source\\second1m\\dependency_groups\\G005\\run_altc2_prospective_validation_v1_4.py",
+      "sha256": "4a0b1627260903ba1f78b9ddbf0272d4313ecf740586b3a581c624fbff524e01",
+      "group_id": 5,
+      "mode": "ARCHIVE_GROUP",
+      "completed": true
+    },
+    {
+      "from": "run_altc2_prospective_validation_v1_5.py",
+      "to": "archive\\source\\second1m\\dependency_groups\\G005\\run_altc2_prospective_validation_v1_5.py",
+      "sha256": "8cccc24007baec3afe1303d89c7d15f1cbceb9e8d2344b924f3cd5c870f67557",
+      "group_id": 5,
+      "mode": "ARCHIVE_GROUP",
+      "completed": true
+    },
+    {
+      "from": "run_altc2_prospective_validation_v1_6.py",
+      "to": "archive\\source\\second1m\\dependency_groups\\G005\\run_altc2_prospective_validation_v1_6.py",
+      "sha256": "e02fd961a0c764c27c2df5ebec8cd65b2e3d20e77d6928f33b621fd1d194770d",
+      "group_id": 5,
+      "mode": "ARCHIVE_GROUP",
+      "completed": true
+    },
+    {
+      "from": "score_a53_v2_prospective_events_v1.py",
+      "to": "archive\\source\\second1m\\dependency_groups\\G005\\score_a53_v2_prospective_events_v1.py",
+      "sha256": "5095fa85786e63f5a3f7409eb098e4372a339bdbf6fd95b48ec801d23156d01f",
+      "group_id": 5,
+      "mode": "ARCHIVE_GROUP",
+      "completed": true
+    },
+    {
+      "from": "update_altc2_prospective_v1.py",
+      "to": "archive\\source\\second1m\\dependency_groups\\G005\\update_altc2_prospective_v1.py",
+      "sha256": "0cfab990bd63c6306d9a9acb17e122de1daee083d102093862be8ddf980768d2",
+      "group_id": 5,
+      "mode": "ARCHIVE_GROUP",
+      "completed": true
+    },
+    {
+      "from": "update_altc2_prospective_v1_v2.py",
+      "to": "archive\\source\\second1m\\dependency_groups\\G005\\update_altc2_prospective_v1_v2.py",
+      "sha256": "b8dc140ae73b8769a9e7983294a587b664506b43788b71aa1eb240cfd573ed20",
+      "group_id": 5,
+      "mode": "ARCHIVE_GROUP",
+      "completed": true
+    },
+    {
+      "from": "audit_9m_2026_local_inventory.py",
+      "to": "archive\\source\\pmpd\\dependency_groups\\G006\\audit_9m_2026_local_inventory.py",
+      "sha256": "3a0ba3e021277e0e9a3c4283b97a9dd828f87ea8473578a274707e36951ec939",
+      "group_id": 6,
+      "mode": "ARCHIVE_GROUP",
+      "completed": true
+    },
+    {
+      "from": "audit_9m_2026_symbol_partitions.py",
+      "to": "archive\\source\\pmpd\\dependency_groups\\G006\\audit_9m_2026_symbol_partitions.py",
+      "sha256": "84892dfe2b83988a9fc34eef271baae1a8db2a0a255446a0eafe3b91384d903d",
+      "group_id": 6,
+      "mode": "ARCHIVE_GROUP",
+      "completed": true
+    },
+    {
+      "from": "audit_9m_2026_symbol_partitions_v2.py",
+      "to": "archive\\source\\pmpd\\dependency_groups\\G006\\audit_9m_2026_symbol_partitions_v2.py",
+      "sha256": "a213c052e9849e37d843a82103688030268831b586e4afe691231f9f8ab760a9",
+      "group_id": 6,
+      "mode": "ARCHIVE_GROUP",
+      "completed": true
+    },
+    {
+      "from": "audit_9n_preserved_tv_parity_evidence_v1.py",
+      "to": "archive\\source\\pmpd\\dependency_groups\\G007\\audit_9n_preserved_tv_parity_evidence_v1.py",
+      "sha256": "cf4e7936b9c755b078ad2397f07f2cab415d05acd4b0e714c38c38fe33dc9f0b",
+      "group_id": 7,
+      "mode": "ARCHIVE_GROUP",
+      "completed": true
+    },
+    {
+      "from": "recover_9n_parity_reference_evidence_v1.py",
+      "to": "archive\\source\\pmpd\\dependency_groups\\G007\\recover_9n_parity_reference_evidence_v1.py",
+      "sha256": "beb8d0bb72364d43fc5932a9c5d60608b4ed8797288fadc82f2fdd0ac9237bb3",
+      "group_id": 7,
+      "mode": "ARCHIVE_GROUP",
+      "completed": true
+    },
+    {
+      "from": "certify_9n_v4_reconstruction_static_v1.py",
+      "to": "archive\\source\\pmpd\\dependency_groups\\G010\\certify_9n_v4_reconstruction_static_v1.py",
+      "sha256": "4651c6c0c845a7b3d211bebb7ff4f6c46f3d019f1ba75dd06719a6ee643b6f12",
+      "group_id": 10,
+      "mode": "ARCHIVE_GROUP",
+      "completed": true
+    },
+    {
+      "from": "v4_parity_engine_v1.py",
+      "to": "archive\\source\\pmpd\\dependency_groups\\G010\\v4_parity_engine_v1.py",
+      "sha256": "c1710736da927d1d3b6e19ce36cf1a04098d9eac23213af5a958808e9e602d00",
+      "group_id": 10,
+      "mode": "ARCHIVE_GROUP",
+      "completed": true
+    },
+    {
+      "from": "certify_v2_full50.py",
+      "to": "archive\\source\\pmpd\\dependency_groups\\G011\\certify_v2_full50.py",
+      "sha256": "0e1c8de64c3d95c78584d252de49f232cf55d0ba823ca1cbc7e65a03024c7fee",
+      "group_id": 11,
+      "mode": "ARCHIVE_GROUP",
+      "completed": true
+    },
+    {
+      "from": "patch_certify_v2_full50_parity.py",
+      "to": "archive\\source\\pmpd\\dependency_groups\\G011\\patch_certify_v2_full50_parity.py",
+      "sha256": "1fe8448cbd9874f441c1ed321fad899a6630f22665bf624faf134021fee948cc",
+      "group_id": 11,
+      "mode": "ARCHIVE_GROUP",
+      "completed": true
+    },
+    {
+      "from": "certify_v2_outcome_independence.py",
+      "to": "archive\\source\\pmpd\\dependency_groups\\G012\\certify_v2_outcome_independence.py",
+      "sha256": "9b69f03249e2a44eb14090f7e02af9faae053dafc1353002c703585fba0f3624",
+      "group_id": 12,
+      "mode": "ARCHIVE_GROUP",
+      "completed": true
+    },
+    {
+      "from": "derive_and_certify_dp4_structural_clearance.py",
+      "to": "archive\\source\\pmpd\\dependency_groups\\G012\\derive_and_certify_dp4_structural_clearance.py",
+      "sha256": "383a1f5fc98222685f9d271c6c5e34ed4da841a2346639a8743b38437d46da30",
+      "group_id": 12,
+      "mode": "ARCHIVE_GROUP",
+      "completed": true
+    },
+    {
+      "from": "install_and_msft_preflight.ps1",
+      "to": "archive\\source\\pmpd\\dependency_groups\\G012\\install_and_msft_preflight.ps1",
+      "sha256": "fe4c69e1e704b678f0921dd607bc6365fbb45ae6ba6464bcb87142713f52162d",
+      "group_id": 12,
+      "mode": "ARCHIVE_GROUP",
+      "completed": true
+    },
+    {
+      "from": "patch_dp4_derivation_duplicate_decision_id.py",
+      "to": "archive\\source\\pmpd\\dependency_groups\\G012\\patch_dp4_derivation_duplicate_decision_id.py",
+      "sha256": "31d59e46bec241ea4a9257a322bb58a878a8f1bfaebc7f0549307ca13683115b",
+      "group_id": 12,
+      "mode": "ARCHIVE_GROUP",
+      "completed": true
+    },
+    {
+      "from": "patch_dp4_derivation_timezone.py",
+      "to": "archive\\source\\pmpd\\dependency_groups\\G012\\patch_dp4_derivation_timezone.py",
+      "sha256": "c61fc11e8cc65695a780370fef6660368be87652dc670dee0cc813ba575c48b4",
+      "group_id": 12,
+      "mode": "ARCHIVE_GROUP",
+      "completed": true
+    },
+    {
+      "from": "patch_outcome_independence_comment_filter.py",
+      "to": "archive\\source\\pmpd\\dependency_groups\\G012\\patch_outcome_independence_comment_filter.py",
+      "sha256": "36decba6a62963dfd68ae27699594cba459660e2c25e0059f3b4a2e9b6421e7f",
+      "group_id": 12,
+      "mode": "ARCHIVE_GROUP",
+      "completed": true
+    },
+    {
+      "from": "vwap_event_path_v2.py",
+      "to": "archive\\source\\pmpd\\dependency_groups\\G012\\vwap_event_path_v2.py",
+      "sha256": "c8e45976ffe921e2e3395c4abcb90815c6872cc8bbdb8442e4ed8cf56a0cb8e5",
+      "group_id": 12,
+      "mode": "ARCHIVE_GROUP",
+      "completed": true
+    },
+    {
+      "from": "patch_9k_discovery_bool_cast.py",
+      "to": "archive\\source\\pmpd\\dependency_groups\\G023\\patch_9k_discovery_bool_cast.py",
+      "sha256": "4bf6c635d30dddb12e106613faaaf502fb0dfe50f0a89d146f2ee6416ae28da4",
+      "group_id": 23,
+      "mode": "ARCHIVE_GROUP",
+      "completed": true
+    },
+    {
+      "from": "run_9k_classifier_discovery_v1.py",
+      "to": "archive\\source\\pmpd\\dependency_groups\\G023\\run_9k_classifier_discovery_v1.py",
+      "sha256": "2585f8fb05490e5ee91d56a6d4cfa1cfec2f64684c2e22aead488535219ef330",
+      "group_id": 23,
+      "mode": "ARCHIVE_GROUP",
+      "completed": true
+    },
+    {
+      "from": "patch_discovery_stage1_restrict_features.py",
+      "to": "archive\\source\\pmpd\\dependency_groups\\G024\\patch_discovery_stage1_restrict_features.py",
+      "sha256": "71de94d449859f189259e418251bfdb71a78f6e81460e91bd1239148b9fb0ba4",
+      "group_id": 24,
+      "mode": "ARCHIVE_GROUP",
+      "completed": true
+    },
+    {
+      "from": "run_9j_vwap_v2_discovery_stage1.py",
+      "to": "archive\\source\\pmpd\\dependency_groups\\G024\\run_9j_vwap_v2_discovery_stage1.py",
+      "sha256": "36eedee26b70e523c3e5d043b68b3e46d66254d72ef0f83ed153298457dc1994",
+      "group_id": 24,
+      "mode": "ARCHIVE_GROUP",
+      "completed": true
+    },
+    {
+      "from": "patch_validation_robustness_block_repair_v3.py",
+      "to": "archive\\source\\pmpd\\dependency_groups\\G025\\patch_validation_robustness_block_repair_v3.py",
+      "sha256": "29b71b0b909e50b1e49a06c1c1619ce5ee9519a86256bbe789eefeb99ad63dbb",
+      "group_id": 25,
+      "mode": "ARCHIVE_GROUP",
+      "completed": true
+    },
+    {
+      "from": "patch_validation_robustness_corr_scope_v2.py",
+      "to": "archive\\source\\pmpd\\dependency_groups\\G025\\patch_validation_robustness_corr_scope_v2.py",
+      "sha256": "8792e37048f6baf5fe937aab209d93a12351b90c0febb1b1ba308c620bd8c933",
+      "group_id": 25,
+      "mode": "ARCHIVE_GROUP",
+      "completed": true
+    },
+    {
+      "from": "patch_validation_robustness_no_scipy.py",
+      "to": "archive\\source\\pmpd\\dependency_groups\\G025\\patch_validation_robustness_no_scipy.py",
+      "sha256": "92cfca2f80ad2a5a7344d4b6e66ce25dee5f3b37314212e1fd5c1f144a4ee40f",
+      "group_id": 25,
+      "mode": "ARCHIVE_GROUP",
+      "completed": true
+    },
+    {
+      "from": "summarize_9j_validation_robustness.py",
+      "to": "archive\\source\\pmpd\\dependency_groups\\G025\\summarize_9j_validation_robustness.py",
+      "sha256": "66cce632296b3776e06499680bf527893a15f89e7cd04d31999387a5d6aa42db",
+      "group_id": 25,
+      "mode": "ARCHIVE_GROUP",
+      "completed": true
+    },
+    {
+      "from": "run_controlled_batch.py",
+      "to": "scripts\\market_data\\utilities\\run_controlled_batch.py",
+      "sha256": "bc55fcc22957511ccb604d52e79b77eb90ed185040d14ce51d28a592630fc556",
+      "group_id": 37,
+      "mode": "NORMAL_GROUP",
+      "completed": true
+    }
+  ]
+}

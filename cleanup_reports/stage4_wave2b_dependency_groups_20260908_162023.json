@@ -1,0 +1,298 @@
+[
+  {
+    "group_id": 1,
+    "member_count": 1,
+    "projects": "orb",
+    "phases": "legacy",
+    "status": "GROUP_MOVE_CANDIDATE",
+    "members": "6_2.pine"
+  },
+  {
+    "group_id": 2,
+    "member_count": 27,
+    "projects": "pmpd",
+    "phases": "9n | v4",
+    "status": "HOLD_SENSITIVE_GROUP",
+    "members": "PM + PD Breakout Monitor - V4 8H-7 Parity Capture.pine | PM + PD Breakout Monitor - V4 Forward Validation FINAL.pine | PM_PD_Breakout_V4_8H7_Parity_Capture.pine | PM_PD_Breakout_V4_8H7_Parity_Capture_FULL.pine | PM_PD_Breakout_V4_9N_3F3_COMPACT_CSV_Parity_Export.pine | PM_PD_Breakout_V4_9N_3F4_DATA_WINDOW_CSV_Parity_Export.pine | PM_PD_Breakout_V4_9N_3F5_FROZEN_DATE_LEVEL_CSV_Parity_Export.pine | PM_PD_Breakout_V4_9N_3F_CSV_Parity_Export.pine | certify_9n_v4_engine_semantics_v2.py | extract_9n_v4_source_semantics_utf8_v1.py | extract_9n_v4_source_semantics_v1.py | inspect_v4_parity_validation.py | patch_9n_3f2_compact_csv_parity.py | patch_9n_3f3_robust_compact_csv_parity.py | patch_9n_3f4_data_window_csv_export.py | patch_9n_3f5_frozen_date_level_export.py | patch_9n_3f_csv_parity_export.py | run_9n_3g2_vrtx_first_parity_case.py | run_9n_3g3_vrtx_first_parity_case.py | run_9n_3g4_vrtx_first_parity_case.py | run_9n_3g_vrtx_first_parity_case.py | run_9n_3m_24case_python_baseline.py | run_9n_3q_pine_pm_counterfactual.py | run_9n_3r_h2h_preflight.py | run_9n_3s2_final_h2h.py | run_9n_3s_final_h2h.py | v4_parity_engine_v2.py"
+  },
+  {
+    "group_id": 3,
+    "member_count": 1,
+    "projects": "pmpd",
+    "phases": "v4",
+    "status": "HOLD_SENSITIVE_GROUP",
+    "members": "PM_PD_Breakout_V4_8H7_Parity_Capture_PRE_PATCH_BACKUP.pine"
+  },
+  {
+    "group_id": 4,
+    "member_count": 1,
+    "projects": "utilities",
+    "phases": "misc",
+    "status": "GROUP_MOVE_CANDIDATE",
+    "members": "Test.py"
+  },
+  {
+    "group_id": 5,
+    "member_count": 29,
+    "projects": "second1m",
+    "phases": "a37_a56 | ae2 | altc2 | ingestion | legacy",
+    "status": "GROUP_MOVE_CANDIDATE",
+    "members": "acquire_second1m_alt_entry_universe.py | extract_a51_a39_original_predictor_bucketing_scope_v1.py | find_altc2_latest_available_date_v1.py | report_a53_v2_prospective_checkpoint_v1.py | report_altc2_prospective_checkpoint_v1.py | research_second1m_ae2_c2_predictors_v1.py | research_second1m_ae2_daily_trend_v1.py | research_second1m_ae2_ma_context_v1.py | research_second1m_ae2_market_regime_v1.py | research_second1m_ae2_opening_volume_v1.py | research_second1m_ae2_relative_strength_robustness_v1.py | research_second1m_ae2_relative_strength_v1.py | research_second1m_ae2_session_levels_v1.py | research_second1m_ae2_short_ma_warning_v1.py | research_second1m_ae2_three_index_regime_v1.py | research_second1m_ae2_trend_exhaustion_robustness_v1.py | research_second1m_ae2_volume_robustness_v1.py | research_second1m_ae2_weekly_trend_v1.py | research_second1m_alt_entry_v1.py | run_altc2_prospective_validation_v1.py | run_altc2_prospective_validation_v1_1.py | run_altc2_prospective_validation_v1_2.py | run_altc2_prospective_validation_v1_3.py | run_altc2_prospective_validation_v1_4.py | run_altc2_prospective_validation_v1_5.py | run_altc2_prospective_validation_v1_6.py | score_a53_v2_prospective_events_v1.py | update_altc2_prospective_v1.py | update_altc2_prospective_v1_v2.py"
+  },
+  {
+    "group_id": 6,
+    "member_count": 3,
+    "projects": "pmpd",
+    "phases": "9m",
+    "status": "GROUP_MOVE_CANDIDATE",
+    "members": "audit_9m_2026_local_inventory.py | audit_9m_2026_symbol_partitions.py | audit_9m_2026_symbol_partitions_v2.py"
+  },
+  {
+    "group_id": 7,
+    "member_count": 2,
+    "projects": "pmpd",
+    "phases": "9n",
+    "status": "GROUP_MOVE_CANDIDATE",
+    "members": "audit_9n_preserved_tv_parity_evidence_v1.py | recover_9n_parity_reference_evidence_v1.py"
+  },
+  {
+    "group_id": 8,
+    "member_count": 1,
+    "projects": "second1m",
+    "phases": "a37_a56",
+    "status": "HOLD_SENSITIVE_GROUP",
+    "members": "audit_a39_frozen_transition_buckets_v1.py"
+  },
+  {
+    "group_id": 9,
+    "member_count": 1,
+    "projects": "second1m",
+    "phases": "a37_a56",
+    "status": "HOLD_SENSITIVE_GROUP",
+    "members": "build_a53_candidate_model_v2_prospective_protocol_v1.py"
+  },
+  {
+    "group_id": 10,
+    "member_count": 2,
+    "projects": "pmpd",
+    "phases": "9n | v4",
+    "status": "GROUP_MOVE_CANDIDATE",
+    "members": "certify_9n_v4_reconstruction_static_v1.py | v4_parity_engine_v1.py"
+  },
+  {
+    "group_id": 11,
+    "member_count": 2,
+    "projects": "pmpd",
+    "phases": "9j | legacy",
+    "status": "GROUP_MOVE_CANDIDATE",
+    "members": "certify_v2_full50.py | patch_certify_v2_full50_parity.py"
+  },
+  {
+    "group_id": 12,
+    "member_count": 7,
+    "projects": "pmpd",
+    "phases": "9h | legacy",
+    "status": "GROUP_MOVE_CANDIDATE",
+    "members": "certify_v2_outcome_independence.py | derive_and_certify_dp4_structural_clearance.py | install_and_msft_preflight.ps1 | patch_dp4_derivation_duplicate_decision_id.py | patch_dp4_derivation_timezone.py | patch_outcome_independence_comment_filter.py | vwap_event_path_v2.py"
+  },
+  {
+    "group_id": 13,
+    "member_count": 1,
+    "projects": "second1m",
+    "phases": "a37_a56",
+    "status": "HOLD_SENSITIVE_GROUP",
+    "members": "evaluate_a52_frozen_v2_architecture_outcomes_v1.py"
+  },
+  {
+    "group_id": 14,
+    "member_count": 1,
+    "projects": "second1m",
+    "phases": "a37_a56",
+    "status": "HOLD_SENSITIVE_GROUP",
+    "members": "extract_a51_original_frozen_candidate_definitions_v1.py"
+  },
+  {
+    "group_id": 15,
+    "member_count": 1,
+    "projects": "pmpd",
+    "phases": "9j",
+    "status": "HOLD_SENSITIVE_GROUP",
+    "members": "freeze_9j_vwap_v2_validation_protocol.py"
+  },
+  {
+    "group_id": 16,
+    "member_count": 1,
+    "projects": "second1m",
+    "phases": "a37_a56",
+    "status": "HOLD_SENSITIVE_GROUP",
+    "members": "freeze_a52_candidate_model_v2_v1.py"
+  },
+  {
+    "group_id": 17,
+    "member_count": 1,
+    "projects": "second1m",
+    "phases": "a37_a56",
+    "status": "HOLD_SENSITIVE_GROUP",
+    "members": "inventory_a39_a37_frozen_geometry_sources_v1.py"
+  },
+  {
+    "group_id": 18,
+    "member_count": 1,
+    "projects": "second1m",
+    "phases": "a37_a56",
+    "status": "HOLD_SENSITIVE_GROUP",
+    "members": "inventory_a51_2_frozen_candidate_encodings_v1.py"
+  },
+  {
+    "group_id": 19,
+    "member_count": 1,
+    "projects": "second1m",
+    "phases": "a37_a56",
+    "status": "HOLD_SENSITIVE_GROUP",
+    "members": "inventory_a51_a39_frozen_cutpoints_v1.py"
+  },
+  {
+    "group_id": 20,
+    "member_count": 1,
+    "projects": "second1m",
+    "phases": "a37_a56",
+    "status": "HOLD_SENSITIVE_GROUP",
+    "members": "inventory_a51_a39_frozen_encoding_v1.py"
+  },
+  {
+    "group_id": 21,
+    "member_count": 1,
+    "projects": "second1m",
+    "phases": "a37_a56",
+    "status": "HOLD_SENSITIVE_GROUP",
+    "members": "inventory_a51_frozen_quintile_assignments_v1.py"
+  },
+  {
+    "group_id": 22,
+    "member_count": 3,
+    "projects": "pmpd",
+    "phases": "9h",
+    "status": "HOLD_SENSITIVE_GROUP",
+    "members": "join_and_audit_frozen_9h_outcomes.py | patch_outcome_join_ambiguous_same_bar.py | patch_outcome_join_prefer_canonical_label.py"
+  },
+  {
+    "group_id": 23,
+    "member_count": 2,
+    "projects": "pmpd",
+    "phases": "9k",
+    "status": "GROUP_MOVE_CANDIDATE",
+    "members": "patch_9k_discovery_bool_cast.py | run_9k_classifier_discovery_v1.py"
+  },
+  {
+    "group_id": 24,
+    "member_count": 2,
+    "projects": "pmpd",
+    "phases": "9j | legacy",
+    "status": "GROUP_MOVE_CANDIDATE",
+    "members": "patch_discovery_stage1_restrict_features.py | run_9j_vwap_v2_discovery_stage1.py"
+  },
+  {
+    "group_id": 25,
+    "member_count": 4,
+    "projects": "pmpd",
+    "phases": "9j",
+    "status": "GROUP_MOVE_CANDIDATE",
+    "members": "patch_validation_robustness_block_repair_v3.py | patch_validation_robustness_corr_scope_v2.py | patch_validation_robustness_no_scipy.py | summarize_9j_validation_robustness.py"
+  },
+  {
+    "group_id": 26,
+    "member_count": 1,
+    "projects": "second1m",
+    "phases": "a37_a56",
+    "status": "HOLD_SENSITIVE_GROUP",
+    "members": "research_a42_discovery_frozen_quintile_screen_v1.py"
+  },
+  {
+    "group_id": 27,
+    "member_count": 1,
+    "projects": "second1m",
+    "phases": "a37_a56",
+    "status": "HOLD_SENSITIVE_GROUP",
+    "members": "research_a43_discovery_frozen_quintile_screen_v1.py"
+  },
+  {
+    "group_id": 28,
+    "member_count": 1,
+    "projects": "second1m",
+    "phases": "a37_a56",
+    "status": "HOLD_SENSITIVE_GROUP",
+    "members": "research_a44_discovery_frozen_quintile_screen_v1.py"
+  },
+  {
+    "group_id": 29,
+    "member_count": 1,
+    "projects": "second1m",
+    "phases": "a37_a56",
+    "status": "HOLD_SENSITIVE_GROUP",
+    "members": "research_a47_discovery_frozen_confluence_quintile_screen_v1.py"
+  },
+  {
+    "group_id": 30,
+    "member_count": 1,
+    "projects": "second1m",
+    "phases": "a37_a56",
+    "status": "HOLD_SENSITIVE_GROUP",
+    "members": "research_a49_discovery_frozen_opening_liquidity_quintile_screen_v1.py"
+  },
+  {
+    "group_id": 31,
+    "member_count": 1,
+    "projects": "second1m",
+    "phases": "ae2",
+    "status": "HOLD_SENSITIVE_GROUP",
+    "members": "research_second1m_ae2_candidate_models_v1.py"
+  },
+  {
+    "group_id": 32,
+    "member_count": 1,
+    "projects": "second1m",
+    "phases": "ae2",
+    "status": "HOLD_SENSITIVE_GROUP",
+    "members": "research_second1m_ae2_final_temporal_audit_v1.py"
+  },
+  {
+    "group_id": 33,
+    "member_count": 1,
+    "projects": "pmpd",
+    "phases": "9j",
+    "status": "HOLD_SENSITIVE_GROUP",
+    "members": "run_9j_vwap_v2_frozen_validation.py"
+  },
+  {
+    "group_id": 34,
+    "member_count": 1,
+    "projects": "pmpd",
+    "phases": "9k",
+    "status": "HOLD_SENSITIVE_GROUP",
+    "members": "run_9k_frozen_ablation_v1.py"
+  },
+  {
+    "group_id": 35,
+    "member_count": 1,
+    "projects": "pmpd",
+    "phases": "9k",
+    "status": "HOLD_SENSITIVE_GROUP",
+    "members": "run_9k_frozen_validation_v1.py"
+  },
+  {
+    "group_id": 36,
+    "member_count": 1,
+    "projects": "pmpd",
+    "phases": "9m",
+    "status": "HOLD_SENSITIVE_GROUP",
+    "members": "run_9m_frozen_oos_evaluation_v1.py"
+  },
+  {
+    "group_id": 37,
+    "member_count": 1,
+    "projects": "market_data",
+    "phases": "utilities",
+    "status": "GROUP_MOVE_CANDIDATE",
+    "members": "run_controlled_batch.py"
+  }
+]

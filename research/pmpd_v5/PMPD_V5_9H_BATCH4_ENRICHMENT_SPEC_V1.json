@@ -1,0 +1,22 @@
+{
+  "enrichment_version": "PMPD_V5_9H_ENRICHMENT_V1",
+  "parent_dataset_version": "PMPD_V5_9H_RESEARCH_DATASET_V1",
+  "protocol_id": "PMPD_V5_9H_FACTOR_PROTOCOL_V1",
+  "frozen_before_results": true,
+  "factor_definitions": {
+    "V5L02": "stack_width_abs / RTH-local completed 1m Wilder ATR14; ATR resets each RTH day; min 14 completed RTH bars.",
+    "V5L11": "Count of PM/AH/PD directional levels strictly pre-cleared by the 09:30 RTH opening price.",
+    "V5L12": "RTH open location: BEFORE_INNER, BETWEEN_INNER_MIDDLE, BETWEEN_MIDDLE_OUTER, BEYOND_OUTER, or ON_LEVEL_BOUNDARY.",
+    "V5S01": "Identity/identities touched on DP1 bar; simultaneous within-bar touches encoded MULTI_* rather than fake ordering.",
+    "V5S02": "Identity/identities traded beyond on DP2 bar; simultaneous clears encoded MULTI_*.",
+    "V5S13": "Cumulative close-vector bit flips beyond each identity's initial flip, measured only through the current decision timestamp.",
+    "V5S14": "Ordered close-vector transition signature from 000 through the current decision timestamp.",
+    "V5R08": "Elapsed minutes and transition count since most recent 111 -> non-111 deterioration, measured through the current decision; primarily adjudicated at DP10-DP12."
+  },
+  "leakage_guards": [
+    "No future parent-event attempt count.",
+    "No final maximum levels cleared as predictor at earlier DPs.",
+    "No transitions after decision timestamp.",
+    "No intrabar ordering invented when multiple levels touch/clear in same 1m bar."
+  ]
+}

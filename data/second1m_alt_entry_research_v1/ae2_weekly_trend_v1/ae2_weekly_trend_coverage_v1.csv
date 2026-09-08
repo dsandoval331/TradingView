@@ -1,0 +1,14 @@
+feature,available_n,coverage_pct
+weekly_ret_1w_pct,8189,98.5795112555676
+weekly_ret_2w_pct,8060,97.0266040688576
+weekly_ret_4w_pct,7820,94.13747441916456
+weekly_ret_8w_pct,7261,87.40820994342121
+weekly_ema9,7261,87.40820994342121
+weekly_ema20,5920,71.2651980257614
+weekly_close_vs_ema9_pct,7261,87.40820994342121
+weekly_close_vs_ema20_pct,5920,71.2651980257614
+weekly_ema9_vs_ema20_pct,5920,71.2651980257614
+weekly_close_vs_sma20_pct,5920,71.2651980257614
+weekly_ema9_slope_1w_pct,7093,85.38581918863609
+weekly_ema20_slope_1w_pct,5795,69.76044299987961
+weekly_trend_score,5920,71.2651980257614

@@ -1,0 +1,7 @@
+-- PM+PD V5 9M-8 DP4 candidate population freeze — 2026-09-08
+-- Deterministic selection:
+--   decision_type = 'DP4_FULL_STACK_FIRST_CLEAR'
+--   primary_decision_unit = true
+--   primary_inference_eligible = true
+-- No outcome summarization in this step.
+-- Candidate remains PMPD_V5_CANDIDATE_DP4_UNSCORED_V1.

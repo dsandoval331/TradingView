@@ -1,0 +1,17 @@
+feature,available_n,coverage_pct
+dia_daily_ret_1d_pct,8254,97.59962161522999
+dia_daily_ret_5d_pct,8164,96.5354144495684
+dia_daily_ret_10d_pct,8029,94.93910370107604
+dia_daily_close_vs_ema20_pct,7790,92.11304245004139
+dia_daily_ema9_vs_ema20_pct,7790,92.11304245004139
+dia_weekly_ret_1w_pct,8339,98.60470616057704
+dia_weekly_ret_4w_pct,7970,94.24145678136455
+dia_weekly_ret_8w_pct,7411,87.63154783019984
+dia_weekly_close_vs_ema20_pct,6070,71.77486106184226
+dia_market_week_end,8427,99.6452642781128
+market_3idx_prior_1d_state,8457,100.0
+market_3idx_prior_5d_state,8457,100.0
+market_3idx_daily_ema20_state,8457,100.0
+market_3idx_prior_1w_state,8457,100.0
+market_3idx_prior_4w_state,8457,100.0
+market_3idx_weekly_ema20_state,8457,100.0

@@ -1,4 +1,6 @@
-from __future__ import annotations
+﻿from __future__ import annotations
+
+import argparse
 
 from tr_platform.downloader.batch_acquisition import (
     acquire_batch,
@@ -6,23 +8,47 @@ from tr_platform.downloader.batch_acquisition import (
 )
 
 
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Run a controlled MARKET_CACHE_V1 batch acquisition."
+    )
+
+    parser.add_argument(
+        "--symbols",
+        nargs="+",
+        required=True,
+        help="One or more ticker symbols, e.g. SPY QQQ DIA XLE XLK",
+    )
+
+    parser.add_argument(
+        "--year",
+        type=int,
+        required=True,
+        help="Calendar year to acquire.",
+    )
+
+    parser.add_argument(
+        "--stop-on-error",
+        action="store_true",
+        help="Stop immediately if any symbol fails.",
+    )
+
+    return parser.parse_args()
+
+
 def main() -> None:
-    # Controlled 8H-6A-6D production-style batch.
-    #
-    # Expected on first run:
-    #   AAPL 2025 -> SKIPPED_COMPLETE
-    #   MSFT 2025 -> DOWNLOADED
-    #   NVDA 2025 -> DOWNLOADED
-    #
-    # Expected on second run:
-    #   all three -> SKIPPED_COMPLETE
+    args = parse_args()
+
     items = [
-        ("AAPL", 2025),
-        ("MSFT", 2025),
-        ("NVDA", 2025),
+        (symbol.upper().strip(), args.year)
+        for symbol in args.symbols
     ]
 
-    summary = acquire_batch(items)
+    summary = acquire_batch(
+        items,
+        continue_on_error=not args.stop_on_error,
+    )
+
     print_batch_summary(summary)
 
     if summary.failed:

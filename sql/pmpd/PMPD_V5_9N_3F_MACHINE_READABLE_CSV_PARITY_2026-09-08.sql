@@ -1,0 +1,7 @@
+-- PM+PD V5 9N-3F — Machine-Readable TradingView CSV Parity Export
+-- Original frozen V4 source unchanged.
+-- Additive patched copy only.
+-- TradingView CSV supplies Pine implementation truth.
+-- Massive remains canonical market-data source for Python evaluation.
+-- TradingView parity not yet validated.
+-- V5 unchanged. Production rule unauthorized.

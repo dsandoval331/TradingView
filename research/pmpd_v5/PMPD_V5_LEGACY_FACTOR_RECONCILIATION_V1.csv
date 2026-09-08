@@ -1,0 +1,206 @@
+legacy_factor_code,legacy_family,legacy_factor_name,v5_disposition,target_phase,mapping_note
+A01,A_SETUP_QUALITY,Breakout penetration beyond required PM/PD levels,REFRAME_EVENT_ARCHITECTURE,9H,Translate V4 signal/breakout wording to event decision-point measurements.
+A02,A_SETUP_QUALITY,Breakout candle body-to-range ratio,REFRAME_EVENT_ARCHITECTURE,9H,Translate V4 signal/breakout wording to event decision-point measurements.
+A03,A_SETUP_QUALITY,Strong-close / close-location percentage,REFRAME_EVENT_ARCHITECTURE,9H,Translate V4 signal/breakout wording to event decision-point measurements.
+A04,A_SETUP_QUALITY,Breakout candle range vs ATR,REFRAME_EVENT_ARCHITECTURE,9H,Translate V4 signal/breakout wording to event decision-point measurements.
+A05,A_SETUP_QUALITY,Directional candle quality,REFRAME_EVENT_ARCHITECTURE,9H,Translate V4 signal/breakout wording to event decision-point measurements.
+A06,A_SETUP_QUALITY,Breakout speed / velocity,REFRAME_EVENT_ARCHITECTURE,9H,Translate V4 signal/breakout wording to event decision-point measurements.
+A07,A_SETUP_QUALITY,Pre-signal 1-minute velocity,REFRAME_EVENT_ARCHITECTURE,9H,Translate V4 signal/breakout wording to event decision-point measurements.
+A08,A_SETUP_QUALITY,Pre-signal 2-minute velocity,REFRAME_EVENT_ARCHITECTURE,9H,Translate V4 signal/breakout wording to event decision-point measurements.
+A09,A_SETUP_QUALITY,Pre-signal 3-minute velocity,REFRAME_EVENT_ARCHITECTURE,9H,Translate V4 signal/breakout wording to event decision-point measurements.
+A10,A_SETUP_QUALITY,Pre-signal acceleration / deceleration,REFRAME_EVENT_ARCHITECTURE,9H,Translate V4 signal/breakout wording to event decision-point measurements.
+A11,A_SETUP_QUALITY,Distance between required PM/PD breakout levels,REFRAME_EVENT_ARCHITECTURE,9H,Translate V4 signal/breakout wording to event decision-point measurements.
+A12,A_SETUP_QUALITY,ATR-normalized distance between required levels,REFRAME_EVENT_ARCHITECTURE,9H,Translate V4 signal/breakout wording to event decision-point measurements.
+A13,A_SETUP_QUALITY,Which required level was crossed first,REFRAME_EVENT_ARCHITECTURE,9H,Translate V4 signal/breakout wording to event decision-point measurements.
+A14,A_SETUP_QUALITY,Time between first-level and second-level break,REFRAME_EVENT_ARCHITECTURE,9H,Translate V4 signal/breakout wording to event decision-point measurements.
+A15,A_SETUP_QUALITY,Distance traveled before final breakout / pre-signal extension,REFRAME_EVENT_ARCHITECTURE,9H,Translate V4 signal/breakout wording to event decision-point measurements.
+A16,A_SETUP_QUALITY,Volume at breakout,REFRAME_EVENT_ARCHITECTURE,9H,Translate V4 signal/breakout wording to event decision-point measurements.
+A17,A_SETUP_QUALITY,Relative-volume / volume expansion,REFRAME_EVENT_ARCHITECTURE,9H,Translate V4 signal/breakout wording to event decision-point measurements.
+A18,A_SETUP_QUALITY,Existing PM+PD Strength Score validation,BENCHMARK_ONLY,9N,"Preserve frozen V4 score/profile/priority constructs for benchmark comparison, not V5 discovery truth."
+A19,A_SETUP_QUALITY,Existing Grade validation,BENCHMARK_ONLY,9N,"Preserve frozen V4 score/profile/priority constructs for benchmark comparison, not V5 discovery truth."
+A20,A_SETUP_QUALITY,Existing V4 Profile validation,BENCHMARK_ONLY,9N,"Preserve frozen V4 score/profile/priority constructs for benchmark comparison, not V5 discovery truth."
+A21,A_SETUP_QUALITY,Grade x V4 Profile validation,BENCHMARK_ONLY,9N,"Preserve frozen V4 score/profile/priority constructs for benchmark comparison, not V5 discovery truth."
+A22,A_SETUP_QUALITY,PRIME vs CONDITIONAL vs suppressed populations,BENCHMARK_ONLY,9N,"Preserve frozen V4 score/profile/priority constructs for benchmark comparison, not V5 discovery truth."
+A23,A_SETUP_QUALITY,EXPANSION vs SCALP behavior,BENCHMARK_ONLY,9N,"Preserve frozen V4 score/profile/priority constructs for benchmark comparison, not V5 discovery truth."
+B01,B_STOCK_CONTEXT,Previous-day stock candle direction,CARRY_CONTEXT,9H,Context concept remains valid; attach outcome-blind value to each V5 decision point.
+B02,B_STOCK_CONTEXT,Previous-day stock return magnitude,CARRY_CONTEXT,9H,Context concept remains valid; attach outcome-blind value to each V5 decision point.
+B03,B_STOCK_CONTEXT,Previous-day candle body strength,CARRY_CONTEXT,9H,Context concept remains valid; attach outcome-blind value to each V5 decision point.
+B04,B_STOCK_CONTEXT,Previous-day candle range,CARRY_CONTEXT,9H,Context concept remains valid; attach outcome-blind value to each V5 decision point.
+B05,B_STOCK_CONTEXT,Previous-day range normalized by ATR,CARRY_CONTEXT,9H,Context concept remains valid; attach outcome-blind value to each V5 decision point.
+B06,B_STOCK_CONTEXT,Previous-day close location,CARRY_CONTEXT,9H,Context concept remains valid; attach outcome-blind value to each V5 decision point.
+B07,B_STOCK_CONTEXT,Previous-day candle strength composite,CARRY_CONTEXT,9H,Context concept remains valid; attach outcome-blind value to each V5 decision point.
+B08,B_STOCK_CONTEXT,Stock 3-day trend,CARRY_CONTEXT,9H,Context concept remains valid; attach outcome-blind value to each V5 decision point.
+B09,B_STOCK_CONTEXT,Stock 5-day trend,CARRY_CONTEXT,9H,Context concept remains valid; attach outcome-blind value to each V5 decision point.
+B10,B_STOCK_CONTEXT,Stock 10-day trend,CARRY_CONTEXT,9H,Context concept remains valid; attach outcome-blind value to each V5 decision point.
+B11,B_STOCK_CONTEXT,Stock 20-day trend,CARRY_CONTEXT,9H,Context concept remains valid; attach outcome-blind value to each V5 decision point.
+B12,B_STOCK_CONTEXT,Multi-day trend strength / slope,CARRY_CONTEXT,9H,Context concept remains valid; attach outcome-blind value to each V5 decision point.
+B13,B_STOCK_CONTEXT,HH/HL vs LH/LL structure,CARRY_CONTEXT,9H,Context concept remains valid; attach outcome-blind value to each V5 decision point.
+B14,B_STOCK_CONTEXT,Higher-timeframe moving-average position / slope,CARRY_CONTEXT,9H,Context concept remains valid; attach outcome-blind value to each V5 decision point.
+B15,B_STOCK_CONTEXT,Weekly symbol bias,CARRY_CONTEXT,9H,Context concept remains valid; attach outcome-blind value to each V5 decision point.
+B16,B_STOCK_CONTEXT,Weekly-bias strength,CARRY_CONTEXT,9H,Context concept remains valid; attach outcome-blind value to each V5 decision point.
+B17,B_STOCK_CONTEXT,Signal x weekly-bias alignment,REFRAME_DECISION_POINT,9H,Measure at explicit V5 decision points rather than only at a V4 signal.
+B18,B_STOCK_CONTEXT,Gap direction,CARRY_CONTEXT,9H,Context concept remains valid; attach outcome-blind value to each V5 decision point.
+B19,B_STOCK_CONTEXT,Gap magnitude,CARRY_CONTEXT,9H,Context concept remains valid; attach outcome-blind value to each V5 decision point.
+B20,B_STOCK_CONTEXT,Gap alignment with breakout,REFRAME_DECISION_POINT,9H,Measure at explicit V5 decision points rather than only at a V4 signal.
+B21,B_STOCK_CONTEXT,Premarket direction / trend,CARRY_CONTEXT,9H,Context concept remains valid; attach outcome-blind value to each V5 decision point.
+B22,B_STOCK_CONTEXT,Premarket move magnitude,CARRY_CONTEXT,9H,Context concept remains valid; attach outcome-blind value to each V5 decision point.
+B23,B_STOCK_CONTEXT,Premarket range,CARRY_CONTEXT,9H,Context concept remains valid; attach outcome-blind value to each V5 decision point.
+B24,B_STOCK_CONTEXT,Premarket position relative to previous-day levels,CARRY_CONTEXT,9H,Context concept remains valid; attach outcome-blind value to each V5 decision point.
+B25,B_STOCK_CONTEXT,Distance from VWAP at signal,REFRAME_DECISION_POINT,9H,Measure at explicit V5 decision points rather than only at a V4 signal.
+B26,B_STOCK_CONTEXT,VWAP slope at signal,REFRAME_DECISION_POINT,9H,Measure at explicit V5 decision points rather than only at a V4 signal.
+B27,B_STOCK_CONTEXT,Signal direction vs VWAP side,REFRAME_DECISION_POINT,9H,Measure at explicit V5 decision points rather than only at a V4 signal.
+B28,B_STOCK_CONTEXT,ATR-normalized extension from VWAP,REFRAME_DECISION_POINT,9H,Measure at explicit V5 decision points rather than only at a V4 signal.
+B29,B_STOCK_CONTEXT,ATR / volatility regime,CARRY_CONTEXT,9H,Context concept remains valid; attach outcome-blind value to each V5 decision point.
+B30,B_STOCK_CONTEXT,Normal intraday volatility regime,CARRY_CONTEXT,9H,Context concept remains valid; attach outcome-blind value to each V5 decision point.
+C01,C_MARKET_CONTEXT,Previous-day SPY direction / return,CARRY_CONTEXT,9H,Prior/multi-day market context carries forward unchanged in concept.
+C02,C_MARKET_CONTEXT,Previous-day QQQ direction / return,CARRY_CONTEXT,9H,Prior/multi-day market context carries forward unchanged in concept.
+C03,C_MARKET_CONTEXT,Previous-day DIA direction / return,CARRY_CONTEXT,9H,Prior/multi-day market context carries forward unchanged in concept.
+C04,C_MARKET_CONTEXT,Previous-day 3-index agreement,CARRY_CONTEXT,9H,Prior/multi-day market context carries forward unchanged in concept.
+C05,C_MARKET_CONTEXT,Previous-day Bullish/Bearish/Mixed regime,CARRY_CONTEXT,9H,Prior/multi-day market context carries forward unchanged in concept.
+C06,C_MARKET_CONTEXT,SPY/QQQ/DIA 3-day trends,CARRY_CONTEXT,9H,Prior/multi-day market context carries forward unchanged in concept.
+C07,C_MARKET_CONTEXT,Aggregate 3-day market trend,CARRY_CONTEXT,9H,Prior/multi-day market context carries forward unchanged in concept.
+C08,C_MARKET_CONTEXT,SPY/QQQ/DIA 5-day trends,CARRY_CONTEXT,9H,Prior/multi-day market context carries forward unchanged in concept.
+C09,C_MARKET_CONTEXT,SPY/QQQ/DIA 10-day trends,CARRY_CONTEXT,9H,Prior/multi-day market context carries forward unchanged in concept.
+C10,C_MARKET_CONTEXT,SPY/QQQ/DIA 20-day trends,CARRY_CONTEXT,9H,Prior/multi-day market context carries forward unchanged in concept.
+C11,C_MARKET_CONTEXT,Multi-day market trend strength,CARRY_CONTEXT,9H,Prior/multi-day market context carries forward unchanged in concept.
+C12,C_MARKET_CONTEXT,Current-day SPY direction at signal,REFRAME_DECISION_POINT,9H,Current-day market context must be timestamped at each V5 decision point.
+C13,C_MARKET_CONTEXT,Current-day QQQ direction at signal,REFRAME_DECISION_POINT,9H,Current-day market context must be timestamped at each V5 decision point.
+C14,C_MARKET_CONTEXT,Current-day DIA direction at signal,REFRAME_DECISION_POINT,9H,Current-day market context must be timestamped at each V5 decision point.
+C15,C_MARKET_CONTEXT,Current-day 3-index agreement,REFRAME_DECISION_POINT,9H,Current-day market context must be timestamped at each V5 decision point.
+C16,C_MARKET_CONTEXT,Current market bias,REFRAME_DECISION_POINT,9H,Current-day market context must be timestamped at each V5 decision point.
+C17,C_MARKET_CONTEXT,Signal x market-bias alignment,REFRAME_DECISION_POINT,9H,Current-day market context must be timestamped at each V5 decision point.
+C18,C_MARKET_CONTEXT,Current market move magnitude,REFRAME_DECISION_POINT,9H,Current-day market context must be timestamped at each V5 decision point.
+C19,C_MARKET_CONTEXT,Market velocity into signal,REFRAME_DECISION_POINT,9H,Current-day market context must be timestamped at each V5 decision point.
+C20,C_MARKET_CONTEXT,Market acceleration / deceleration,REFRAME_DECISION_POINT,9H,Current-day market context must be timestamped at each V5 decision point.
+C21,C_MARKET_CONTEXT,Broad-market volatility regime,REFRAME_DECISION_POINT,9H,Current-day market context must be timestamped at each V5 decision point.
+D01,D_RELATIVE_ALIGNMENT,Signal vs previous-day market regime,REFRAME_DECISION_POINT,9H,Alignment must reference V5 event direction/decision point rather than frozen V4 signal.
+D02,D_RELATIVE_ALIGNMENT,Signal vs current market regime,REFRAME_DECISION_POINT,9H,Alignment must reference V5 event direction/decision point rather than frozen V4 signal.
+D03,D_RELATIVE_ALIGNMENT,Signal vs previous-day stock direction,REFRAME_DECISION_POINT,9H,Alignment must reference V5 event direction/decision point rather than frozen V4 signal.
+D04,D_RELATIVE_ALIGNMENT,Signal vs multi-day stock trend,REFRAME_DECISION_POINT,9H,Alignment must reference V5 event direction/decision point rather than frozen V4 signal.
+D05,D_RELATIVE_ALIGNMENT,Signal vs weekly stock bias,REFRAME_DECISION_POINT,9H,Alignment must reference V5 event direction/decision point rather than frozen V4 signal.
+D06,D_RELATIVE_ALIGNMENT,Stock trend vs market trend alignment,CARRY_CONTEXT,9H,Relative/sector alignment concept carries forward at event time.
+D07,D_RELATIVE_ALIGNMENT,Stock vs SPY relative strength / weakness,CARRY_CONTEXT,9H,Relative/sector alignment concept carries forward at event time.
+D08,D_RELATIVE_ALIGNMENT,Stock vs QQQ relative strength / weakness,CARRY_CONTEXT,9H,Relative/sector alignment concept carries forward at event time.
+D09,D_RELATIVE_ALIGNMENT,Relative strength / weakness persistence,CARRY_CONTEXT,9H,Relative/sector alignment concept carries forward at event time.
+D10,D_RELATIVE_ALIGNMENT,Sector direction at signal,CARRY_CONTEXT,9H,Relative/sector alignment concept carries forward at event time.
+D11,D_RELATIVE_ALIGNMENT,Stock vs sector relative strength,CARRY_CONTEXT,9H,Relative/sector alignment concept carries forward at event time.
+D12,D_RELATIVE_ALIGNMENT,Stock x sector alignment,CARRY_CONTEXT,9H,Relative/sector alignment concept carries forward at event time.
+D13,D_RELATIVE_ALIGNMENT,Sector x market alignment,CARRY_CONTEXT,9H,Relative/sector alignment concept carries forward at event time.
+D14,D_RELATIVE_ALIGNMENT,Stock + sector + market three-way alignment,CARRY_CONTEXT,9H,Relative/sector alignment concept carries forward at event time.
+D15,D_RELATIVE_ALIGNMENT,Gap + stock trend + signal alignment,REFRAME_DECISION_POINT,9H,Alignment must reference V5 event direction/decision point rather than frozen V4 signal.
+D16,D_RELATIVE_ALIGNMENT,Previous-day stock + previous-day market alignment,CARRY_CONTEXT,9H,Relative/sector alignment concept carries forward at event time.
+D17,D_RELATIVE_ALIGNMENT,Setup strength + market regime,REFRAME_DECISION_POINT,9H,Alignment must reference V5 event direction/decision point rather than frozen V4 signal.
+D18,D_RELATIVE_ALIGNMENT,Setup strength + stock trend,REFRAME_DECISION_POINT,9H,Alignment must reference V5 event direction/decision point rather than frozen V4 signal.
+D19,D_RELATIVE_ALIGNMENT,Setup strength + relative strength,REFRAME_DECISION_POINT,9H,Alignment must reference V5 event direction/decision point rather than frozen V4 signal.
+D20,D_RELATIVE_ALIGNMENT,Pre-signal context vs subsequent warning probability,REFRAME_DECISION_POINT,9H,Alignment must reference V5 event direction/decision point rather than frozen V4 signal.
+E01,E_TRADE_HEALTH,Favorable separation after signal,REFRAME_POST_DECISION_POINT,9H,Study health/failure/recovery from explicit V5 decision points and transitions.
+E02,E_TRADE_HEALTH,Time to first favorable progress,REFRAME_POST_DECISION_POINT,9H,Study health/failure/recovery from explicit V5 decision points and transitions.
+E03,E_TRADE_HEALTH,Time without new favorable extreme,REFRAME_POST_DECISION_POINT,9H,Study health/failure/recovery from explicit V5 decision points and transitions.
+E04,E_TRADE_HEALTH,MFE trajectory,REFRAME_POST_DECISION_POINT,9H,Study health/failure/recovery from explicit V5 decision points and transitions.
+E05,E_TRADE_HEALTH,MAE trajectory,REFRAME_POST_DECISION_POINT,9H,Study health/failure/recovery from explicit V5 decision points and transitions.
+E06,E_TRADE_HEALTH,MFE/MAE relationship through time,REFRAME_POST_DECISION_POINT,9H,Study health/failure/recovery from explicit V5 decision points and transitions.
+E07,E_TRADE_HEALTH,Confirmation-candle retracement,REFRAME_POST_DECISION_POINT,9H,Study health/failure/recovery from explicit V5 decision points and transitions.
+E08,E_TRADE_HEALTH,Post-breakout impulse retracement,REFRAME_POST_DECISION_POINT,9H,Study health/failure/recovery from explicit V5 decision points and transitions.
+E09,E_TRADE_HEALTH,Fib 23.6% retracement,REFRAME_POST_DECISION_POINT,9H,Study health/failure/recovery from explicit V5 decision points and transitions.
+E10,E_TRADE_HEALTH,Fib 38.2% retracement,REFRAME_POST_DECISION_POINT,9H,Study health/failure/recovery from explicit V5 decision points and transitions.
+E11,E_TRADE_HEALTH,Fib 50% retracement,REFRAME_POST_DECISION_POINT,9H,Study health/failure/recovery from explicit V5 decision points and transitions.
+E12,E_TRADE_HEALTH,Fib 61.8% retracement,REFRAME_POST_DECISION_POINT,9H,Study health/failure/recovery from explicit V5 decision points and transitions.
+E13,E_TRADE_HEALTH,Fib 78.6% retracement,REFRAME_POST_DECISION_POINT,9H,Study health/failure/recovery from explicit V5 decision points and transitions.
+E14,E_TRADE_HEALTH,PM/PD breakout-level loss,REFRAME_POST_DECISION_POINT,9H,Study health/failure/recovery from explicit V5 decision points and transitions.
+E15,E_TRADE_HEALTH,Loss of one required breakout level,REFRAME_POST_DECISION_POINT,9H,Study health/failure/recovery from explicit V5 decision points and transitions.
+E16,E_TRADE_HEALTH,Loss of both required breakout levels,REFRAME_POST_DECISION_POINT,9H,Study health/failure/recovery from explicit V5 decision points and transitions.
+E17,E_TRADE_HEALTH,Close back inside breakout structure,REFRAME_POST_DECISION_POINT,9H,Study health/failure/recovery from explicit V5 decision points and transitions.
+E18,E_TRADE_HEALTH,Breakout level reclaim after failure,REFRAME_POST_DECISION_POINT,9H,Study health/failure/recovery from explicit V5 decision points and transitions.
+E19,E_TRADE_HEALTH,VWAP loss against trade,REFRAME_POST_DECISION_POINT,9H,Study health/failure/recovery from explicit V5 decision points and transitions.
+E20,E_TRADE_HEALTH,VWAP reclaim,REFRAME_POST_DECISION_POINT,9H,Study health/failure/recovery from explicit V5 decision points and transitions.
+E21,E_TRADE_HEALTH,VWAP lost/not-reclaimed state,REFRAME_POST_DECISION_POINT,9H,Study health/failure/recovery from explicit V5 decision points and transitions.
+E22,E_TRADE_HEALTH,Consecutive adverse candles,REFRAME_POST_DECISION_POINT,9H,Study health/failure/recovery from explicit V5 decision points and transitions.
+E23,E_TRADE_HEALTH,Momentum deterioration,REFRAME_POST_DECISION_POINT,9H,Study health/failure/recovery from explicit V5 decision points and transitions.
+E24,E_TRADE_HEALTH,Speed of deterioration,REFRAME_POST_DECISION_POINT,9H,Study health/failure/recovery from explicit V5 decision points and transitions.
+E25,E_TRADE_HEALTH,Warning persistence / duration,REFRAME_POST_DECISION_POINT,9H,Study health/failure/recovery from explicit V5 decision points and transitions.
+E26,E_TRADE_HEALTH,Recovery after warning,REFRAME_POST_DECISION_POINT,9H,Study health/failure/recovery from explicit V5 decision points and transitions.
+E27,E_TRADE_HEALTH,MAE progression milestones,REFRAME_POST_DECISION_POINT,9H,Study health/failure/recovery from explicit V5 decision points and transitions.
+E28,E_TRADE_HEALTH,Profile-aware deterioration,BENCHMARK_ONLY,9N,Profile/priority/trade-type labels belong to frozen V4 benchmark.
+E29,E_TRADE_HEALTH,PRIME vs CONDITIONAL deterioration,BENCHMARK_ONLY,9N,Profile/priority/trade-type labels belong to frozen V4 benchmark.
+E30,E_TRADE_HEALTH,EXPANSION vs SCALP deterioration,BENCHMARK_ONLY,9N,Profile/priority/trade-type labels belong to frozen V4 benchmark.
+E31,E_TRADE_HEALTH,Candidate W1 severity,REFRAME_POST_DECISION_POINT,9H,Study health/failure/recovery from explicit V5 decision points and transitions.
+E32,E_TRADE_HEALTH,Candidate W2 severity,REFRAME_POST_DECISION_POINT,9H,Study health/failure/recovery from explicit V5 decision points and transitions.
+E33,E_TRADE_HEALTH,Candidate W3 severity,REFRAME_POST_DECISION_POINT,9H,Study health/failure/recovery from explicit V5 decision points and transitions.
+E34,E_TRADE_HEALTH,Probability of eventual +0.50% success after warning,REFRAME_POST_DECISION_POINT,9H,Study health/failure/recovery from explicit V5 decision points and transitions.
+E35,E_TRADE_HEALTH,False-warning / recovery rate,REFRAME_POST_DECISION_POINT,9H,Study health/failure/recovery from explicit V5 decision points and transitions.
+F01,F_TIME_EXECUTION,Time-of-day signal performance,REFRAME_DECISION_POINT,9H,"Time variables apply to V5 decision points, not only V4 signals."
+F02,F_TIME_EXECUTION,Minutes since RTH open,REFRAME_DECISION_POINT,9H,"Time variables apply to V5 decision points, not only V4 signals."
+F03,F_TIME_EXECUTION,Early vs middle vs late RTH,REFRAME_DECISION_POINT,9H,"Time variables apply to V5 decision points, not only V4 signals."
+F04,F_TIME_EXECUTION,Time x direction,REFRAME_DECISION_POINT,9H,"Time variables apply to V5 decision points, not only V4 signals."
+F05,F_TIME_EXECUTION,Time x PRIME/CONDITIONAL,BENCHMARK_ONLY,9N,PRIME/CONDITIONAL and EXPANSION/SCALP are frozen V4 benchmark categories.
+F06,F_TIME_EXECUTION,Time x EXPANSION/SCALP,BENCHMARK_ONLY,9N,PRIME/CONDITIONAL and EXPANSION/SCALP are frozen V4 benchmark categories.
+F07,F_TIME_EXECUTION,Time x market regime,REFRAME_DECISION_POINT,9H,"Time variables apply to V5 decision points, not only V4 signals."
+F08,F_TIME_EXECUTION,Day of week,REFRAME_DECISION_POINT,9H,"Time variables apply to V5 decision points, not only V4 signals."
+F09,F_TIME_EXECUTION,Month / seasonality,REFRAME_DECISION_POINT,9H,"Time variables apply to V5 decision points, not only V4 signals."
+F10,F_TIME_EXECUTION,5-minute confirmation lag,DEFER_ENTRY_ARCHITECTURE,9J,Confirmation-timeframe/latency architecture belongs to alternative entry research.
+F11,F_TIME_EXECUTION,Favorable move consumed before alert,DEFER_ENTRY_ARCHITECTURE,9J,Confirmation-timeframe/latency architecture belongs to alternative entry research.
+F12,F_TIME_EXECUTION,Executable price vs confirmation reference price,DEFER_ENTRY_ARCHITECTURE,9J,Confirmation-timeframe/latency architecture belongs to alternative entry research.
+F13,F_TIME_EXECUTION,2-minute vs 5-minute confirmation,DEFER_ENTRY_ARCHITECTURE,9J,Confirmation-timeframe/latency architecture belongs to alternative entry research.
+F14,F_TIME_EXECUTION,1M/2M/3M/5M confirmation comparison,DEFER_ENTRY_ARCHITECTURE,9J,Confirmation-timeframe/latency architecture belongs to alternative entry research.
+F15,F_TIME_EXECUTION,Signal quality vs entry latency tradeoff,DEFER_ENTRY_ARCHITECTURE,9J,Confirmation-timeframe/latency architecture belongs to alternative entry research.
+G01,G_SYMBOL_UNIVERSE,Overall performance by symbol,CARRY_ROBUSTNESS,9H,Symbol/universe robustness remains directly applicable to V5.
+G02,G_SYMBOL_UNIVERSE,Bull performance by symbol,CARRY_ROBUSTNESS,9H,Symbol/universe robustness remains directly applicable to V5.
+G03,G_SYMBOL_UNIVERSE,Bear performance by symbol,CARRY_ROBUSTNESS,9H,Symbol/universe robustness remains directly applicable to V5.
+G04,G_SYMBOL_UNIVERSE,PRIME performance by symbol,BENCHMARK_ONLY,9N,Frozen V4 production/profile categories retained for head-to-head comparison.
+G05,G_SYMBOL_UNIVERSE,CONDITIONAL performance by symbol,BENCHMARK_ONLY,9N,Frozen V4 production/profile categories retained for head-to-head comparison.
+G06,G_SYMBOL_UNIVERSE,EXPANSION performance by symbol,BENCHMARK_ONLY,9N,Frozen V4 production/profile categories retained for head-to-head comparison.
+G07,G_SYMBOL_UNIVERSE,SCALP performance by symbol,BENCHMARK_ONLY,9N,Frozen V4 production/profile categories retained for head-to-head comparison.
+G08,G_SYMBOL_UNIVERSE,Symbol x direction,CARRY_ROBUSTNESS,9H,Symbol/universe robustness remains directly applicable to V5.
+G09,G_SYMBOL_UNIVERSE,Symbol x Grade/Profile,BENCHMARK_ONLY,9N,Frozen V4 production/profile categories retained for head-to-head comparison.
+G10,G_SYMBOL_UNIVERSE,Symbol x market regime,CARRY_ROBUSTNESS,9H,Symbol/universe robustness remains directly applicable to V5.
+G11,G_SYMBOL_UNIVERSE,Symbol x time of day,CARRY_ROBUSTNESS,9H,Symbol/universe robustness remains directly applicable to V5.
+G12,G_SYMBOL_UNIVERSE,Recent symbol-performance changes,CARRY_ROBUSTNESS,9H,Symbol/universe robustness remains directly applicable to V5.
+G13,G_SYMBOL_UNIVERSE,Performance stability through time,CARRY_ROBUSTNESS,9H,Symbol/universe robustness remains directly applicable to V5.
+G14,G_SYMBOL_UNIVERSE,Sample maturity / N,CARRY_ROBUSTNESS,9H,Symbol/universe robustness remains directly applicable to V5.
+G15,G_SYMBOL_UNIVERSE,Stock volatility characteristics,CARRY_ROBUSTNESS,9H,Symbol/universe robustness remains directly applicable to V5.
+G16,G_SYMBOL_UNIVERSE,Stock liquidity characteristics,CARRY_ROBUSTNESS,9H,Symbol/universe robustness remains directly applicable to V5.
+G17,G_SYMBOL_UNIVERSE,Performance clusters by stock characteristics,CARRY_ROBUSTNESS,9H,Symbol/universe robustness remains directly applicable to V5.
+G18,G_SYMBOL_UNIVERSE,Original 16-stock vs expanded 112-stock universe,CARRY_ROBUSTNESS,9H,Symbol/universe robustness remains directly applicable to V5.
+G19,G_SYMBOL_UNIVERSE,Cross-universe robustness,CARRY_ROBUSTNESS,9H,Symbol/universe robustness remains directly applicable to V5.
+H01,H_OUTCOME_TARGETS,+0.25% favorable-first,CARRY_OUTCOME,9H,Outcome definition remains useful when anchored to frozen V5 decision points.
+H02,H_OUTCOME_TARGETS,+0.50% favorable-first,CARRY_OUTCOME,9H,Outcome definition remains useful when anchored to frozen V5 decision points.
+H03,H_OUTCOME_TARGETS,+0.75% favorable-first,CARRY_OUTCOME,9H,Outcome definition remains useful when anchored to frozen V5 decision points.
+H04,H_OUTCOME_TARGETS,+1.00% favorable hit,CARRY_OUTCOME,9H,Outcome definition remains useful when anchored to frozen V5 decision points.
+H05,H_OUTCOME_TARGETS,MFE distribution percentiles,CARRY_OUTCOME,9H,Outcome definition remains useful when anchored to frozen V5 decision points.
+H06,H_OUTCOME_TARGETS,MAE distribution percentiles,CARRY_OUTCOME,9H,Outcome definition remains useful when anchored to frozen V5 decision points.
+H07,H_OUTCOME_TARGETS,Time to +0.25%,CARRY_OUTCOME,9H,Outcome definition remains useful when anchored to frozen V5 decision points.
+H08,H_OUTCOME_TARGETS,Time to +0.50%,CARRY_OUTCOME,9H,Outcome definition remains useful when anchored to frozen V5 decision points.
+H09,H_OUTCOME_TARGETS,Time to +0.75%,CARRY_OUTCOME,9H,Outcome definition remains useful when anchored to frozen V5 decision points.
+H10,H_OUTCOME_TARGETS,Time to +1.00%,CARRY_OUTCOME,9H,Outcome definition remains useful when anchored to frozen V5 decision points.
+H11,H_OUTCOME_TARGETS,Time to adverse milestones,CARRY_OUTCOME,9H,Outcome definition remains useful when anchored to frozen V5 decision points.
+H12,H_OUTCOME_TARGETS,Same-bar favorable/adverse cases,CARRY_OUTCOME,9H,Outcome definition remains useful when anchored to frozen V5 decision points.
+H13,H_OUTCOME_TARGETS,EXPANSION-specific targets,BENCHMARK_ONLY,9N,EXPANSION/SCALP-specific outcomes are frozen V4 benchmark constructs.
+H14,H_OUTCOME_TARGETS,SCALP-specific targets,BENCHMARK_ONLY,9N,EXPANSION/SCALP-specific outcomes are frozen V4 benchmark constructs.
+H15,H_OUTCOME_TARGETS,Structural exits vs fixed exits,CARRY_OUTCOME,9H,Outcome definition remains useful when anchored to frozen V5 decision points.
+I01,I_MODEL_INTERACTIONS,Grade x Profile x Time,DEFER_INTERACTION,9I,Interaction/model-development factors are intentionally deferred until individual-factor evidence exists.
+I02,I_MODEL_INTERACTIONS,Grade x Profile x Market Bias,DEFER_INTERACTION,9I,Interaction/model-development factors are intentionally deferred until individual-factor evidence exists.
+I03,I_MODEL_INTERACTIONS,Grade x Profile x Weekly Bias,DEFER_INTERACTION,9I,Interaction/model-development factors are intentionally deferred until individual-factor evidence exists.
+I04,I_MODEL_INTERACTIONS,Grade x Profile x Relative Strength,DEFER_INTERACTION,9I,Interaction/model-development factors are intentionally deferred until individual-factor evidence exists.
+I05,I_MODEL_INTERACTIONS,Market x Weekly alignment,DEFER_INTERACTION,9I,Interaction/model-development factors are intentionally deferred until individual-factor evidence exists.
+I06,I_MODEL_INTERACTIONS,Time x Market Bias,DEFER_INTERACTION,9I,Interaction/model-development factors are intentionally deferred until individual-factor evidence exists.
+I07,I_MODEL_INTERACTIONS,Volatility x Profile,DEFER_INTERACTION,9I,Interaction/model-development factors are intentionally deferred until individual-factor evidence exists.
+I08,I_MODEL_INTERACTIONS,Symbol characteristics x Profile,DEFER_INTERACTION,9I,Interaction/model-development factors are intentionally deferred until individual-factor evidence exists.
+I09,I_MODEL_INTERACTIONS,Setup quality x warning probability,DEFER_INTERACTION,9I,Interaction/model-development factors are intentionally deferred until individual-factor evidence exists.
+I10,I_MODEL_INTERACTIONS,Signal context x warning recovery,DEFER_INTERACTION,9I,Interaction/model-development factors are intentionally deferred until individual-factor evidence exists.
+I11,I_MODEL_INTERACTIONS,Minimal-factor model development,DEFER_INTERACTION,9I,Interaction/model-development factors are intentionally deferred until individual-factor evidence exists.
+I12,I_MODEL_INTERACTIONS,Complexity vs V4 baseline improvement,DEFER_INTERACTION,9I,Interaction/model-development factors are intentionally deferred until individual-factor evidence exists.
+I13,I_MODEL_INTERACTIONS,Signal-frequency cost of added filters,DEFER_INTERACTION,9I,Interaction/model-development factors are intentionally deferred until individual-factor evidence exists.
+J01,J_ROBUSTNESS,Discovery vs holdout datasets,PROTOCOL_GUARDRAIL,9H/9M/9O,Retain as methodology/validation guardrail rather than ordinary predictive factor.
+J02,J_ROBUSTNESS,Older vs newer periods,PROTOCOL_GUARDRAIL,9H/9M/9O,Retain as methodology/validation guardrail rather than ordinary predictive factor.
+J03,J_ROBUSTNESS,Bull vs Bear robustness,PROTOCOL_GUARDRAIL,9H/9M/9O,Retain as methodology/validation guardrail rather than ordinary predictive factor.
+J04,J_ROBUSTNESS,Market-regime robustness,PROTOCOL_GUARDRAIL,9H/9M/9O,Retain as methodology/validation guardrail rather than ordinary predictive factor.
+J05,J_ROBUSTNESS,Volatility-regime robustness,PROTOCOL_GUARDRAIL,9H/9M/9O,Retain as methodology/validation guardrail rather than ordinary predictive factor.
+J06,J_ROBUSTNESS,Cross-symbol robustness,PROTOCOL_GUARDRAIL,9H/9M/9O,Retain as methodology/validation guardrail rather than ordinary predictive factor.
+J07,J_ROBUSTNESS,Cross-stock-set robustness,PROTOCOL_GUARDRAIL,9H/9M/9O,Retain as methodology/validation guardrail rather than ordinary predictive factor.
+J08,J_ROBUSTNESS,Across-year robustness,PROTOCOL_GUARDRAIL,9H/9M/9O,Retain as methodology/validation guardrail rather than ordinary predictive factor.
+J09,J_ROBUSTNESS,Threshold sensitivity,PROTOCOL_GUARDRAIL,9H/9M/9O,Retain as methodology/validation guardrail rather than ordinary predictive factor.
+J10,J_ROBUSTNESS,Nearby-parameter stability,PROTOCOL_GUARDRAIL,9H/9M/9O,Retain as methodology/validation guardrail rather than ordinary predictive factor.
+J11,J_ROBUSTNESS,Original 16 vs 112-stock universe,PROTOCOL_GUARDRAIL,9H/9M/9O,Retain as methodology/validation guardrail rather than ordinary predictive factor.
+J12,J_ROBUSTNESS,Frozen candidate out-of-sample test,PROTOCOL_GUARDRAIL,9H/9M/9O,Retain as methodology/validation guardrail rather than ordinary predictive factor.
+J13,J_ROBUSTNESS,Forward validation,PROTOCOL_GUARDRAIL,9H/9M/9O,Retain as methodology/validation guardrail rather than ordinary predictive factor.
+J14,J_ROBUSTNESS,Optimized candidate vs frozen V4 baseline,PROTOCOL_GUARDRAIL,9H/9M/9O,Retain as methodology/validation guardrail rather than ordinary predictive factor.

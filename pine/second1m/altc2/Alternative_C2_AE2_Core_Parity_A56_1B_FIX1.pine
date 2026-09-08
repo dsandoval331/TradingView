@@ -1,0 +1,222 @@
+//@version=6
+indicator("Alternative C2 — AE2 Core Parity — A56.1B FIX1", shorttitle="ALT C2 A56.1B FIX1", overlay=true, max_labels_count=500)
+
+//=============================================================================
+// A56.1B FIX1
+// Syntax-cleanup only. Frozen AE2 research logic is unchanged.
+//=============================================================================
+
+string TZ = "America/New_York"
+
+//-----------------------------------------------------------------------------
+// Inputs
+//-----------------------------------------------------------------------------
+groupDisplay = "Display"
+
+showRthVwap = input.bool(true, "Show Frozen RTH VWAP", group=groupDisplay)
+showSignalLabels = input.bool(true, "Show AE2 Signal Labels", group=groupDisplay)
+showC1Marker = input.bool(true, "Show Valid C1 Marker", group=groupDisplay)
+showDebugTable = input.bool(true, "Show Debug Table", group=groupDisplay)
+showC2FailureMarker = input.bool(false, "Show C2 Failure Marker", group=groupDisplay)
+
+//-----------------------------------------------------------------------------
+// Timeframe / New York time
+//-----------------------------------------------------------------------------
+bool isOneMinute = timeframe.isminutes and timeframe.multiplier == 1
+
+int nyHour = hour(time, TZ)
+int nyMinute = minute(time, TZ)
+
+bool isC1 = nyHour == 9 and nyMinute == 30
+bool isC2 = nyHour == 9 and nyMinute == 31
+bool isRth = (nyHour > 9 or (nyHour == 9 and nyMinute >= 30)) and nyHour < 16
+bool isRthStart = isC1
+
+//-----------------------------------------------------------------------------
+// Frozen RTH VWAP
+// cumulative(HLC3 * volume) / cumulative(volume), reset at 09:30 ET
+//-----------------------------------------------------------------------------
+float typicalPrice = (high + low + close) / 3.0
+
+var float cumulativePV = na
+var float cumulativeVolume = na
+
+if isRthStart
+    cumulativePV := typicalPrice * volume
+    cumulativeVolume := volume
+else if isRth
+    cumulativePV := nz(cumulativePV) + typicalPrice * volume
+    cumulativeVolume := nz(cumulativeVolume) + volume
+else
+    cumulativePV := na
+    cumulativeVolume := na
+
+float frozenRthVwap = isRth and not na(cumulativeVolume) and cumulativeVolume != 0 ? cumulativePV / cumulativeVolume : na
+
+//-----------------------------------------------------------------------------
+// C1 state
+//-----------------------------------------------------------------------------
+var bool c1Exists = false
+var bool c1Valid = false
+var int c1Direction = 0     // +1 bull, -1 bear, 0 invalid
+var float c1OpenStored = na
+var float c1HighStored = na
+var float c1LowStored = na
+var float c1CloseStored = na
+var float c1VwapStored = na
+
+if isC1 and barstate.isconfirmed
+    c1Exists := true
+    c1OpenStored := open
+    c1HighStored := high
+    c1LowStored := low
+    c1CloseStored := close
+    c1VwapStored := frozenRthVwap
+
+    bool c1Bull = close > open and close > frozenRthVwap
+    bool c1Bear = close < open and close < frozenRthVwap
+
+    if c1Bull
+        c1Valid := true
+        c1Direction := 1
+    else if c1Bear
+        c1Valid := true
+        c1Direction := -1
+    else
+        c1Valid := false
+        c1Direction := 0
+
+//-----------------------------------------------------------------------------
+// C2 / AE2 state
+//-----------------------------------------------------------------------------
+var bool c2Evaluated = false
+var bool c2DirectionAligned = false
+var bool c2VwapCloseOk = false
+var bool c2VwapTouchOrCross = false
+
+var float c2OpenStored = na
+var float c2HighStored = na
+var float c2LowStored = na
+var float c2CloseStored = na
+var float c2VwapStored = na
+
+var bool ae2Bull = false
+var bool ae2Bear = false
+var bool ae2Signal = false
+var float ae2EntryPrice = na
+
+if isC1
+    c2Evaluated := false
+    c2DirectionAligned := false
+    c2VwapCloseOk := false
+    c2VwapTouchOrCross := false
+    c2OpenStored := na
+    c2HighStored := na
+    c2LowStored := na
+    c2CloseStored := na
+    c2VwapStored := na
+    ae2Bull := false
+    ae2Bear := false
+    ae2Signal := false
+    ae2EntryPrice := na
+
+bool bullSignalThisBar = false
+bool bearSignalThisBar = false
+bool c2FailureThisBar = false
+
+if isC2 and barstate.isconfirmed
+    c2Evaluated := true
+    c2OpenStored := open
+    c2HighStored := high
+    c2LowStored := low
+    c2CloseStored := close
+    c2VwapStored := frozenRthVwap
+
+    if c1Valid and c1Direction == 1
+        c2DirectionAligned := close > open
+        c2VwapCloseOk := close > frozenRthVwap
+        c2VwapTouchOrCross := low <= frozenRthVwap
+        ae2Bull := c2DirectionAligned and c2VwapCloseOk and c2VwapTouchOrCross
+        ae2Bear := false
+    else if c1Valid and c1Direction == -1
+        c2DirectionAligned := close < open
+        c2VwapCloseOk := close < frozenRthVwap
+        c2VwapTouchOrCross := high >= frozenRthVwap
+        ae2Bear := c2DirectionAligned and c2VwapCloseOk and c2VwapTouchOrCross
+        ae2Bull := false
+    else
+        c2DirectionAligned := false
+        c2VwapCloseOk := false
+        c2VwapTouchOrCross := false
+        ae2Bull := false
+        ae2Bear := false
+
+    ae2Signal := ae2Bull or ae2Bear
+
+    if ae2Signal
+        ae2EntryPrice := close
+
+    bullSignalThisBar := ae2Bull
+    bearSignalThisBar := ae2Bear
+    c2FailureThisBar := c1Valid and not ae2Signal
+
+//-----------------------------------------------------------------------------
+// Plots
+//-----------------------------------------------------------------------------
+plot(showRthVwap ? frozenRthVwap : na, title="Frozen RTH VWAP", linewidth=2)
+
+plotshape(showC1Marker and isC1 and barstate.isconfirmed and c1Valid and c1Direction == 1, title="Valid Bull C1", style=shape.circle, location=location.belowbar, size=size.tiny, text="C1")
+plotshape(showC1Marker and isC1 and barstate.isconfirmed and c1Valid and c1Direction == -1, title="Valid Bear C1", style=shape.circle, location=location.abovebar, size=size.tiny, text="C1")
+
+plotshape(showSignalLabels and bullSignalThisBar, title="AE2 Bull", style=shape.labelup, location=location.belowbar, size=size.small, text="ALT C2\nBULL")
+plotshape(showSignalLabels and bearSignalThisBar, title="AE2 Bear", style=shape.labeldown, location=location.abovebar, size=size.small, text="ALT C2\nBEAR")
+
+plotshape(showC2FailureMarker and c2FailureThisBar, title="AE2 C2 Failure", style=shape.xcross, location=location.abovebar, size=size.tiny, text="C2 FAIL")
+
+//-----------------------------------------------------------------------------
+// Alerts
+//-----------------------------------------------------------------------------
+alertcondition(bullSignalThisBar, title="Alternative C2 Bull — AE2", message="AE2_RECLAIM BULL confirmed on C2 close.")
+alertcondition(bearSignalThisBar, title="Alternative C2 Bear — AE2", message="AE2_RECLAIM BEAR confirmed on C2 close.")
+
+//-----------------------------------------------------------------------------
+// Debug table
+//-----------------------------------------------------------------------------
+var table debugTable = table.new(position.top_right, 2, 13, border_width=1)
+
+string directionText = c1Direction == 1 ? "BULL" : c1Direction == -1 ? "BEAR" : "NONE"
+string tfText = isOneMinute ? "PASS — 1m" : "FAIL — USE 1m"
+string c1ValidText = c1Valid ? "TRUE" : "FALSE"
+string c2EvaluatedText = c2Evaluated ? "TRUE" : "FALSE"
+string c2DirectionText = c2DirectionAligned ? "TRUE" : "FALSE"
+string c2CloseText = c2VwapCloseOk ? "TRUE" : "FALSE"
+string c2TouchText = c2VwapTouchOrCross ? "TRUE" : "FALSE"
+string ae2Text = ae2Bull ? "BULL" : ae2Bear ? "BEAR" : "NONE"
+
+if barstate.islast and showDebugTable
+    table.cell(debugTable, 0, 0, "A56.1B FIX1")
+    table.cell(debugTable, 1, 0, "AE2 PARITY")
+    table.cell(debugTable, 0, 1, "Timeframe")
+    table.cell(debugTable, 1, 1, tfText)
+    table.cell(debugTable, 0, 2, "C1 Valid")
+    table.cell(debugTable, 1, 2, c1ValidText)
+    table.cell(debugTable, 0, 3, "Direction")
+    table.cell(debugTable, 1, 3, directionText)
+    table.cell(debugTable, 0, 4, "C1 Close")
+    table.cell(debugTable, 1, 4, str.tostring(c1CloseStored, format.mintick))
+    table.cell(debugTable, 0, 5, "C1 VWAP")
+    table.cell(debugTable, 1, 5, str.tostring(c1VwapStored, format.mintick))
+    table.cell(debugTable, 0, 6, "C2 Evaluated")
+    table.cell(debugTable, 1, 6, c2EvaluatedText)
+    table.cell(debugTable, 0, 7, "C2 Direction")
+    table.cell(debugTable, 1, 7, c2DirectionText)
+    table.cell(debugTable, 0, 8, "C2 VWAP Close")
+    table.cell(debugTable, 1, 8, c2CloseText)
+    table.cell(debugTable, 0, 9, "C2 Touch/Cross")
+    table.cell(debugTable, 1, 9, c2TouchText)
+    table.cell(debugTable, 0, 10, "C2 Close")
+    table.cell(debugTable, 1, 10, str.tostring(c2CloseStored, format.mintick))
+    table.cell(debugTable, 0, 11, "C2 VWAP")
+    table.cell(debugTable, 1, 11, str.tostring(c2VwapStored, format.mintick))
+    table.cell(debugTable, 0, 12, "AE2")
+    table.cell(debugTable, 1, 12, ae2Text)

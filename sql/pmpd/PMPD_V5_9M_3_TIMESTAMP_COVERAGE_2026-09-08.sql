@@ -1,0 +1,6 @@
+-- PM+PD V5 9M-3 timestamp/common-window certification checkpoint — 2026-09-08
+-- 9M-2 V2 mapped all 112 authoritative PMPD_112_V1 symbols to local 2026 files.
+-- Next gate identifies OHLC market-data candidates, certifies per-symbol 2026 first/last timestamps,
+-- and computes the common 112-symbol window WITHOUT calculating PM+PD outcomes.
+-- Candidate remains frozen: PMPD_V5_CANDIDATE_DP4_UNSCORED_V1.
+-- No outcome characterization, candidate modification, threshold tuning, or production authorization.

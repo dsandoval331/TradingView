@@ -1,0 +1,7 @@
+{
+  "version": "PMPD_V5_9J_VWAP_ENTRY_CONTEXT_V1",
+  "vwap_definition": "RTH-only session VWAP; reset each trade date; typical price (H+L+C)/3 weighted by 1m volume; completed bars only.",
+  "no_threshold_tuning": true,
+  "leakage_guard": "Every field uses bars timestamp <= decision timestamp only.",
+  "note": "This patch captures contemporaneous VWAP state/path. Reclaim-after-loss and loss-after-full-clear flags are intentionally deferred to analysis by joining certified event/decision chronology, avoiding ambiguous event-level future summaries in the enrichment."
+}

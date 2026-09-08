@@ -1,0 +1,353 @@
+//@version=6
+indicator("Second 1M Forward Trade Health Collector - S1M_FTHC_1.0C VWAP/Checkpoint", overlay=false)
+
+string BUILD_ID = "S1M_FTHC_1.0C"
+string TZ = "America/New_York"
+showStatusTable = input.bool(true, "Show Status Table", group="Validation")
+
+bool native1M = timeframe.in_seconds() == 60
+if timeframe.in_seconds() < 60
+    runtime.error("S1M_FTHC_1.0C supports 1-minute or higher chart timeframes.")
+extendedTicker = ticker.new(syminfo.prefix, syminfo.ticker, session.extended)
+
+f_dateKey(int t) => year(t, TZ) * 10000 + month(t, TZ) * 100 + dayofmonth(t, TZ)
+[tArr,oArr,hArr,lArr,cArr,vArr] = request.security_lower_tf(extendedTicker,"1",[time,open,high,low,close,volume])
+
+f_vwapState(int dir, float h, float l, float c, float vw) =>
+    int s = 0
+    if not na(vw)
+        if dir == 1
+            s := l > vw and c > vw ? 1 : h >= vw and l <= vw ? 0 : -1
+        else if dir == -1
+            s := h < vw and c < vw ? 1 : h >= vw and l <= vw ? 0 : -1
+    s
+
+var int lastProcessed = na
+var int activeRTHDate = na
+var float pv = 0.0
+var float vv = 0.0
+var float rvwap = na
+var float c1O = na
+var float c1C = na
+var float c1VWAP = na
+var int c1Date = na
+var bool researchEvent = false
+var int eventDirection = 0
+var int eventDateKey = na
+var int eventTimestamp = na
+var bool vwapLost = false
+var bool vwapReclaimed = false
+var int wrongSideCloseCount = 0
+var int currentWrongStreak = 0
+var int maxWrongStreak = 0
+
+var float cp1O = na
+var float cp1H = na
+var float cp1L = na
+var float cp1C = na
+var float cp1VW = na
+var int cp1State = na
+var int cp1Lost = na
+var int cp1Recl = na
+var int cp1Wrong = na
+var int cp1MaxStreak = na
+var int cp1Has = 0
+var float cp2O = na
+var float cp2H = na
+var float cp2L = na
+var float cp2C = na
+var float cp2VW = na
+var int cp2State = na
+var int cp2Lost = na
+var int cp2Recl = na
+var int cp2Wrong = na
+var int cp2MaxStreak = na
+var int cp2Has = 0
+var float cp3O = na
+var float cp3H = na
+var float cp3L = na
+var float cp3C = na
+var float cp3VW = na
+var int cp3State = na
+var int cp3Lost = na
+var int cp3Recl = na
+var int cp3Wrong = na
+var int cp3MaxStreak = na
+var int cp3Has = 0
+var float cp5O = na
+var float cp5H = na
+var float cp5L = na
+var float cp5C = na
+var float cp5VW = na
+var int cp5State = na
+var int cp5Lost = na
+var int cp5Recl = na
+var int cp5Wrong = na
+var int cp5MaxStreak = na
+var int cp5Has = 0
+var float cp10O = na
+var float cp10H = na
+var float cp10L = na
+var float cp10C = na
+var float cp10VW = na
+var int cp10State = na
+var int cp10Lost = na
+var int cp10Recl = na
+var int cp10Wrong = na
+var int cp10MaxStreak = na
+var int cp10Has = 0
+
+int processCount = native1M ? 1 : array.size(tArr)
+if processCount > 0
+    for i = 0 to processCount - 1
+        int t = native1M ? time : array.get(tArr,i)
+        float o = native1M ? open : array.get(oArr,i)
+        float h = native1M ? high : array.get(hArr,i)
+        float l = native1M ? low : array.get(lArr,i)
+        float c = native1M ? close : array.get(cArr,i)
+        float v = native1M ? volume : array.get(vArr,i)
+        bool isNew = na(lastProcessed) or t > lastProcessed
+        if isNew
+            int dk = f_dateKey(t)
+            int hh = hour(t,TZ)
+            int mm = minute(t,TZ)
+            bool isRTH = (hh > 9 or (hh == 9 and mm >= 30)) and hh < 16
+            bool isC1 = hh == 9 and mm == 30
+            bool isC2 = hh == 9 and mm == 31
+            bool newRTH = isRTH and (na(activeRTHDate) or dk != activeRTHDate)
+            if newRTH
+                activeRTHDate := dk
+                pv := 0.0
+                vv := 0.0
+                rvwap := na
+                c1O := na
+                c1C := na
+                c1VWAP := na
+                c1Date := na
+                researchEvent := false
+                eventDirection := 0
+                eventDateKey := na
+                eventTimestamp := na
+                vwapLost := false
+                vwapReclaimed := false
+                wrongSideCloseCount := 0
+                currentWrongStreak := 0
+                maxWrongStreak := 0
+                cp1O := na
+                cp1H := na
+                cp1L := na
+                cp1C := na
+                cp1VW := na
+                cp1State := na
+                cp1Lost := na
+                cp1Recl := na
+                cp1Wrong := na
+                cp1MaxStreak := na
+                cp1Has := 0
+                cp2O := na
+                cp2H := na
+                cp2L := na
+                cp2C := na
+                cp2VW := na
+                cp2State := na
+                cp2Lost := na
+                cp2Recl := na
+                cp2Wrong := na
+                cp2MaxStreak := na
+                cp2Has := 0
+                cp3O := na
+                cp3H := na
+                cp3L := na
+                cp3C := na
+                cp3VW := na
+                cp3State := na
+                cp3Lost := na
+                cp3Recl := na
+                cp3Wrong := na
+                cp3MaxStreak := na
+                cp3Has := 0
+                cp5O := na
+                cp5H := na
+                cp5L := na
+                cp5C := na
+                cp5VW := na
+                cp5State := na
+                cp5Lost := na
+                cp5Recl := na
+                cp5Wrong := na
+                cp5MaxStreak := na
+                cp5Has := 0
+                cp10O := na
+                cp10H := na
+                cp10L := na
+                cp10C := na
+                cp10VW := na
+                cp10State := na
+                cp10Lost := na
+                cp10Recl := na
+                cp10Wrong := na
+                cp10MaxStreak := na
+                cp10Has := 0
+            if isRTH
+                float tp = (h+l+c)/3.0
+                pv += tp*v
+                vv += v
+                rvwap := vv > 0 ? pv/vv : na
+            if isC1
+                c1O := o
+                c1C := c
+                c1VWAP := rvwap
+                c1Date := dk
+            if isC2 and c1Date == dk and not na(c1C)
+                bool bull = c1C > c1O and c1C > c1VWAP and c > o and c > rvwap and l > rvwap
+                bool bear = c1C < c1O and c1C < c1VWAP and c < o and c < rvwap and h < rvwap
+                if bull or bear
+                    researchEvent := true
+                    eventDirection := bull ? 1 : -1
+                    eventDateKey := dk
+                    eventTimestamp := t
+            if researchEvent and isRTH and dk == eventDateKey and t > eventTimestamp
+                int elapsed = int((t-eventTimestamp)/60000)
+                int state = f_vwapState(eventDirection,h,l,c,rvwap)
+                if state == -1
+                    vwapLost := true
+                    wrongSideCloseCount += 1
+                    currentWrongStreak += 1
+                    maxWrongStreak := math.max(maxWrongStreak,currentWrongStreak)
+                else
+                    if vwapLost and state == 1
+                        vwapReclaimed := true
+                    currentWrongStreak := 0
+                if elapsed == 1 and cp1Has == 0
+                    cp1O := o
+                    cp1H := h
+                    cp1L := l
+                    cp1C := c
+                    cp1VW := rvwap
+                    cp1State := state
+                    cp1Lost := vwapLost ? 1 : 0
+                    cp1Recl := vwapReclaimed ? 1 : 0
+                    cp1Wrong := wrongSideCloseCount
+                    cp1MaxStreak := maxWrongStreak
+                    cp1Has := 1
+                if elapsed == 2 and cp2Has == 0
+                    cp2O := o
+                    cp2H := h
+                    cp2L := l
+                    cp2C := c
+                    cp2VW := rvwap
+                    cp2State := state
+                    cp2Lost := vwapLost ? 1 : 0
+                    cp2Recl := vwapReclaimed ? 1 : 0
+                    cp2Wrong := wrongSideCloseCount
+                    cp2MaxStreak := maxWrongStreak
+                    cp2Has := 1
+                if elapsed == 3 and cp3Has == 0
+                    cp3O := o
+                    cp3H := h
+                    cp3L := l
+                    cp3C := c
+                    cp3VW := rvwap
+                    cp3State := state
+                    cp3Lost := vwapLost ? 1 : 0
+                    cp3Recl := vwapReclaimed ? 1 : 0
+                    cp3Wrong := wrongSideCloseCount
+                    cp3MaxStreak := maxWrongStreak
+                    cp3Has := 1
+                if elapsed == 5 and cp5Has == 0
+                    cp5O := o
+                    cp5H := h
+                    cp5L := l
+                    cp5C := c
+                    cp5VW := rvwap
+                    cp5State := state
+                    cp5Lost := vwapLost ? 1 : 0
+                    cp5Recl := vwapReclaimed ? 1 : 0
+                    cp5Wrong := wrongSideCloseCount
+                    cp5MaxStreak := maxWrongStreak
+                    cp5Has := 1
+                if elapsed == 10 and cp10Has == 0
+                    cp10O := o
+                    cp10H := h
+                    cp10L := l
+                    cp10C := c
+                    cp10VW := rvwap
+                    cp10State := state
+                    cp10Lost := vwapLost ? 1 : 0
+                    cp10Recl := vwapReclaimed ? 1 : 0
+                    cp10Wrong := wrongSideCloseCount
+                    cp10MaxStreak := maxWrongStreak
+                    cp10Has := 1
+            lastProcessed := t
+
+plot(eventDateKey, "FTHV_EventDateKey", display=display.data_window)
+plot(eventTimestamp, "FTHV_EventTimestamp", display=display.data_window)
+plot(eventDirection, "FTHV_Direction", display=display.data_window)
+plot(cp1O, "FTHV_CP1_Open", display=display.data_window)
+plot(cp1H, "FTHV_CP1_High", display=display.data_window)
+plot(cp1L, "FTHV_CP1_Low", display=display.data_window)
+plot(cp1C, "FTHV_CP1_Close", display=display.data_window)
+plot(cp1VW, "FTHV_CP1_RTH_VWAP", display=display.data_window)
+plot(cp1State, "FTHV_CP1_VWAP_State", display=display.data_window)
+plot(cp1Lost, "FTHV_CP1_VWAP_Lost", display=display.data_window)
+plot(cp1Recl, "FTHV_CP1_VWAP_Reclaimed", display=display.data_window)
+plot(cp1Wrong, "FTHV_CP1_WrongSideCloseCount", display=display.data_window)
+plot(cp1MaxStreak, "FTHV_CP1_MaxWrongSideStreak", display=display.data_window)
+plot(cp1Has, "FTHV_Has_CP1", display=display.data_window)
+plot(cp2O, "FTHV_CP2_Open", display=display.data_window)
+plot(cp2H, "FTHV_CP2_High", display=display.data_window)
+plot(cp2L, "FTHV_CP2_Low", display=display.data_window)
+plot(cp2C, "FTHV_CP2_Close", display=display.data_window)
+plot(cp2VW, "FTHV_CP2_RTH_VWAP", display=display.data_window)
+plot(cp2State, "FTHV_CP2_VWAP_State", display=display.data_window)
+plot(cp2Lost, "FTHV_CP2_VWAP_Lost", display=display.data_window)
+plot(cp2Recl, "FTHV_CP2_VWAP_Reclaimed", display=display.data_window)
+plot(cp2Wrong, "FTHV_CP2_WrongSideCloseCount", display=display.data_window)
+plot(cp2MaxStreak, "FTHV_CP2_MaxWrongSideStreak", display=display.data_window)
+plot(cp2Has, "FTHV_Has_CP2", display=display.data_window)
+plot(cp3O, "FTHV_CP3_Open", display=display.data_window)
+plot(cp3H, "FTHV_CP3_High", display=display.data_window)
+plot(cp3L, "FTHV_CP3_Low", display=display.data_window)
+plot(cp3C, "FTHV_CP3_Close", display=display.data_window)
+plot(cp3VW, "FTHV_CP3_RTH_VWAP", display=display.data_window)
+plot(cp3State, "FTHV_CP3_VWAP_State", display=display.data_window)
+plot(cp3Lost, "FTHV_CP3_VWAP_Lost", display=display.data_window)
+plot(cp3Recl, "FTHV_CP3_VWAP_Reclaimed", display=display.data_window)
+plot(cp3Wrong, "FTHV_CP3_WrongSideCloseCount", display=display.data_window)
+plot(cp3MaxStreak, "FTHV_CP3_MaxWrongSideStreak", display=display.data_window)
+plot(cp3Has, "FTHV_Has_CP3", display=display.data_window)
+plot(cp5O, "FTHV_CP5_Open", display=display.data_window)
+plot(cp5H, "FTHV_CP5_High", display=display.data_window)
+plot(cp5L, "FTHV_CP5_Low", display=display.data_window)
+plot(cp5C, "FTHV_CP5_Close", display=display.data_window)
+plot(cp5VW, "FTHV_CP5_RTH_VWAP", display=display.data_window)
+plot(cp5State, "FTHV_CP5_VWAP_State", display=display.data_window)
+plot(cp5Lost, "FTHV_CP5_VWAP_Lost", display=display.data_window)
+plot(cp5Recl, "FTHV_CP5_VWAP_Reclaimed", display=display.data_window)
+plot(cp5Wrong, "FTHV_CP5_WrongSideCloseCount", display=display.data_window)
+plot(cp5MaxStreak, "FTHV_CP5_MaxWrongSideStreak", display=display.data_window)
+plot(cp5Has, "FTHV_Has_CP5", display=display.data_window)
+plot(cp10O, "FTHV_CP10_Open", display=display.data_window)
+plot(cp10H, "FTHV_CP10_High", display=display.data_window)
+plot(cp10L, "FTHV_CP10_Low", display=display.data_window)
+plot(cp10C, "FTHV_CP10_Close", display=display.data_window)
+plot(cp10VW, "FTHV_CP10_RTH_VWAP", display=display.data_window)
+plot(cp10State, "FTHV_CP10_VWAP_State", display=display.data_window)
+plot(cp10Lost, "FTHV_CP10_VWAP_Lost", display=display.data_window)
+plot(cp10Recl, "FTHV_CP10_VWAP_Reclaimed", display=display.data_window)
+plot(cp10Wrong, "FTHV_CP10_WrongSideCloseCount", display=display.data_window)
+plot(cp10MaxStreak, "FTHV_CP10_MaxWrongSideStreak", display=display.data_window)
+plot(cp10Has, "FTHV_Has_CP10", display=display.data_window)
+
+var table status = table.new(position.bottom_right,2,4,frame_color=color.gray,frame_width=1)
+if barstate.islast
+    table.clear(status,0,0,1,3)
+    if showStatusTable
+        table.cell(status,0,0,"BUILD")
+        table.cell(status,1,0,BUILD_ID)
+        table.cell(status,0,1,"Event")
+        table.cell(status,1,1,researchEvent ? "YES" : "NO")
+        table.cell(status,0,2,"Direction")
+        table.cell(status,1,2,eventDirection == 1 ? "BULL" : eventDirection == -1 ? "BEAR" : "NONE")
+        table.cell(status,0,3,"Purpose")
+        table.cell(status,1,3,"VWAP + checkpoint raw")

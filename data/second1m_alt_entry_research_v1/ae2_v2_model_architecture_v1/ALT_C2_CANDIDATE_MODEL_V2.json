@@ -1,0 +1,48 @@
+{
+  "candidate_model_id": "ALT_C2_CANDIDATE_MODEL_V2",
+  "status": "FROZEN_HISTORICAL_CANDIDATE_PENDING_INDEPENDENT_PROSPECTIVE_VALIDATION",
+  "parent_model": "ALT_C2_CANDIDATE_MODEL_V1",
+  "scope": "Refinement layer applied only inside Candidate-V1 PREFERRED events.",
+  "architecture_id": "ALT_C2_V2_PREDECLARED_ARCHITECTURE_V1",
+  "architecture_spec_sha256": "7ca6555faa51c4af5462ccfbe21738ee9e9bbaaf25fdff96ea4c97ff7b864865",
+  "positive_evidence": [
+    "A37_G_P2_PD_AH_PM_ORDERING",
+    "A38_T_P1_PM_REMAINS_FOR_C2"
+  ],
+  "negative_evidence": [
+    "A37_G_N1_PM_PD_SPACING_Q4",
+    "A38_T_N1_PD_REMAINS_FOR_C2",
+    "A42_N2_OPEN_CONSUMED_RATIO_Q2"
+  ],
+  "excluded_evidence": {
+    "A39_T_V1_VWAP_EXPANSION_Q3": "PROVENANCE_CONFLICTED_NON_RECONSTRUCTIBLE"
+  },
+  "state_definitions": {
+    "UPGRADE": "positive_present AND NOT negative_present",
+    "DOWNGRADE": "negative_present AND NOT positive_present",
+    "CONFLICT": "positive_present AND negative_present",
+    "BASE": "NOT positive_present AND NOT negative_present"
+  },
+  "state_semantics": {
+    "UPGRADE": "higher-confidence V1 Preferred subset",
+    "BASE": "V1 Preferred with no retained V2 evidence",
+    "DOWNGRADE": "V1 Preferred with negative V2 evidence and no positive V2 evidence",
+    "CONFLICT": "V1 Preferred with both positive and negative V2 evidence; preserve separately"
+  },
+  "historical_population_n": 753,
+  "outcome_free_state_counts": {
+    "BASE": 314,
+    "DOWNGRADE": 228,
+    "UPGRADE": 137,
+    "CONFLICT": 74
+  },
+  "research_constraints": [
+    "No weights fitted.",
+    "No thresholds changed after combined outcomes were viewed.",
+    "No conflict reassignment.",
+    "Quarter failures 2025Q3 and 2026Q1 are preserved and not optimized away.",
+    "Candidate Model V1 and its prospective validation remain unchanged.",
+    "V2 is not production/prospective-approved until a separate prospective protocol is frozen and completed."
+  ],
+  "sha256": "8d11531fe9859c253ee629a473094654ca8c69721e3ab82ceebad5bb5ed1697b"
+}

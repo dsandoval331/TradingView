@@ -1,0 +1,5 @@
+state,total_n,binary_n,ff_n,af_n,ff_pct,minimum_binary_n,remaining_to_minimum
+UPGRADE,6,6,2,4,33.333333333333336,100,94
+BASE,15,15,7,8,46.666666666666664,200,185
+CONFLICT,3,3,1,2,33.333333333333336,60,57
+DOWNGRADE,4,4,2,2,50.0,150,146

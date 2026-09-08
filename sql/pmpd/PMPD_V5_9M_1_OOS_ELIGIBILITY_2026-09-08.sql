@@ -1,0 +1,7 @@
+-- PM+PD V5 9M-1 OOS eligibility checkpoint — 2026-09-08
+-- Supabase research universe PMPD_112_V1 has 112 active members.
+-- market_data_coverage currently contains zero rows, so it cannot certify 2026 OOS coverage.
+-- 2025 is development evidence and cannot be reused as untouched 9M OOS.
+-- Next gate: local 2026 canonical market-cache inventory before any 2026 outcome characterization.
+-- Candidate PMPD_V5_CANDIDATE_DP4_UNSCORED_V1 remains frozen.
+-- No candidate modification, threshold tuning, score fitting, or production authorization.

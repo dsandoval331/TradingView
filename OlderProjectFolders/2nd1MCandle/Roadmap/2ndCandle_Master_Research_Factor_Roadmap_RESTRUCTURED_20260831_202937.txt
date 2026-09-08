@@ -1,0 +1,259 @@
+MASTER RESEARCH FACTOR ROADMAP — SECOND 1M CANDLE MONITORING (VWAP)
+Status: RESTRUCTURED AUTHORITATIVE CANDIDATE
+
+PURPOSE Systematic research backlog and project-state record. Primary
+benchmark: +0.50% favorable before -0.50% adverse. Research validity,
+reproducibility, temporal robustness, and adequate sample size take
+priority over maximizing historical FF%.
+
+FACTOR LIFECYCLE NOT STARTED -> DATA READY -> IN PROGRESS -> TESTED ->
+TEMPORALLY VALIDATED -> RETAINED / RESEARCH-ONLY / REJECTED. TESTED does
+not imply predictive value.
+
+CURRENT DATA FOUNDATION - 2,457 historical signals; 112 symbols; 267
+trading dates; 2,457 unique symbol-days. - Signal range: 2025-05-23
+through 2026-08-27; maximum one signal per symbol/day. - Daily history:
+44,128 rows; 112 symbols; 394 dates; 2025-02-03 through 2026-08-27; 0
+missing OHLC; 100% actual previous-trading-day coverage. - Historical
+1M: all 2,457 requested symbol-days retrieved; 1,075,790 bars from
+04:00-16:00; 0 missing 09:30 bars; 26 missing 09:31 bars. - Historical
+entry_grade, entry_grade_components, and raw_payload coverage: 0%;
+reconstruct missing setup components where possible.
+
+SYSTEMATIC RESEARCH SEQUENCE 2C-R01 Data & Outcome Integrity —
+SUBSTANTIALLY COMPLETE 2C-R01B Historical 1M Integration & Factor
+Reconstruction — CURRENT 2C-R02 C1 Setup Quality 2C-R03 C2 Setup Quality
+2C-R04 C1 -> C2 Relationship 2C-R05 VWAP & ATR Context 2C-R06
+Previous-Day / HTF Stock Context — SUBSTANTIALLY ADVANCED EARLY 2C-R07
+Gap & Premarket Context — GAP PORTION SUBSTANTIALLY ADVANCED EARLY
+2C-R08 Volume / Relative Volume 2C-R09 Market Regime 2C-R10 Relative
+Strength / Alignment 2C-R11 Time / Calendar 2C-R12 Post-Signal Failure &
+Warning Research 2C-R13 Two-Factor Interactions — NOT STARTED /
+PHASE-GATED 2C-R14 Higher-Order Candidate Signal Quality Model 2C-R15
+Frozen Model Validation 2C-R16 Forward Validation / Production Decision
+
+2C-R01 — DATA & OUTCOME INTEGRITY 1 Historical signal population
+integrity — COMPLETE 2 Unique symbol-day validation — COMPLETE 3
+BULL/BEAR population validation — COMPLETE 4 Primary +/-0.50%
+favorable-first outcome framework — COMPLETE 5 Historical outcome
+availability/resolution validation — COMPLETE 6 Daily-history coverage —
+COMPLETE 7 Actual previous-trading-day alignment — COMPLETE 8 Historical
+1M manifest construction — COMPLETE 9 Historical 1M acquisition —
+COMPLETE 10 Historical 1M download audit — COMPLETE 11 Consolidation
+validation — COMPLETE 12 Missing 09:30 audit — COMPLETE; zero missing 13
+Missing 09:31 audit — COMPLETE; 26 identified 14 Explicit missing-09:31
+research policy — PENDING FINAL IMPLEMENTATION
+
+2C-R01B — HISTORICAL 1M INTEGRATION & FACTOR RECONSTRUCTION — CURRENT 15
+Create/validate dedicated historical intraday-bar storage architecture
+16 Import consolidated 1M history 17 Validate imported row count =
+1,075,790 18 Validate imported symbol-days = 2,457 19 Validate
+timestamp/session handling in America/New_York 20 Link minute history
+deterministically to historical signal symbol-days 21 Preserve
+data-source provenance 22 Preserve missing-bar/data-quality flags 23
+Reconstruct C1 (09:30) OHLCV 24 Reconstruct C2 (09:31) OHLCV where
+available 25 Reconstruct/validate C1 VWAP 26 Reconstruct/validate C2
+VWAP 27 Reconstruct volume-derived features 28 Reconstruct ATR-dependent
+features with explicit ATR method 29 Compare reconstructed fields with
+stored signal_entry_context 30 Produce reconstruction coverage/parity
+report 31 Freeze reconstruction formulas before factor testing
+
+2C-R02 — C1 SETUP QUALITY 32 C1 direction 33 C1 body-to-range % 34 C1
+close-location value 35 C1 upper-wick % 36 C1 lower-wick % 37 C1 total
+range 38 C1 range / appropriate ATR 39 C1 true range 40 C1 volume 41 C1
+relative volume 42 C1 position relative to VWAP 43 C1 VWAP distance 44
+C1 directional quality relative to signal 45 C1 strength composite —
+only after components tested
+
+2C-R03 — C2 SETUP QUALITY 46 C2 direction 47 C2 body-to-range % 48 C2
+close-location value 49 C2 upper-wick % 50 C2 lower-wick % 51 C2 total
+range 52 C2 range / appropriate ATR 53 C2 true range 54 C2 volume 55 C2
+relative volume 56 C2 position relative to VWAP 57 C2 VWAP distance 58
+C2 directional quality relative to signal 59 C2 strength composite —
+only after components tested
+
+2C-R04 — C1 -> C2 RELATIONSHIP 60 C1 direction vs C2 direction 61 C2
+body strength relative to C1 62 C2 range expansion/contraction 63 C2
+volume expansion/contraction 64 C2 relative-volume change 65 C2 high
+relative to C1 high 66 C2 low relative to C1 low 67 C2 close position
+within C1 range 68 C2 open relative to C1 close 69 C1-to-C2 price delta
+70 Combined C1+C2 directional structure 71 Combined C1+C2 relative
+volume 72 C1->C2 momentum 73 C1->C2 acceleration/deceleration 74
+Two-candle range/extension 75 Two-candle structure composite — after
+components tested
+
+2C-R05 — VWAP & ATR CONTEXT 76 C1 side of VWAP 77 C2 side of VWAP 78
+Signal direction vs VWAP side 79 VWAP cross during C1/C2 80 VWAP reclaim
+during C1/C2 81 VWAP loss during C1/C2 82 Distance from VWAP at signal
+83 ATR-normalized VWAP distance 84 VWAP slope at signal 85 VWAP slope
+magnitude 86 VWAP slope alignment with signal 87 Daily ATR context 88
+Previous-day 1M ATR context 89 Previous-5-day 1M ATR context 90
+First-two-candles ATR context where appropriate 91 ATR-method
+sensitivity/configuration comparison 92 Broader volatility regime 93
+Normal intraday volatility regime ATR GOVERNANCE: ATR measures are not
+interchangeable. Explicitly record source/formula. Daily ATR remains
+preferred for overnight-gap normalization.
+
+2C-R06 — PREVIOUS-DAY / HTF STOCK CONTEXT 94 Previous-day direction —
+TESTED; weak/modest standalone discrimination 95 Previous-day return
+magnitude — TESTED; pockets found, temporally unstable 96 Previous-day
+body strength — TESTED; weak standalone 97 Previous-day close location —
+TESTED; weak standalone 98 Previous-day range — TESTED 99 Previous-day
+range expansion/normalized range — TESTED; unstable 100 Previous-day
+candle-strength composite — NOT STARTED 101 Stock 3D trend — TESTED 102
+Stock 5D trend — TESTED; mixed stability 103 Stock 10D trend — TESTED;
+direction-specific pockets, mixed stability 104 Stock 20D trend —
+TESTED; no durable standalone edge 105 Multi-day trend strength/slope —
+NOT STARTED 106 HH/HL vs LH/LL structure — NOT STARTED 107 HTF MA
+position/slope — NOT STARTED / DATA DEPENDENT
+
+2C-R07 — GAP & PREMARKET CONTEXT 108 Raw gap direction — TESTED 109 Raw
+gap magnitude — TESTED 110 Gap alignment with signal — PARTIALLY TESTED
+111 Gap / Daily ATR — TESTED + TEMPORAL ANALYSIS 112 Gap ATR-source
+audit — COMPLETE 113 Premarket direction/trend 114 Premarket move
+magnitude 115 Premarket range 116 Premarket volume 117 Premarket
+position relative to previous-day levels 118 Position relative to
+PMH/PML/PDH/PDL — CONTEXT ONLY, NOT SIGNAL DEFINITION 119
+Overnight/extended-hours range context PRESERVE: <=-0.50 Daily ATR weak
+context; -0.50 to -0.25 promising but non-uniform; BULL +0.25 to +1.00
+promising but non-uniform; BEAR >=+0.50 rejected standalone. Preserve
+Daily-ATR gap as future feature.
+
+2C-R08 — VOLUME / RELATIVE VOLUME 120 C1 volume 121 C2 volume 122 C1
+relative volume 123 C2 relative volume 124 Combined C1+C2 relative
+volume 125 C2/C1 raw-volume ratio 126 C2/C1 relative-volume ratio 127
+Volume expansion/contraction 128 Volume alignment with signal 129
+Premarket volume context 130 Opening volume vs historical normal 131
+Volume x candle strength — DEFER R13 132 Volume x VWAP — DEFER R13
+
+2C-R09 — MARKET REGIME 133 Previous-day SPY direction/return 134
+Previous-day QQQ direction/return 135 Previous-day DIA direction/return
+136 Previous-day 3-index agreement 137 Previous-day aggregate
+bullish/bearish/mixed regime 138-141 SPY/QQQ/DIA and aggregate 3D trends
+142 5D index trends + aggregate 143 10D index trends + aggregate 144 20D
+index trends + aggregate 145 Multi-day market trend strength 146
+Current-day SPY direction at signal 147 Current-day QQQ direction at
+signal 148 Current-day DIA direction at signal 149 Current-day 3-index
+agreement 150 Current-day bullish/bearish/mixed regime 151 Current-day
+market move magnitude 152 Current-day market momentum/velocity 153
+Market acceleration/deceleration
+
+2C-R10 — RELATIVE STRENGTH / ALIGNMENT 154 Signal vs previous-day stock
+direction 155 Signal vs stock multi-day trend 156 Signal vs previous-day
+market regime 157 Signal vs current-day market regime 158 Stock trend vs
+market trend 159 Stock vs SPY relative strength/weakness 160 Stock vs
+QQQ relative strength/weakness 161 Relative strength/weakness
+persistence 162 Sector direction at signal 163 Stock vs sector alignment
+164 Sector vs broad-market alignment 165 Stock + sector + market
+alignment 166 Gap + stock trend + signal — DEFER R13 167 Setup quality +
+market regime — DEFER R13 168 Setup quality + stock trend — DEFER R13
+169 Setup quality + relative strength — DEFER R13
+
+HISTORICAL / SYMBOL CONTEXT 170 Individual-symbol FF performance —
+SUBSTANTIALLY TESTED 171 Historical prior-N/sample maturity — TESTED 172
+Historical 90-day FF rate — TESTED 173 Historical adjusted score —
+TESTED 174 Historical rank/established rank — TESTED; weak predictive
+value 175 Established vs insufficient-N — TESTED 176 Recent symbol
+performance trend/change — NOT STARTED 177 BULL-specific vs
+BEAR-specific symbol history — PARTIALLY TESTED 178 Symbol x setup
+quality — DEFER R13 179 Symbol x market regime — DEFER R13
+
+2C-R11 — TIME / CALENDAR 180 Time-of-day signal performance 181 Early vs
+middle vs later RTH 182 Minutes since RTH open 183 Day of week 184
+Month/seasonal stability — LOW PRIORITY 185 Time-of-day x direction —
+DEFER R13 186 Time-of-day x market regime — DEFER R13
+
+2C-R12 — POST-SIGNAL FAILURE & WARNING RESEARCH PM+PD warning-model
+completion statuses are NOT inherited. 187 Immediate continuation 188
+Initial continuation then reversal 189 Immediate signal failure 190 VWAP
+loss after signal 191 VWAP reclaim after loss 192 Failure to reclaim
+VWAP 193 C1 structural high/low loss 194 C2 structural high/low loss 195
+Two-candle structure invalidation 196 Favorable-excursion progression
+197 Adverse-excursion progression 198 MFE/MAE trajectory 199 Warning
+persistence/duration 200 Speed of deterioration 201 Recovery after
+warning 202 Time since signal/warning-age effect 203 Continuation ->
+pullback -> continuation 204 Failure -> reclaim -> recovery 205 Warning
+accumulation/multiple concurrent failures 206 Candidate Warning
+State/Path model — after individual warnings tested 207 Warning-model
+temporal robustness 208 Warning-model BULL/BEAR robustness
+
+2C-R13 — TWO-FACTOR INTERACTIONS — PHASE-GATED 209 C1 quality x C2
+quality 210 C1/C2 relationship x VWAP 211 Candle strength x relative
+volume 212 Candle strength x Daily-ATR gap 213 VWAP x Daily-ATR gap 214
+Setup quality x previous-day direction 215 Setup quality x multi-day
+stock trend 216 Setup quality x market regime 217 Setup quality x
+relative strength 218 Gap x stock trend 219 Gap x market regime 220
+Volume x VWAP 221 Direction x market regime 222 Direction x gap 223
+Direction x VWAP 224 Time-of-day x setup quality 225 Symbol history x
+setup quality GATE: predefine interaction candidates from retained
+factors/plausible mechanisms; do not mine broad matrices for maximum
+FF%.
+
+2C-R14 — HIGHER-ORDER CANDIDATE MODEL 226 Define retained feature set
+227 Minimum-N requirements 228 Missing-data treatment 229 BULL/BEAR
+treatment 230 Score vs rule architecture 231 Build without outcome
+leakage 232 Discrimination vs baseline 233 Coverage/signals retained 234
+Temporal stability 235 Symbol concentration 236 Regime concentration 237
+Sensitivity analysis 238 Freeze candidate model/version
+
+2C-R15 — FROZEN MODEL VALIDATION 239 Lock formulas 240 Lock
+thresholds/buckets 241 Lock feature list 242 Lock missing-data rules 243
+Lock BULL/BEAR treatment 244 Untouched/out-of-sample validation where
+available 245 FF vs baseline 246 N/coverage vs baseline 247 Temporal
+consistency 248 Symbol concentration 249 Regime dependence 250 Document
+failures/nulls 251 Production-readiness decision
+
+2C-R16 — FORWARD VALIDATION / PRODUCTION DECISION 252 Freeze
+production-candidate indicator logic 253 Forward-collect without
+retuning 254 Live vs historical signal parity 255 Feature-calculation
+parity 256 Forward vs historical FF behavior 257 Prospective
+warning/failure tracking 258 Minimum forward N 259 Decide use: filter,
+score, warning, context-only, or reject 260 Version/archive final
+decision
+
+RESEARCH RULES 1 Do not optimize thresholds simply to maximize
+historical FF%. 2 Primary benchmark remains +0.50% favorable before
+-0.50% adverse. 3 Report N with every rate. 4 Establish overall
+relationships, then inspect BULL/BEAR as appropriate. 5 Require temporal
+robustness before production promotion. 6 Pre-signal variables use only
+information available at/before signal. 7 Test individual factors before
+high-dimensional interactions. 8 Do not promote small-N high-performing
+buckets. 9 Keep Signal Quality separate from post-signal Trade
+Health/Warnings. 10 Preserve null/rejected findings. 11 Record data
+source/formula for reconstructed variables. 12 ATR-normalized variables
+must identify ATR method. 13 Never fabricate missing candles or silently
+discard missing-data cases. 14 Freeze model versions before final
+validation. 15 Validate frozen candidates out-of-sample and/or forward
+without retuning. 16 Favor robustness, reproducibility, plausible
+mechanism, and adequate N. 17 Completed tests may end RETAINED,
+RESEARCH-ONLY, or REJECTED. 18 Do not promote temporally unstable
+pockets without independent validation.
+
+BLOCKERS / DATA LIMITATIONS - 26/2,457 historical signal-days lack a
+09:31 aggregate; explicit missing-data handling required. - Historical
+entry_grade, entry_grade_components, and raw_payload unavailable. -
+Reconstruction parity must be validated before reconstructed factors are
+trusted. - Daily-history and historical 1M acquisition are not current
+blockers.
+
+ROADMAP GOVERNANCE / LINEAGE This document restructures an earlier
+roadmap lineage contaminated with PM + Previous Day Breakout terminology
+while being used during Second 1M Candle research. - This roadmap is
+specific to SECOND 1M CANDLE MONITORING (VWAP). - PM+PD-specific
+setup/warning factors are not inherited as completed Second Candle
+research. - PMH/PML/PDH/PDL may be contextual factors but do not define
+the signal. - Earlier mislabeled copies remain historical artifacts, not
+the current source of truth. - After review/approval, register this
+roadmap in the DB research-management layer and version it rather than
+silently overwrite it.
+
+CURRENT POSITION 2C-R01B — Historical 1M Integration & Factor
+Reconstruction.
+
+NEXT ACTION Design and validate DB storage/import for the 1,075,790
+historical 1M bars, including provenance and missing-09:31 handling.
+Then reconstruct/parity-check C1/C2/VWAP/volume/ATR features. Resume
+individual-factor research at R02-R12. R13 remains closed until
+individual-factor work is sufficiently complete.
+
+END OF ROADMAP

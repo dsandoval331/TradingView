@@ -1,0 +1,310 @@
+//@version=6
+indicator(
+     "Second 1M Research Collector - S1M_RC_1.2B Raw HTF Context",
+     overlay=false
+     )
+
+// ============================================================================
+// BUILD
+// ============================================================================
+
+string BUILD_ID = "S1M_RC_1.2B"
+
+// ============================================================================
+// SETTINGS
+// ============================================================================
+
+spxSymbol = input.symbol(
+     "SP:SPX",
+     "S&P 500 Symbol",
+     group="Bias Context"
+     )
+
+nasdaqSymbol = input.symbol(
+     "NASDAQ:IXIC",
+     "Nasdaq Composite Symbol",
+     group="Bias Context"
+     )
+
+djiaSymbol = input.symbol(
+     "DJ:DJI",
+     "DJIA Symbol",
+     group="Bias Context"
+     )
+
+showStatusTable = input.bool(
+     true,
+     "Show Status Table",
+     group="Validation"
+     )
+
+// ============================================================================
+// STOCK DAILY RAW CONTEXT
+// D1 = previous completed daily candle
+// D2 = completed daily candle immediately before D1
+// ============================================================================
+
+[stkD1O,
+ stkD1H,
+ stkD1L,
+ stkD1C,
+ stkD2O,
+ stkD2H,
+ stkD2L,
+ stkD2C] = request.security(
+     syminfo.tickerid,
+     "D",
+     [
+         open[1], high[1], low[1], close[1],
+         open[2], high[2], low[2], close[2]
+     ],
+     lookahead=barmerge.lookahead_on
+     )
+
+// ============================================================================
+// STOCK WEEKLY RAW CONTEXT
+// W1 = previous completed weekly candle
+// W2 = completed weekly candle immediately before W1
+// ============================================================================
+
+[stkW1O,
+ stkW1H,
+ stkW1L,
+ stkW1C,
+ stkW2O,
+ stkW2H,
+ stkW2L,
+ stkW2C] = request.security(
+     syminfo.tickerid,
+     "W",
+     [
+         open[1], high[1], low[1], close[1],
+         open[2], high[2], low[2], close[2]
+     ],
+     lookahead=barmerge.lookahead_on
+     )
+
+// ============================================================================
+// SPX DAILY / WEEKLY RAW CONTEXT
+// ============================================================================
+
+[spxD1O,
+ spxD1H,
+ spxD1L,
+ spxD1C,
+ spxD2O,
+ spxD2H,
+ spxD2L,
+ spxD2C] = request.security(
+     spxSymbol,
+     "D",
+     [
+         open[1], high[1], low[1], close[1],
+         open[2], high[2], low[2], close[2]
+     ],
+     lookahead=barmerge.lookahead_on
+     )
+
+[spxW1O,
+ spxW1H,
+ spxW1L,
+ spxW1C,
+ spxW2O,
+ spxW2H,
+ spxW2L,
+ spxW2C] = request.security(
+     spxSymbol,
+     "W",
+     [
+         open[1], high[1], low[1], close[1],
+         open[2], high[2], low[2], close[2]
+     ],
+     lookahead=barmerge.lookahead_on
+     )
+
+// ============================================================================
+// NASDAQ DAILY / WEEKLY RAW CONTEXT
+// ============================================================================
+
+[nasD1O,
+ nasD1H,
+ nasD1L,
+ nasD1C,
+ nasD2O,
+ nasD2H,
+ nasD2L,
+ nasD2C] = request.security(
+     nasdaqSymbol,
+     "D",
+     [
+         open[1], high[1], low[1], close[1],
+         open[2], high[2], low[2], close[2]
+     ],
+     lookahead=barmerge.lookahead_on
+     )
+
+[nasW1O,
+ nasW1H,
+ nasW1L,
+ nasW1C,
+ nasW2O,
+ nasW2H,
+ nasW2L,
+ nasW2C] = request.security(
+     nasdaqSymbol,
+     "W",
+     [
+         open[1], high[1], low[1], close[1],
+         open[2], high[2], low[2], close[2]
+     ],
+     lookahead=barmerge.lookahead_on
+     )
+
+// ============================================================================
+// DJIA DAILY / WEEKLY RAW CONTEXT
+// ============================================================================
+
+[djiD1O,
+ djiD1H,
+ djiD1L,
+ djiD1C,
+ djiD2O,
+ djiD2H,
+ djiD2L,
+ djiD2C] = request.security(
+     djiaSymbol,
+     "D",
+     [
+         open[1], high[1], low[1], close[1],
+         open[2], high[2], low[2], close[2]
+     ],
+     lookahead=barmerge.lookahead_on
+     )
+
+[djiW1O,
+ djiW1H,
+ djiW1L,
+ djiW1C,
+ djiW2O,
+ djiW2H,
+ djiW2L,
+ djiW2C] = request.security(
+     djiaSymbol,
+     "W",
+     [
+         open[1], high[1], low[1], close[1],
+         open[2], high[2], low[2], close[2]
+     ],
+     lookahead=barmerge.lookahead_on
+     )
+
+// ============================================================================
+// CSV / DATA WINDOW EXPORT — EXACTLY 64 SERIES
+// ============================================================================
+
+// Stock daily — 8
+plot(stkD1O, "HTF_Stock_D1_Open", display=display.data_window)
+plot(stkD1H, "HTF_Stock_D1_High", display=display.data_window)
+plot(stkD1L, "HTF_Stock_D1_Low", display=display.data_window)
+plot(stkD1C, "HTF_Stock_D1_Close", display=display.data_window)
+plot(stkD2O, "HTF_Stock_D2_Open", display=display.data_window)
+plot(stkD2H, "HTF_Stock_D2_High", display=display.data_window)
+plot(stkD2L, "HTF_Stock_D2_Low", display=display.data_window)
+plot(stkD2C, "HTF_Stock_D2_Close", display=display.data_window)
+
+// Stock weekly — 8
+plot(stkW1O, "HTF_Stock_W1_Open", display=display.data_window)
+plot(stkW1H, "HTF_Stock_W1_High", display=display.data_window)
+plot(stkW1L, "HTF_Stock_W1_Low", display=display.data_window)
+plot(stkW1C, "HTF_Stock_W1_Close", display=display.data_window)
+plot(stkW2O, "HTF_Stock_W2_Open", display=display.data_window)
+plot(stkW2H, "HTF_Stock_W2_High", display=display.data_window)
+plot(stkW2L, "HTF_Stock_W2_Low", display=display.data_window)
+plot(stkW2C, "HTF_Stock_W2_Close", display=display.data_window)
+
+// SPX daily — 8
+plot(spxD1O, "HTF_SPX_D1_Open", display=display.data_window)
+plot(spxD1H, "HTF_SPX_D1_High", display=display.data_window)
+plot(spxD1L, "HTF_SPX_D1_Low", display=display.data_window)
+plot(spxD1C, "HTF_SPX_D1_Close", display=display.data_window)
+plot(spxD2O, "HTF_SPX_D2_Open", display=display.data_window)
+plot(spxD2H, "HTF_SPX_D2_High", display=display.data_window)
+plot(spxD2L, "HTF_SPX_D2_Low", display=display.data_window)
+plot(spxD2C, "HTF_SPX_D2_Close", display=display.data_window)
+
+// SPX weekly — 8
+plot(spxW1O, "HTF_SPX_W1_Open", display=display.data_window)
+plot(spxW1H, "HTF_SPX_W1_High", display=display.data_window)
+plot(spxW1L, "HTF_SPX_W1_Low", display=display.data_window)
+plot(spxW1C, "HTF_SPX_W1_Close", display=display.data_window)
+plot(spxW2O, "HTF_SPX_W2_Open", display=display.data_window)
+plot(spxW2H, "HTF_SPX_W2_High", display=display.data_window)
+plot(spxW2L, "HTF_SPX_W2_Low", display=display.data_window)
+plot(spxW2C, "HTF_SPX_W2_Close", display=display.data_window)
+
+// Nasdaq daily — 8
+plot(nasD1O, "HTF_NASDAQ_D1_Open", display=display.data_window)
+plot(nasD1H, "HTF_NASDAQ_D1_High", display=display.data_window)
+plot(nasD1L, "HTF_NASDAQ_D1_Low", display=display.data_window)
+plot(nasD1C, "HTF_NASDAQ_D1_Close", display=display.data_window)
+plot(nasD2O, "HTF_NASDAQ_D2_Open", display=display.data_window)
+plot(nasD2H, "HTF_NASDAQ_D2_High", display=display.data_window)
+plot(nasD2L, "HTF_NASDAQ_D2_Low", display=display.data_window)
+plot(nasD2C, "HTF_NASDAQ_D2_Close", display=display.data_window)
+
+// Nasdaq weekly — 8
+plot(nasW1O, "HTF_NASDAQ_W1_Open", display=display.data_window)
+plot(nasW1H, "HTF_NASDAQ_W1_High", display=display.data_window)
+plot(nasW1L, "HTF_NASDAQ_W1_Low", display=display.data_window)
+plot(nasW1C, "HTF_NASDAQ_W1_Close", display=display.data_window)
+plot(nasW2O, "HTF_NASDAQ_W2_Open", display=display.data_window)
+plot(nasW2H, "HTF_NASDAQ_W2_High", display=display.data_window)
+plot(nasW2L, "HTF_NASDAQ_W2_Low", display=display.data_window)
+plot(nasW2C, "HTF_NASDAQ_W2_Close", display=display.data_window)
+
+// DJIA daily — 8
+plot(djiD1O, "HTF_DJIA_D1_Open", display=display.data_window)
+plot(djiD1H, "HTF_DJIA_D1_High", display=display.data_window)
+plot(djiD1L, "HTF_DJIA_D1_Low", display=display.data_window)
+plot(djiD1C, "HTF_DJIA_D1_Close", display=display.data_window)
+plot(djiD2O, "HTF_DJIA_D2_Open", display=display.data_window)
+plot(djiD2H, "HTF_DJIA_D2_High", display=display.data_window)
+plot(djiD2L, "HTF_DJIA_D2_Low", display=display.data_window)
+plot(djiD2C, "HTF_DJIA_D2_Close", display=display.data_window)
+
+// DJIA weekly — 8
+plot(djiW1O, "HTF_DJIA_W1_Open", display=display.data_window)
+plot(djiW1H, "HTF_DJIA_W1_High", display=display.data_window)
+plot(djiW1L, "HTF_DJIA_W1_Low", display=display.data_window)
+plot(djiW1C, "HTF_DJIA_W1_Close", display=display.data_window)
+plot(djiW2O, "HTF_DJIA_W2_Open", display=display.data_window)
+plot(djiW2H, "HTF_DJIA_W2_High", display=display.data_window)
+plot(djiW2L, "HTF_DJIA_W2_Low", display=display.data_window)
+plot(djiW2C, "HTF_DJIA_W2_Close", display=display.data_window)
+
+// ============================================================================
+// STATUS TABLE — DOES NOT CONSUME PLOT BUDGET
+// ============================================================================
+
+var table statusTable = table.new(
+     position.bottom_left,
+     2,
+     5,
+     frame_color=color.gray,
+     frame_width=1
+     )
+
+if barstate.islast
+    table.clear(statusTable, 0, 0, 1, 4)
+
+    if showStatusTable
+        table.cell(statusTable, 0, 0, "BUILD")
+        table.cell(statusTable, 1, 0, BUILD_ID)
+        table.cell(statusTable, 0, 1, "Stock")
+        table.cell(statusTable, 1, 1, syminfo.ticker)
+        table.cell(statusTable, 0, 2, "SPX")
+        table.cell(statusTable, 1, 2, spxSymbol)
+        table.cell(statusTable, 0, 3, "Nasdaq")
+        table.cell(statusTable, 1, 3, nasdaqSymbol)
+        table.cell(statusTable, 0, 4, "DJIA")
+        table.cell(statusTable, 1, 4, djiaSymbol)

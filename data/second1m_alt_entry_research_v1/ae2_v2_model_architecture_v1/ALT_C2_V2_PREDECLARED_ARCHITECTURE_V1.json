@@ -1,0 +1,42 @@
+{
+  "architecture_id": "ALT_C2_V2_PREDECLARED_ARCHITECTURE_V1",
+  "purpose": "Freeze an outcome-blind V2 evidence-combination architecture before any combined outcome evaluation.",
+  "base_population": "753 historical Candidate-V1 Preferred binary events in A51 five-factor certified matrix.",
+  "positive_evidence": [
+    "A37_G_P2_PD_AH_PM_ORDERING",
+    "A38_T_P1_PM_REMAINS_FOR_C2"
+  ],
+  "negative_evidence": [
+    "A37_G_N1_PM_PD_SPACING_Q4",
+    "A38_T_N1_PD_REMAINS_FOR_C2",
+    "A42_N2_OPEN_CONSUMED_RATIO_Q2"
+  ],
+  "a39_status": "EXCLUDED_PROVENANCE_CONFLICTED",
+  "combination_rule": {
+    "positive_present": "OR across the two positive candidates",
+    "negative_present": "OR across the three negative candidates",
+    "state_priority": "No priority/override. Positive and negative evidence are represented separately.",
+    "states": {
+      "UPGRADE": "positive_present AND NOT negative_present",
+      "DOWNGRADE": "negative_present AND NOT positive_present",
+      "CONFLICT": "positive_present AND negative_present",
+      "BASE": "NOT positive_present AND NOT negative_present"
+    }
+  },
+  "intensity_fields": {
+    "positive_count": "0..2, descriptive only",
+    "negative_count": "0..3, descriptive only",
+    "total_evidence_count": "positive_count + negative_count, descriptive only"
+  },
+  "predeclared_constraints": [
+    "No outcome information is used to define states.",
+    "No weights are fitted.",
+    "No candidate threshold is changed.",
+    "No pairwise interaction is promoted into a rule.",
+    "A38_T_N1 and A42_N2 remain separate evidence flags despite moderate overlap; OR only determines negative_present.",
+    "CONFLICT is preserved as its own state rather than resolved post hoc.",
+    "Candidate Model V1 and prospective V1 remain unchanged.",
+    "A52 state definitions must be frozen before outcome evaluation."
+  ],
+  "sha256": "7ca6555faa51c4af5462ccfbe21738ee9e9bbaaf25fdff96ea4c97ff7b864865"
+}

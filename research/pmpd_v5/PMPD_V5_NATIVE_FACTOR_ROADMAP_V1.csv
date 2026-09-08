@@ -1,0 +1,49 @@
+factor_code,family,factor_name,description,priority,target_phase,status,timing_type,data_type,data_available
+V5Q01,Q_DATA_QUALITY,Six-level completeness,Whether PMH/PML/AHH/AHL/PDH/PDL are all available for the symbol-day.,1,9H,not_tested,decision_point_or_event,mixed,True
+V5Q02,Q_DATA_QUALITY,Premarket observation count,Number of observed PRE 1-minute bars used to form PMH/PML.,1,9H,not_tested,decision_point_or_event,mixed,True
+V5Q03,Q_DATA_QUALITY,Prior after-hours observation count,Number of observed AH 1-minute bars used to form AHH/AHL.,1,9H,not_tested,decision_point_or_event,mixed,True
+V5Q04,Q_DATA_QUALITY,Prior RTH observation count,Number of observed prior RTH 1-minute bars used to form PDH/PDL.,1,9H,not_tested,decision_point_or_event,mixed,True
+V5Q05,Q_DATA_QUALITY,Premarket observability tier,Descriptive PM observability stratum; retain continuous count as primary field.,1,9H,not_tested,decision_point_or_event,mixed,True
+V5Q06,Q_DATA_QUALITY,After-hours observability tier,Descriptive AH observability stratum; retain continuous count as primary field.,1,9H,not_tested,decision_point_or_event,mixed,True
+V5Q07,Q_DATA_QUALITY,Six-level price-scale ratio,Maximum divided by minimum across all six reconstructed levels.,1,9H,not_tested,decision_point_or_event,mixed,True
+V5Q08,Q_DATA_QUALITY,Overnight gap percentage,Current PM last close versus previous RTH close continuity diagnostic.,1,9H,not_tested,decision_point_or_event,mixed,True
+V5Q09,Q_DATA_QUALITY,Severe price-scale discontinuity flag,Outcome-blind guardrail for obvious corporate-action/scale discontinuities.,1,9H,not_tested,decision_point_or_event,mixed,True
+V5Q10,Q_DATA_QUALITY,Sparse extended-hours sensitivity flag,Whether PM or AH has five or fewer observed bars; not a default exclusion.,1,9H,not_tested,decision_point_or_event,mixed,True
+V5L01,L_LEVEL_GEOMETRY,Directional stack width percentage,Outer-to-inner width of PM/AH/PD directional level stack as percent of price.,1,9H,not_tested,decision_point_or_event,mixed,True
+V5L02,L_LEVEL_GEOMETRY,ATR-normalized directional stack width,Directional stack width normalized by contemporaneous ATR.,1,9H,not_tested,decision_point_or_event,mixed,False
+V5L03,L_LEVEL_GEOMETRY,PM-AH level separation,Directional PM versus AH level separation.,1,9H,not_tested,decision_point_or_event,mixed,True
+V5L04,L_LEVEL_GEOMETRY,PM-PD level separation,Directional PM versus PD level separation.,1,9H,not_tested,decision_point_or_event,mixed,True
+V5L05,L_LEVEL_GEOMETRY,AH-PD level separation,Directional AH versus PD level separation.,1,9H,not_tested,decision_point_or_event,mixed,True
+V5L06,L_LEVEL_GEOMETRY,Identity ordering inner-to-outer,Exact PM/AH/PD identity ordering in directional geometry space.,1,9H,not_tested,decision_point_or_event,mixed,True
+V5L07,L_LEVEL_GEOMETRY,Inner level identity,"Whether PM, AH, or PD is the innermost directional level.",1,9H,not_tested,decision_point_or_event,mixed,True
+V5L08,L_LEVEL_GEOMETRY,Middle level identity,"Whether PM, AH, or PD is the middle directional level.",1,9H,not_tested,decision_point_or_event,mixed,True
+V5L09,L_LEVEL_GEOMETRY,Outer level identity,"Whether PM, AH, or PD is the outermost directional level.",1,9H,not_tested,decision_point_or_event,mixed,True
+V5L10,L_LEVEL_GEOMETRY,Minimum pairwise confluence distance,Smallest pairwise PM/AH/PD directional-level distance.,1,9H,not_tested,decision_point_or_event,mixed,False
+V5L11,L_LEVEL_GEOMETRY,Levels pre-cleared at RTH open,Count of directional levels already beyond price at the RTH open.,1,9H,not_tested,decision_point_or_event,mixed,False
+V5L12,L_LEVEL_GEOMETRY,RTH open location relative to stack,Categorical location of RTH open versus inner/middle/outer levels.,1,9H,not_tested,decision_point_or_event,mixed,False
+V5S01,S_EVENT_STRUCTURE,First contacted level identity,PM/AH/PD identity first contacted by the directional encounter.,1,9H,not_tested,decision_point_or_event,mixed,False
+V5S02,S_EVENT_STRUCTURE,First cleared level identity,PM/AH/PD identity first cleared by the directional encounter.,1,9H,not_tested,decision_point_or_event,mixed,False
+V5S03,S_EVENT_STRUCTURE,Maximum levels cleared,Maximum 0-3 directional levels traded beyond during parent event.,1,9H,not_tested,decision_point_or_event,mixed,True
+V5S04,S_EVENT_STRUCTURE,First-to-second clear elapsed time,Elapsed time between first and second directional clears.,1,9H,not_tested,decision_point_or_event,mixed,False
+V5S05,S_EVENT_STRUCTURE,Second-to-full-stack clear elapsed time,Elapsed time between second clear and first full-stack trade.,1,9H,not_tested,decision_point_or_event,mixed,False
+V5S06,S_EVENT_STRUCTURE,Contact-to-full-stack elapsed time,Elapsed time from first hard contact to first full-stack trade.,1,9H,not_tested,decision_point_or_event,mixed,False
+V5S07,S_EVENT_STRUCTURE,Traded-beyond vector,Three-bit PM/AH/PD vector indicating levels penetrated intrabar.,1,9H,not_tested,decision_point_or_event,mixed,True
+V5S08,S_EVENT_STRUCTURE,Completed-bar retention vector,Three-bit PM/AH/PD vector retained beyond on completed bar.,1,9H,not_tested,decision_point_or_event,mixed,True
+V5S09,S_EVENT_STRUCTURE,Traded-versus-retained disagreement,Difference between traded-beyond and completed-bar retention vectors.,1,9H,not_tested,decision_point_or_event,mixed,True
+V5S10,S_EVENT_STRUCTURE,Immediate full-stack retention,Whether first full-stack trade is retained beyond all three levels on the completed bar.,1,9H,not_tested,decision_point_or_event,mixed,False
+V5S11,S_EVENT_STRUCTURE,Parent-event attempt count,Number of directional attempts within the parent encounter.,1,9H,not_tested,decision_point_or_event,mixed,True
+V5S12,S_EVENT_STRUCTURE,Attempt number at decision point,Attempt ordinal when a candidate decision point occurs.,1,9H,not_tested,decision_point_or_event,mixed,True
+V5S13,S_EVENT_STRUCTURE,Directional recross count,Count of repeated cross/recross transitions through stack levels.,2,9H,not_tested,decision_point_or_event,mixed,False
+V5S14,S_EVENT_STRUCTURE,Structural progression path signature,Ordered transition signature from contact through clears/losses/reclaims.,2,9H,not_tested,decision_point_or_event,mixed,False
+V5R01,R_FAILURE_RECLAIM,Partial loss after retention,Whether a retained multi-level structure subsequently loses one or more retained levels.,1,9H,not_tested,decision_point_or_event,mixed,True
+V5R02,R_FAILURE_RECLAIM,Full loss after retention,Whether retained structure subsequently loses all directional levels.,1,9H,not_tested,decision_point_or_event,mixed,True
+V5R03,R_FAILURE_RECLAIM,Partial reclaim after loss,Whether lost structure subsequently reclaims some but not all directional levels.,1,9H,not_tested,decision_point_or_event,mixed,True
+V5R04,R_FAILURE_RECLAIM,Full reclaim after loss,Whether lost structure subsequently reclaims all directional levels.,1,9H,not_tested,decision_point_or_event,mixed,True
+V5R05,R_FAILURE_RECLAIM,Retention-to-loss elapsed time,Elapsed time from retained structure to first partial/full loss.,1,9H,not_tested,decision_point_or_event,mixed,False
+V5R06,R_FAILURE_RECLAIM,Loss-to-reclaim elapsed time,Elapsed time from loss state to partial/full reclaim.,1,9H,not_tested,decision_point_or_event,mixed,False
+V5R07,R_FAILURE_RECLAIM,Reclaim count,Count of reclaim transitions within parent event.,1,9H,not_tested,decision_point_or_event,mixed,True
+V5R08,R_FAILURE_RECLAIM,Failure-warning persistence,Duration/transition count spent in deteriorated or loss states before recovery or termination.,2,9H,not_tested,decision_point_or_event,mixed,False
+V5T01,T_TIMING_VELOCITY,Minutes from RTH open to first contact,Elapsed RTH minutes before directional stack encounter begins.,1,9H,not_tested,decision_point_or_event,mixed,False
+V5T02,T_TIMING_VELOCITY,Decision-point time of day,Timestamp/minutes since RTH open for each candidate decision point.,1,9H,not_tested,decision_point_or_event,mixed,True
+V5T03,T_TIMING_VELOCITY,Level-crossing velocity,Directional price/time velocity across successive stack levels.,1,9H,not_tested,decision_point_or_event,mixed,False
+V5T04,T_TIMING_VELOCITY,Bars between structural transitions,Completed 1-minute bars between consecutive state transitions.,1,9H,not_tested,decision_point_or_event,mixed,False

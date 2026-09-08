@@ -1,0 +1,35 @@
+{
+  "batch_id": "PMPD_V5_9H_FACTOR_BATCH_1_GEOMETRY_QUALITY_V1",
+  "protocol_id": "PMPD_V5_9H_FACTOR_PROTOCOL_V1",
+  "primary_decision_types": [
+    "DP1_FIRST_CONTACT",
+    "DP2_FIRST_LEVEL_CLEAR",
+    "DP3_SECOND_LEVEL_CLEAR",
+    "DP4_FULL_STACK_FIRST_CLEAR",
+    "DP5_FIRST_COMPLETED_BAR_RETENTION"
+  ],
+  "continuous_factors": [
+    "stack_width_pct",
+    "pm_ah_abs_pct",
+    "pm_pd_abs_pct",
+    "ah_pd_abs_pct",
+    "pm_bar_count",
+    "prior_ah_bar_count",
+    "prior_rth_bar_count",
+    "six_level_scale_ratio",
+    "attempt_number",
+    "minutes_since_rth_open"
+  ],
+  "categorical_factors": [
+    "inner_level_name",
+    "middle_level_name",
+    "outer_level_name",
+    "identity_order_inner_to_outer",
+    "pm_observability_tier",
+    "ah_observability_tier",
+    "sparse_extended_hours_flag",
+    "price_scale_review_flag",
+    "traded_vector_code",
+    "close_vector_code"
+  ]
+}

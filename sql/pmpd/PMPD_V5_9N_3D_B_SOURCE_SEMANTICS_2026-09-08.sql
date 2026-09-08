@@ -1,0 +1,3 @@
+-- PM+PD V5 9N-3D-B — Frozen V4 Source Semantic Extraction
+-- Local audit helper. No model logic changes.
+-- V4 remains frozen. V5 remains frozen. Production rule unauthorized.

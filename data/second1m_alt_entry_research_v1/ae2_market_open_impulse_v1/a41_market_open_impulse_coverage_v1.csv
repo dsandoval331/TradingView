@@ -1,0 +1,4 @@
+symbol,event_rows,event_rows_with_impulse,event_rows_missing_impulse,coverage_pct
+SPY,8307,8307,0,100.0
+QQQ,8307,8307,0,100.0
+DIA,8307,8307,0,100.0

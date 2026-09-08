@@ -1,0 +1,91 @@
+{
+  "protocol_id": "ALT_C2_PROSPECTIVE_VALIDATION_V2",
+  "candidate_model_id": "ALT_C2_CANDIDATE_MODEL_V2",
+  "parent_model_id": "ALT_C2_CANDIDATE_MODEL_V1",
+  "model_sha256": "8d11531fe9859c253ee629a473094654ca8c69721e3ab82ceebad5bb5ed1697b",
+  "architecture_spec_sha256": "7ca6555faa51c4af5462ccfbe21738ee9e9bbaaf25fdff96ea4c97ff7b864865",
+  "status": "FROZEN_BEFORE_V2_PROSPECTIVE_OUTCOME_EVALUATION",
+  "historical_research_end_date": "2026-08-27",
+  "prospective_start_date": "2026-08-28",
+  "cohort_rule": "Score V2 only on events classified PREFERRED by frozen Candidate Model V1.",
+  "important_independence_note": "V2 was developed using historical data ending 2026-08-27. Existing post-2026-08-27 V1 prospective events may be scored by frozen V2 only after this protocol freeze; no V2 rule may be changed using those outcomes.",
+  "primary_outcome": {
+    "definition": "+0.50% favorable before -0.50% adverse",
+    "binary_population": [
+      "FAVORABLE_FIRST",
+      "ADVERSE_FIRST"
+    ],
+    "track_separately": [
+      "BOTH_SAME_BAR",
+      "UNRESOLVED"
+    ]
+  },
+  "states": [
+    "UPGRADE",
+    "BASE",
+    "CONFLICT",
+    "DOWNGRADE"
+  ],
+  "primary_hypotheses": [
+    "UPGRADE > BASE > DOWNGRADE in binary favorable-first rate.",
+    "UPGRADE - DOWNGRADE spread >= 7 percentage points.",
+    "UPGRADE favorable-first rate >= 60%.",
+    "DOWNGRADE favorable-first rate <= 53%."
+  ],
+  "directional_confirmation": {
+    "rule": "For BULL and BEAR separately, UPGRADE > DOWNGRADE once both state-direction cells meet minimum N.",
+    "minimum_n_per_state_direction": 40
+  },
+  "minimum_binary_samples": {
+    "UPGRADE": 100,
+    "BASE": 200,
+    "DOWNGRADE": 150,
+    "CONFLICT": 60
+  },
+  "review_checkpoints": {
+    "UPGRADE": [
+      25,
+      50,
+      100
+    ],
+    "DOWNGRADE": [
+      50,
+      100,
+      150
+    ],
+    "policy": "Descriptive review only. No early stopping and no model changes."
+  },
+  "concentration_checks": {
+    "max_single_symbol_share_of_upgrade_pct": 7.5,
+    "max_top10_symbol_share_of_upgrade_pct": 45.0,
+    "note": "Higher than V1 thresholds because V2 UPGRADE is a smaller nested cohort; failures are cautions, not automatic model edits."
+  },
+  "frozen_rules": {
+    "positive_evidence": [
+      "A37_G_P2_PD_AH_PM_ORDERING",
+      "A38_T_P1_PM_REMAINS_FOR_C2"
+    ],
+    "negative_evidence": [
+      "A37_G_N1_PM_PD_SPACING_Q4",
+      "A38_T_N1_PD_REMAINS_FOR_C2",
+      "A42_N2_OPEN_CONSUMED_RATIO_Q2"
+    ],
+    "state_definitions": {
+      "UPGRADE": "positive_present AND NOT negative_present",
+      "DOWNGRADE": "negative_present AND NOT positive_present",
+      "CONFLICT": "positive_present AND negative_present",
+      "BASE": "NOT positive_present AND NOT negative_present"
+    },
+    "conflict_policy": "Preserve CONFLICT as separate state; no reassignment.",
+    "a39": "Excluded permanently from this V2 protocol because provenance-conflicted/non-reconstructible."
+  },
+  "research_firewall": [
+    "Candidate Model V1 prospective validation remains unchanged.",
+    "V2 scoring must not modify the V1 ledger or V1 classifications.",
+    "No V2 thresholds, weights, candidate membership, or state definitions may change during this protocol.",
+    "No outcome-optimized subgroups may be created from prospective V2 events.",
+    "2025Q3 and 2026Q1 historical failures remain part of the record and are not filtered out.",
+    "Any model change freezes this protocol and requires a separately named V3 or successor protocol."
+  ],
+  "sha256": "39868df326858f59b3fd9234db208347d5a43e154645f6be34cd3c8bf4249728"
+}

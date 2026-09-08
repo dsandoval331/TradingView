@@ -1,0 +1,752 @@
+//@version=6
+indicator("15M ORB Post-Breakout Research - BUILD 6.1.0 — MTF Structural Research Engine", overlay = true, max_labels_count = 200)
+
+//=============================================================================
+// BUILD 6.1.0 — MTF STRUCTURAL RESEARCH ENGINE
+// Parent methodology: BUILD 6.0.2 / ORB_CORE_1.
+//
+// PURPOSE
+// • Run the research engine from chronological REGULAR-SESSION 1-minute bars
+//   while hosted on a higher timeframe (validated target: 5m; 2m also allowed).
+// • Preserve the core ORB / retest / checkpoint / fresh-forward methodology.
+// • Add timing-safe PMH/PML, PDH/PDL, previous AHH/AHL and failed-ORB fields.
+// • Export one machine-readable row per finalized event.
+//
+// IMPORTANT
+// • This is the Stage-2 parity candidate. Do NOT merge its data with Sets 1-4
+//   until the NVDA 1m(Build 6.0.2) vs 5m(Build 6.1.0) parity audit passes.
+// • Host chart must be >1 minute. The authoritative research stream is 1 minute.
+// • RTH research uses an explicit REGULAR-session ticker so chart Extended Hours
+//   display does not change ORB/ATR methodology.
+// • PM/AH structure is calculated in an explicit EXTENDED-session 1m context,
+//   so those levels do not depend on whether Extended Hours are visually shown.
+//=============================================================================
+
+string TZ = "America/New_York"
+string RESEARCH_TF = "1"
+
+//=============================================================================
+// INPUTS
+//=============================================================================
+
+groupResearch = "Research Period"
+useStartDate = input.bool(false, "Use Research Start Date", group = groupResearch)
+researchStart = input.time(timestamp("01 Jan 2026 00:00 -0500"), "Research Start Date", group = groupResearch)
+useEndDate = input.bool(false, "Use Research End Date", group = groupResearch)
+researchEnd = input.time(timestamp("31 Dec 2026 23:59 -0500"), "Research End Date", group = groupResearch)
+
+groupOutcome = "Outcome Research"
+primaryPct = input.float(0.50, "Primary Favorable / Adverse %", minval = 0.01, step = 0.05, group = groupOutcome)
+secondary025 = input.float(0.25, "Secondary Favorable 1 %", minval = 0.01, step = 0.05, group = groupOutcome)
+secondary075 = input.float(0.75, "Secondary Favorable 2 %", minval = 0.01, step = 0.05, group = groupOutcome)
+secondary100 = input.float(1.00, "Secondary Favorable 3 %", minval = 0.01, step = 0.05, group = groupOutcome)
+
+groupBreakout = "Breakout Confirmation"
+atrLength = input.int(14, "1M ATR Length", minval = 1, group = groupBreakout)
+reqDirectional = input.bool(false, "Require Directional Candle", group = groupBreakout)
+reqPenetration = input.bool(false, "Require Minimum ATR Penetration", group = groupBreakout)
+minPenetrationPct = input.float(10.0, "Minimum Penetration % ATR", minval = 0.0, step = 1.0, group = groupBreakout)
+reqBody = input.bool(false, "Require Body / Range Strength", group = groupBreakout)
+minBodyPct = input.float(50.0, "Minimum Body / Range %", minval = 0.0, maxval = 100.0, step = 1.0, group = groupBreakout)
+reqRange = input.bool(false, "Require Minimum Candle Range vs ATR", group = groupBreakout)
+minRangeAtrPct = input.float(25.0, "Minimum Range % ATR", minval = 0.0, step = 1.0, group = groupBreakout)
+reqClosePosition = input.bool(false, "Require Strong Close Position", group = groupBreakout)
+minClosePositionPct = input.float(80.0, "Minimum Close Position %", minval = 0.0, maxval = 100.0, step = 1.0, group = groupBreakout)
+
+groupStrength = "Strength Score"
+enableStrengthScore = input.bool(true, "Enable Strength Score", group = groupStrength)
+reqMinimumGrade = input.bool(false, "Require Minimum Grade", group = groupStrength)
+minimumGrade = input.string("B", "Minimum Signal Grade", options = ["A+","A","A-","B+","B","B-","C+","C","C-","Weak"], group = groupStrength)
+
+groupRetest = "Retest Research"
+retestZoneAtrPct = input.float(10.0, "Retest Zone ± % of Frozen ATR", minval = 0.0, step = 1.0, group = groupRetest)
+failureAtrPct = input.float(25.0, "Failure Close Penetration % of Frozen ATR", minval = 0.0, step = 1.0, group = groupRetest)
+requireDirectionalConfirmation = input.bool(true, "Require Directional Retest Confirmation Candle", group = groupRetest)
+
+groupDiag = "MTF Diagnostics"
+showParityLabels = input.bool(false, "Show MTF Signal Labels", group = groupDiag)
+
+//=============================================================================
+// HELPERS
+//=============================================================================
+
+f_minGradeScore(string grade) =>
+    grade == "A+" ? 95.0 : grade == "A" ? 90.0 : grade == "A-" ? 85.0 : grade == "B+" ? 80.0 : grade == "B" ? 75.0 : grade == "B-" ? 70.0 : grade == "C+" ? 65.0 : grade == "C" ? 60.0 : grade == "C-" ? 55.0 : 0.0
+
+f_speedScore(int minuteOfDay) =>
+    minuteOfDay < 600 ? 10.0 : minuteOfDay < 630 ? 8.0 : minuteOfDay < 660 ? 6.0 : minuteOfDay < 720 ? 4.0 : 2.0
+
+f_clamp(float v, float lo, float hi) => math.max(lo, math.min(hi, v))
+
+f_sepPct(int dir, float px, float level, float atr) =>
+    not na(px) and not na(level) and not na(atr) and atr > 0.0 ? (dir == 1 ? px - level : level - px) / atr * 100.0 : na
+
+f_outcomeUpdate(int oldOutcome, float fav, float adv, float threshold) =>
+    int out = oldOutcome
+    if out == 0
+        bool f = fav >= threshold
+        bool a = adv >= threshold
+        out := f and a ? 3 : f ? 1 : a ? 2 : 0
+    out
+
+// Stateful extended-session context. It evaluates in the requested 1m
+// EXTENDED ticker context, independently of the host chart's session display.
+f_structLevels() =>
+    var int activeDate = na
+    var float curPmH = na
+    var float curPmL = na
+    var float curRthH = na
+    var float curRthL = na
+    var float curAhH = na
+    var float curAhL = na
+    var float lastRthH = na
+    var float lastRthL = na
+    var float lastAhH = na
+    var float lastAhL = na
+    var float dayPdH = na
+    var float dayPdL = na
+    var float dayPrevAhH = na
+    var float dayPrevAhL = na
+    var float frozenPmH = na
+    var float frozenPmL = na
+
+    int d = year(time, TZ) * 10000 + month(time, TZ) * 100 + dayofmonth(time, TZ)
+    int m = hour(time, TZ) * 60 + minute(time, TZ)
+    bool isPm = m >= 240 and m < 570
+    bool isRth = m >= 570 and m < 960
+    bool isAh = m >= 960 and m < 1200
+
+    if na(activeDate) or d != activeDate
+        if not na(activeDate)
+            if not na(curRthH)
+                lastRthH := curRthH
+                lastRthL := curRthL
+            if not na(curAhH)
+                lastAhH := curAhH
+                lastAhL := curAhL
+        activeDate := d
+        dayPdH := lastRthH
+        dayPdL := lastRthL
+        dayPrevAhH := lastAhH
+        dayPrevAhL := lastAhL
+        curPmH := na
+        curPmL := na
+        curRthH := na
+        curRthL := na
+        curAhH := na
+        curAhL := na
+        frozenPmH := na
+        frozenPmL := na
+
+    if isPm
+        curPmH := na(curPmH) ? high : math.max(curPmH, high)
+        curPmL := na(curPmL) ? low : math.min(curPmL, low)
+
+    if isRth
+        if na(frozenPmH)
+            frozenPmH := curPmH
+            frozenPmL := curPmL
+        curRthH := na(curRthH) ? high : math.max(curRthH, high)
+        curRthL := na(curRthL) ? low : math.min(curRthL, low)
+
+    if isAh
+        curAhH := na(curAhH) ? high : math.max(curAhH, high)
+        curAhL := na(curAhL) ? low : math.min(curAhL, low)
+
+    [frozenPmH, frozenPmL, dayPdH, dayPdL, dayPrevAhH, dayPrevAhL]
+
+//=============================================================================
+// SOURCE STREAMS
+//=============================================================================
+
+float hostSeconds = timeframe.in_seconds(timeframe.period)
+bool validHost = hostSeconds > 60
+
+string regularTicker = ticker.new(syminfo.prefix, syminfo.ticker, session.regular)
+string extendedTicker = ticker.new(syminfo.prefix, syminfo.ticker, session.extended)
+
+// Chronological regular-session 1m intrabars. Explicit regular ticker keeps
+// ATR/ORB behavior invariant to the host chart's Extended Hours display.
+[tA, oA, hA, lA, cA, atrA] = request.security_lower_tf(regularTicker, RESEARCH_TF, [time, open, high, low, close, ta.atr(atrLength)])
+
+// Session structure is evaluated in a separate explicit extended 1m context.
+[ctxPmH, ctxPmL, ctxPdH, ctxPdL, ctxPrevAhH, ctxPrevAhL] = request.security(extendedTicker, RESEARCH_TF, f_structLevels(), gaps = barmerge.gaps_off, lookahead = barmerge.lookahead_off)
+
+//=============================================================================
+// ACTIVE 1M RESEARCH STATE
+//=============================================================================
+
+var float orbHigh = na
+var float orbLow = na
+var bool signalTakenToday = false
+
+var bool activeSignal = false
+var int activeDir = 0
+var int entryTime = na
+var float entryPrice = na
+var float frozenAtr = na
+var float brokenOrbLevel = na
+var float retestTolerance = na
+var float failureTolerance = na
+var float retestUpper = na
+var float retestLower = na
+
+var int primaryOutcome = 0
+var float mfePct = 0.0
+var float maePct = 0.0
+var bool firstRetestOccurred = false
+var int firstRetestTime = na
+var bool retestConfirmed = false
+var bool provisionalFailure = false
+var int failureTime = na
+
+// Fresh checkpoint state.
+var bool cp5Captured = false
+var bool cp10Captured = false
+var bool cp15Captured = false
+var bool cp30Captured = false
+var bool cp5ForwardEligible = false
+var bool cp10ForwardEligible = false
+var bool cp15ForwardEligible = false
+var bool cp30ForwardEligible = false
+var int cp5Time = na
+var int cp10Time = na
+var int cp15Time = na
+var int cp30Time = na
+var float cp5Ref = na
+var float cp10Ref = na
+var float cp15Ref = na
+var float cp30Ref = na
+var float cp5Sep = na
+var float cp10Sep = na
+var float cp15Sep = na
+var float cp30Sep = na
+var float cp5FwdMFE = 0.0
+var float cp5FwdMAE = 0.0
+var float cp10FwdMFE = 0.0
+var float cp10FwdMAE = 0.0
+var float cp15FwdMFE = 0.0
+var float cp15FwdMAE = 0.0
+var float cp30FwdMFE = 0.0
+var float cp30FwdMAE = 0.0
+var int cp5Outcome = 0
+var int cp10Outcome = 0
+var int cp15Outcome = 0
+var int cp30Outcome = 0
+
+// Frozen structural context for the event day.
+var float eventPmH = na
+var float eventPmL = na
+var float eventPdH = na
+var float eventPdL = na
+var float eventPrevAhH = na
+var float eventPrevAhL = na
+var int firstPmTradeTime = na
+var int firstPdTradeTime = na
+var int firstPrevAhTradeTime = na
+
+// Failed-ORB raw state.
+var int firstBrokenBoundaryTouchTime = na
+var int firstTradeInsideTime = na
+var int firstCloseInsideTime = na
+var float firstCloseInsidePrice = na
+var int firstMidpointCrossTime = na
+var int firstOppositeBoundaryTime = na
+
+//=============================================================================
+// EXPORT SNAPSHOT (one host-bar pulse at event finalization)
+//=============================================================================
+
+var bool expPulse = false
+var int expDirection = na
+var int expSignalTime = na
+var float expSignalPrice = na
+var float expOrbHigh = na
+var float expOrbLow = na
+var float expFrozenAtr = na
+var float expSignalMFE = na
+var float expSignalMAE = na
+var int expPrimaryOutcome = na
+var int expFirstRetestTime = na
+var int expRetestState = na
+
+var int expCp5Valid = na
+var int expCp5Time = na
+var float expCp5Ref = na
+var float expCp5Sep = na
+var float expCp5MFE = na
+var float expCp5MAE = na
+var int expCp5Outcome = na
+
+var int expCp10Valid = na
+var int expCp10Time = na
+var float expCp10Ref = na
+var float expCp10Sep = na
+var float expCp10MFE = na
+var float expCp10MAE = na
+var int expCp10Outcome = na
+
+var int expCp15Valid = na
+var int expCp15Time = na
+var float expCp15Ref = na
+var float expCp15Sep = na
+var float expCp15MFE = na
+var float expCp15MAE = na
+var int expCp15Outcome = na
+
+var int expCp30Valid = na
+var int expCp30Time = na
+var float expCp30Ref = na
+var float expCp30Sep = na
+var float expCp30MFE = na
+var float expCp30MAE = na
+var int expCp30Outcome = na
+
+var float expRatio10to15 = na
+
+var float expPmH = na
+var float expPmL = na
+var float expPdH = na
+var float expPdL = na
+var float expPrevAhH = na
+var float expPrevAhL = na
+var int expPmTradeTime = na
+var int expPdTradeTime = na
+var int expPrevAhTradeTime = na
+
+var int expBoundaryTouchTime = na
+var int expTradeInsideTime = na
+var int expCloseInsideTime = na
+var float expCloseInsidePrice = na
+var int expMidpointCrossTime = na
+var int expOppositeBoundaryTime = na
+var int expResearchBarsProcessed = na
+
+var int totalResearchBarsProcessed = 0
+
+expPulse := false
+
+//=============================================================================
+// PROCESS EVERY LOWER-TIMEFRAME BAR IN CHRONOLOGICAL ORDER
+//=============================================================================
+
+if validHost
+    int n = array.size(tA)
+    if n > 0
+        for i = 0 to n - 1
+            int t1 = array.get(tA, i)
+            float o1 = array.get(oA, i)
+            float h1 = array.get(hA, i)
+            float l1 = array.get(lA, i)
+            float c1 = array.get(cA, i)
+            float atr1 = array.get(atrA, i)
+            totalResearchBarsProcessed += 1
+
+            int hh = hour(t1, TZ)
+            int mm = minute(t1, TZ)
+            int mins = hh * 60 + mm
+            bool isRTH = mins >= 570 and mins < 960
+            bool isORB = mins >= 570 and mins < 585
+            bool canTrigger = mins >= 585 and mins < 960
+            bool is930 = mins == 570
+            bool isLastRTH = mins == 959
+            bool dateOK = (not useStartDate or t1 >= researchStart) and (not useEndDate or t1 <= researchEnd)
+
+            // Daily reset occurs on authoritative 09:30 1m bar.
+            if is930
+                orbHigh := h1
+                orbLow := l1
+                signalTakenToday := false
+                activeSignal := false
+                activeDir := 0
+                entryTime := na
+                entryPrice := na
+                frozenAtr := na
+                brokenOrbLevel := na
+                primaryOutcome := 0
+                mfePct := 0.0
+                maePct := 0.0
+                firstRetestOccurred := false
+                firstRetestTime := na
+                retestConfirmed := false
+                provisionalFailure := false
+                failureTime := na
+
+                cp5Captured := false
+                cp10Captured := false
+                cp15Captured := false
+                cp30Captured := false
+                cp5ForwardEligible := false
+                cp10ForwardEligible := false
+                cp15ForwardEligible := false
+                cp30ForwardEligible := false
+                cp5Time := na
+                cp10Time := na
+                cp15Time := na
+                cp30Time := na
+                cp5Ref := na
+                cp10Ref := na
+                cp15Ref := na
+                cp30Ref := na
+                cp5Sep := na
+                cp10Sep := na
+                cp15Sep := na
+                cp30Sep := na
+                cp5FwdMFE := 0.0
+                cp5FwdMAE := 0.0
+                cp10FwdMFE := 0.0
+                cp10FwdMAE := 0.0
+                cp15FwdMFE := 0.0
+                cp15FwdMAE := 0.0
+                cp30FwdMFE := 0.0
+                cp30FwdMAE := 0.0
+                cp5Outcome := 0
+                cp10Outcome := 0
+                cp15Outcome := 0
+                cp30Outcome := 0
+
+                eventPmH := ctxPmH
+                eventPmL := ctxPmL
+                eventPdH := ctxPdH
+                eventPdL := ctxPdL
+                eventPrevAhH := ctxPrevAhH
+                eventPrevAhL := ctxPrevAhL
+                firstPmTradeTime := na
+                firstPdTradeTime := na
+                firstPrevAhTradeTime := na
+                firstBrokenBoundaryTouchTime := na
+                firstTradeInsideTime := na
+                firstCloseInsideTime := na
+                firstCloseInsidePrice := na
+                firstMidpointCrossTime := na
+                firstOppositeBoundaryTime := na
+
+            else if isORB
+                orbHigh := na(orbHigh) ? h1 : math.max(orbHigh, h1)
+                orbLow := na(orbLow) ? l1 : math.min(orbLow, l1)
+
+            bool validORB = not na(orbHigh) and not na(orbLow) and orbHigh > orbLow
+
+            // Parent breakout-strength calculations on the authoritative 1m bar.
+            float barRange = math.max(h1 - l1, syminfo.mintick)
+            float bodyPct = math.abs(c1 - o1) / barRange * 100.0
+            float rangeAtrPct = not na(atr1) and atr1 > 0.0 ? barRange / atr1 * 100.0 : na
+            bool bullDirectional = c1 > o1
+            bool bearDirectional = c1 < o1
+            float bullPen = validORB and not na(atr1) and atr1 > 0.0 ? math.max(c1 - orbHigh, 0.0) / atr1 * 100.0 : 0.0
+            float bearPen = validORB and not na(atr1) and atr1 > 0.0 ? math.max(orbLow - c1, 0.0) / atr1 * 100.0 : 0.0
+            float bullClosePct = (c1 - l1) / barRange * 100.0
+            float bearClosePct = (h1 - c1) / barRange * 100.0
+            float bullScore = enableStrengthScore ? f_clamp(bullPen / 50.0 * 30.0, 0.0, 30.0) + f_clamp(bodyPct / 100.0 * 25.0, 0.0, 25.0) + f_clamp(bullClosePct / 100.0 * 20.0, 0.0, 20.0) + f_clamp(rangeAtrPct / 150.0 * 15.0, 0.0, 15.0) + f_speedScore(mins) : 0.0
+            float bearScore = enableStrengthScore ? f_clamp(bearPen / 50.0 * 30.0, 0.0, 30.0) + f_clamp(bodyPct / 100.0 * 25.0, 0.0, 25.0) + f_clamp(bearClosePct / 100.0 * 20.0, 0.0, 20.0) + f_clamp(rangeAtrPct / 150.0 * 15.0, 0.0, 15.0) + f_speedScore(mins) : 0.0
+            float gradeReq = f_minGradeScore(minimumGrade)
+
+            bool rawBull = dateOK and canTrigger and validORB and not signalTakenToday and c1 > orbHigh
+            bool rawBear = dateOK and canTrigger and validORB and not signalTakenToday and c1 < orbLow
+            bool bullBreak = rawBull and (not reqDirectional or bullDirectional) and (not reqPenetration or bullPen >= minPenetrationPct) and (not reqBody or bodyPct >= minBodyPct) and (not reqRange or rangeAtrPct >= minRangeAtrPct) and (not reqClosePosition or bullClosePct >= minClosePositionPct) and (not reqMinimumGrade or bullScore >= gradeReq)
+            bool bearBreak = rawBear and (not reqDirectional or bearDirectional) and (not reqPenetration or bearPen >= minPenetrationPct) and (not reqBody or bodyPct >= minBodyPct) and (not reqRange or rangeAtrPct >= minRangeAtrPct) and (not reqClosePosition or bearClosePct >= minClosePositionPct) and (not reqMinimumGrade or bearScore >= gradeReq)
+
+            if bullBreak or bearBreak
+                signalTakenToday := true
+                activeSignal := true
+                activeDir := bullBreak ? 1 : -1
+                entryTime := t1
+                entryPrice := c1
+                frozenAtr := atr1
+                brokenOrbLevel := activeDir == 1 ? orbHigh : orbLow
+                retestTolerance := frozenAtr * retestZoneAtrPct / 100.0
+                failureTolerance := frozenAtr * failureAtrPct / 100.0
+                retestUpper := brokenOrbLevel + retestTolerance
+                retestLower := brokenOrbLevel - retestTolerance
+                primaryOutcome := 0
+                mfePct := 0.0
+                maePct := 0.0
+
+                if showParityLabels
+                    label.new(t1, c1, activeDir == 1 ? "MTF ORB LONG" : "MTF ORB SHORT", xloc = xloc.bar_time, yloc = yloc.price, style = activeDir == 1 ? label.style_label_up : label.style_label_down, color = activeDir == 1 ? color.green : color.red, textcolor = color.white, size = size.tiny)
+
+            // Structural trade-through timestamps are only relevant once a
+            // direction exists; values are frozen from pre-open context.
+            if activeSignal and isRTH
+                if na(firstPmTradeTime)
+                    bool pmTrade = activeDir == 1 ? (not na(eventPmH) and h1 > eventPmH) : (not na(eventPmL) and l1 < eventPmL)
+                    if pmTrade
+                        firstPmTradeTime := t1
+                if na(firstPdTradeTime)
+                    bool pdTrade = activeDir == 1 ? (not na(eventPdH) and h1 > eventPdH) : (not na(eventPdL) and l1 < eventPdL)
+                    if pdTrade
+                        firstPdTradeTime := t1
+                if na(firstPrevAhTradeTime)
+                    bool ahTrade = activeDir == 1 ? (not na(eventPrevAhH) and h1 > eventPrevAhH) : (not na(eventPrevAhL) and l1 < eventPrevAhL)
+                    if ahTrade
+                        firstPrevAhTradeTime := t1
+
+            // Parent methodology starts post-entry excursion tracking on the
+            // NEXT 1m bar, not on the signal candle.
+            bool postEntryBar = activeSignal and not na(entryTime) and t1 > entryTime and isRTH
+            if postEntryBar
+                float fav = activeDir == 1 ? (h1 - entryPrice) / entryPrice * 100.0 : (entryPrice - l1) / entryPrice * 100.0
+                float adv = activeDir == 1 ? (entryPrice - l1) / entryPrice * 100.0 : (h1 - entryPrice) / entryPrice * 100.0
+                mfePct := math.max(mfePct, fav)
+                maePct := math.max(maePct, adv)
+                primaryOutcome := f_outcomeUpdate(primaryOutcome, fav, adv, primaryPct)
+
+                bool overlapsRetestZone = h1 >= retestLower and l1 <= retestUpper
+                if not firstRetestOccurred and overlapsRetestZone
+                    firstRetestOccurred := true
+                    firstRetestTime := t1
+
+                if firstRetestOccurred and not provisionalFailure and not retestConfirmed
+                    bool failureClose = activeDir == 1 ? c1 <= brokenOrbLevel - failureTolerance : c1 >= brokenOrbLevel + failureTolerance
+                    if failureClose
+                        provisionalFailure := true
+                        failureTime := t1
+
+                    bool directionConfirm = activeDir == 1 ? c1 > o1 : c1 < o1
+                    bool outsideZone = activeDir == 1 ? c1 > retestUpper : c1 < retestLower
+                    bool confirm = not provisionalFailure and t1 > firstRetestTime and outsideZone and (not requireDirectionalConfirmation or directionConfirm)
+                    if confirm
+                        retestConfirmed := true
+
+                // Raw failed-ORB sequencing.
+                float midpoint = (orbHigh + orbLow) / 2.0
+                if na(firstBrokenBoundaryTouchTime)
+                    bool touchBack = activeDir == 1 ? l1 <= brokenOrbLevel : h1 >= brokenOrbLevel
+                    if touchBack
+                        firstBrokenBoundaryTouchTime := t1
+                if na(firstTradeInsideTime)
+                    bool tradeInside = activeDir == 1 ? l1 < brokenOrbLevel : h1 > brokenOrbLevel
+                    if tradeInside
+                        firstTradeInsideTime := t1
+                if na(firstCloseInsideTime)
+                    bool closeInside = activeDir == 1 ? c1 < brokenOrbLevel : c1 > brokenOrbLevel
+                    if closeInside
+                        firstCloseInsideTime := t1
+                        firstCloseInsidePrice := c1
+                if na(firstMidpointCrossTime)
+                    bool midpointCross = activeDir == 1 ? l1 <= midpoint : h1 >= midpoint
+                    if midpointCross
+                        firstMidpointCrossTime := t1
+                if na(firstOppositeBoundaryTime)
+                    bool oppositeCross = activeDir == 1 ? l1 <= orbLow : h1 >= orbHigh
+                    if oppositeCross
+                        firstOppositeBoundaryTime := t1
+
+                int minutesSince = int((t1 - entryTime) / 60000)
+                float currentSep = f_sepPct(activeDir, c1, brokenOrbLevel, frozenAtr)
+                bool originalStillUnresolvedNow = primaryOutcome == 0 and fav < primaryPct and adv < primaryPct
+
+                if not firstRetestOccurred
+                    if not cp5Captured and minutesSince >= 5
+                        cp5Captured := true
+                        cp5Time := t1
+                        cp5Ref := c1
+                        cp5Sep := currentSep
+                        cp5ForwardEligible := originalStillUnresolvedNow
+                    if not cp10Captured and minutesSince >= 10
+                        cp10Captured := true
+                        cp10Time := t1
+                        cp10Ref := c1
+                        cp10Sep := currentSep
+                        cp10ForwardEligible := originalStillUnresolvedNow
+                    if not cp15Captured and minutesSince >= 15
+                        cp15Captured := true
+                        cp15Time := t1
+                        cp15Ref := c1
+                        cp15Sep := currentSep
+                        cp15ForwardEligible := originalStillUnresolvedNow
+                    if not cp30Captured and minutesSince >= 30
+                        cp30Captured := true
+                        cp30Time := t1
+                        cp30Ref := c1
+                        cp30Sep := currentSep
+                        cp30ForwardEligible := originalStillUnresolvedNow
+
+                // Fresh checkpoint excursion/outcome continues after capture,
+                // even if a later retest occurs. This matches Build 6.0.2.
+                if cp5Captured and not na(cp5Time) and t1 > cp5Time
+                    float f5 = activeDir == 1 ? (h1 - cp5Ref) / cp5Ref * 100.0 : (cp5Ref - l1) / cp5Ref * 100.0
+                    float a5 = activeDir == 1 ? (cp5Ref - l1) / cp5Ref * 100.0 : (h1 - cp5Ref) / cp5Ref * 100.0
+                    cp5FwdMFE := math.max(cp5FwdMFE, f5)
+                    cp5FwdMAE := math.max(cp5FwdMAE, a5)
+                    if cp5ForwardEligible
+                        cp5Outcome := f_outcomeUpdate(cp5Outcome, f5, a5, primaryPct)
+                if cp10Captured and not na(cp10Time) and t1 > cp10Time
+                    float f10 = activeDir == 1 ? (h1 - cp10Ref) / cp10Ref * 100.0 : (cp10Ref - l1) / cp10Ref * 100.0
+                    float a10 = activeDir == 1 ? (cp10Ref - l1) / cp10Ref * 100.0 : (h1 - cp10Ref) / cp10Ref * 100.0
+                    cp10FwdMFE := math.max(cp10FwdMFE, f10)
+                    cp10FwdMAE := math.max(cp10FwdMAE, a10)
+                    if cp10ForwardEligible
+                        cp10Outcome := f_outcomeUpdate(cp10Outcome, f10, a10, primaryPct)
+                if cp15Captured and not na(cp15Time) and t1 > cp15Time
+                    float f15 = activeDir == 1 ? (h1 - cp15Ref) / cp15Ref * 100.0 : (cp15Ref - l1) / cp15Ref * 100.0
+                    float a15 = activeDir == 1 ? (cp15Ref - l1) / cp15Ref * 100.0 : (h1 - cp15Ref) / cp15Ref * 100.0
+                    cp15FwdMFE := math.max(cp15FwdMFE, f15)
+                    cp15FwdMAE := math.max(cp15FwdMAE, a15)
+                    if cp15ForwardEligible
+                        cp15Outcome := f_outcomeUpdate(cp15Outcome, f15, a15, primaryPct)
+                if cp30Captured and not na(cp30Time) and t1 > cp30Time
+                    float f30 = activeDir == 1 ? (h1 - cp30Ref) / cp30Ref * 100.0 : (cp30Ref - l1) / cp30Ref * 100.0
+                    float a30 = activeDir == 1 ? (cp30Ref - l1) / cp30Ref * 100.0 : (h1 - cp30Ref) / cp30Ref * 100.0
+                    cp30FwdMFE := math.max(cp30FwdMFE, f30)
+                    cp30FwdMAE := math.max(cp30FwdMAE, a30)
+                    if cp30ForwardEligible
+                        cp30Outcome := f_outcomeUpdate(cp30Outcome, f30, a30, primaryPct)
+
+            // Finalize one export row on authoritative 15:59 1m bar.
+            if isLastRTH and activeSignal
+                expPulse := true
+                expDirection := activeDir
+                expSignalTime := entryTime
+                expSignalPrice := entryPrice
+                expOrbHigh := orbHigh
+                expOrbLow := orbLow
+                expFrozenAtr := frozenAtr
+                expSignalMFE := mfePct
+                expSignalMAE := maePct
+                expPrimaryOutcome := primaryOutcome
+                expFirstRetestTime := firstRetestOccurred ? firstRetestTime : na
+                expRetestState := not firstRetestOccurred ? 0 : retestConfirmed ? 1 : provisionalFailure ? 2 : 3
+
+                expCp5Valid := cp5Captured ? 1 : 0
+                expCp5Time := cp5Time
+                expCp5Ref := cp5Ref
+                expCp5Sep := cp5Sep
+                expCp5MFE := cp5FwdMFE
+                expCp5MAE := cp5FwdMAE
+                expCp5Outcome := cp5Outcome
+
+                expCp10Valid := cp10Captured ? 1 : 0
+                expCp10Time := cp10Time
+                expCp10Ref := cp10Ref
+                expCp10Sep := cp10Sep
+                expCp10MFE := cp10FwdMFE
+                expCp10MAE := cp10FwdMAE
+                expCp10Outcome := cp10Outcome
+
+                expCp15Valid := cp15Captured ? 1 : 0
+                expCp15Time := cp15Time
+                expCp15Ref := cp15Ref
+                expCp15Sep := cp15Sep
+                expCp15MFE := cp15FwdMFE
+                expCp15MAE := cp15FwdMAE
+                expCp15Outcome := cp15Outcome
+
+                expCp30Valid := cp30Captured ? 1 : 0
+                expCp30Time := cp30Time
+                expCp30Ref := cp30Ref
+                expCp30Sep := cp30Sep
+                expCp30MFE := cp30FwdMFE
+                expCp30MAE := cp30FwdMAE
+                expCp30Outcome := cp30Outcome
+
+                expRatio10to15 := not na(cp10Sep) and cp10Sep > 0.0 and not na(cp15Sep) ? cp15Sep / cp10Sep : na
+
+                expPmH := eventPmH
+                expPmL := eventPmL
+                expPdH := eventPdH
+                expPdL := eventPdL
+                expPrevAhH := eventPrevAhH
+                expPrevAhL := eventPrevAhL
+                expPmTradeTime := firstPmTradeTime
+                expPdTradeTime := firstPdTradeTime
+                expPrevAhTradeTime := firstPrevAhTradeTime
+
+                expBoundaryTouchTime := firstBrokenBoundaryTouchTime
+                expTradeInsideTime := firstTradeInsideTime
+                expCloseInsideTime := firstCloseInsideTime
+                expCloseInsidePrice := firstCloseInsidePrice
+                expMidpointCrossTime := firstMidpointCrossTime
+                expOppositeBoundaryTime := firstOppositeBoundaryTime
+                expResearchBarsProcessed := totalResearchBarsProcessed
+
+//=============================================================================
+// HOST-TIMEFRAME WARNING
+//=============================================================================
+
+var label tfWarning = na
+if barstate.islast and not validHost
+    if na(tfWarning)
+        tfWarning := label.new(bar_index, high, "BUILD 6.1.0 requires host TF > 1m.\nUse Build 6.0.2 as the 1m control.", style = label.style_label_down, color = color.red, textcolor = color.white)
+else if barstate.islast and validHost and not na(tfWarning)
+    label.delete(tfWarning)
+    tfWarning := na
+
+// Minimal visual parity aids (4 plot counts).
+plot(validHost ? orbHigh : na, "MTF ORB High", color = color.new(color.fuchsia, 40), style = plot.style_linebr)
+plot(validHost ? orbLow : na, "MTF ORB Low", color = color.new(color.fuchsia, 40), style = plot.style_linebr)
+plot(validHost and activeSignal ? brokenOrbLevel : na, "MTF Broken ORB", color = color.new(color.gray, 60), style = plot.style_linebr)
+plot(validHost and activeSignal ? (orbHigh + orbLow) / 2.0 : na, "MTF ORB Mid", color = color.new(color.gray, 80), style = plot.style_linebr)
+
+//=============================================================================
+// CSV EXPORT — FILTER TO EXP_event_flag == 1
+// 59 research/diagnostic columns + 4 visual plots = 63 plot counts.
+//=============================================================================
+
+plot(expPulse ? 1 : na, "EXP_event_flag", display = display.data_window)
+plot(expPulse ? expDirection : na, "EXP_direction", display = display.data_window)
+plot(expPulse ? expSignalTime : na, "EXP_signal_time", display = display.data_window)
+plot(expPulse ? expSignalPrice : na, "EXP_signal_price", display = display.data_window)
+plot(expPulse ? expOrbHigh : na, "EXP_orb_high", display = display.data_window)
+plot(expPulse ? expOrbLow : na, "EXP_orb_low", display = display.data_window)
+plot(expPulse ? expFrozenAtr : na, "EXP_frozen_atr", display = display.data_window)
+plot(expPulse ? expSignalMFE : na, "EXP_signal_mfe_pct", display = display.data_window)
+plot(expPulse ? expSignalMAE : na, "EXP_signal_mae_pct", display = display.data_window)
+plot(expPulse ? expPrimaryOutcome : na, "EXP_primary_outcome", display = display.data_window)
+plot(expPulse ? expFirstRetestTime : na, "EXP_first_retest_time", display = display.data_window)
+plot(expPulse ? expRetestState : na, "EXP_retest_state", display = display.data_window)
+
+plot(expPulse ? expCp5Valid : na, "EXP_cp5_valid", display = display.data_window)
+plot(expPulse ? expCp5Time : na, "EXP_cp5_time", display = display.data_window)
+plot(expPulse ? expCp5Ref : na, "EXP_cp5_ref_price", display = display.data_window)
+plot(expPulse ? expCp5Sep : na, "EXP_cp5_sep_atr_pct", display = display.data_window)
+plot(expPulse ? expCp5MFE : na, "EXP_cp5_fwd_mfe_pct", display = display.data_window)
+plot(expPulse ? expCp5MAE : na, "EXP_cp5_fwd_mae_pct", display = display.data_window)
+plot(expPulse ? expCp5Outcome : na, "EXP_cp5_outcome", display = display.data_window)
+
+plot(expPulse ? expCp10Valid : na, "EXP_cp10_valid", display = display.data_window)
+plot(expPulse ? expCp10Time : na, "EXP_cp10_time", display = display.data_window)
+plot(expPulse ? expCp10Ref : na, "EXP_cp10_ref_price", display = display.data_window)
+plot(expPulse ? expCp10Sep : na, "EXP_cp10_sep_atr_pct", display = display.data_window)
+plot(expPulse ? expCp10MFE : na, "EXP_cp10_fwd_mfe_pct", display = display.data_window)
+plot(expPulse ? expCp10MAE : na, "EXP_cp10_fwd_mae_pct", display = display.data_window)
+plot(expPulse ? expCp10Outcome : na, "EXP_cp10_outcome", display = display.data_window)
+
+plot(expPulse ? expCp15Valid : na, "EXP_cp15_valid", display = display.data_window)
+plot(expPulse ? expCp15Time : na, "EXP_cp15_time", display = display.data_window)
+plot(expPulse ? expCp15Ref : na, "EXP_cp15_ref_price", display = display.data_window)
+plot(expPulse ? expCp15Sep : na, "EXP_cp15_sep_atr_pct", display = display.data_window)
+plot(expPulse ? expCp15MFE : na, "EXP_cp15_fwd_mfe_pct", display = display.data_window)
+plot(expPulse ? expCp15MAE : na, "EXP_cp15_fwd_mae_pct", display = display.data_window)
+plot(expPulse ? expCp15Outcome : na, "EXP_cp15_outcome", display = display.data_window)
+
+plot(expPulse ? expCp30Valid : na, "EXP_cp30_valid", display = display.data_window)
+plot(expPulse ? expCp30Time : na, "EXP_cp30_time", display = display.data_window)
+plot(expPulse ? expCp30Ref : na, "EXP_cp30_ref_price", display = display.data_window)
+plot(expPulse ? expCp30Sep : na, "EXP_cp30_sep_atr_pct", display = display.data_window)
+plot(expPulse ? expCp30MFE : na, "EXP_cp30_fwd_mfe_pct", display = display.data_window)
+plot(expPulse ? expCp30MAE : na, "EXP_cp30_fwd_mae_pct", display = display.data_window)
+plot(expPulse ? expCp30Outcome : na, "EXP_cp30_outcome", display = display.data_window)
+
+plot(expPulse ? expRatio10to15 : na, "EXP_ratio_10m_15m", display = display.data_window)
+
+plot(expPulse ? expPmH : na, "EXP_pmh", display = display.data_window)
+plot(expPulse ? expPmL : na, "EXP_pml", display = display.data_window)
+plot(expPulse ? expPdH : na, "EXP_pdh", display = display.data_window)
+plot(expPulse ? expPdL : na, "EXP_pdl", display = display.data_window)
+plot(expPulse ? expPrevAhH : na, "EXP_prev_ahh", display = display.data_window)
+plot(expPulse ? expPrevAhL : na, "EXP_prev_ahl", display = display.data_window)
+plot(expPulse ? expPmTradeTime : na, "EXP_relevant_pm_first_trade_time", display = display.data_window)
+plot(expPulse ? expPdTradeTime : na, "EXP_relevant_pd_first_trade_time", display = display.data_window)
+plot(expPulse ? expPrevAhTradeTime : na, "EXP_relevant_prev_ah_first_trade_time", display = display.data_window)
+
+plot(expPulse ? expBoundaryTouchTime : na, "EXP_fail_boundary_touch_time", display = display.data_window)
+plot(expPulse ? expTradeInsideTime : na, "EXP_fail_first_trade_inside_time", display = display.data_window)
+plot(expPulse ? expCloseInsideTime : na, "EXP_fail_first_close_inside_time", display = display.data_window)
+plot(expPulse ? expCloseInsidePrice : na, "EXP_fail_first_close_inside_price", display = display.data_window)
+plot(expPulse ? expMidpointCrossTime : na, "EXP_fail_midpoint_cross_time", display = display.data_window)
+plot(expPulse ? expOppositeBoundaryTime : na, "EXP_fail_opposite_boundary_time", display = display.data_window)
+
+plot(expPulse ? hostSeconds : na, "EXP_host_tf_seconds", display = display.data_window)
+plot(expPulse ? 60 : na, "EXP_research_tf_seconds", display = display.data_window)
+plot(expPulse ? expResearchBarsProcessed : na, "EXP_research_1m_bars_processed", display = display.data_window)

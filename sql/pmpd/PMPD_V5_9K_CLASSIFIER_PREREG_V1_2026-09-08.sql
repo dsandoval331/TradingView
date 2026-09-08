@@ -1,0 +1,17 @@
+-- PM+PD V5 9K classifier preregistration checkpoint — 2026-09-08
+-- Frozen before any feature/outcome relationship characterization.
+-- Matrix SHA256: 6ec9da73cf554469083d35b8866222ae8c66295562bba22557b5b77bfc9d0e57
+-- Architectures:
+-- A0 direction-specific intercept baseline
+-- A1 core-3 direction-specific logistic:
+--    six_level_scale_ratio
+--    direction_normalized_overnight_gap_pct
+--    decision_minutes_from_rth_open
+-- A2 A1 + frozen minimal VWAP DP4 context:
+--    directional_vwap_distance_pct
+--    event_minutes_since_last_cross
+--    event_minutes_since_last_touch
+--    event_vwap_touch_count_from_dp1
+--    event_vwap_touch_from_dp1
+-- Discovery-only preprocessing/fit. Validation A/B must be scored unchanged.
+-- No inherited V4 weights. No post-DP4 features. No production rule. 9L not opened.

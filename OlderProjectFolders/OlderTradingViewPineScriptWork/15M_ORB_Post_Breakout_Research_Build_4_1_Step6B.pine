@@ -1,0 +1,4022 @@
+//@version=6
+indicator(
+     "15M ORB Post-Breakout Research - Build 4.1",
+     overlay = true,
+     max_labels_count = 500)
+
+//=============================================================================
+// BUILD 4.1 — POST-BREAKOUT + NO-RETEST CHECKPOINT RESEARCH ENGINE
+//
+// CORE RULES
+//
+// • 1-minute chart only.
+// • ORB = 09:30–09:44 ET.
+// • ORB freezes at 09:45 ET.
+// • First qualified 1M close outside ORB is the day's primary breakout.
+// • Only one primary breakout per day.
+//
+// PRIMARY BASELINE:
+// +0.50% favorable BEFORE -0.50% adverse from breakout close.
+//
+// RETEST:
+// • ATR freezes at breakout.
+// • Retest zone = ±10% frozen 1M ATR around broken ORB boundary.
+// • Wick/high-low overlap with zone = retest.
+// • Provisional failure = close ≥25% frozen ATR back inside ORB.
+// • Successful confirmation = later directional candle closes back outside
+//   the outer retest-zone boundary.
+//
+// FIRST-EVENT PATH PRINCIPLE:
+//
+// NR CONTINUE:
+// +0.50% favorable reached before first retest.
+//
+// NR FAIL:
+// -0.50% adverse reached before first retest and before +0.50% favorable.
+//
+// RETEST CONTINUE:
+// Retest occurs first → no failure → confirmation → +0.50% favorable later.
+//
+// RETEST FAIL:
+// Retest occurs first → provisional failure before successful confirmation.
+//
+// RETEST UNCONFIRMED:
+// Retest occurs, but no failure and no confirmation by RTH close.
+//
+// UNRESOLVED:
+// Does not meet another path by RTH close.
+//
+// MARKET REGIME:
+// RTH and Daily regime metadata remain available for future Build 4 analysis.
+//=============================================================================
+
+
+//=============================================================================
+// CONSTANTS
+//=============================================================================
+
+string TZ = "America/New_York"
+
+int REGIME_BULL = 1
+int REGIME_MIXED = 0
+int REGIME_BEAR = -1
+int REGIME_INVALID = 99
+
+int PATH_NONE = 0
+int PATH_NR_CONTINUE = 1
+int PATH_RETEST_CONTINUE = 2
+int PATH_RETEST_FAIL = 3
+int PATH_NR_FAIL = 4
+int PATH_RETEST_UNCONFIRMED = 5
+int PATH_UNRESOLVED = 6
+
+
+//=============================================================================
+// INPUTS — RESEARCH PERIOD
+//=============================================================================
+
+groupResearch = "Research Period"
+
+useStartDate =
+     input.bool(
+         true,
+         "Use Research Start Date",
+         group = groupResearch)
+
+researchStart =
+     input.time(
+         timestamp("01 Jan 2025 00:00 +0000"),
+         "Research Start Date",
+         group = groupResearch)
+
+
+//=============================================================================
+// INPUTS — OUTCOME RESEARCH
+//=============================================================================
+
+groupOutcome = "Outcome Research"
+
+primaryPct =
+     input.float(
+         0.50,
+         "Primary Favorable / Adverse %",
+         minval = 0.01,
+         step = 0.05,
+         group = groupOutcome)
+
+secondary025 =
+     input.float(
+         0.25,
+         "Secondary Favorable 1 %",
+         minval = 0.01,
+         step = 0.05,
+         group = groupOutcome)
+
+secondary075 =
+     input.float(
+         0.75,
+         "Secondary Favorable 2 %",
+         minval = 0.01,
+         step = 0.05,
+         group = groupOutcome)
+
+secondary100 =
+     input.float(
+         1.00,
+         "Secondary Favorable 3 %",
+         minval = 0.01,
+         step = 0.05,
+         group = groupOutcome)
+
+
+//=============================================================================
+// INPUTS — BREAKOUT CONFIRMATION
+//=============================================================================
+
+groupBreakout = "Breakout Confirmation"
+
+atrLength =
+     input.int(
+         14,
+         "1M ATR Length",
+         minval = 1,
+         group = groupBreakout)
+
+reqDirectional =
+     input.bool(
+         false,
+         "Require Directional Candle",
+         group = groupBreakout)
+
+reqPenetration =
+     input.bool(
+         false,
+         "Require Minimum ATR Penetration",
+         group = groupBreakout)
+
+minPenetrationPct =
+     input.float(
+         10.0,
+         "Minimum Penetration % ATR",
+         minval = 0.0,
+         step = 1.0,
+         group = groupBreakout)
+
+reqBody =
+     input.bool(
+         false,
+         "Require Body / Range Strength",
+         group = groupBreakout)
+
+minBodyPct =
+     input.float(
+         50.0,
+         "Minimum Body / Range %",
+         minval = 0.0,
+         maxval = 100.0,
+         step = 1.0,
+         group = groupBreakout)
+
+reqRange =
+     input.bool(
+         false,
+         "Require Minimum Candle Range vs ATR",
+         group = groupBreakout)
+
+minRangeAtrPct =
+     input.float(
+         25.0,
+         "Minimum Range % ATR",
+         minval = 0.0,
+         step = 1.0,
+         group = groupBreakout)
+
+reqClosePosition =
+     input.bool(
+         false,
+         "Require Strong Close Position",
+         group = groupBreakout)
+
+minClosePositionPct =
+     input.float(
+         80.0,
+         "Minimum Close Position %",
+         minval = 0.0,
+         maxval = 100.0,
+         step = 1.0,
+         group = groupBreakout)
+
+
+//=============================================================================
+// INPUTS — STRENGTH SCORE
+//=============================================================================
+
+groupStrength = "Strength Score"
+
+enableStrengthScore =
+     input.bool(
+         true,
+         "Enable Strength Score",
+         group = groupStrength)
+
+showScoreOnLabel =
+     input.bool(
+         true,
+         "Show Score on Breakout Label",
+         group = groupStrength)
+
+reqMinimumGrade =
+     input.bool(
+         false,
+         "Require Minimum Grade",
+         group = groupStrength)
+
+minimumGrade =
+     input.string(
+         "B",
+         "Minimum Signal Grade",
+         options = [
+             "A+",
+             "A",
+             "A-",
+             "B+",
+             "B",
+             "B-",
+             "C+",
+             "C",
+             "C-",
+             "Weak"
+         ],
+         group = groupStrength)
+
+
+//=============================================================================
+// INPUTS — RETEST RESEARCH
+//=============================================================================
+
+groupRetest = "Retest Research"
+
+retestZoneAtrPct =
+     input.float(
+         10.0,
+         "Retest Zone ± % of Frozen ATR",
+         minval = 0.0,
+         step = 1.0,
+         group = groupRetest)
+
+failureAtrPct =
+     input.float(
+         25.0,
+         "Failure Close Penetration % of Frozen ATR",
+         minval = 0.0,
+         step = 1.0,
+         group = groupRetest)
+
+requireDirectionalConfirmation =
+     input.bool(
+         true,
+         "Require Directional Retest Confirmation Candle",
+         group = groupRetest)
+
+showRetestZone =
+     input.bool(
+         false,
+         "Show Active Retest Zone",
+         group = groupRetest)
+
+showRetestLabels =
+     input.bool(
+         true,
+         "Show Retest / Confirmation / Failure Labels",
+         group = groupRetest)
+
+
+//=============================================================================
+// INPUTS — NO-RETEST CHECKPOINT RESEARCH
+//=============================================================================
+
+groupCheckpoint = "No-Retest Checkpoints"
+
+enableCheckpointResearch =
+     input.bool(
+         true,
+         "Enable No-Retest Checkpoint Research",
+         group = groupCheckpoint)
+
+showCheckpointTable =
+     input.bool(
+         true,
+         "Show No-Retest Checkpoint Table",
+         group = groupCheckpoint)
+
+showCheckpointLabels =
+     input.bool(
+         false,
+         "Show 5/10/15/30m Checkpoint Labels",
+         group = groupCheckpoint)
+
+
+//=============================================================================
+// INPUTS — MARKET REGIME
+//=============================================================================
+
+groupRegime = "Market Regime"
+
+spxSymbol =
+     input.symbol(
+         "SP:SPX",
+         "S&P 500 Symbol",
+         group = groupRegime)
+
+nasdaqSymbol =
+     input.symbol(
+         "NASDAQ:IXIC",
+         "Nasdaq Composite Symbol",
+         group = groupRegime)
+
+dowSymbol =
+     input.symbol(
+         "TVC:DJI",
+         "Dow Jones Symbol",
+         group = groupRegime)
+
+
+//=============================================================================
+// INPUTS — DISPLAY
+//=============================================================================
+
+groupDisplay = "Display"
+
+showORB =
+     input.bool(
+         true,
+         "Show ORB High / Low",
+         group = groupDisplay)
+
+showBreakoutLabels =
+     input.bool(
+         true,
+         "Show Breakout Labels",
+         group = groupDisplay)
+
+showBaselineTable =
+     input.bool(
+         true,
+         "Show Baseline Table",
+         group = groupDisplay)
+
+showPathTable =
+     input.bool(
+         true,
+         "Show Post-Breakout Path Table",
+         group = groupDisplay)
+
+showRetestTable =
+     input.bool(
+         true,
+         "Show Retest Summary",
+         group = groupDisplay)
+
+showDebug =
+     input.bool(
+         false,
+         "Show Debug Table",
+         group = groupDisplay)
+
+
+//=============================================================================
+// HELPERS
+//=============================================================================
+
+f_clamp(float value, float minValue, float maxValue) =>
+    math.max(
+         minValue,
+         math.min(
+             maxValue,
+             value))
+
+
+f_grade(float score) =>
+    score >= 95.0 ? "A+" :
+     score >= 90.0 ? "A" :
+     score >= 85.0 ? "A-" :
+     score >= 80.0 ? "B+" :
+     score >= 75.0 ? "B" :
+     score >= 70.0 ? "B-" :
+     score >= 65.0 ? "C+" :
+     score >= 60.0 ? "C" :
+     score >= 55.0 ? "C-" :
+     "Weak"
+
+
+f_minGradeScore(string grade) =>
+    grade == "A+" ? 95.0 :
+     grade == "A" ? 90.0 :
+     grade == "A-" ? 85.0 :
+     grade == "B+" ? 80.0 :
+     grade == "B" ? 75.0 :
+     grade == "B-" ? 70.0 :
+     grade == "C+" ? 65.0 :
+     grade == "C" ? 60.0 :
+     grade == "C-" ? 55.0 :
+     0.0
+
+
+f_speedScore(int minuteOfDay) =>
+    minuteOfDay < 600 ? 10.0 :
+     minuteOfDay < 630 ? 8.0 :
+     minuteOfDay < 660 ? 6.0 :
+     minuteOfDay < 720 ? 4.0 :
+     2.0
+
+
+f_pct(float value) =>
+    na(value)
+     ? "—"
+     : str.tostring(
+         value,
+         "#.##") + "%"
+
+
+f_num(int value) =>
+    str.tostring(value)
+
+
+f_rate(int fav, int adv) =>
+    int decisive =
+         fav + adv
+
+    decisive > 0
+     ? float(fav) /
+       float(decisive) *
+       100.0
+     : na
+
+
+f_date(int ts) =>
+    na(ts)
+     ? "—"
+     : str.format_time(
+         ts,
+         "yyyy-MM-dd",
+         TZ)
+
+
+f_pathName(int path) =>
+    path == PATH_NR_CONTINUE ? "NR Continue" :
+     path == PATH_RETEST_CONTINUE ? "Retest Continue" :
+     path == PATH_RETEST_FAIL ? "Retest Fail" :
+     path == PATH_NR_FAIL ? "NR Fail" :
+     path == PATH_RETEST_UNCONFIRMED ? "Retest Unconfirmed" :
+     path == PATH_UNRESOLVED ? "Unresolved" :
+     "Pending"
+
+
+//=============================================================================
+// TIMEFRAME + SESSION
+//=============================================================================
+
+bool isOneMinuteChart =
+     timeframe.in_seconds(
+         timeframe.period) == 60
+
+int hh =
+     hour(
+         time,
+         TZ)
+
+int mm =
+     minute(
+         time,
+         TZ)
+
+int mins =
+     hh * 60 + mm
+
+bool isRTH =
+     mins >= 570 and
+     mins < 960
+
+bool isORB =
+     mins >= 570 and
+     mins < 585
+
+bool canTrigger =
+     mins >= 585 and
+     mins < 960
+
+bool is930 =
+     mins == 570
+
+bool isLastRTH =
+     mins == 959
+
+bool afterStartDate =
+     not useStartDate or
+     time >= researchStart
+
+bool researchEligible =
+     isOneMinuteChart and
+     afterStartDate
+
+
+//=============================================================================
+// ATR
+//=============================================================================
+
+float atr1m =
+     ta.atr(
+         atrLength)
+
+
+//=============================================================================
+// MARKET DATA
+// Retained for future Build 4 regime analysis.
+//=============================================================================
+
+float spxOpen1m =
+     request.security(
+         spxSymbol,
+         "1",
+         open,
+         gaps = barmerge.gaps_off,
+         lookahead = barmerge.lookahead_off)
+
+float spxClose1m =
+     request.security(
+         spxSymbol,
+         "1",
+         close,
+         gaps = barmerge.gaps_off,
+         lookahead = barmerge.lookahead_off)
+
+float nasdaqOpen1m =
+     request.security(
+         nasdaqSymbol,
+         "1",
+         open,
+         gaps = barmerge.gaps_off,
+         lookahead = barmerge.lookahead_off)
+
+float nasdaqClose1m =
+     request.security(
+         nasdaqSymbol,
+         "1",
+         close,
+         gaps = barmerge.gaps_off,
+         lookahead = barmerge.lookahead_off)
+
+float dowOpen1m =
+     request.security(
+         dowSymbol,
+         "1",
+         open,
+         gaps = barmerge.gaps_off,
+         lookahead = barmerge.lookahead_off)
+
+float dowClose1m =
+     request.security(
+         dowSymbol,
+         "1",
+         close,
+         gaps = barmerge.gaps_off,
+         lookahead = barmerge.lookahead_off)
+
+
+float spxPrevClose =
+     request.security(
+         spxSymbol,
+         "1D",
+         close[1],
+         gaps = barmerge.gaps_off,
+         lookahead = barmerge.lookahead_on)
+
+float nasdaqPrevClose =
+     request.security(
+         nasdaqSymbol,
+         "1D",
+         close[1],
+         gaps = barmerge.gaps_off,
+         lookahead = barmerge.lookahead_on)
+
+float dowPrevClose =
+     request.security(
+         dowSymbol,
+         "1D",
+         close[1],
+         gaps = barmerge.gaps_off,
+         lookahead = barmerge.lookahead_on)
+
+
+//=============================================================================
+// MARKET RTH OPEN
+//=============================================================================
+
+var float spxRthOpen = na
+var float nasdaqRthOpen = na
+var float dowRthOpen = na
+
+if is930
+
+    spxRthOpen :=
+         spxOpen1m
+
+    nasdaqRthOpen :=
+         nasdaqOpen1m
+
+    dowRthOpen :=
+         dowOpen1m
+
+
+float spxRthPct =
+     not na(spxRthOpen) and
+     spxRthOpen != 0.0
+     ? (
+         spxClose1m -
+         spxRthOpen
+       ) /
+       spxRthOpen *
+       100.0
+     : na
+
+float nasdaqRthPct =
+     not na(nasdaqRthOpen) and
+     nasdaqRthOpen != 0.0
+     ? (
+         nasdaqClose1m -
+         nasdaqRthOpen
+       ) /
+       nasdaqRthOpen *
+       100.0
+     : na
+
+float dowRthPct =
+     not na(dowRthOpen) and
+     dowRthOpen != 0.0
+     ? (
+         dowClose1m -
+         dowRthOpen
+       ) /
+       dowRthOpen *
+       100.0
+     : na
+
+
+float spxDailyPct =
+     not na(spxPrevClose) and
+     spxPrevClose != 0.0
+     ? (
+         spxClose1m -
+         spxPrevClose
+       ) /
+       spxPrevClose *
+       100.0
+     : na
+
+float nasdaqDailyPct =
+     not na(nasdaqPrevClose) and
+     nasdaqPrevClose != 0.0
+     ? (
+         nasdaqClose1m -
+         nasdaqPrevClose
+       ) /
+       nasdaqPrevClose *
+       100.0
+     : na
+
+float dowDailyPct =
+     not na(dowPrevClose) and
+     dowPrevClose != 0.0
+     ? (
+         dowClose1m -
+         dowPrevClose
+       ) /
+       dowPrevClose *
+       100.0
+     : na
+
+
+bool rthIndexesValid =
+     not na(spxRthPct) and
+     not na(nasdaqRthPct) and
+     not na(dowRthPct)
+
+bool dailyIndexesValid =
+     not na(spxDailyPct) and
+     not na(nasdaqDailyPct) and
+     not na(dowDailyPct)
+
+
+int currentRthRegime =
+     REGIME_INVALID
+
+if rthIndexesValid
+
+    if spxRthPct > 0.0 and
+       nasdaqRthPct > 0.0 and
+       dowRthPct > 0.0
+
+        currentRthRegime :=
+             REGIME_BULL
+
+    else if spxRthPct < 0.0 and nasdaqRthPct < 0.0 and dowRthPct < 0.0
+
+        currentRthRegime :=
+             REGIME_BEAR
+
+    else
+
+        currentRthRegime :=
+             REGIME_MIXED
+
+
+int currentDailyRegime =
+     REGIME_INVALID
+
+if dailyIndexesValid
+
+    if spxDailyPct > 0.0 and
+       nasdaqDailyPct > 0.0 and
+       dowDailyPct > 0.0
+
+        currentDailyRegime :=
+             REGIME_BULL
+
+    else if spxDailyPct < 0.0 and nasdaqDailyPct < 0.0 and dowDailyPct < 0.0
+
+        currentDailyRegime :=
+             REGIME_BEAR
+
+    else
+
+        currentDailyRegime :=
+             REGIME_MIXED
+
+
+//=============================================================================
+// ORB
+//=============================================================================
+
+var float orbHigh = na
+var float orbLow = na
+
+if is930
+
+    orbHigh :=
+         high
+
+    orbLow :=
+         low
+
+else if isORB
+
+    orbHigh :=
+         na(orbHigh)
+         ? high
+         : math.max(
+             orbHigh,
+             high)
+
+    orbLow :=
+         na(orbLow)
+         ? low
+         : math.min(
+             orbLow,
+             low)
+
+
+//=============================================================================
+// RESEARCH SAMPLE METADATA
+//=============================================================================
+
+var int firstAnalyzedDate = na
+var int lastAnalyzedDate = na
+var int analyzedDays = 0
+
+if is930 and
+   researchEligible
+
+    analyzedDays += 1
+
+    if na(firstAnalyzedDate)
+
+        firstAnalyzedDate :=
+             time
+
+    lastAnalyzedDate :=
+         time
+
+
+//=============================================================================
+// DAILY SIGNAL STATE
+//=============================================================================
+
+var bool signalTakenToday = false
+
+if is930
+
+    signalTakenToday :=
+         false
+
+
+//=============================================================================
+// BASELINE STATISTICS
+//=============================================================================
+
+var int totalSignals = 0
+var int completed = 0
+
+var int bullishSignals = 0
+var int bearishSignals = 0
+
+var int favorableFirst = 0
+var int adverseFirst = 0
+var int bothSameBar = 0
+var int unresolved = 0
+
+var int hits025 = 0
+var int hits075 = 0
+var int hits100 = 0
+
+var float totalMFE = 0.0
+var float totalMAE = 0.0
+
+
+//=============================================================================
+// CHECKPOINT AGGREGATES
+//=============================================================================
+
+var int cp5NoRetestN = 0
+var int cp10NoRetestN = 0
+var int cp15NoRetestN = 0
+var int cp30NoRetestN = 0
+
+var int cp5ForwardN = 0
+var int cp10ForwardN = 0
+var int cp15ForwardN = 0
+var int cp30ForwardN = 0
+
+var int cp5Fav = 0
+var int cp5Adv = 0
+var int cp5Both = 0
+var int cp5Unresolved = 0
+
+var int cp10Fav = 0
+var int cp10Adv = 0
+var int cp10Both = 0
+var int cp10Unresolved = 0
+
+var int cp15Fav = 0
+var int cp15Adv = 0
+var int cp15Both = 0
+var int cp15Unresolved = 0
+
+var int cp30Fav = 0
+var int cp30Adv = 0
+var int cp30Both = 0
+var int cp30Unresolved = 0
+
+var float cp5SepAtrTotal = 0.0
+var float cp10SepAtrTotal = 0.0
+var float cp15SepAtrTotal = 0.0
+var float cp30SepAtrTotal = 0.0
+
+
+//=============================================================================
+// POST-BREAKOUT PATH STATS
+//=============================================================================
+
+var int nrContinueN = 0
+var int retestContinueN = 0
+var int retestFailN = 0
+var int nrFailN = 0
+var int retestUnconfirmedN = 0
+var int pathUnresolvedN = 0
+
+
+var float nrContinueMFE = 0.0
+var float retestContinueMFE = 0.0
+var float retestFailMFE = 0.0
+var float nrFailMFE = 0.0
+
+
+var int nrContinueHit075 = 0
+var int nrContinueHit100 = 0
+
+
+//=============================================================================
+// RETEST AGGREGATES
+//=============================================================================
+
+var int totalRetests = 0
+var float totalMinutesToRetest = 0.0
+
+var float totalPreRetestMFE = 0.0
+var float totalPreRetestMAE = 0.0
+
+var float totalWickPenPctAtr = 0.0
+var float totalClosePenPctAtr = 0.0
+
+var int provisionalFailureN = 0
+var int failureReclaimN = 0
+
+var float totalMinutesToReclaim = 0.0
+
+
+//=============================================================================
+// ACTIVE BREAKOUT STATE
+//=============================================================================
+
+var bool activeSignal = false
+var int activeDir = 0
+
+var float entryPrice = na
+var int entryTime = na
+
+var float frozenAtr = na
+var float brokenOrbLevel = na
+
+var float retestTolerance = na
+var float failureTolerance = na
+
+var float retestUpper = na
+var float retestLower = na
+
+var int primaryOutcome = 0
+
+var bool hit025 = false
+var bool hit075 = false
+var bool hit100 = false
+
+var float mfePct = 0.0
+var float maePct = 0.0
+
+var int activePath = PATH_NONE
+
+
+//=============================================================================
+// ACTIVE CHECKPOINT STATE
+//=============================================================================
+
+var bool cp5Captured = false
+var bool cp10Captured = false
+var bool cp15Captured = false
+var bool cp30Captured = false
+
+// A checkpoint can be descriptive (no retest yet) without being eligible
+// for a fresh forward test. Forward eligibility requires that the original
+// breakout ±0.50% outcome is still unresolved at the checkpoint close.
+var bool cp5ForwardEligible = false
+var bool cp10ForwardEligible = false
+var bool cp15ForwardEligible = false
+var bool cp30ForwardEligible = false
+
+var float cp5Entry = na
+var float cp10Entry = na
+var float cp15Entry = na
+var float cp30Entry = na
+
+var int cp5Time = na
+var int cp10Time = na
+var int cp15Time = na
+var int cp30Time = na
+
+// Forward outcomes:
+// 0 = unresolved
+// 1 = favorable first
+// 2 = adverse first
+// 3 = both same 1M bar
+
+var int cp5Outcome = 0
+var int cp10Outcome = 0
+var int cp15Outcome = 0
+var int cp30Outcome = 0
+
+
+//=============================================================================
+// ACTIVE RETEST STATE
+//=============================================================================
+
+var bool firstRetestOccurred = false
+var int firstRetestTime = na
+
+var float preRetestMFE = 0.0
+var float preRetestMAE = 0.0
+
+var float maxWickPenAtrPct = 0.0
+var float maxClosePenAtrPct = 0.0
+
+// Stops first-retest penetration measurements after
+// confirmation or provisional failure.
+var bool retestPenetrationFrozen = false
+
+var bool provisionalFailure = false
+var int failureTime = na
+
+var bool retestConfirmed = false
+var int confirmationTime = na
+var float confirmationPrice = na
+
+var bool reclaimedAfterFailure = false
+var int reclaimTime = na
+
+var int retestCount = 0
+
+var bool inRetestZonePrev = false
+
+
+//=============================================================================
+// ACTIVE REGIME SNAPSHOT
+//=============================================================================
+
+var int breakoutRthRegime = REGIME_INVALID
+var int breakoutDailyRegime = REGIME_INVALID
+
+
+//=============================================================================
+// BREAKOUT CANDLE METRICS
+//=============================================================================
+
+bool validORB =
+     not na(orbHigh) and
+     not na(orbLow)
+
+float candleRange =
+     high - low
+
+float candleBody =
+     math.abs(
+         close -
+         open)
+
+float bodyPct =
+     candleRange > 0.0
+     ? candleBody /
+       candleRange *
+       100.0
+     : 0.0
+
+bool bullDirectional =
+     close > open
+
+bool bearDirectional =
+     close < open
+
+
+float bullPenetration =
+     validORB
+     ? math.max(
+         close -
+         orbHigh,
+         0.0)
+     : 0.0
+
+float bearPenetration =
+     validORB
+     ? math.max(
+         orbLow -
+         close,
+         0.0)
+     : 0.0
+
+
+float bullPenetrationPct =
+     atr1m > 0.0
+     ? bullPenetration /
+       atr1m *
+       100.0
+     : 0.0
+
+float bearPenetrationPct =
+     atr1m > 0.0
+     ? bearPenetration /
+       atr1m *
+       100.0
+     : 0.0
+
+
+float bullClosePct =
+     candleRange > 0.0
+     ? (
+         close -
+         low
+       ) /
+       candleRange *
+       100.0
+     : 0.0
+
+float bearClosePct =
+     candleRange > 0.0
+     ? (
+         high -
+         close
+       ) /
+       candleRange *
+       100.0
+     : 0.0
+
+
+float rangeAtrPct =
+     atr1m > 0.0
+     ? candleRange /
+       atr1m *
+       100.0
+     : 0.0
+
+
+//=============================================================================
+// STRENGTH SCORE
+//=============================================================================
+
+float bullPenScore =
+     f_clamp(
+         bullPenetrationPct /
+         50.0 *
+         30.0,
+         0.0,
+         30.0)
+
+float bearPenScore =
+     f_clamp(
+         bearPenetrationPct /
+         50.0 *
+         30.0,
+         0.0,
+         30.0)
+
+float bodyScore =
+     f_clamp(
+         bodyPct /
+         100.0 *
+         25.0,
+         0.0,
+         25.0)
+
+float bullCloseScore =
+     f_clamp(
+         bullClosePct /
+         100.0 *
+         20.0,
+         0.0,
+         20.0)
+
+float bearCloseScore =
+     f_clamp(
+         bearClosePct /
+         100.0 *
+         20.0,
+         0.0,
+         20.0)
+
+float rangeScore =
+     f_clamp(
+         rangeAtrPct /
+         150.0 *
+         15.0,
+         0.0,
+         15.0)
+
+float speedScore =
+     f_speedScore(
+         mins)
+
+float bullScore =
+     enableStrengthScore
+     ? bullPenScore +
+       bodyScore +
+       bullCloseScore +
+       rangeScore +
+       speedScore
+     : 0.0
+
+float bearScore =
+     enableStrengthScore
+     ? bearPenScore +
+       bodyScore +
+       bearCloseScore +
+       rangeScore +
+       speedScore
+     : 0.0
+
+
+//=============================================================================
+// FILTERS
+//=============================================================================
+
+float requiredGradeScore =
+     f_minGradeScore(
+         minimumGrade)
+
+bool bullDirectionalOK =
+     not reqDirectional or
+     bullDirectional
+
+bool bearDirectionalOK =
+     not reqDirectional or
+     bearDirectional
+
+bool bullPenOK =
+     not reqPenetration or
+     bullPenetrationPct >=
+     minPenetrationPct
+
+bool bearPenOK =
+     not reqPenetration or
+     bearPenetrationPct >=
+     minPenetrationPct
+
+bool bodyOK =
+     not reqBody or
+     bodyPct >=
+     minBodyPct
+
+bool rangeOK =
+     not reqRange or
+     rangeAtrPct >=
+     minRangeAtrPct
+
+bool bullCloseOK =
+     not reqClosePosition or
+     bullClosePct >=
+     minClosePositionPct
+
+bool bearCloseOK =
+     not reqClosePosition or
+     bearClosePct >=
+     minClosePositionPct
+
+bool bullGradeOK =
+     not reqMinimumGrade or
+     bullScore >=
+     requiredGradeScore
+
+bool bearGradeOK =
+     not reqMinimumGrade or
+     bearScore >=
+     requiredGradeScore
+
+
+//=============================================================================
+// BREAKOUT DETECTION
+//=============================================================================
+
+bool rawBull =
+     researchEligible and
+     canTrigger and
+     validORB and
+     not signalTakenToday and
+     close > orbHigh
+
+bool rawBear =
+     researchEligible and
+     canTrigger and
+     validORB and
+     not signalTakenToday and
+     close < orbLow
+
+bool bullBreak =
+     rawBull and
+     bullDirectionalOK and
+     bullPenOK and
+     bodyOK and
+     rangeOK and
+     bullCloseOK and
+     bullGradeOK
+
+bool bearBreak =
+     rawBear and
+     bearDirectionalOK and
+     bearPenOK and
+     bodyOK and
+     rangeOK and
+     bearCloseOK and
+     bearGradeOK
+
+
+//=============================================================================
+// NEW BREAKOUT INITIALIZATION
+//=============================================================================
+
+if bullBreak or bearBreak
+
+    signalTakenToday :=
+         true
+
+    activeSignal :=
+         true
+
+    activeDir :=
+         bullBreak
+         ? 1
+         : -1
+
+    entryPrice :=
+         close
+
+    entryTime :=
+         time
+
+    frozenAtr :=
+         atr1m
+
+    brokenOrbLevel :=
+         activeDir == 1
+         ? orbHigh
+         : orbLow
+
+    retestTolerance :=
+         frozenAtr *
+         (
+             retestZoneAtrPct /
+             100.0
+         )
+
+    failureTolerance :=
+         frozenAtr *
+         (
+             failureAtrPct /
+             100.0
+         )
+
+    retestUpper :=
+         brokenOrbLevel +
+         retestTolerance
+
+    retestLower :=
+         brokenOrbLevel -
+         retestTolerance
+
+
+    primaryOutcome :=
+         0
+
+    hit025 :=
+         false
+
+    hit075 :=
+         false
+
+    hit100 :=
+         false
+
+    mfePct :=
+         0.0
+
+    maePct :=
+         0.0
+
+    activePath :=
+         PATH_NONE
+
+
+    firstRetestOccurred :=
+         false
+
+    firstRetestTime :=
+         na
+
+    preRetestMFE :=
+         0.0
+
+    preRetestMAE :=
+         0.0
+
+    maxWickPenAtrPct :=
+         0.0
+
+    maxClosePenAtrPct :=
+         0.0
+
+    retestPenetrationFrozen :=
+         false
+
+    provisionalFailure :=
+         false
+
+    failureTime :=
+         na
+
+    retestConfirmed :=
+         false
+
+    confirmationTime :=
+         na
+
+    confirmationPrice :=
+         na
+
+    reclaimedAfterFailure :=
+         false
+
+    reclaimTime :=
+         na
+
+    retestCount :=
+         0
+
+    inRetestZonePrev :=
+         false
+
+
+    breakoutRthRegime :=
+         currentRthRegime
+
+    breakoutDailyRegime :=
+         currentDailyRegime
+
+
+    totalSignals += 1
+
+    if activeDir == 1
+        bullishSignals += 1
+    else
+        bearishSignals += 1
+
+
+    cp5Captured := false
+    cp10Captured := false
+    cp15Captured := false
+    cp30Captured := false
+
+    cp5ForwardEligible := false
+    cp10ForwardEligible := false
+    cp15ForwardEligible := false
+    cp30ForwardEligible := false
+
+    cp5Entry := na
+    cp10Entry := na
+    cp15Entry := na
+    cp30Entry := na
+
+    cp5Time := na
+    cp10Time := na
+    cp15Time := na
+    cp30Time := na
+
+    cp5Outcome := 0
+    cp10Outcome := 0
+    cp15Outcome := 0
+    cp30Outcome := 0
+
+
+//=============================================================================
+// BREAKOUT LABEL
+//=============================================================================
+
+if showBreakoutLabels and
+   (bullBreak or bearBreak)
+
+    float activeScoreNow =
+         bullBreak
+         ? bullScore
+         : bearScore
+
+    string gradeText =
+         showScoreOnLabel and
+         enableStrengthScore
+         ? "\n" +
+           f_grade(
+               activeScoreNow) +
+           " · " +
+           str.tostring(
+               activeScoreNow,
+               "#.0")
+         : ""
+
+    label.new(
+         time,
+         close,
+         activeDir == 1
+         ? "ORB LONG\n" +
+           str.tostring(
+               close,
+               format.mintick) +
+           gradeText
+         : "ORB SHORT\n" +
+           str.tostring(
+               close,
+               format.mintick) +
+           gradeText,
+         xloc = xloc.bar_time,
+         yloc = yloc.price,
+         style =
+             activeDir == 1
+             ? label.style_label_up
+             : label.style_label_down,
+         color =
+             activeDir == 1
+             ? color.new(
+                 color.green,
+                 0)
+             : color.new(
+                 color.red,
+                 0),
+         textcolor =
+             color.white, 
+         size =
+             size.small)
+
+
+//=============================================================================
+// ACTIVE POST-BREAKOUT ENGINE
+//=============================================================================
+
+//=============================================================================
+// POST-ENTRY BAR STATE
+//=============================================================================
+
+bool postEntryBar =
+     activeSignal and
+     not na(entryTime) and
+     time > entryTime and
+     isRTH
+
+
+// These are declared at bar scope so every post-breakout
+// research section can reference the same values.
+
+float favorableMove = na
+float adverseMove = na
+
+
+if postEntryBar
+
+    //---------------------------------------------------------------------
+    // FAVORABLE / ADVERSE EXCURSION
+    //---------------------------------------------------------------------
+
+    if activeDir == 1
+
+        // Bullish ORB breakout
+        favorableMove :=
+             (high - entryPrice) /
+             entryPrice *
+             100.0
+
+        adverseMove :=
+             (entryPrice - low) /
+             entryPrice *
+             100.0
+
+    else if activeDir == -1
+
+        // Bearish ORB breakout
+        favorableMove :=
+             (entryPrice - low) /
+             entryPrice *
+             100.0
+
+        adverseMove :=
+             (high - entryPrice) /
+             entryPrice *
+             100.0
+
+
+    int minutesSinceBreakout =
+         int(
+             (time - entryTime) /
+             60000)
+
+
+    mfePct :=
+         math.max(
+             mfePct,
+             favorableMove)
+
+    maePct :=
+         math.max(
+             maePct,
+             adverseMove)
+
+
+    float currentOrbSeparation =
+         activeDir == 1
+         ? close - brokenOrbLevel
+         : brokenOrbLevel - close
+
+    float currentOrbSepAtrPct =
+         frozenAtr > 0.0
+         ? currentOrbSeparation /
+           frozenAtr *
+           100.0
+         : na
+
+
+    //---------------------------------------------------------------------
+    // PRE-RETEST EXCURSION
+    //---------------------------------------------------------------------
+
+    if not firstRetestOccurred
+
+        preRetestMFE :=
+             math.max(
+                 preRetestMFE,
+                 favorableMove)
+
+        preRetestMAE :=
+             math.max(
+                 preRetestMAE,
+                 adverseMove)
+
+
+    //---------------------------------------------------------------------
+    // SECONDARY FAVORABLE TARGETS
+    //---------------------------------------------------------------------
+
+    if not hit025 and
+       favorableMove >=
+       secondary025
+
+        hit025 :=
+             true
+
+
+    if not hit075 and
+       favorableMove >=
+       secondary075
+
+        hit075 :=
+             true
+
+
+    if not hit100 and
+       favorableMove >=
+       secondary100
+
+        hit100 :=
+             true
+
+
+    //---------------------------------------------------------------------
+    // RETEST ZONE OVERLAP
+    //
+    // Candle range overlaps the frozen zone.
+    //---------------------------------------------------------------------
+
+    bool overlapsRetestZone =
+         high >= retestLower and
+         low <= retestUpper
+
+
+    //---------------------------------------------------------------------
+    // FIRST-EVENT CLASSIFICATION BEFORE RETEST
+    //---------------------------------------------------------------------
+
+    if activePath == PATH_NONE and
+       not firstRetestOccurred
+
+        bool favorableHitNow =
+             favorableMove >=
+             primaryPct
+
+        bool adverseHitNow =
+             adverseMove >=
+             primaryPct
+
+
+        // If target and retest occur on same 1M candle, sequencing
+        // is unknowable. Retest takes precedence for path classification.
+        // Baseline ±0.50 logic remains independent below.
+
+        if overlapsRetestZone
+
+            firstRetestOccurred :=
+                 true
+
+            firstRetestTime :=
+                 time
+
+            totalRetests +=
+                 1
+
+            retestCount +=
+                 1
+
+            totalMinutesToRetest +=
+                 (
+                     time -
+                     entryTime
+                 ) /
+                 60000.0
+
+            totalPreRetestMFE +=
+                 preRetestMFE
+
+            totalPreRetestMAE +=
+                 preRetestMAE
+
+
+            if showRetestLabels
+
+                label.new(
+                     time,
+                     brokenOrbLevel,
+                     "RETEST\n+" +
+                     str.tostring(
+                         int(
+                             (
+                                 time -
+                                 entryTime
+                             ) /
+                             60000
+                         )
+                     ) +
+                     "m",
+                     xloc = xloc.bar_time,
+                     yloc = yloc.price,
+                     style =
+                         activeDir == 1
+                         ? label.style_label_down
+                         : label.style_label_up,
+                     color =
+                         color.new(
+                             color.orange,
+                             0),
+                     textcolor =
+                         color.white,
+                     size =
+                         size.tiny)
+
+
+        else if favorableHitNow
+
+            activePath :=
+                 PATH_NR_CONTINUE
+
+
+        else if adverseHitNow
+
+            activePath :=
+                 PATH_NR_FAIL
+
+
+    //---------------------------------------------------------------------
+    // RETEST COUNT
+    //
+    // Count a new zone entry after previously being outside.
+    //---------------------------------------------------------------------
+
+    if firstRetestOccurred
+
+        if overlapsRetestZone and
+           not inRetestZonePrev and
+           time != firstRetestTime
+
+            retestCount +=
+                 1
+
+
+    inRetestZonePrev :=
+         overlapsRetestZone
+
+
+    //---------------------------------------------------------------------
+    // FIRST-RETEST PENETRATION
+    //
+    // ONLY this measurement freezes after the first decisive retest
+    // outcome. Failure / confirmation / continuation / reclaim logic
+    // remains active on subsequent bars.
+    //---------------------------------------------------------------------
+
+    if firstRetestOccurred and
+       not retestPenetrationFrozen and
+       frozenAtr > 0.0
+
+        float wickPen =
+             activeDir == 1
+             ? math.max(
+                 brokenOrbLevel -
+                 low,
+                 0.0)
+             : math.max(
+                 high -
+                 brokenOrbLevel,
+                 0.0)
+
+        float closePen =
+             activeDir == 1
+             ? math.max(
+                 brokenOrbLevel -
+                 close,
+                 0.0)
+             : math.max(
+                 close -
+                 brokenOrbLevel,
+                 0.0)
+
+
+        float wickPenPctAtr =
+             wickPen /
+             frozenAtr *
+             100.0
+
+        float closePenPctAtr =
+             closePen /
+             frozenAtr *
+             100.0
+
+
+        maxWickPenAtrPct :=
+             math.max(
+                 maxWickPenAtrPct,
+                 wickPenPctAtr)
+
+        maxClosePenAtrPct :=
+             math.max(
+                 maxClosePenAtrPct,
+                 closePenPctAtr)
+
+
+    //=====================================================================
+    // NO-RETEST CHECKPOINT CAPTURE
+    //
+    // NR N is descriptive: no first retest has occurred by the checkpoint.
+    //
+    // FWD N is stricter: the original breakout ±0.50% outcome must still
+    // be unresolved at the checkpoint CLOSE. We therefore also inspect the
+    // current checkpoint candle's high/low before declaring eligibility.
+    // The fresh checkpoint outcome begins on the NEXT 1-minute bar.
+    //=====================================================================
+
+    if enableCheckpointResearch and
+       not firstRetestOccurred
+
+        bool originalStillUnresolvedNow =
+             primaryOutcome == 0 and
+             favorableMove < primaryPct and
+             adverseMove < primaryPct
+
+        if not cp5Captured and
+           minutesSinceBreakout >= 5
+
+            cp5Captured := true
+            cp5NoRetestN += 1
+            cp5SepAtrTotal += currentOrbSepAtrPct
+
+            cp5ForwardEligible := originalStillUnresolvedNow
+
+            if cp5ForwardEligible
+                cp5Entry := close
+                cp5Time := time
+                cp5ForwardN += 1
+
+            if showCheckpointLabels
+                label.new(
+                     time,
+                     close,
+                     cp5ForwardEligible ? "NR 5m FWD" : "NR 5m",
+                     xloc = xloc.bar_time,
+                     yloc = yloc.price,
+                     style =
+                         activeDir == 1
+                         ? label.style_label_up
+                         : label.style_label_down,
+                     color = color.new(color.gray, 20),
+                     textcolor = color.white,
+                     size = size.tiny)
+
+
+        if not cp10Captured and
+           minutesSinceBreakout >= 10
+
+            cp10Captured := true
+            cp10NoRetestN += 1
+            cp10SepAtrTotal += currentOrbSepAtrPct
+
+            cp10ForwardEligible := originalStillUnresolvedNow
+
+            if cp10ForwardEligible
+                cp10Entry := close
+                cp10Time := time
+                cp10ForwardN += 1
+
+            if showCheckpointLabels
+                label.new(
+                     time,
+                     close,
+                     cp10ForwardEligible ? "NR 10m FWD" : "NR 10m",
+                     xloc = xloc.bar_time,
+                     yloc = yloc.price,
+                     style =
+                         activeDir == 1
+                         ? label.style_label_up
+                         : label.style_label_down,
+                     color = color.new(color.gray, 20),
+                     textcolor = color.white,
+                     size = size.tiny)
+
+
+        if not cp15Captured and
+           minutesSinceBreakout >= 15
+
+            cp15Captured := true
+            cp15NoRetestN += 1
+            cp15SepAtrTotal += currentOrbSepAtrPct
+
+            cp15ForwardEligible := originalStillUnresolvedNow
+
+            if cp15ForwardEligible
+                cp15Entry := close
+                cp15Time := time
+                cp15ForwardN += 1
+
+            if showCheckpointLabels
+                label.new(
+                     time,
+                     close,
+                     cp15ForwardEligible ? "NR 15m FWD" : "NR 15m",
+                     xloc = xloc.bar_time,
+                     yloc = yloc.price,
+                     style =
+                         activeDir == 1
+                         ? label.style_label_up
+                         : label.style_label_down,
+                     color = color.new(color.gray, 20),
+                     textcolor = color.white,
+                     size = size.tiny)
+
+
+        if not cp30Captured and
+           minutesSinceBreakout >= 30
+
+            cp30Captured := true
+            cp30NoRetestN += 1
+            cp30SepAtrTotal += currentOrbSepAtrPct
+
+            cp30ForwardEligible := originalStillUnresolvedNow
+
+            if cp30ForwardEligible
+                cp30Entry := close
+                cp30Time := time
+                cp30ForwardN += 1
+
+            if showCheckpointLabels
+                label.new(
+                     time,
+                     close,
+                     cp30ForwardEligible ? "NR 30m FWD" : "NR 30m",
+                     xloc = xloc.bar_time,
+                     yloc = yloc.price,
+                     style =
+                         activeDir == 1
+                         ? label.style_label_up
+                         : label.style_label_down,
+                     color = color.new(color.gray, 20),
+                     textcolor = color.white,
+                     size = size.tiny)
+
+
+    //=====================================================================
+    // CHECKPOINT FORWARD OUTCOMES
+    //
+    // These tests continue even if a retest happens later. Once a checkpoint
+    // was valid and forward-eligible, the research question is simply:
+    // from the checkpoint close, does +0.50% occur before -0.50%?
+    //=====================================================================
+
+    if cp5ForwardEligible and
+       cp5Outcome == 0 and
+       not na(cp5Time) and
+       time > cp5Time
+
+        float cp5FavMove =
+             activeDir == 1
+             ? (high - cp5Entry) / cp5Entry * 100.0
+             : (cp5Entry - low) / cp5Entry * 100.0
+
+        float cp5AdvMove =
+             activeDir == 1
+             ? (cp5Entry - low) / cp5Entry * 100.0
+             : (high - cp5Entry) / cp5Entry * 100.0
+
+        bool cp5FavHit = cp5FavMove >= primaryPct
+        bool cp5AdvHit = cp5AdvMove >= primaryPct
+
+        if cp5FavHit and cp5AdvHit
+            cp5Outcome := 3
+        else if cp5FavHit
+            cp5Outcome := 1
+        else if cp5AdvHit
+            cp5Outcome := 2
+
+
+    if cp10ForwardEligible and
+       cp10Outcome == 0 and
+       not na(cp10Time) and
+       time > cp10Time
+
+        float cp10FavMove =
+             activeDir == 1
+             ? (high - cp10Entry) / cp10Entry * 100.0
+             : (cp10Entry - low) / cp10Entry * 100.0
+
+        float cp10AdvMove =
+             activeDir == 1
+             ? (cp10Entry - low) / cp10Entry * 100.0
+             : (high - cp10Entry) / cp10Entry * 100.0
+
+        bool cp10FavHit = cp10FavMove >= primaryPct
+        bool cp10AdvHit = cp10AdvMove >= primaryPct
+
+        if cp10FavHit and cp10AdvHit
+            cp10Outcome := 3
+        else if cp10FavHit
+            cp10Outcome := 1
+        else if cp10AdvHit
+            cp10Outcome := 2
+
+
+    if cp15ForwardEligible and
+       cp15Outcome == 0 and
+       not na(cp15Time) and
+       time > cp15Time
+
+        float cp15FavMove =
+             activeDir == 1
+             ? (high - cp15Entry) / cp15Entry * 100.0
+             : (cp15Entry - low) / cp15Entry * 100.0
+
+        float cp15AdvMove =
+             activeDir == 1
+             ? (cp15Entry - low) / cp15Entry * 100.0
+             : (high - cp15Entry) / cp15Entry * 100.0
+
+        bool cp15FavHit = cp15FavMove >= primaryPct
+        bool cp15AdvHit = cp15AdvMove >= primaryPct
+
+        if cp15FavHit and cp15AdvHit
+            cp15Outcome := 3
+        else if cp15FavHit
+            cp15Outcome := 1
+        else if cp15AdvHit
+            cp15Outcome := 2
+
+
+    if cp30ForwardEligible and
+       cp30Outcome == 0 and
+       not na(cp30Time) and
+       time > cp30Time
+
+        float cp30FavMove =
+             activeDir == 1
+             ? (high - cp30Entry) / cp30Entry * 100.0
+             : (cp30Entry - low) / cp30Entry * 100.0
+
+        float cp30AdvMove =
+             activeDir == 1
+             ? (cp30Entry - low) / cp30Entry * 100.0
+             : (high - cp30Entry) / cp30Entry * 100.0
+
+        bool cp30FavHit = cp30FavMove >= primaryPct
+        bool cp30AdvHit = cp30AdvMove >= primaryPct
+
+        if cp30FavHit and cp30AdvHit
+            cp30Outcome := 3
+        else if cp30FavHit
+            cp30Outcome := 1
+        else if cp30AdvHit
+            cp30Outcome := 2
+
+
+    //---------------------------------------------------------------------
+    // PROVISIONAL RETEST FAILURE
+    //---------------------------------------------------------------------
+
+    bool failureClose =
+         firstRetestOccurred and
+         not provisionalFailure and
+         not retestConfirmed and
+         (
+             activeDir == 1
+             ? close <=
+               brokenOrbLevel -
+               failureTolerance
+             : close >=
+               brokenOrbLevel +
+               failureTolerance
+         )
+
+
+    if failureClose
+
+        provisionalFailure :=
+             true
+
+        // Freeze first-retest penetration after this failure bar.
+        retestPenetrationFrozen :=
+             true
+
+        failureTime :=
+             time
+
+        provisionalFailureN +=
+             1
+
+        if activePath == PATH_NONE
+
+            activePath :=
+                 PATH_RETEST_FAIL
+
+
+        if showRetestLabels
+
+            label.new(
+                 time,
+                 close,
+                 "RETEST FAIL\n" +
+                 str.tostring(
+                     failureAtrPct,
+                     "#") +
+                 "% ATR+",
+                 xloc = xloc.bar_time,
+                 yloc = yloc.price,
+                 style =
+                     activeDir == 1
+                     ? label.style_label_down
+                     : label.style_label_up,
+                 color =
+                     color.new(
+                         color.red,
+                         0),
+                 textcolor =
+                     color.white,
+                 size =
+                     size.tiny)
+
+
+    //---------------------------------------------------------------------
+    // SUCCESSFUL RETEST CONFIRMATION
+    //
+    // Must occur AFTER first retest.
+    //---------------------------------------------------------------------
+
+    bool directionConfirm =
+         activeDir == 1
+         ? close > open
+         : close < open
+
+    bool outsideRetestZone =
+         activeDir == 1
+         ? close > retestUpper
+         : close < retestLower
+
+    bool validConfirmation =
+         firstRetestOccurred and
+         not provisionalFailure and
+         not retestConfirmed and
+         time > firstRetestTime and
+         outsideRetestZone and
+         (
+             not requireDirectionalConfirmation or
+             directionConfirm
+         )
+
+
+    if validConfirmation
+
+        retestConfirmed :=
+             true
+
+        // Freeze first-retest penetration after this confirmation bar.
+        retestPenetrationFrozen :=
+             true
+
+        confirmationTime :=
+             time
+
+        confirmationPrice :=
+             close
+
+
+        if showRetestLabels
+
+            label.new(
+                 time,
+                 close,
+                 "RETEST CONFIRM\n" +
+                 str.tostring(
+                     close,
+                     format.mintick),
+                 xloc = xloc.bar_time,
+                 yloc = yloc.price,
+                 style =
+                     activeDir == 1
+                     ? label.style_label_up
+                     : label.style_label_down,
+                 color =
+                     color.new(
+                         color.teal,
+                         0),
+                 textcolor =
+                     color.white,
+                 size =
+                     size.tiny)
+
+
+    //---------------------------------------------------------------------
+    // RETEST CONTINUATION
+    //
+    // Confirmation must already exist and the +0.50% original breakout
+    // target must be reached on a later bar.
+    //---------------------------------------------------------------------
+
+    if activePath == PATH_NONE and
+       retestConfirmed and
+       time > confirmationTime and
+       favorableMove >= primaryPct
+
+        activePath :=
+             PATH_RETEST_CONTINUE
+
+
+    //---------------------------------------------------------------------
+    // FAILED RETEST -> RECLAIM
+    //---------------------------------------------------------------------
+
+    bool reclaimed =
+         provisionalFailure and
+         not reclaimedAfterFailure and
+         (
+             activeDir == 1
+             ? close > retestUpper
+             : close < retestLower
+         )
+
+
+    if reclaimed
+
+        reclaimedAfterFailure :=
+             true
+
+        reclaimTime :=
+             time
+
+        failureReclaimN +=
+             1
+
+        totalMinutesToReclaim +=
+             (
+                 time -
+                 failureTime
+             ) /
+             60000.0
+
+
+        if showRetestLabels
+
+            label.new(
+                 time,
+                 close,
+                 "FAIL -> RECLAIM",
+                 xloc = xloc.bar_time,
+                 yloc = yloc.price,
+                 style =
+                     activeDir == 1
+                     ? label.style_label_up
+                     : label.style_label_down,
+                 color =
+                     color.new(
+                         color.blue,
+                         0),
+                 textcolor =
+                     color.white,
+                 size =
+                     size.tiny)
+
+
+    //---------------------------------------------------------------------
+    // BASELINE ±0.50% FIRST-REACHED
+    //
+    // IMPORTANT:
+    // This executes on EVERY post-entry bar until the first baseline
+    // outcome is known. It is independent of retest penetration state.
+    //---------------------------------------------------------------------
+
+    if primaryOutcome == 0
+
+        bool baselineFav =
+             favorableMove >=
+             primaryPct
+
+        bool baselineAdv =
+             adverseMove >=
+             primaryPct
+
+        if baselineFav and
+           baselineAdv
+
+            primaryOutcome :=
+                 3
+
+        else if baselineFav
+
+            primaryOutcome :=
+                 1
+
+        else if baselineAdv
+
+            primaryOutcome :=
+                 2
+
+
+//=============================================================================
+// END-OF-DAY FINALIZATION
+//=============================================================================
+
+if isLastRTH and
+   activeSignal
+
+    completed +=
+         1
+
+
+    //---------------------------------------------------------------------
+    // BASELINE RESULTS
+    //---------------------------------------------------------------------
+
+    if primaryOutcome == 1
+
+        favorableFirst +=
+             1
+
+    else if primaryOutcome == 2
+
+        adverseFirst +=
+             1
+
+    else if primaryOutcome == 3
+
+        bothSameBar +=
+             1
+
+    else
+
+        unresolved +=
+             1
+
+
+    if hit025
+        hits025 += 1
+
+    if hit075
+        hits075 += 1
+
+    if hit100
+        hits100 += 1
+
+
+    totalMFE +=
+         mfePct
+
+    totalMAE +=
+         maePct
+
+
+    //---------------------------------------------------------------------
+    // FINAL PATH RESOLUTION
+    //---------------------------------------------------------------------
+
+    if activePath == PATH_NONE
+
+        if firstRetestOccurred and
+           not retestConfirmed and
+           not provisionalFailure
+
+            activePath :=
+                 PATH_RETEST_UNCONFIRMED
+
+        else
+
+            activePath :=
+                 PATH_UNRESOLVED
+
+
+    //---------------------------------------------------------------------
+    // PATH COUNTERS
+    //---------------------------------------------------------------------
+
+    if activePath == PATH_NR_CONTINUE
+
+        nrContinueN +=
+             1
+
+        nrContinueMFE +=
+             mfePct
+
+        if hit075
+            nrContinueHit075 += 1
+
+        if hit100
+            nrContinueHit100 += 1
+
+
+    else if activePath == PATH_RETEST_CONTINUE
+
+        retestContinueN +=
+             1
+
+        retestContinueMFE +=
+             mfePct
+
+
+    else if activePath == PATH_RETEST_FAIL
+
+        retestFailN +=
+             1
+
+        retestFailMFE +=
+             mfePct
+
+
+    else if activePath == PATH_NR_FAIL
+
+        nrFailN +=
+             1
+
+        nrFailMFE +=
+             mfePct
+
+
+    else if activePath == PATH_RETEST_UNCONFIRMED
+
+        retestUnconfirmedN +=
+             1
+
+
+    else
+
+        pathUnresolvedN +=
+             1
+
+
+    //---------------------------------------------------------------------
+    // RETEST PENETRATION AGGREGATES
+    //---------------------------------------------------------------------
+
+    if firstRetestOccurred
+
+        totalWickPenPctAtr +=
+             maxWickPenAtrPct
+
+        totalClosePenPctAtr +=
+             maxClosePenAtrPct
+
+
+    //---------------------------------------------------------------------
+    // CHECKPOINT RESULT FINALIZATION
+    //
+    // Only forward-eligible checkpoints contribute to forward outcomes.
+    // NR N was already counted at checkpoint capture.
+    //---------------------------------------------------------------------
+
+    if cp5ForwardEligible
+        if cp5Outcome == 1
+            cp5Fav += 1
+        else if cp5Outcome == 2
+            cp5Adv += 1
+        else if cp5Outcome == 3
+            cp5Both += 1
+        else
+            cp5Unresolved += 1
+
+    if cp10ForwardEligible
+        if cp10Outcome == 1
+            cp10Fav += 1
+        else if cp10Outcome == 2
+            cp10Adv += 1
+        else if cp10Outcome == 3
+            cp10Both += 1
+        else
+            cp10Unresolved += 1
+
+    if cp15ForwardEligible
+        if cp15Outcome == 1
+            cp15Fav += 1
+        else if cp15Outcome == 2
+            cp15Adv += 1
+        else if cp15Outcome == 3
+            cp15Both += 1
+        else
+            cp15Unresolved += 1
+
+    if cp30ForwardEligible
+        if cp30Outcome == 1
+            cp30Fav += 1
+        else if cp30Outcome == 2
+            cp30Adv += 1
+        else if cp30Outcome == 3
+            cp30Both += 1
+        else
+            cp30Unresolved += 1
+
+
+    //---------------------------------------------------------------------
+    // RESET ACTIVE BREAKOUT
+    //---------------------------------------------------------------------
+
+    activeSignal :=
+         false
+
+    activeDir :=
+         0
+
+    entryPrice :=
+         na
+
+    entryTime :=
+         na
+
+    frozenAtr :=
+         na
+
+    brokenOrbLevel :=
+         na
+
+    retestTolerance :=
+         na
+
+    failureTolerance :=
+         na
+
+    retestUpper :=
+         na
+
+    retestLower :=
+         na
+
+    activePath :=
+         PATH_NONE
+
+    firstRetestOccurred :=
+         false
+
+    firstRetestTime :=
+         na
+
+    retestPenetrationFrozen :=
+         false
+
+    provisionalFailure :=
+         false
+
+    failureTime :=
+         na
+
+    retestConfirmed :=
+         false
+
+    confirmationTime :=
+         na
+
+    confirmationPrice :=
+         na
+
+    reclaimedAfterFailure :=
+         false
+
+    reclaimTime :=
+         na
+
+    retestCount :=
+         0
+
+    inRetestZonePrev :=
+         false
+
+    cp5Captured := false
+    cp10Captured := false
+    cp15Captured := false
+    cp30Captured := false
+
+    cp5ForwardEligible := false
+    cp10ForwardEligible := false
+    cp15ForwardEligible := false
+    cp30ForwardEligible := false
+
+    cp5Entry := na
+    cp10Entry := na
+    cp15Entry := na
+    cp30Entry := na
+
+    cp5Time := na
+    cp10Time := na
+    cp15Time := na
+    cp30Time := na
+
+    cp5Outcome := 0
+    cp10Outcome := 0
+    cp15Outcome := 0
+    cp30Outcome := 0
+
+
+//=============================================================================
+// ORB VISUALS
+//=============================================================================
+
+plot(
+     showORB and
+     isRTH
+     ? orbHigh
+     : na,
+     title = "ORB High",
+     color = color.new(
+         color.green,
+         0),
+     linewidth = 2,
+     style = plot.style_linebr)
+
+
+plot(
+     showORB and
+     isRTH
+     ? orbLow
+     : na,
+     title = "ORB Low",
+     color = color.new(
+         color.red,
+         0),
+     linewidth = 2,
+     style = plot.style_linebr)
+
+
+//=============================================================================
+// ACTIVE RETEST ZONE VISUALS
+//=============================================================================
+
+plot(
+     showRetestZone and
+     activeSignal
+     ? retestUpper
+     : na,
+     title = "Retest Upper",
+     color = color.new(
+         color.orange,
+         40),
+     linewidth = 1,
+     style = plot.style_linebr)
+
+
+plot(
+     showRetestZone and
+     activeSignal
+     ? retestLower
+     : na,
+     title = "Retest Lower",
+     color = color.new(
+         color.orange,
+         40),
+     linewidth = 1,
+     style = plot.style_linebr)
+
+
+//=============================================================================
+// PERFORMANCE CALCULATIONS
+//=============================================================================
+
+int decisive =
+     favorableFirst +
+     adverseFirst
+
+float baselineFavRate =
+     decisive > 0
+     ? float(
+         favorableFirst) /
+       float(
+         decisive) *
+       100.0
+     : na
+
+float avgMFE =
+     completed > 0
+     ? totalMFE /
+       float(
+         completed)
+     : na
+
+float avgMAE =
+     completed > 0
+     ? totalMAE /
+       float(
+         completed)
+     : na
+
+float hit025Rate =
+     completed > 0
+     ? float(
+         hits025) /
+       float(
+         completed) *
+       100.0
+     : na
+
+float hit075Rate =
+     completed > 0
+     ? float(
+         hits075) /
+       float(
+         completed) *
+       100.0
+     : na
+
+float hit100Rate =
+     completed > 0
+     ? float(
+         hits100) /
+       float(
+         completed) *
+       100.0
+     : na
+
+
+int totalFinalPaths =
+     nrContinueN +
+     retestContinueN +
+     retestFailN +
+     nrFailN +
+     retestUnconfirmedN +
+     pathUnresolvedN
+
+
+float nrContinuePct =
+     completed > 0
+     ? float(
+         nrContinueN) /
+       float(
+         completed) *
+       100.0
+     : na
+
+float retestContinuePct =
+     completed > 0
+     ? float(
+         retestContinueN) /
+       float(
+         completed) *
+       100.0
+     : na
+
+float retestFailPct =
+     completed > 0
+     ? float(
+         retestFailN) /
+       float(
+         completed) *
+       100.0
+     : na
+
+float nrFailPct =
+     completed > 0
+     ? float(
+         nrFailN) /
+       float(
+         completed) *
+       100.0
+     : na
+
+
+float avgMinutesToRetest =
+     totalRetests > 0
+     ? totalMinutesToRetest /
+       float(
+         totalRetests)
+     : na
+
+float avgPreRetestMFE =
+     totalRetests > 0
+     ? totalPreRetestMFE /
+       float(
+         totalRetests)
+     : na
+
+float avgPreRetestMAE =
+     totalRetests > 0
+     ? totalPreRetestMAE /
+       float(
+         totalRetests)
+     : na
+
+float avgWickPen =
+     totalRetests > 0
+     ? totalWickPenPctAtr /
+       float(
+         totalRetests)
+     : na
+
+float avgClosePen =
+     totalRetests > 0
+     ? totalClosePenPctAtr /
+       float(
+         totalRetests)
+     : na
+
+float reclaimRate =
+     provisionalFailureN > 0
+     ? float(
+         failureReclaimN) /
+       float(
+         provisionalFailureN) *
+       100.0
+     : na
+
+float avgMinutesToReclaim =
+     failureReclaimN > 0
+     ? totalMinutesToReclaim /
+       float(
+         failureReclaimN)
+     : na
+
+float nr075Rate =
+     nrContinueN > 0
+     ? float(
+         nrContinueHit075) /
+       float(
+         nrContinueN) *
+       100.0
+     : na
+
+float nr100Rate =
+     nrContinueN > 0
+     ? float(
+         nrContinueHit100) /
+       float(
+         nrContinueN) *
+       100.0
+     : na
+
+
+float cp5Rate =
+     f_rate(
+         cp5Fav,
+         cp5Adv)
+
+float cp10Rate =
+     f_rate(
+         cp10Fav,
+         cp10Adv)
+
+float cp15Rate =
+     f_rate(
+         cp15Fav,
+         cp15Adv)
+
+float cp30Rate =
+     f_rate(
+         cp30Fav,
+         cp30Adv)
+
+float cp5AvgSepAtr =
+     cp5NoRetestN > 0
+     ? cp5SepAtrTotal /
+       float(cp5NoRetestN)
+     : na
+
+float cp10AvgSepAtr =
+     cp10NoRetestN > 0
+     ? cp10SepAtrTotal /
+       float(cp10NoRetestN)
+     : na
+
+float cp15AvgSepAtr =
+     cp15NoRetestN > 0
+     ? cp15SepAtrTotal /
+       float(cp15NoRetestN)
+     : na
+
+float cp30AvgSepAtr =
+     cp30NoRetestN > 0
+     ? cp30SepAtrTotal /
+       float(cp30NoRetestN)
+     : na
+
+
+//=============================================================================
+// BASELINE TABLE
+//=============================================================================
+
+var table baselineTable =
+     table.new(
+         position.top_right,
+         3,
+         14,
+         border_width = 1)
+
+
+if barstate.islast
+
+    if showBaselineTable
+
+        table.cell(
+             baselineTable,
+             0,
+             0,
+             "ORB BASELINE",
+             bgcolor =
+                 color.new(
+                     color.blue,
+                     75),
+             text_color =
+                 color.white)
+
+        table.cell(
+             baselineTable,
+             1,
+             0,
+             "BUILD 4.1",
+             bgcolor =
+                 color.new(
+                     color.blue,
+                     75),
+             text_color =
+                 color.white)
+
+        table.cell(
+             baselineTable,
+             2,
+             0,
+             "1M",
+             bgcolor =
+                 color.new(
+                     color.blue,
+                     75),
+             text_color =
+                 color.white)
+
+
+        table.cell(
+             baselineTable,
+             0,
+             1,
+             "First Date")
+
+        table.cell(
+             baselineTable,
+             1,
+             1,
+             f_date(
+                 firstAnalyzedDate))
+
+
+        table.cell(
+             baselineTable,
+             0,
+             2,
+             "Last Date")
+
+        table.cell(
+             baselineTable,
+             1,
+             2,
+             f_date(
+                 lastAnalyzedDate))
+
+
+        table.cell(
+             baselineTable,
+             0,
+             3,
+             "RTH Days")
+
+        table.cell(
+             baselineTable,
+             1,
+             3,
+             f_num(
+                 analyzedDays))
+
+
+        table.cell(
+             baselineTable,
+             0,
+             4,
+             "Signals")
+
+        table.cell(
+             baselineTable,
+             1,
+             4,
+             f_num(
+                 totalSignals))
+
+        table.cell(
+             baselineTable,
+             2,
+             4,
+             "Completed " +
+             f_num(
+                 completed))
+
+
+        table.cell(
+             baselineTable,
+             0,
+             5,
+             "Bull / Bear")
+
+        table.cell(
+             baselineTable,
+             1,
+             5,
+             f_num(
+                 bullishSignals))
+
+        table.cell(
+             baselineTable,
+             2,
+             5,
+             f_num(
+                 bearishSignals))
+
+
+        table.cell(
+             baselineTable,
+             0,
+             6,
+             "Fav First")
+
+        table.cell(
+             baselineTable,
+             1,
+             6,
+             f_num(
+                 favorableFirst))
+
+        table.cell(
+             baselineTable,
+             2,
+             6,
+             f_pct(
+                 baselineFavRate))
+
+
+        table.cell(
+             baselineTable,
+             0,
+             7,
+             "Adv First")
+
+        table.cell(
+             baselineTable,
+             1,
+             7,
+             f_num(
+                 adverseFirst))
+
+
+        table.cell(
+             baselineTable,
+             0,
+             8,
+             "Both / U")
+
+        table.cell(
+             baselineTable,
+             1,
+             8,
+             f_num(
+                 bothSameBar))
+
+        table.cell(
+             baselineTable,
+             2,
+             8,
+             f_num(
+                 unresolved))
+
+
+        table.cell(
+             baselineTable,
+             0,
+             9,
+             "+0.25")
+
+        table.cell(
+             baselineTable,
+             1,
+             9,
+             f_num(
+                 hits025))
+
+        table.cell(
+             baselineTable,
+             2,
+             9,
+             f_pct(
+                 hit025Rate))
+
+
+        table.cell(
+             baselineTable,
+             0,
+             10,
+             "+0.75")
+
+        table.cell(
+             baselineTable,
+             1,
+             10,
+             f_num(
+                 hits075))
+
+        table.cell(
+             baselineTable,
+             2,
+             10,
+             f_pct(
+                 hit075Rate))
+
+
+        table.cell(
+             baselineTable,
+             0,
+             11,
+             "+1.00")
+
+        table.cell(
+             baselineTable,
+             1,
+             11,
+             f_num(
+                 hits100))
+
+        table.cell(
+             baselineTable,
+             2,
+             11,
+             f_pct(
+                 hit100Rate))
+
+
+        table.cell(
+             baselineTable,
+             0,
+             12,
+             "Avg MFE")
+
+        table.cell(
+             baselineTable,
+             1,
+             12,
+             f_pct(
+                 avgMFE))
+
+
+        table.cell(
+             baselineTable,
+             0,
+             13,
+             "Avg MAE")
+
+        table.cell(
+             baselineTable,
+             1,
+             13,
+             f_pct(
+                 avgMAE))
+
+    else
+
+        table.clear(
+             baselineTable,
+             0,
+             0,
+             2,
+             13)
+
+
+//=============================================================================
+// PATH TABLE
+//=============================================================================
+
+var table pathTable =
+     table.new(
+         position.middle_right,
+         4,
+         8,
+         border_width = 1)
+
+
+if barstate.islast
+
+    if showPathTable
+
+        table.cell(
+             pathTable,
+             0,
+             0,
+             "POST-BREAKOUT",
+             bgcolor =
+                 color.new(
+                     color.blue,
+                     75),
+             text_color =
+                 color.white)
+
+        table.cell(
+             pathTable,
+             1,
+             0,
+             "N",
+             bgcolor =
+                 color.new(
+                     color.blue,
+                     75),
+             text_color =
+                 color.white)
+
+        table.cell(
+             pathTable,
+             2,
+             0,
+             "% ALL",
+             bgcolor =
+                 color.new(
+                     color.blue,
+                     75),
+             text_color =
+                 color.white)
+
+        table.cell(
+             pathTable,
+             3,
+             0,
+             "EXTRA",
+             bgcolor =
+                 color.new(
+                     color.blue,
+                     75),
+             text_color =
+                 color.white)
+
+
+        table.cell(
+             pathTable,
+             0,
+             1,
+             "NR Continue")
+
+        table.cell(
+             pathTable,
+             1,
+             1,
+             f_num(
+                 nrContinueN))
+
+        table.cell(
+             pathTable,
+             2,
+             1,
+             f_pct(
+                 nrContinuePct))
+
+        table.cell(
+             pathTable,
+             3,
+             1,
+             "+1% " +
+             f_pct(
+                 nr100Rate))
+
+
+        table.cell(
+             pathTable,
+             0,
+             2,
+             "Retest Continue")
+
+        table.cell(
+             pathTable,
+             1,
+             2,
+             f_num(
+                 retestContinueN))
+
+        table.cell(
+             pathTable,
+             2,
+             2,
+             f_pct(
+                 retestContinuePct))
+
+
+        table.cell(
+             pathTable,
+             0,
+             3,
+             "Retest Fail")
+
+        table.cell(
+             pathTable,
+             1,
+             3,
+             f_num(
+                 retestFailN))
+
+        table.cell(
+             pathTable,
+             2,
+             3,
+             f_pct(
+                 retestFailPct))
+
+
+        table.cell(
+             pathTable,
+             0,
+             4,
+             "NR Fail")
+
+        table.cell(
+             pathTable,
+             1,
+             4,
+             f_num(
+                 nrFailN))
+
+        table.cell(
+             pathTable,
+             2,
+             4,
+             f_pct(
+                 nrFailPct))
+
+
+        table.cell(
+             pathTable,
+             0,
+             5,
+             "Retest Unconfirmed")
+
+        table.cell(
+             pathTable,
+             1,
+             5,
+             f_num(
+                 retestUnconfirmedN))
+
+
+        table.cell(
+             pathTable,
+             0,
+             6,
+             "Unresolved")
+
+        table.cell(
+             pathTable,
+             1,
+             6,
+             f_num(
+                 pathUnresolvedN))
+
+
+        table.cell(
+             pathTable,
+             0,
+             7,
+             "Path Check")
+
+        table.cell(
+             pathTable,
+             1,
+             7,
+             f_num(
+                 totalFinalPaths))
+
+        table.cell(
+             pathTable,
+             2,
+             7,
+             "vs " +
+             f_num(
+                 completed))
+
+        table.cell(
+             pathTable,
+             3,
+             7,
+             totalFinalPaths ==
+             completed
+             ? "OK"
+             : "CHECK")
+
+    else
+
+        table.clear(
+             pathTable,
+             0,
+             0,
+             3,
+             7)
+
+
+//=============================================================================
+// RETEST SUMMARY TABLE
+//=============================================================================
+
+var table retestTable =
+     table.new(
+         position.middle_left,
+         3,
+         10,
+         border_width = 1)
+
+
+if barstate.islast
+
+    if showRetestTable
+
+        table.cell(
+             retestTable,
+             0,
+             0,
+             "RETEST SUMMARY",
+             bgcolor =
+                 color.new(
+                     color.blue,
+                     75),
+             text_color =
+                 color.white)
+
+        table.cell(
+             retestTable,
+             1,
+             0,
+             "VALUE",
+             bgcolor =
+                 color.new(
+                     color.blue,
+                     75),
+             text_color =
+                 color.white)
+
+        table.cell(
+             retestTable,
+             2,
+             0,
+             "NOTE",
+             bgcolor =
+                 color.new(
+                     color.blue,
+                     75),
+             text_color =
+                 color.white)
+
+
+        table.cell(
+             retestTable,
+             0,
+             1,
+             "First Retests")
+
+        table.cell(
+             retestTable,
+             1,
+             1,
+             f_num(
+                 totalRetests))
+
+
+        table.cell(
+             retestTable,
+             0,
+             2,
+             "Avg Min to Retest")
+
+        table.cell(
+             retestTable,
+             1,
+             2,
+             na(
+                 avgMinutesToRetest)
+             ? "—"
+             : str.tostring(
+                 avgMinutesToRetest,
+                 "#.1"))
+
+
+        table.cell(
+             retestTable,
+             0,
+             3,
+             "Avg Pre-Retest MFE")
+
+        table.cell(
+             retestTable,
+             1,
+             3,
+             f_pct(
+                 avgPreRetestMFE))
+
+
+        table.cell(
+             retestTable,
+             0,
+             4,
+             "Avg Pre-Retest MAE")
+
+        table.cell(
+             retestTable,
+             1,
+             4,
+             f_pct(
+                 avgPreRetestMAE))
+
+
+        table.cell(
+             retestTable,
+             0,
+             5,
+             "Avg Wick Pen")
+
+        table.cell(
+             retestTable,
+             1,
+             5,
+             f_pct(
+                 avgWickPen))
+
+        table.cell(
+             retestTable,
+             2,
+             5,
+             "% ATR")
+
+
+        table.cell(
+             retestTable,
+             0,
+             6,
+             "Avg Close Pen")
+
+        table.cell(
+             retestTable,
+             1,
+             6,
+             f_pct(
+                 avgClosePen))
+
+        table.cell(
+             retestTable,
+             2,
+             6,
+             "% ATR")
+
+
+        table.cell(
+             retestTable,
+             0,
+             7,
+             "Failures")
+
+        table.cell(
+             retestTable,
+             1,
+             7,
+             f_num(
+                 provisionalFailureN))
+
+
+        table.cell(
+             retestTable,
+             0,
+             8,
+             "Failure Reclaims")
+
+        table.cell(
+             retestTable,
+             1,
+             8,
+             f_num(
+                 failureReclaimN))
+
+        table.cell(
+             retestTable,
+             2,
+             8,
+             f_pct(
+                 reclaimRate))
+
+
+        table.cell(
+             retestTable,
+             0,
+             9,
+             "Avg Min Reclaim")
+
+        table.cell(
+             retestTable,
+             1,
+             9,
+             na(
+                 avgMinutesToReclaim)
+             ? "—"
+             : str.tostring(
+                 avgMinutesToReclaim,
+                 "#.1"))
+
+    else
+
+        table.clear(
+             retestTable,
+             0,
+             0,
+             2,
+             9)
+
+
+//=============================================================================
+// NO-RETEST CHECKPOINT TABLE
+//=============================================================================
+
+var table checkpointTable =
+     table.new(
+         position.bottom_right,
+         5,
+         5,
+         border_width = 1)
+
+
+if barstate.islast
+
+    if showCheckpointTable
+
+        table.cell(
+             checkpointTable,
+             0,
+             0,
+             "NO-RETEST",
+             bgcolor = color.new(color.blue, 75),
+             text_color = color.white)
+
+        table.cell(
+             checkpointTable,
+             1,
+             0,
+             "NR N",
+             bgcolor = color.new(color.blue, 75),
+             text_color = color.white)
+
+        table.cell(
+             checkpointTable,
+             2,
+             0,
+             "AVG SEP",
+             bgcolor = color.new(color.blue, 75),
+             text_color = color.white)
+
+        table.cell(
+             checkpointTable,
+             3,
+             0,
+             "FWD N",
+             bgcolor = color.new(color.blue, 75),
+             text_color = color.white)
+
+        table.cell(
+             checkpointTable,
+             4,
+             0,
+             "FWD FAV%",
+             bgcolor = color.new(color.blue, 75),
+             text_color = color.white)
+
+
+        table.cell(checkpointTable, 0, 1, "5m")
+        table.cell(checkpointTable, 1, 1, f_num(cp5NoRetestN))
+        table.cell(checkpointTable, 2, 1, f_pct(cp5AvgSepAtr))
+        table.cell(checkpointTable, 3, 1, f_num(cp5ForwardN))
+        table.cell(checkpointTable, 4, 1, f_pct(cp5Rate))
+
+
+        table.cell(checkpointTable, 0, 2, "10m")
+        table.cell(checkpointTable, 1, 2, f_num(cp10NoRetestN))
+        table.cell(checkpointTable, 2, 2, f_pct(cp10AvgSepAtr))
+        table.cell(checkpointTable, 3, 2, f_num(cp10ForwardN))
+        table.cell(checkpointTable, 4, 2, f_pct(cp10Rate))
+
+
+        table.cell(checkpointTable, 0, 3, "15m")
+        table.cell(checkpointTable, 1, 3, f_num(cp15NoRetestN))
+        table.cell(checkpointTable, 2, 3, f_pct(cp15AvgSepAtr))
+        table.cell(checkpointTable, 3, 3, f_num(cp15ForwardN))
+        table.cell(checkpointTable, 4, 3, f_pct(cp15Rate))
+
+
+        table.cell(checkpointTable, 0, 4, "30m")
+        table.cell(checkpointTable, 1, 4, f_num(cp30NoRetestN))
+        table.cell(checkpointTable, 2, 4, f_pct(cp30AvgSepAtr))
+        table.cell(checkpointTable, 3, 4, f_num(cp30ForwardN))
+        table.cell(checkpointTable, 4, 4, f_pct(cp30Rate))
+
+    else
+
+        table.clear(
+             checkpointTable,
+             0,
+             0,
+             4,
+             4)
+
+
+//=============================================================================
+// CHECKPOINT RECONCILIATION NOTES
+//
+// NR N should be non-increasing:
+//   5m >= 10m >= 15m >= 30m
+//
+// FWD N <= NR N at every checkpoint.
+//
+// FWD FAV% uses only decisive forward outcomes (Fav + Adv).
+// Both-same-bar and unresolved events remain tracked internally.
+//=============================================================================
+
+
+//=============================================================================
+// DEBUG TABLE
+//=============================================================================
+
+var table debugTable =
+     table.new(
+         position.bottom_left,
+         2,
+         14,
+         border_width = 1)
+
+
+if barstate.islast
+
+    if showDebug
+
+        table.cell(
+             debugTable,
+             0,
+             0,
+             "BUILD 4 DEBUG",
+             bgcolor =
+                 color.new(
+                     color.orange,
+                     65),
+             text_color =
+                 color.white)
+
+        table.cell(
+             debugTable,
+             1,
+             0,
+             "ACTIVE",
+             bgcolor =
+                 color.new(
+                     color.orange,
+                     65),
+             text_color =
+                 color.white)
+
+
+        table.cell(
+             debugTable,
+             0,
+             1,
+             "Path")
+
+        table.cell(
+             debugTable,
+             1,
+             1,
+             f_pathName(
+                 activePath))
+
+
+        table.cell(
+             debugTable,
+             0,
+             2,
+             "Entry")
+
+        table.cell(
+             debugTable,
+             1,
+             2,
+             na(entryPrice)
+             ? "—"
+             : str.tostring(
+                 entryPrice,
+                 format.mintick))
+
+
+        table.cell(
+             debugTable,
+             0,
+             3,
+             "Frozen ATR")
+
+        table.cell(
+             debugTable,
+             1,
+             3,
+             na(frozenAtr)
+             ? "—"
+             : str.tostring(
+                 frozenAtr,
+                 format.mintick))
+
+
+        table.cell(
+             debugTable,
+             0,
+             4,
+             "Broken ORB")
+
+        table.cell(
+             debugTable,
+             1,
+             4,
+             na(brokenOrbLevel)
+             ? "—"
+             : str.tostring(
+                 brokenOrbLevel,
+                 format.mintick))
+
+
+        table.cell(
+             debugTable,
+             0,
+             5,
+             "Retest?")
+
+        table.cell(
+             debugTable,
+             1,
+             5,
+             str.tostring(
+                 firstRetestOccurred))
+
+
+        table.cell(
+             debugTable,
+             0,
+             6,
+             "Retest Count")
+
+        table.cell(
+             debugTable,
+             1,
+             6,
+             f_num(
+                 retestCount))
+
+
+        table.cell(
+             debugTable,
+             0,
+             7,
+             "Pre-Retest MFE")
+
+        table.cell(
+             debugTable,
+             1,
+             7,
+             f_pct(
+                 preRetestMFE))
+
+
+        table.cell(
+             debugTable,
+             0,
+             8,
+             "Wick Pen ATR")
+
+        table.cell(
+             debugTable,
+             1,
+             8,
+             f_pct(
+                 maxWickPenAtrPct))
+
+
+        table.cell(
+             debugTable,
+             0,
+             9,
+             "Close Pen ATR")
+
+        table.cell(
+             debugTable,
+             1,
+             9,
+             f_pct(
+                 maxClosePenAtrPct))
+
+
+        table.cell(
+             debugTable,
+             0,
+             10,
+             "Confirmed?")
+
+        table.cell(
+             debugTable,
+             1,
+             10,
+             str.tostring(
+                 retestConfirmed))
+
+
+        table.cell(
+             debugTable,
+             0,
+             11,
+             "Failed?")
+
+        table.cell(
+             debugTable,
+             1,
+             11,
+             str.tostring(
+                 provisionalFailure))
+
+
+        table.cell(
+             debugTable,
+             0,
+             12,
+             "Reclaimed?")
+
+        table.cell(
+             debugTable,
+             1,
+             12,
+             str.tostring(
+                 reclaimedAfterFailure))
+
+
+        table.cell(
+             debugTable,
+             0,
+             13,
+             "Pen Frozen?")
+
+        table.cell(
+             debugTable,
+             1,
+             13,
+             str.tostring(
+                 retestPenetrationFrozen))
+
+
+    else
+
+        table.clear(
+             debugTable,
+             0,
+             0,
+             1,
+             13)
+
+
+//=============================================================================
+// 1-MINUTE WARNING
+//=============================================================================
+
+var table warningTable =
+     table.new(
+         position.top_center,
+         1,
+         2,
+         border_width = 1)
+
+
+if barstate.islast
+
+    if not isOneMinuteChart
+
+        table.cell(
+             warningTable,
+             0,
+             0,
+             "⚠ BUILD 4 REQUIRES 1-MINUTE CHART",
+             bgcolor =
+                 color.new(
+                     color.red,
+                     15),
+             text_color =
+                 color.white)
+
+        table.cell(
+             warningTable,
+             0,
+             1,
+             "Switch chart timeframe to 1 minute",
+             bgcolor =
+                 color.new(
+                     color.red,
+                     15),
+             text_color =
+                 color.white)
+
+    else
+
+        table.clear(
+             warningTable,
+             0,
+             0,
+             0,
+             1)

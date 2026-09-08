@@ -1,0 +1,11 @@
+-- PM+PD V5 9N-1 common-evidence protocol freeze — 2026-09-08
+-- Protocol: PMPD_V5_9N_HEAD_TO_HEAD_PROTOCOL_V1
+-- Common universe: PMPD_112_V1 (112 symbols)
+-- Common window: 2026-01-05 through 2026-09-02
+-- Common primary benchmark: +0.50% favorable before -0.50% adverse
+-- Primary head-to-head metric: V5 resolved favorable-first rate minus V4 resolved favorable-first rate
+-- Inference: paired symbol-cluster bootstrap, 10,000 reps, seed 9062026
+-- V5_WINS iff lower 95% CI(diff)>0
+-- V4_WINS iff upper 95% CI(diff)<0
+-- else NO_CLEAR_WINNER
+-- Both models remain frozen. No tuning/refit/model modification.

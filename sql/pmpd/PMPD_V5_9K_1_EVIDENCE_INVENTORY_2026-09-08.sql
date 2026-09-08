@@ -1,0 +1,20 @@
+-- PM+PD V5 9K-1 evidence inventory / eligibility checkpoint — 2026-09-08
+-- Strategy: 84fb30c1-7600-49bf-a024-022f0500492e
+-- Inventory: PMPD_V5_9K_EVIDENCE_INVENTORY_V1
+-- Entry-classification anchor: DP4_FULL_STACK_FIRST_CLEAR
+--
+-- Governance:
+-- * No inherited V4 weights.
+-- * No post-DP4 information in DP4 entry scoring.
+-- * Native primary conditional candidates: V5Q07, V5Q08, V5T02.
+-- * 9J VWAP findings remain contextual until DP4-specific re-scoping.
+-- * No production/Pine rule authorized in 9K.
+--
+-- Eligibility counts after tagging:
+-- DATA_QUALITY_GUARDRAIL_ONLY = 8
+-- EXCLUDE_NEGATIVE_OR_UNSTABLE_EVIDENCE = 8
+-- INELIGIBLE_NOT_TESTED_OR_UNESTABLISHED = 21
+-- PRIMARY_CANDIDATE_CONDITIONAL = 3
+-- SECONDARY_RESEARCH_ONLY_NOT_FINAL_9H_SCOPE = 8
+--
+-- This backup documents the already-applied Supabase checkpoint.

@@ -1,0 +1,4 @@
+-- PM+PD V5 9N-3 V4 runner forensic audit — 2026-09-08
+-- Prior preflight confirmed frozen V4 spec/provenance artifacts but no tr_platform.pmpd_v4 package.
+-- This step reads existing provenance and searches local Python code for the exact historical V4 runner path.
+-- It does not execute or modify V4 logic.

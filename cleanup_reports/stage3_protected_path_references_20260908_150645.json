@@ -1,0 +1,68 @@
+{
+  "data/second1m_alt_entry_cache_v1": [
+    "a56_1g_raw_bar_audit_v1.py",
+    "audit_a41_benchmark_opening_bar_parity_v1.py",
+    "build_a41_market_open_impulse_features_v1.py",
+    "cleanup_tradingresearch_stage3_audit.py",
+    "research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt",
+    "research_outputs\\pmpd\\docs_history\\README_9N_3G2.md",
+    "research_outputs\\pmpd\\docs_history\\README_9N_3I.md"
+  ],
+  "data\\second1m_alt_entry_cache_v1": [
+    "a56_1g_raw_bar_audit_v1.py",
+    "cleanup_tradingresearch_stage3_audit.py",
+    "data\\second1m_alt_entry_research_v1\\ae2_market_open_impulse_v1\\a41_benchmark_intraday_source_inventory_v1.csv",
+    "data\\second1m_alt_entry_research_v1\\ae2_market_open_impulse_v1\\a41_benchmark_opening_bar_parity_v1.csv",
+    "research_outputs\\misc\\repo_file_inventory.csv",
+    "research_outputs\\pmpd\\9n\\pmpd_v5_9n_3i_24case_market_data_coverage.csv",
+    "research_outputs\\pmpd\\9n\\pmpd_v5_9n_3j_alternate_market_data_source_audit.csv",
+    "research_outputs\\pmpd\\9n\\pmpd_v5_9n_3k_massive_pipeline_inventory.txt",
+    "research_outputs\\second1m\\legacy_research\\a56_1g_raw_bar_audit.csv",
+    "research_outputs\\second1m\\legacy_research\\a56_1g_raw_bar_audit.txt",
+    "validate_second1m_alt_aapl_overlap.py"
+  ],
+  "pmpd_v5_9m_oos_candidate_dp4_v1.parquet": [
+    "cleanup_tradingresearch_stage3_audit.py",
+    "freeze_9m_dp4_candidate_population_v1.py",
+    "research_outputs\\pmpd\\9m\\pmpd_v5_9m_oos_candidate_dp4_v1_manifest.json",
+    "research_outputs\\pmpd\\9n\\pmpd_v5_9n_3r_h2h_preflight.json",
+    "run_9m_frozen_oos_evaluation_v1.py",
+    "run_9n_3s2_final_h2h.py",
+    "run_9n_3s_final_h2h.py"
+  ],
+  "pmpd_v5_9m_oos_candidate_dp4_v1_manifest.json": [
+    "cleanup_tradingresearch_stage3_audit.py",
+    "freeze_9m_dp4_candidate_population_v1.py",
+    "research_outputs\\pmpd\\9n\\pmpd_v5_9n_3r_h2h_preflight.json",
+    "run_9m_frozen_oos_evaluation_v1.py"
+  ],
+  "pmpd_v5_9n_3s_h2h_summary.json": [
+    "cleanup_tradingresearch_stage3_audit.py",
+    "research_outputs\\pmpd\\docs_history\\README_9N_3S.md",
+    "research_outputs\\pmpd\\docs_history\\README_9N_3S2.md",
+    "run_9n_3s2_final_h2h.py",
+    "run_9n_3s_final_h2h.py"
+  ],
+  "pmpd_v5_9n_3s_symbol_h2h.csv": [
+    "cleanup_tradingresearch_stage3_audit.py",
+    "research_outputs\\pmpd\\9n\\pmpd_v5_9n_3s_h2h_summary.json",
+    "research_outputs\\pmpd\\docs_history\\README_9N_3S.md",
+    "research_outputs\\pmpd\\docs_history\\README_9N_3S2.md",
+    "run_9n_3s2_final_h2h.py",
+    "run_9n_3s_final_h2h.py"
+  ],
+  "pmpd_v5_9n_3s_monthly_h2h.csv": [
+    "cleanup_tradingresearch_stage3_audit.py",
+    "research_outputs\\pmpd\\9n\\pmpd_v5_9n_3s_h2h_summary.json",
+    "research_outputs\\pmpd\\docs_history\\README_9N_3S.md",
+    "research_outputs\\pmpd\\docs_history\\README_9N_3S2.md",
+    "run_9n_3s2_final_h2h.py",
+    "run_9n_3s_final_h2h.py"
+  ],
+  "pmpd_v5_9n_3s_v4_events_2026.parquet": [
+    "cleanup_tradingresearch_stage3_audit.py",
+    "research_outputs\\pmpd\\9n\\pmpd_v5_9n_3s_h2h_summary.json",
+    "run_9n_3s2_final_h2h.py",
+    "run_9n_3s_final_h2h.py"
+  ]
+}

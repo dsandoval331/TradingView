@@ -1,0 +1,13 @@
+symbol,source,minute_et,unique_dates_total,unique_dates_with_bar,coverage_pct
+SPY,data\second1m_alt_entry_cache_v1\partitions\SPY\SPY_2025.parquet,09:30,153,153,100.0
+SPY,data\second1m_alt_entry_cache_v1\partitions\SPY\SPY_2025.parquet,09:31,153,153,100.0
+SPY,data\second1m_alt_entry_cache_v1\partitions\SPY\SPY_2026.parquet,09:30,168,168,100.0
+SPY,data\second1m_alt_entry_cache_v1\partitions\SPY\SPY_2026.parquet,09:31,168,168,100.0
+QQQ,data\second1m_alt_entry_cache_v1\partitions\QQQ\QQQ_2025.parquet,09:30,153,153,100.0
+QQQ,data\second1m_alt_entry_cache_v1\partitions\QQQ\QQQ_2025.parquet,09:31,153,153,100.0
+QQQ,data\second1m_alt_entry_cache_v1\partitions\QQQ\QQQ_2026.parquet,09:30,168,168,100.0
+QQQ,data\second1m_alt_entry_cache_v1\partitions\QQQ\QQQ_2026.parquet,09:31,168,168,100.0
+DIA,data\second1m_alt_entry_cache_v1\DIA\DIA_2025.parquet,09:30,153,153,100.0
+DIA,data\second1m_alt_entry_cache_v1\DIA\DIA_2025.parquet,09:31,153,153,100.0
+DIA,data\second1m_alt_entry_cache_v1\DIA\DIA_2026.parquet,09:30,164,164,100.0
+DIA,data\second1m_alt_entry_cache_v1\DIA\DIA_2026.parquet,09:31,164,164,100.0

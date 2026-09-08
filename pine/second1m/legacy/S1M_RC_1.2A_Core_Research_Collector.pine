@@ -1,0 +1,2560 @@
+//@version=6
+indicator(
+     "Second 1M Research Collector - S1M_RC_1.2A",
+     overlay=true,
+     max_labels_count=500
+     )
+
+// ============================================================================
+// BUILD
+// ============================================================================
+
+string BUILD_ID = "S1M_RC_1.2A"
+string TZ = "America/New_York"
+
+bool native1M = timeframe.in_seconds() == 60
+
+if timeframe.in_seconds() < 60
+    runtime.error("S1M_RC_1.2A supports 1-minute or higher chart timeframes.")
+
+string engineName = "Lower-TF 1M"
+
+if native1M
+    engineName := "Native 1M"
+
+
+// ============================================================================
+// SETTINGS
+// ============================================================================
+
+atrType = input.string(
+     "Previous 5 Days 1M ATR",
+     "Production ATR Method",
+     options=[
+         "Previous Daily ATR",
+         "Previous Day 1M ATR",
+         "Previous 5 Days 1M ATR",
+         "First 2 Candles 1M ATR"
+     ],
+     group="ATR"
+     )
+
+dailyATRLength = input.int(
+     14,
+     "Daily ATR Length",
+     minval=1,
+     group="ATR"
+     )
+
+enableDeltaFilter = input.bool(
+     false,
+     "Enable Production Delta Filter",
+     group="Production Signal"
+     )
+
+minimumDelta = input.float(
+     0.0,
+     "Minimum Delta %",
+     minval=0.0,
+     step=1.0,
+     group="Production Signal"
+     )
+
+maximumDelta = input.float(
+     100.0,
+     "Maximum Delta %",
+     minval=0.0,
+     step=1.0,
+     group="Production Signal"
+     )
+
+spxSymbol = input.symbol(
+     "SP:SPX",
+     "S&P 500 Symbol",
+     group="Bias Context"
+     )
+
+nasdaqSymbol = input.symbol(
+     "NASDAQ:IXIC",
+     "Nasdaq Composite Symbol",
+     group="Bias Context"
+     )
+
+djiaSymbol = input.symbol(
+     "DJ:DJI",
+     "DJIA Symbol",
+     group="Bias Context"
+     )
+
+showValidationTable = input.bool(
+     true,
+     "Show Validation Tables",
+     group="Validation"
+     )
+
+showEventMarker = input.bool(
+     true,
+     "Show Event Marker",
+     group="Validation"
+     )
+
+
+// ============================================================================
+// EXTENDED-HOURS SYMBOL
+// ============================================================================
+
+extendedTicker = ticker.new(
+     syminfo.prefix,
+     syminfo.ticker,
+     session.extended
+     )
+
+
+// ============================================================================
+// HELPERS
+// ============================================================================
+
+f_direction(float o, float c) =>
+    int result = 0
+
+    if c > o
+        result := 1
+    else if c < o
+        result := -1
+
+    result
+
+
+f_relation(float currentValue, float previousValue) =>
+    int result = 0
+
+    if not na(previousValue)
+
+        if currentValue > previousValue
+            result := 1
+
+        else if currentValue < previousValue
+            result := -1
+
+    result
+
+
+f_structure(
+     float h1,
+     float h2,
+     float l1,
+     float l2
+     ) =>
+
+    int result = 0
+    int highRelation = 0
+    int lowRelation = 0
+
+    if h1 > h2
+        highRelation := 1
+    else if h1 < h2
+        highRelation := -1
+
+    if l1 > l2
+        lowRelation := 1
+    else if l1 < l2
+        lowRelation := -1
+
+    if highRelation == 1 and lowRelation == 1
+        result := 1
+
+    else if highRelation == -1 and lowRelation == -1
+        result := -1
+
+    result
+
+
+f_avg5(
+     float a,
+     float b,
+     float c,
+     float d,
+     float e
+     ) =>
+
+    float sum = 0.0
+    int count = 0
+
+    if not na(a)
+        sum += a
+        count += 1
+
+    if not na(b)
+        sum += b
+        count += 1
+
+    if not na(c)
+        sum += c
+        count += 1
+
+    if not na(d)
+        sum += d
+        count += 1
+
+    if not na(e)
+        sum += e
+        count += 1
+
+    float result = na
+
+    if count > 0
+        result := sum / count
+
+    result
+
+
+// ============================================================================
+// CANONICAL 1M ATR ENGINE
+//
+// Executes entirely in an explicitly requested extended-session 1M stream.
+// Native 1M and Higher-TF charts therefore receive the same ATR source.
+// ============================================================================
+
+f_canonical1MATR() =>
+
+    var float sessionTRSum = 0.0
+    var int sessionTRCount = 0
+
+    var float atr1 = na
+    var float atr2 = na
+    var float atr3 = na
+    var float atr4 = na
+    var float atr5 = na
+
+    var float prevDayATR = na
+    var float prev5DayATR = na
+
+    int hh = hour(time, TZ)
+    int mm = minute(time, TZ)
+
+    bool isRTH =
+         (hh > 9 or (hh == 9 and mm >= 30)) and
+         hh < 16
+
+    bool isC1 =
+         hh == 9 and
+         mm == 30
+
+    // At today's 9:30 bar, finalize the previous completed RTH session.
+    if isC1
+
+        if sessionTRCount > 0
+
+            float completedATR =
+                 sessionTRSum /
+                 sessionTRCount
+
+            atr5 := atr4
+            atr4 := atr3
+            atr3 := atr2
+            atr2 := atr1
+            atr1 := completedATR
+
+            prevDayATR := completedATR
+
+        prev5DayATR :=
+             f_avg5(
+                 atr1,
+                 atr2,
+                 atr3,
+                 atr4,
+                 atr5
+                 )
+
+        sessionTRSum := 0.0
+        sessionTRCount := 0
+
+    // Build today's RTH TR history for tomorrow.
+    if isRTH
+
+        sessionTRSum += ta.tr(true)
+        sessionTRCount += 1
+
+    [prevDayATR, prev5DayATR]
+
+
+// ============================================================================
+// CANONICAL 1M ATR REQUEST
+// ============================================================================
+
+[canonicalPreviousDay1MATR,
+ canonicalPrevious5Days1MATR] = request.security(
+     extendedTicker,
+     "1",
+     f_canonical1MATR(),
+     lookahead=barmerge.lookahead_off
+     )
+
+
+// ============================================================================
+// PREVIOUS DAILY ATR
+// ============================================================================
+
+previousDailyATR = request.security(
+     syminfo.tickerid,
+     "D",
+     ta.atr(dailyATRLength)[1],
+     lookahead=barmerge.lookahead_on
+     )
+
+
+// ============================================================================
+// STOCK DAILY CONTEXT
+// ============================================================================
+
+[prevDayOpen,
+ prevDayHigh,
+ prevDayLow,
+ prevDayClose,
+ priorDayOpen,
+ priorDayHigh,
+ priorDayLow,
+ priorDayClose] = request.security(
+     syminfo.tickerid,
+     "D",
+     [
+         open[1],
+         high[1],
+         low[1],
+         close[1],
+         open[2],
+         high[2],
+         low[2],
+         close[2]
+     ],
+     lookahead=barmerge.lookahead_on
+     )
+
+
+int prevDailyCandleDirection =
+     f_direction(
+         prevDayOpen,
+         prevDayClose
+         )
+
+int prevDailyCloseRelation =
+     f_relation(
+         prevDayClose,
+         priorDayClose
+         )
+
+int prevDailyHighRelation =
+     f_relation(
+         prevDayHigh,
+         priorDayHigh
+         )
+
+int prevDailyLowRelation =
+     f_relation(
+         prevDayLow,
+         priorDayLow
+         )
+
+int prevDailyStructure =
+     f_structure(
+         prevDayHigh,
+         priorDayHigh,
+         prevDayLow,
+         priorDayLow
+         )
+
+
+// ============================================================================
+// STOCK WEEKLY CONTEXT
+// ============================================================================
+
+[prevWeekOpen,
+ prevWeekHigh,
+ prevWeekLow,
+ prevWeekClose,
+ priorWeekOpen,
+ priorWeekHigh,
+ priorWeekLow,
+ priorWeekClose] = request.security(
+     syminfo.tickerid,
+     "W",
+     [
+         open[1],
+         high[1],
+         low[1],
+         close[1],
+         open[2],
+         high[2],
+         low[2],
+         close[2]
+     ],
+     lookahead=barmerge.lookahead_on
+     )
+
+
+int prevWeeklyCandleDirection =
+     f_direction(
+         prevWeekOpen,
+         prevWeekClose
+         )
+
+int prevWeeklyCloseRelation =
+     f_relation(
+         prevWeekClose,
+         priorWeekClose
+         )
+
+int prevWeeklyHighRelation =
+     f_relation(
+         prevWeekHigh,
+         priorWeekHigh
+         )
+
+int prevWeeklyLowRelation =
+     f_relation(
+         prevWeekLow,
+         priorWeekLow
+         )
+
+int prevWeeklyStructure =
+     f_structure(
+         prevWeekHigh,
+         priorWeekHigh,
+         prevWeekLow,
+         priorWeekLow
+         )
+
+
+// ============================================================================
+// SPX CONTEXT
+// ============================================================================
+
+[spxD1Open,
+ spxD1High,
+ spxD1Low,
+ spxD1Close,
+ spxD2Open,
+ spxD2High,
+ spxD2Low,
+ spxD2Close] = request.security(
+     spxSymbol,
+     "D",
+     [
+         open[1],
+         high[1],
+         low[1],
+         close[1],
+         open[2],
+         high[2],
+         low[2],
+         close[2]
+     ],
+     lookahead=barmerge.lookahead_on
+     )
+
+
+int spxDirection =
+     f_direction(
+         spxD1Open,
+         spxD1Close
+         )
+
+int spxCloseRelation =
+     f_relation(
+         spxD1Close,
+         spxD2Close
+         )
+
+int spxHighRelation =
+     f_relation(
+         spxD1High,
+         spxD2High
+         )
+
+int spxLowRelation =
+     f_relation(
+         spxD1Low,
+         spxD2Low
+         )
+
+int spxStructure =
+     f_structure(
+         spxD1High,
+         spxD2High,
+         spxD1Low,
+         spxD2Low
+         )
+
+
+// ============================================================================
+// NASDAQ CONTEXT
+// ============================================================================
+
+[nasD1Open,
+ nasD1High,
+ nasD1Low,
+ nasD1Close,
+ nasD2Open,
+ nasD2High,
+ nasD2Low,
+ nasD2Close] = request.security(
+     nasdaqSymbol,
+     "D",
+     [
+         open[1],
+         high[1],
+         low[1],
+         close[1],
+         open[2],
+         high[2],
+         low[2],
+         close[2]
+     ],
+     lookahead=barmerge.lookahead_on
+     )
+
+
+int nasdaqDirection =
+     f_direction(
+         nasD1Open,
+         nasD1Close
+         )
+
+int nasdaqCloseRelation =
+     f_relation(
+         nasD1Close,
+         nasD2Close
+         )
+
+int nasdaqHighRelation =
+     f_relation(
+         nasD1High,
+         nasD2High
+         )
+
+int nasdaqLowRelation =
+     f_relation(
+         nasD1Low,
+         nasD2Low
+         )
+
+int nasdaqStructure =
+     f_structure(
+         nasD1High,
+         nasD2High,
+         nasD1Low,
+         nasD2Low
+         )
+
+
+// ============================================================================
+// DJIA CONTEXT
+// ============================================================================
+
+[djiD1Open,
+ djiD1High,
+ djiD1Low,
+ djiD1Close,
+ djiD2Open,
+ djiD2High,
+ djiD2Low,
+ djiD2Close] = request.security(
+     djiaSymbol,
+     "D",
+     [
+         open[1],
+         high[1],
+         low[1],
+         close[1],
+         open[2],
+         high[2],
+         low[2],
+         close[2]
+     ],
+     lookahead=barmerge.lookahead_on
+     )
+
+
+int djiaDirection =
+     f_direction(
+         djiD1Open,
+         djiD1Close
+         )
+
+int djiaCloseRelation =
+     f_relation(
+         djiD1Close,
+         djiD2Close
+         )
+
+int djiaHighRelation =
+     f_relation(
+         djiD1High,
+         djiD2High
+         )
+
+int djiaLowRelation =
+     f_relation(
+         djiD1Low,
+         djiD2Low
+         )
+
+int djiaStructure =
+     f_structure(
+         djiD1High,
+         djiD2High,
+         djiD1Low,
+         djiD2Low
+         )
+
+
+// ============================================================================
+// MARKET SCORES
+// ============================================================================
+
+int marketDirectionScore =
+     spxDirection +
+     nasdaqDirection +
+     djiaDirection
+
+int marketStructureScore =
+     spxStructure +
+     nasdaqStructure +
+     djiaStructure
+
+
+// ============================================================================
+// LOWER-TIMEFRAME ARRAYS
+// ============================================================================
+
+[tArr,
+ oArr,
+ hArr,
+ lArr,
+ cArr,
+ vArr,
+ trArr] = request.security_lower_tf(
+     extendedTicker,
+     "1",
+     [
+         time,
+         open,
+         high,
+         low,
+         close,
+         volume,
+         ta.tr(true)
+     ]
+     )
+
+
+// ============================================================================
+// STATE
+// ============================================================================
+
+var int lastProcessed1MTime = na
+
+var float rthPVSum = 0.0
+var float rthVolumeSum = 0.0
+var float currentRTHVWAP = na
+
+// Legacy session ATR state retained for diagnostic continuity.
+// 1.1D no longer uses these values for Previous Day / Previous 5 Days
+// when selecting the ATR used by Delta.
+var float currentSessionTRSum = 0.0
+var int currentSessionTRCount = 0
+
+var float atrSession1 = na
+var float atrSession2 = na
+var float atrSession3 = na
+var float atrSession4 = na
+var float atrSession5 = na
+
+var float previousDay1MATR = na
+var float previous5Days1MATR = na
+
+var float currentPMH = na
+var float currentPML = na
+var float currentPMVolume = 0.0
+
+var float signalPMH = na
+var float signalPML = na
+var float signalPMVolume = na
+
+var float currentAHHigh = na
+var float currentAHLow = na
+var float currentAHVolume = 0.0
+
+var float signalAHHigh = na
+var float signalAHLow = na
+var float signalAHVolume = na
+
+var float currentRTHHigh = na
+var float currentRTHLow = na
+
+var float signalPDH = na
+var float signalPDL = na
+
+var float c1VolHist1 = na
+var float c1VolHist2 = na
+var float c1VolHist3 = na
+var float c1VolHist4 = na
+var float c1VolHist5 = na
+
+var float c2VolHist1 = na
+var float c2VolHist2 = na
+var float c2VolHist3 = na
+var float c2VolHist4 = na
+var float c2VolHist5 = na
+
+var float avgPrev5C1Volume = na
+var float avgPrev5C2Volume = na
+var float avgPrev5CombinedVolume = na
+
+var float c1RelOpeningVolume = na
+var float c2RelOpeningVolume = na
+var float combinedRelOpeningVolume = na
+
+var bool haveC1 = false
+
+var float c1Open = na
+var float c1High = na
+var float c1Low = na
+var float c1Close = na
+var float c1Volume = na
+var float c1TR = na
+var float c1VWAP = na
+
+var int c1VWAPStateCode = 0
+
+var bool haveC2 = false
+
+var float c2Open = na
+var float c2High = na
+var float c2Low = na
+var float c2Close = na
+var float c2Volume = na
+var float c2TR = na
+var float c2VWAP = na
+
+var float c2Range = na
+var float c2ClosePositionPct = na
+
+var int c2VsPMH = 0
+var int c2VsPML = 0
+var int c2VsAHHigh = 0
+var int c2VsAHLow = 0
+var int c2VsPDH = 0
+var int c2VsPDL = 0
+
+var bool postBrokePMH = false
+var bool postBrokePML = false
+var bool postBrokeAHHigh = false
+var bool postBrokeAHLow = false
+var bool postBrokePDH = false
+var bool postBrokePDL = false
+
+var bool postBullBrokePMH_PDH = false
+var bool postBullBrokePMH_AH_PDH = false
+
+var bool postBearBrokePML_PDL = false
+var bool postBearBrokePML_AH_PDL = false
+
+var bool researchEvent = false
+var bool productionSignal = false
+
+var int eventDirection = 0
+
+var float referencePrice = na
+var float rawVWAPDistance = na
+var float deltaPct = na
+
+var float firstTwoATR = na
+var float selectedATRAtSignal = na
+
+var int eventDateKey = na
+var int eventStartTime = na
+var int eventDetectedTime = na
+
+var bool trackingEvent = false
+
+var float highestAfterSignal = na
+var float lowestAfterSignal = na
+
+var float mfePct = na
+var float maePct = na
+
+var float mfe1m = na
+var float mae1m = na
+
+var float mfe2m = na
+var float mae2m = na
+
+var float mfe3m = na
+var float mae3m = na
+
+var float mfe5m = na
+var float mae5m = na
+
+var float mfe10m = na
+var float mae10m = na
+
+var int minTo025 = na
+var int minTo050 = na
+var int minTo100 = na
+var int minToAdverse050 = na
+
+var int outcome050 = 0
+var int outcome100 = 0
+
+
+// ============================================================================
+// PROCESS 1M DATA
+// ============================================================================
+
+int processCount =
+     native1M
+     ? 1
+     : array.size(tArr)
+
+if processCount > 0
+
+    for i = 0 to processCount - 1
+
+        int t =
+             native1M
+             ? time
+             : array.get(tArr, i)
+
+        float o =
+             native1M
+             ? open
+             : array.get(oArr, i)
+
+        float h =
+             native1M
+             ? high
+             : array.get(hArr, i)
+
+        float l =
+             native1M
+             ? low
+             : array.get(lArr, i)
+
+        float c =
+             native1M
+             ? close
+             : array.get(cArr, i)
+
+        float vol =
+             native1M
+             ? volume
+             : array.get(vArr, i)
+
+        float tr =
+             native1M
+             ? ta.tr(true)
+             : array.get(trArr, i)
+
+
+        bool isNewIntrabar =
+             na(lastProcessed1MTime) or
+             t > lastProcessed1MTime
+
+
+        if isNewIntrabar
+
+            int hh = hour(t, TZ)
+            int mm = minute(t, TZ)
+
+            bool isPM =
+                 (hh >= 4 and hh < 9) or
+                 (hh == 9 and mm < 30)
+
+            bool isRTH =
+                 (hh > 9 or (hh == 9 and mm >= 30)) and
+                 hh < 16
+
+            bool isAH =
+                 hh >= 16 and
+                 hh < 20
+
+            bool firstPMBar =
+                 hh == 4 and
+                 mm == 0
+
+            bool firstAHBar =
+                 hh == 16 and
+                 mm == 0
+
+            bool isC1 =
+                 hh == 9 and
+                 mm == 30
+
+            bool isC2 =
+                 hh == 9 and
+                 mm == 31
+
+
+            // ----------------------------------------------------------------
+            // PREMARKET
+            // ----------------------------------------------------------------
+
+            if firstPMBar
+
+                currentPMH := h
+                currentPML := l
+                currentPMVolume := vol
+
+            else if isPM
+
+                if na(currentPMH)
+                    currentPMH := h
+                else
+                    currentPMH := math.max(currentPMH, h)
+
+                if na(currentPML)
+                    currentPML := l
+                else
+                    currentPML := math.min(currentPML, l)
+
+                currentPMVolume += vol
+
+
+            // ----------------------------------------------------------------
+            // AFTER HOURS
+            // ----------------------------------------------------------------
+
+            if firstAHBar
+
+                currentAHHigh := h
+                currentAHLow := l
+                currentAHVolume := vol
+
+            else if isAH
+
+                if na(currentAHHigh)
+                    currentAHHigh := h
+                else
+                    currentAHHigh := math.max(currentAHHigh, h)
+
+                if na(currentAHLow)
+                    currentAHLow := l
+                else
+                    currentAHLow := math.min(currentAHLow, l)
+
+                currentAHVolume += vol
+
+
+            // ----------------------------------------------------------------
+            // NEW RTH SESSION
+            // ----------------------------------------------------------------
+
+            if isC1
+
+                signalPDH := currentRTHHigh
+                signalPDL := currentRTHLow
+
+                signalPMH := currentPMH
+                signalPML := currentPML
+                signalPMVolume := currentPMVolume
+
+                signalAHHigh := currentAHHigh
+                signalAHLow := currentAHLow
+                signalAHVolume := currentAHVolume
+
+
+                // ------------------------------------------------------------
+                // OPENING VOLUME HISTORY
+                // ------------------------------------------------------------
+
+                if not na(c1Volume)
+
+                    c1VolHist5 := c1VolHist4
+                    c1VolHist4 := c1VolHist3
+                    c1VolHist3 := c1VolHist2
+                    c1VolHist2 := c1VolHist1
+                    c1VolHist1 := c1Volume
+
+
+                if not na(c2Volume)
+
+                    c2VolHist5 := c2VolHist4
+                    c2VolHist4 := c2VolHist3
+                    c2VolHist3 := c2VolHist2
+                    c2VolHist2 := c2VolHist1
+                    c2VolHist1 := c2Volume
+
+
+                avgPrev5C1Volume :=
+                     f_avg5(
+                         c1VolHist1,
+                         c1VolHist2,
+                         c1VolHist3,
+                         c1VolHist4,
+                         c1VolHist5
+                         )
+
+                avgPrev5C2Volume :=
+                     f_avg5(
+                         c2VolHist1,
+                         c2VolHist2,
+                         c2VolHist3,
+                         c2VolHist4,
+                         c2VolHist5
+                         )
+
+
+                float combined1 = na
+                float combined2 = na
+                float combined3 = na
+                float combined4 = na
+                float combined5 = na
+
+
+                if not na(c1VolHist1) and not na(c2VolHist1)
+                    combined1 := c1VolHist1 + c2VolHist1
+
+                if not na(c1VolHist2) and not na(c2VolHist2)
+                    combined2 := c1VolHist2 + c2VolHist2
+
+                if not na(c1VolHist3) and not na(c2VolHist3)
+                    combined3 := c1VolHist3 + c2VolHist3
+
+                if not na(c1VolHist4) and not na(c2VolHist4)
+                    combined4 := c1VolHist4 + c2VolHist4
+
+                if not na(c1VolHist5) and not na(c2VolHist5)
+                    combined5 := c1VolHist5 + c2VolHist5
+
+
+                avgPrev5CombinedVolume :=
+                     f_avg5(
+                         combined1,
+                         combined2,
+                         combined3,
+                         combined4,
+                         combined5
+                         )
+
+
+                // ------------------------------------------------------------
+                // LEGACY ATR HISTORY
+                //
+                // Retained in 1.1D for comparison only.
+                // Delta no longer uses this Previous 5 Day value.
+                // ------------------------------------------------------------
+
+                if currentSessionTRCount > 0
+
+                    float completedATR =
+                         currentSessionTRSum /
+                         currentSessionTRCount
+
+                    atrSession5 := atrSession4
+                    atrSession4 := atrSession3
+                    atrSession3 := atrSession2
+                    atrSession2 := atrSession1
+                    atrSession1 := completedATR
+
+                    previousDay1MATR := completedATR
+
+
+                previous5Days1MATR :=
+                     f_avg5(
+                         atrSession1,
+                         atrSession2,
+                         atrSession3,
+                         atrSession4,
+                         atrSession5
+                         )
+
+
+                // ------------------------------------------------------------
+                // RESET SESSION
+                // ------------------------------------------------------------
+
+                currentSessionTRSum := 0.0
+                currentSessionTRCount := 0
+
+                rthPVSum := 0.0
+                rthVolumeSum := 0.0
+                currentRTHVWAP := na
+
+                currentRTHHigh := na
+                currentRTHLow := na
+
+                haveC1 := false
+                haveC2 := false
+
+                c1Open := na
+                c1High := na
+                c1Low := na
+                c1Close := na
+                c1Volume := na
+                c1TR := na
+                c1VWAP := na
+                c1VWAPStateCode := 0
+
+                c2Open := na
+                c2High := na
+                c2Low := na
+                c2Close := na
+                c2Volume := na
+                c2TR := na
+                c2VWAP := na
+                c2Range := na
+                c2ClosePositionPct := na
+
+                c1RelOpeningVolume := na
+                c2RelOpeningVolume := na
+                combinedRelOpeningVolume := na
+
+                c2VsPMH := 0
+                c2VsPML := 0
+                c2VsAHHigh := 0
+                c2VsAHLow := 0
+                c2VsPDH := 0
+                c2VsPDL := 0
+
+                postBrokePMH := false
+                postBrokePML := false
+                postBrokeAHHigh := false
+                postBrokeAHLow := false
+                postBrokePDH := false
+                postBrokePDL := false
+
+                postBullBrokePMH_PDH := false
+                postBullBrokePMH_AH_PDH := false
+                postBearBrokePML_PDL := false
+                postBearBrokePML_AH_PDL := false
+
+                researchEvent := false
+                productionSignal := false
+
+                eventDirection := 0
+
+                referencePrice := na
+
+                rawVWAPDistance := na
+                deltaPct := na
+
+                firstTwoATR := na
+                selectedATRAtSignal := na
+
+                eventDateKey :=
+                     year(t, TZ) * 10000 +
+                     month(t, TZ) * 100 +
+                     dayofmonth(t, TZ)
+
+                eventStartTime := na
+                eventDetectedTime := na
+
+                trackingEvent := false
+
+                highestAfterSignal := na
+                lowestAfterSignal := na
+
+                mfePct := na
+                maePct := na
+
+                mfe1m := na
+                mae1m := na
+
+                mfe2m := na
+                mae2m := na
+
+                mfe3m := na
+                mae3m := na
+
+                mfe5m := na
+                mae5m := na
+
+                mfe10m := na
+                mae10m := na
+
+                minTo025 := na
+                minTo050 := na
+                minTo100 := na
+                minToAdverse050 := na
+
+                outcome050 := 0
+                outcome100 := 0
+
+
+            // ----------------------------------------------------------------
+            // RTH VWAP / LEGACY ATR / HIGH-LOW
+            // ----------------------------------------------------------------
+
+            if isRTH
+
+                float typicalPrice =
+                     (h + l + c) / 3.0
+
+                rthPVSum +=
+                     typicalPrice *
+                     vol
+
+                rthVolumeSum +=
+                     vol
+
+                if rthVolumeSum > 0
+                    currentRTHVWAP :=
+                         rthPVSum /
+                         rthVolumeSum
+
+
+                currentSessionTRSum += tr
+                currentSessionTRCount += 1
+
+
+                if na(currentRTHHigh)
+                    currentRTHHigh := h
+                else
+                    currentRTHHigh :=
+                         math.max(
+                             currentRTHHigh,
+                             h
+                             )
+
+
+                if na(currentRTHLow)
+                    currentRTHLow := l
+                else
+                    currentRTHLow :=
+                         math.min(
+                             currentRTHLow,
+                             l
+                             )
+
+
+            // ----------------------------------------------------------------
+            // C1
+            // ----------------------------------------------------------------
+
+            if isC1
+
+                haveC1 := true
+
+                c1Open := o
+                c1High := h
+                c1Low := l
+                c1Close := c
+                c1Volume := vol
+                c1TR := tr
+                c1VWAP := currentRTHVWAP
+
+
+                if not na(avgPrev5C1Volume) and
+                   avgPrev5C1Volume > 0
+
+                    c1RelOpeningVolume :=
+                         c1Volume /
+                         avgPrev5C1Volume
+
+
+            // ----------------------------------------------------------------
+            // C2 / EVENT
+            // ----------------------------------------------------------------
+
+            if isC2 and haveC1
+
+                haveC2 := true
+
+                c2Open := o
+                c2High := h
+                c2Low := l
+                c2Close := c
+                c2Volume := vol
+                c2TR := tr
+                c2VWAP := currentRTHVWAP
+
+                c2Range :=
+                     h -
+                     l
+
+
+                if not na(avgPrev5C2Volume) and
+                   avgPrev5C2Volume > 0
+
+                    c2RelOpeningVolume :=
+                         c2Volume /
+                         avgPrev5C2Volume
+
+
+                if not na(avgPrev5CombinedVolume) and
+                   avgPrev5CombinedVolume > 0
+
+                    combinedRelOpeningVolume :=
+                         (
+                             c1Volume +
+                             c2Volume
+                         ) /
+                         avgPrev5CombinedVolume
+
+
+                bool bullishCandidate =
+                     c1Close > c1Open and
+                     c1Close > c1VWAP and
+                     c2Close > c2Open and
+                     c2Close > c2VWAP and
+                     c2Low > c2VWAP
+
+
+                bool bearishCandidate =
+                     c1Close < c1Open and
+                     c1Close < c1VWAP and
+                     c2Close < c2Open and
+                     c2Close < c2VWAP and
+                     c2High < c2VWAP
+
+
+                // ------------------------------------------------------------
+                // BULLISH EVENT
+                // ------------------------------------------------------------
+
+                if bullishCandidate
+
+                    if c1Low > c1VWAP
+                        c1VWAPStateCode := 1
+
+                    else if c1Low == c1VWAP
+                        c1VWAPStateCode := 2
+
+                    else
+                        c1VWAPStateCode := 3
+
+
+                    researchEvent := true
+                    eventDirection := 1
+
+                    referencePrice :=
+                         c2Close
+
+                    rawVWAPDistance :=
+                         c2Low -
+                         c2VWAP
+
+
+                    if c2Range > 0
+
+                        c2ClosePositionPct :=
+                             (
+                                 c2Close -
+                                 c2Low
+                             ) /
+                             c2Range *
+                             100.0
+
+
+                // ------------------------------------------------------------
+                // BEARISH EVENT
+                // ------------------------------------------------------------
+
+                else if bearishCandidate
+
+                    if c1High < c1VWAP
+                        c1VWAPStateCode := -1
+
+                    else if c1High == c1VWAP
+                        c1VWAPStateCode := -2
+
+                    else
+                        c1VWAPStateCode := -3
+
+
+                    researchEvent := true
+                    eventDirection := -1
+
+                    referencePrice :=
+                         c2Close
+
+                    rawVWAPDistance :=
+                         c2VWAP -
+                         c2High
+
+
+                    if c2Range > 0
+
+                        c2ClosePositionPct :=
+                             (
+                                 c2High -
+                                 c2Close
+                             ) /
+                             c2Range *
+                             100.0
+
+
+                // ------------------------------------------------------------
+                // STRUCTURE RELATIONSHIPS
+                // ------------------------------------------------------------
+
+                c2VsPMH :=
+                     f_relation(
+                         c2Close,
+                         signalPMH
+                         )
+
+                c2VsPML :=
+                     f_relation(
+                         c2Close,
+                         signalPML
+                         )
+
+                c2VsAHHigh :=
+                     f_relation(
+                         c2Close,
+                         signalAHHigh
+                         )
+
+                c2VsAHLow :=
+                     f_relation(
+                         c2Close,
+                         signalAHLow
+                         )
+
+                c2VsPDH :=
+                     f_relation(
+                         c2Close,
+                         signalPDH
+                         )
+
+                c2VsPDL :=
+                     f_relation(
+                         c2Close,
+                         signalPDL
+                         )
+
+
+                // ------------------------------------------------------------
+                // FIRST-TWO-CANDLE ATR
+                // ------------------------------------------------------------
+
+                firstTwoATR :=
+                     (
+                         c1TR +
+                         c2TR
+                     ) /
+                     2.0
+
+
+                // ------------------------------------------------------------
+                // SELECTED ATR — 1.1D
+                //
+                // Previous Day and Previous 5 Day ATR now come from the
+                // canonical explicit 1-minute engine.
+                // ------------------------------------------------------------
+
+                if atrType == "Previous Daily ATR"
+
+                    selectedATRAtSignal :=
+                         previousDailyATR
+
+
+                else if atrType == "Previous Day 1M ATR"
+
+                    selectedATRAtSignal :=
+                         canonicalPreviousDay1MATR
+
+
+                else if atrType == "Previous 5 Days 1M ATR"
+
+                    selectedATRAtSignal :=
+                         canonicalPrevious5Days1MATR
+
+
+                else
+
+                    selectedATRAtSignal :=
+                         firstTwoATR
+
+
+                // ------------------------------------------------------------
+                // DELTA
+                // ------------------------------------------------------------
+
+                deltaPct := na
+
+
+                if researchEvent and
+                   not na(selectedATRAtSignal) and
+                   selectedATRAtSignal > 0 and
+                   not na(rawVWAPDistance) and
+                   rawVWAPDistance >= 0
+
+                    deltaPct :=
+                         rawVWAPDistance /
+                         selectedATRAtSignal *
+                         100.0
+
+
+                bool deltaPass = true
+
+
+                if enableDeltaFilter
+
+                    deltaPass :=
+                         not na(deltaPct) and
+                         deltaPct >= minimumDelta and
+                         deltaPct <= maximumDelta
+
+
+                productionSignal :=
+                     researchEvent and
+                     deltaPass
+
+
+                if researchEvent
+
+                    trackingEvent := true
+
+                    eventStartTime := t
+                    eventDetectedTime := t
+
+                    highestAfterSignal :=
+                         referencePrice
+
+                    lowestAfterSignal :=
+                         referencePrice
+
+                    mfePct := 0.0
+                    maePct := 0.0
+
+
+            // ----------------------------------------------------------------
+            // POST SIGNAL
+            // ----------------------------------------------------------------
+
+            if trackingEvent and
+               isRTH and
+               not na(eventStartTime) and
+               t > eventStartTime
+
+                int elapsedMinutes =
+                     int(
+                         (
+                             t -
+                             eventStartTime
+                         ) /
+                         60000
+                         )
+
+
+                // ------------------------------------------------------------
+                // STRUCTURE BREAKS
+                // ------------------------------------------------------------
+
+                if eventDirection == 1
+
+                    if not na(signalPMH) and h >= signalPMH
+                        postBrokePMH := true
+
+                    if not na(signalAHHigh) and h >= signalAHHigh
+                        postBrokeAHHigh := true
+
+                    if not na(signalPDH) and h >= signalPDH
+                        postBrokePDH := true
+
+
+                    postBullBrokePMH_PDH :=
+                         postBrokePMH and
+                         postBrokePDH
+
+                    postBullBrokePMH_AH_PDH :=
+                         postBrokePMH and
+                         postBrokeAHHigh and
+                         postBrokePDH
+
+
+                else if eventDirection == -1
+
+                    if not na(signalPML) and l <= signalPML
+                        postBrokePML := true
+
+                    if not na(signalAHLow) and l <= signalAHLow
+                        postBrokeAHLow := true
+
+                    if not na(signalPDL) and l <= signalPDL
+                        postBrokePDL := true
+
+
+                    postBearBrokePML_PDL :=
+                         postBrokePML and
+                         postBrokePDL
+
+                    postBearBrokePML_AH_PDL :=
+                         postBrokePML and
+                         postBrokeAHLow and
+                         postBrokePDL
+
+
+                // ------------------------------------------------------------
+                // MFE / MAE
+                // ------------------------------------------------------------
+
+                highestAfterSignal :=
+                     math.max(
+                         highestAfterSignal,
+                         h
+                         )
+
+                lowestAfterSignal :=
+                     math.min(
+                         lowestAfterSignal,
+                         l
+                         )
+
+
+                float newMFE = 0.0
+                float newMAE = 0.0
+
+
+                if eventDirection == 1
+
+                    newMFE :=
+                         (
+                             highestAfterSignal -
+                             referencePrice
+                         ) /
+                         referencePrice *
+                         100.0
+
+                    newMAE :=
+                         (
+                             referencePrice -
+                             lowestAfterSignal
+                         ) /
+                         referencePrice *
+                         100.0
+
+
+                else
+
+                    newMFE :=
+                         (
+                             referencePrice -
+                             lowestAfterSignal
+                         ) /
+                         referencePrice *
+                         100.0
+
+                    newMAE :=
+                         (
+                             highestAfterSignal -
+                             referencePrice
+                         ) /
+                         referencePrice *
+                         100.0
+
+
+                mfePct :=
+                     math.max(
+                         newMFE,
+                         0.0
+                         )
+
+                maePct :=
+                     math.max(
+                         newMAE,
+                         0.0
+                         )
+
+
+                // ------------------------------------------------------------
+                // SCALP CHECKPOINTS
+                // ------------------------------------------------------------
+
+                if elapsedMinutes == 1 and na(mfe1m)
+                    mfe1m := mfePct
+                    mae1m := maePct
+
+                if elapsedMinutes == 2 and na(mfe2m)
+                    mfe2m := mfePct
+                    mae2m := maePct
+
+                if elapsedMinutes == 3 and na(mfe3m)
+                    mfe3m := mfePct
+                    mae3m := maePct
+
+                if elapsedMinutes == 5 and na(mfe5m)
+                    mfe5m := mfePct
+                    mae5m := maePct
+
+                if elapsedMinutes == 10 and na(mfe10m)
+                    mfe10m := mfePct
+                    mae10m := maePct
+
+
+                // ------------------------------------------------------------
+                // CURRENT BAR FAVORABLE / ADVERSE
+                // ------------------------------------------------------------
+
+                float barFavPct = 0.0
+                float barAdvPct = 0.0
+
+
+                if eventDirection == 1
+
+                    barFavPct :=
+                         (
+                             h -
+                             referencePrice
+                         ) /
+                         referencePrice *
+                         100.0
+
+                    barAdvPct :=
+                         (
+                             referencePrice -
+                             l
+                         ) /
+                         referencePrice *
+                         100.0
+
+
+                else
+
+                    barFavPct :=
+                         (
+                             referencePrice -
+                             l
+                         ) /
+                         referencePrice *
+                         100.0
+
+                    barAdvPct :=
+                         (
+                             h -
+                             referencePrice
+                         ) /
+                         referencePrice *
+                         100.0
+
+
+                // ------------------------------------------------------------
+                // TARGET TIMES
+                // ------------------------------------------------------------
+
+                if na(minTo025) and barFavPct >= 0.25
+                    minTo025 := elapsedMinutes
+
+                if na(minTo050) and barFavPct >= 0.50
+                    minTo050 := elapsedMinutes
+
+                if na(minTo100) and barFavPct >= 1.00
+                    minTo100 := elapsedMinutes
+
+                if na(minToAdverse050) and
+                   barAdvPct >= 0.50
+
+                    minToAdverse050 :=
+                         elapsedMinutes
+
+
+                // ------------------------------------------------------------
+                // PRIMARY ±0.50 OUTCOME
+                // ------------------------------------------------------------
+
+                if outcome050 == 0
+
+                    bool fav050 =
+                         barFavPct >= 0.50
+
+                    bool adv050 =
+                         barAdvPct >= 0.50
+
+
+                    if fav050 and adv050
+                        outcome050 := 3
+
+                    else if fav050
+                        outcome050 := 1
+
+                    else if adv050
+                        outcome050 := 2
+
+
+                // ------------------------------------------------------------
+                // +1.00 / -0.50 OUTCOME
+                // ------------------------------------------------------------
+
+                if outcome100 == 0
+
+                    bool fav100 =
+                         barFavPct >= 1.00
+
+                    bool adv050For100 =
+                         barAdvPct >= 0.50
+
+
+                    if fav100 and adv050For100
+                        outcome100 := 3
+
+                    else if fav100
+                        outcome100 := 1
+
+                    else if adv050For100
+                        outcome100 := 2
+
+
+            lastProcessed1MTime := t
+
+
+// ============================================================================
+// STRUCTURE BREAK CODE
+// ============================================================================
+
+int structureBreakCode = 0
+
+if eventDirection == 1
+
+    if postBullBrokePMH_AH_PDH
+        structureBreakCode := 3
+
+    else if postBullBrokePMH_PDH
+        structureBreakCode := 2
+
+
+else if eventDirection == -1
+
+    if postBearBrokePML_AH_PDL
+        structureBreakCode := -3
+
+    else if postBearBrokePML_PDL
+        structureBreakCode := -2
+
+
+// ============================================================================
+// EVENT MARKERS
+// ============================================================================
+
+bool eventOnCurrentChartBar = false
+
+if not na(eventDetectedTime)
+
+    if native1M
+
+        eventOnCurrentChartBar :=
+             time ==
+             eventDetectedTime
+
+    else
+
+        eventOnCurrentChartBar :=
+             eventDetectedTime >= time and
+             eventDetectedTime < time_close
+
+
+plotshape(
+     showEventMarker and
+     eventOnCurrentChartBar and
+     eventDirection == 1,
+     title="Bullish Research Event",
+     style=shape.triangleup,
+     location=location.belowbar,
+     color=color.green,
+     size=size.small,
+     text="1M"
+     )
+
+
+plotshape(
+     showEventMarker and
+     eventOnCurrentChartBar and
+     eventDirection == -1,
+     title="Bearish Research Event",
+     style=shape.triangledown,
+     location=location.abovebar,
+     color=color.red,
+     size=size.small,
+     text="1M"
+     )
+
+
+// ============================================================================
+// CSV / DATA WINDOW EXPORT
+// ============================================================================
+
+// Identity
+plot(eventDateKey, "RC_DateKey", display=display.data_window)
+plot(eventDirection, "RC_Direction", display=display.data_window)
+plot(productionSignal ? 1 : 0, "RC_ProductionSignal", display=display.data_window)
+
+// C1
+plot(c1Open, "RC_C1_Open", display=display.data_window)
+plot(c1High, "RC_C1_High", display=display.data_window)
+plot(c1Low, "RC_C1_Low", display=display.data_window)
+plot(c1Close, "RC_C1_Close", display=display.data_window)
+plot(c1VWAP, "RC_C1_VWAP", display=display.data_window)
+plot(c1VWAPStateCode, "RC_C1_VWAP_State", display=display.data_window)
+plot(c1RelOpeningVolume, "RC_C1_RelOpeningVol", display=display.data_window)
+
+// C2
+plot(c2Open, "RC_C2_Open", display=display.data_window)
+plot(c2High, "RC_C2_High", display=display.data_window)
+plot(c2Low, "RC_C2_Low", display=display.data_window)
+plot(c2Close, "RC_C2_Close", display=display.data_window)
+plot(c2VWAP, "RC_C2_VWAP", display=display.data_window)
+plot(c2RelOpeningVolume, "RC_C2_RelOpeningVol", display=display.data_window)
+plot(combinedRelOpeningVolume, "RC_Combined_RelVol", display=display.data_window)
+
+// ATR / Delta
+plot(selectedATRAtSignal, "RC_ATR_Selected", display=display.data_window)
+plot(deltaPct, "RC_DeltaPct", display=display.data_window)
+
+// Levels
+plot(signalPMH, "RC_PMH", display=display.data_window)
+plot(signalPML, "RC_PML", display=display.data_window)
+plot(signalAHHigh, "RC_AH_High", display=display.data_window)
+plot(signalAHLow, "RC_AH_Low", display=display.data_window)
+plot(signalPDH, "RC_PDH", display=display.data_window)
+plot(signalPDL, "RC_PDL", display=display.data_window)
+
+// Structure
+plot(
+     structureBreakCode,
+     "RC_StructureBreakCode",
+     display=display.data_window
+     )
+
+// Scalp
+plot(mfe1m, "RC_MFE_1m", display=display.data_window)
+plot(mae1m, "RC_MAE_1m", display=display.data_window)
+
+plot(mfe3m, "RC_MFE_3m", display=display.data_window)
+plot(mae3m, "RC_MAE_3m", display=display.data_window)
+
+plot(mfe5m, "RC_MFE_5m", display=display.data_window)
+plot(mae5m, "RC_MAE_5m", display=display.data_window)
+
+plot(mfe10m, "RC_MFE_10m", display=display.data_window)
+plot(mae10m, "RC_MAE_10m", display=display.data_window)
+
+plot(mfePct, "RC_Final_MFE", display=display.data_window)
+plot(maePct, "RC_Final_MAE", display=display.data_window)
+
+// Outcomes
+plot(outcome050, "RC_Outcome_050v050", display=display.data_window)
+plot(outcome100, "RC_Outcome_100v050", display=display.data_window)
+
+plot(minTo025, "RC_MinutesTo_025", display=display.data_window)
+plot(minTo050, "RC_MinutesTo_050", display=display.data_window)
+plot(minTo100, "RC_MinutesTo_100", display=display.data_window)
+
+plot(
+     minToAdverse050,
+     "RC_MinutesTo_Adverse050",
+     display=display.data_window
+     )
+
+// Expanded raw research primitives — 1.2A
+plot(eventDetectedTime, "RC_EventTimestamp", display=display.data_window)
+
+plot(c1Volume, "RC_C1_Volume", display=display.data_window)
+plot(c1TR, "RC_C1_TR", display=display.data_window)
+plot(c2Volume, "RC_C2_Volume", display=display.data_window)
+plot(c2TR, "RC_C2_TR", display=display.data_window)
+
+plot(previousDailyATR, "RC_ATR_PreviousDaily", display=display.data_window)
+plot(canonicalPreviousDay1MATR, "RC_ATR_PreviousDay1M", display=display.data_window)
+plot(canonicalPrevious5Days1MATR, "RC_ATR_Previous5Days1M", display=display.data_window)
+plot(firstTwoATR, "RC_ATR_FirstTwoCandles", display=display.data_window)
+
+plot(rawVWAPDistance, "RC_VWAP_Distance", display=display.data_window)
+plot(signalPMVolume, "RC_PM_Volume", display=display.data_window)
+plot(signalAHVolume, "RC_AH_Volume", display=display.data_window)
+plot(prevDayClose, "RC_PreviousRTHClose", display=display.data_window)
+
+plot(mfe2m, "RC_MFE_2m", display=display.data_window)
+plot(mae2m, "RC_MAE_2m", display=display.data_window)
+
+
+// ============================================================================
+// TABLE HELPERS
+// ============================================================================
+
+f_num(float value) =>
+    string result = "N/A"
+
+    if not na(value)
+        result :=
+             str.tostring(
+                 value,
+                 format.mintick
+                 )
+
+    result
+
+
+f_pct(float value) =>
+    string result = "N/A"
+
+    if not na(value)
+        result :=
+             str.tostring(
+                 value,
+                 "#.###"
+                 ) +
+             "%"
+
+    result
+
+
+f_ratio(float value) =>
+    string result = "N/A"
+
+    if not na(value)
+        result :=
+             str.tostring(
+                 value,
+                 "#.##"
+                 ) +
+             "x"
+
+    result
+
+
+f_bool(bool value) =>
+    string result = "NO"
+
+    if value
+        result := "YES"
+
+    result
+
+
+f_directionText(int value) =>
+    string result = "NEUTRAL"
+
+    if value == 1
+        result := "BULLISH"
+
+    else if value == -1
+        result := "BEARISH"
+
+    result
+
+
+f_structureText(int value) =>
+    string result = "MIXED"
+
+    if value == 1
+        result := "HH + HL"
+
+    else if value == -1
+        result := "LH + LL"
+
+    result
+
+
+f_relationText(int value) =>
+    string result = "Equal"
+
+    if value == 1
+        result := "Higher"
+
+    else if value == -1
+        result := "Lower"
+
+    result
+
+
+// ============================================================================
+// VALIDATION TABLES
+// ============================================================================
+
+var table coreTable =
+     table.new(
+         position.top_right,
+         2,
+         30,
+         frame_color=color.gray,
+         frame_width=1
+         )
+
+var table contextTable =
+     table.new(
+         position.top_center,
+         2,
+         28,
+         frame_color=color.gray,
+         frame_width=1
+         )
+
+
+if barstate.islast
+
+    table.clear(
+         coreTable,
+         0,
+         0,
+         1,
+         29
+         )
+
+    table.clear(
+         contextTable,
+         0,
+         0,
+         1,
+         27
+         )
+
+
+    if showValidationTable
+
+        string directionText = "NONE"
+
+        if eventDirection == 1
+            directionText := "BULLISH"
+
+        else if eventDirection == -1
+            directionText := "BEARISH"
+
+
+        string c1StateText = "N/A"
+
+        if c1VWAPStateCode == 1
+            c1StateText := "Separated Above"
+
+        else if c1VWAPStateCode == 2
+            c1StateText := "Touched VWAP"
+
+        else if c1VWAPStateCode == 3
+            c1StateText := "Crossed Up"
+
+        else if c1VWAPStateCode == -1
+            c1StateText := "Separated Below"
+
+        else if c1VWAPStateCode == -2
+            c1StateText := "Touched VWAP"
+
+        else if c1VWAPStateCode == -3
+            c1StateText := "Crossed Down"
+
+
+        string outcomeText = "Pending / Neither"
+
+        if outcome050 == 1
+            outcomeText := "Favorable First"
+
+        else if outcome050 == 2
+            outcomeText := "Adverse First"
+
+        else if outcome050 == 3
+            outcomeText := "Both Same Candle"
+
+
+        string structureBreakText = "No Full Combo"
+
+        if structureBreakCode == 3
+            structureBreakText := "PMH + AH + PDH"
+
+        else if structureBreakCode == 2
+            structureBreakText := "PMH + PDH"
+
+        else if structureBreakCode == -3
+            structureBreakText := "PML + AH + PDL"
+
+        else if structureBreakCode == -2
+            structureBreakText := "PML + PDL"
+
+
+        string eventDateText = "N/A"
+
+        if not na(eventDateKey)
+            eventDateText := str.tostring(eventDateKey)
+
+
+        // ====================================================================
+        // CORE TABLE
+        // ====================================================================
+
+        table.cell(coreTable, 0, 0, "BUILD")
+        table.cell(coreTable, 1, 0, BUILD_ID)
+
+        table.cell(coreTable, 0, 1, "Engine")
+        table.cell(coreTable, 1, 1, engineName)
+
+        table.cell(coreTable, 0, 2, "Date")
+        table.cell(coreTable, 1, 2, eventDateText)
+
+        table.cell(coreTable, 0, 3, "Direction")
+        table.cell(coreTable, 1, 3, directionText)
+
+        table.cell(coreTable, 0, 4, "Research Event")
+        table.cell(coreTable, 1, 4, f_bool(researchEvent))
+
+        table.cell(coreTable, 0, 5, "Production Signal")
+        table.cell(coreTable, 1, 5, f_bool(productionSignal))
+
+        table.cell(coreTable, 0, 6, "C1 VWAP State")
+        table.cell(coreTable, 1, 6, c1StateText)
+
+        table.cell(coreTable, 0, 7, "C1 Close")
+        table.cell(coreTable, 1, 7, f_num(c1Close))
+
+        table.cell(coreTable, 0, 8, "C1 VWAP")
+        table.cell(coreTable, 1, 8, f_num(c1VWAP))
+
+        table.cell(coreTable, 0, 9, "C2 Close")
+        table.cell(coreTable, 1, 9, f_num(c2Close))
+
+        table.cell(coreTable, 0, 10, "C2 VWAP")
+        table.cell(coreTable, 1, 10, f_num(c2VWAP))
+
+
+        // Diagnostic precision retained for parity validation.
+        string deltaDistanceText = "N/A"
+
+        if not na(deltaPct) and not na(rawVWAPDistance)
+
+            deltaDistanceText :=
+                 str.tostring(
+                     deltaPct,
+                     "#.######"
+                     ) +
+                 "% / " +
+                 str.tostring(
+                     rawVWAPDistance,
+                     "#.######"
+                     )
+
+
+        table.cell(coreTable, 0, 11, "Delta / VWAP Dist")
+        table.cell(coreTable, 1, 11, deltaDistanceText)
+
+
+        string atrDiagnosticText = "N/A"
+
+        if not na(selectedATRAtSignal)
+
+            atrDiagnosticText :=
+                 str.tostring(
+                     selectedATRAtSignal,
+                     "#.######"
+                     )
+
+
+        table.cell(coreTable, 0, 12, "ATR")
+        table.cell(coreTable, 1, 12, atrDiagnosticText)
+
+
+        table.cell(coreTable, 0, 13, "PMH")
+        table.cell(coreTable, 1, 13, f_num(signalPMH))
+
+        table.cell(coreTable, 0, 14, "PML")
+        table.cell(coreTable, 1, 14, f_num(signalPML))
+
+        table.cell(coreTable, 0, 15, "AH High")
+        table.cell(coreTable, 1, 15, f_num(signalAHHigh))
+
+        table.cell(coreTable, 0, 16, "AH Low")
+        table.cell(coreTable, 1, 16, f_num(signalAHLow))
+
+        table.cell(coreTable, 0, 17, "PDH")
+        table.cell(coreTable, 1, 17, f_num(signalPDH))
+
+        table.cell(coreTable, 0, 18, "PDL")
+        table.cell(coreTable, 1, 18, f_num(signalPDL))
+
+        table.cell(coreTable, 0, 19, "Structure Break")
+        table.cell(coreTable, 1, 19, structureBreakText)
+
+        table.cell(coreTable, 0, 20, "C1 Rel Open Vol")
+        table.cell(coreTable, 1, 20, f_ratio(c1RelOpeningVolume))
+
+        table.cell(coreTable, 0, 21, "C2 Rel Open Vol")
+        table.cell(coreTable, 1, 21, f_ratio(c2RelOpeningVolume))
+
+        table.cell(coreTable, 0, 22, "Combined Rel Vol")
+        table.cell(coreTable, 1, 22, f_ratio(combinedRelOpeningVolume))
+
+        table.cell(coreTable, 0, 23, "1m MFE / MAE")
+        table.cell(
+             coreTable,
+             1,
+             23,
+             f_pct(mfe1m) +
+             " / " +
+             f_pct(mae1m)
+             )
+
+        table.cell(coreTable, 0, 24, "3m MFE / MAE")
+        table.cell(
+             coreTable,
+             1,
+             24,
+             f_pct(mfe3m) +
+             " / " +
+             f_pct(mae3m)
+             )
+
+        table.cell(coreTable, 0, 25, "5m MFE / MAE")
+        table.cell(
+             coreTable,
+             1,
+             25,
+             f_pct(mfe5m) +
+             " / " +
+             f_pct(mae5m)
+             )
+
+        table.cell(coreTable, 0, 26, "10m MFE / MAE")
+        table.cell(
+             coreTable,
+             1,
+             26,
+             f_pct(mfe10m) +
+             " / " +
+             f_pct(mae10m)
+             )
+
+        table.cell(coreTable, 0, 27, "Final MFE")
+        table.cell(coreTable, 1, 27, f_pct(mfePct))
+
+        table.cell(coreTable, 0, 28, "Final MAE")
+        table.cell(coreTable, 1, 28, f_pct(maePct))
+
+        table.cell(coreTable, 0, 29, "±0.50 Outcome")
+        table.cell(coreTable, 1, 29, outcomeText)
+
+
+        // ====================================================================
+        // CONTEXT TABLE
+        // ====================================================================
+
+        table.cell(contextTable, 0, 0, "HTF CONTEXT")
+        table.cell(contextTable, 1, 0, BUILD_ID)
+
+        table.cell(contextTable, 0, 1, "D1 Candle")
+        table.cell(
+             contextTable,
+             1,
+             1,
+             f_directionText(prevDailyCandleDirection)
+             )
+
+        table.cell(contextTable, 0, 2, "D1 Close vs D2")
+        table.cell(
+             contextTable,
+             1,
+             2,
+             f_relationText(prevDailyCloseRelation)
+             )
+
+        table.cell(contextTable, 0, 3, "D1 High vs D2")
+        table.cell(
+             contextTable,
+             1,
+             3,
+             f_relationText(prevDailyHighRelation)
+             )
+
+        table.cell(contextTable, 0, 4, "D1 Low vs D2")
+        table.cell(
+             contextTable,
+             1,
+             4,
+             f_relationText(prevDailyLowRelation)
+             )
+
+        table.cell(contextTable, 0, 5, "Daily Structure")
+        table.cell(
+             contextTable,
+             1,
+             5,
+             f_structureText(prevDailyStructure)
+             )
+
+        table.cell(contextTable, 0, 6, "D1 O / H")
+        table.cell(
+             contextTable,
+             1,
+             6,
+             f_num(prevDayOpen) +
+             " / " +
+             f_num(prevDayHigh)
+             )
+
+        table.cell(contextTable, 0, 7, "D1 L / C")
+        table.cell(
+             contextTable,
+             1,
+             7,
+             f_num(prevDayLow) +
+             " / " +
+             f_num(prevDayClose)
+             )
+
+        table.cell(contextTable, 0, 8, "W1 Candle")
+        table.cell(
+             contextTable,
+             1,
+             8,
+             f_directionText(prevWeeklyCandleDirection)
+             )
+
+        table.cell(contextTable, 0, 9, "W1 Close vs W2")
+        table.cell(
+             contextTable,
+             1,
+             9,
+             f_relationText(prevWeeklyCloseRelation)
+             )
+
+        table.cell(contextTable, 0, 10, "W1 High vs W2")
+        table.cell(
+             contextTable,
+             1,
+             10,
+             f_relationText(prevWeeklyHighRelation)
+             )
+
+        table.cell(contextTable, 0, 11, "W1 Low vs W2")
+        table.cell(
+             contextTable,
+             1,
+             11,
+             f_relationText(prevWeeklyLowRelation)
+             )
+
+        table.cell(contextTable, 0, 12, "Weekly Structure")
+        table.cell(
+             contextTable,
+             1,
+             12,
+             f_structureText(prevWeeklyStructure)
+             )
+
+        table.cell(contextTable, 0, 13, "SPX Candle")
+        table.cell(
+             contextTable,
+             1,
+             13,
+             f_directionText(spxDirection)
+             )
+
+        table.cell(contextTable, 0, 14, "SPX Structure")
+        table.cell(
+             contextTable,
+             1,
+             14,
+             f_structureText(spxStructure)
+             )
+
+        table.cell(contextTable, 0, 15, "SPX Close vs Prior")
+        table.cell(
+             contextTable,
+             1,
+             15,
+             f_relationText(spxCloseRelation)
+             )
+
+        table.cell(contextTable, 0, 16, "SPX H / L")
+        table.cell(
+             contextTable,
+             1,
+             16,
+             f_relationText(spxHighRelation) +
+             " / " +
+             f_relationText(spxLowRelation)
+             )
+
+        table.cell(contextTable, 0, 17, "Nasdaq Candle")
+        table.cell(
+             contextTable,
+             1,
+             17,
+             f_directionText(nasdaqDirection)
+             )
+
+        table.cell(contextTable, 0, 18, "Nasdaq Structure")
+        table.cell(
+             contextTable,
+             1,
+             18,
+             f_structureText(nasdaqStructure)
+             )
+
+        table.cell(contextTable, 0, 19, "Nas Close vs Prior")
+        table.cell(
+             contextTable,
+             1,
+             19,
+             f_relationText(nasdaqCloseRelation)
+             )
+
+        table.cell(contextTable, 0, 20, "Nas H / L")
+        table.cell(
+             contextTable,
+             1,
+             20,
+             f_relationText(nasdaqHighRelation) +
+             " / " +
+             f_relationText(nasdaqLowRelation)
+             )
+
+        table.cell(contextTable, 0, 21, "DJIA Candle")
+        table.cell(
+             contextTable,
+             1,
+             21,
+             f_directionText(djiaDirection)
+             )
+
+        table.cell(contextTable, 0, 22, "DJIA Structure")
+        table.cell(
+             contextTable,
+             1,
+             22,
+             f_structureText(djiaStructure)
+             )
+
+        table.cell(contextTable, 0, 23, "DJIA Close vs Prior")
+        table.cell(
+             contextTable,
+             1,
+             23,
+             f_relationText(djiaCloseRelation)
+             )
+
+        table.cell(contextTable, 0, 24, "DJIA H / L")
+        table.cell(
+             contextTable,
+             1,
+             24,
+             f_relationText(djiaHighRelation) +
+             " / " +
+             f_relationText(djiaLowRelation)
+             )
+
+        table.cell(contextTable, 0, 25, "Market Direction Score")
+        table.cell(
+             contextTable,
+             1,
+             25,
+             str.tostring(marketDirectionScore)
+             )
+
+        table.cell(contextTable, 0, 26, "Market Structure Score")
+        table.cell(
+             contextTable,
+             1,
+             26,
+             str.tostring(marketStructureScore)
+             )
+
+        table.cell(contextTable, 0, 27, "Daily / Weekly")
+        table.cell(
+             contextTable,
+             1,
+             27,
+             f_directionText(prevDailyCandleDirection) +
+             " / " +
+             f_structureText(prevDailyStructure) +
+             " | " +
+             f_directionText(prevWeeklyCandleDirection) +
+             " / " +
+             f_structureText(prevWeeklyStructure)
+             )

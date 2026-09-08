@@ -1,0 +1,217 @@
+//@version=6
+indicator(
+     "Second 1M Research Collector - S1M_RC_1.2C Current-Day Index Open Context",
+     overlay=false
+     )
+
+// ============================================================================
+// BUILD
+// ============================================================================
+
+string BUILD_ID = "S1M_RC_1.2C"
+string TZ = "America/New_York"
+
+// ============================================================================
+// SETTINGS
+// ============================================================================
+
+spxSymbol = input.symbol(
+     "SP:SPX",
+     "S&P 500 Symbol",
+     group="Market Open Context"
+     )
+
+nasdaqSymbol = input.symbol(
+     "NASDAQ:IXIC",
+     "Nasdaq Composite Symbol",
+     group="Market Open Context"
+     )
+
+djiaSymbol = input.symbol(
+     "DJ:DJI",
+     "DJIA Symbol",
+     group="Market Open Context"
+     )
+
+showStatusTable = input.bool(
+     true,
+     "Show Status Table",
+     group="Validation"
+     )
+
+// ============================================================================
+// 1-MINUTE OPENING-CONTEXT ENGINE
+//
+// Captures the exact 09:30 (C1) and 09:31 (C2) 1-minute bars inside each
+// requested index context. Values persist for the remainder of that date.
+// This makes the output usable from a 5-minute host chart while preserving
+// the exact underlying 1-minute opening bars.
+// ============================================================================
+
+f_openingContext() =>
+
+    var int activeDateKey = na
+
+    var float c1O = na
+    var float c1H = na
+    var float c1L = na
+    var float c1C = na
+
+    var float c2O = na
+    var float c2H = na
+    var float c2L = na
+    var float c2C = na
+
+    int dateKey =
+         year(time, TZ) * 10000 +
+         month(time, TZ) * 100 +
+         dayofmonth(time, TZ)
+
+    if na(activeDateKey) or dateKey != activeDateKey
+        activeDateKey := dateKey
+        c1O := na
+        c1H := na
+        c1L := na
+        c1C := na
+        c2O := na
+        c2H := na
+        c2L := na
+        c2C := na
+
+    int hh = hour(time, TZ)
+    int mm = minute(time, TZ)
+
+    if hh == 9 and mm == 30
+        c1O := open
+        c1H := high
+        c1L := low
+        c1C := close
+
+    if hh == 9 and mm == 31
+        c2O := open
+        c2H := high
+        c2L := low
+        c2C := close
+
+    [activeDateKey,
+     c1O,
+     c1H,
+     c1L,
+     c1C,
+     c2O,
+     c2H,
+     c2L,
+     c2C]
+
+// ============================================================================
+// INDEX REQUESTS
+// ============================================================================
+
+[spxDateKey,
+ spxC1O,
+ spxC1H,
+ spxC1L,
+ spxC1C,
+ spxC2O,
+ spxC2H,
+ spxC2L,
+ spxC2C] = request.security(
+     spxSymbol,
+     "1",
+     f_openingContext(),
+     lookahead=barmerge.lookahead_off
+     )
+
+[nasDateKey,
+ nasC1O,
+ nasC1H,
+ nasC1L,
+ nasC1C,
+ nasC2O,
+ nasC2H,
+ nasC2L,
+ nasC2C] = request.security(
+     nasdaqSymbol,
+     "1",
+     f_openingContext(),
+     lookahead=barmerge.lookahead_off
+     )
+
+[djiDateKey,
+ djiC1O,
+ djiC1H,
+ djiC1L,
+ djiC1C,
+ djiC2O,
+ djiC2H,
+ djiC2L,
+ djiC2C] = request.security(
+     djiaSymbol,
+     "1",
+     f_openingContext(),
+     lookahead=barmerge.lookahead_off
+     )
+
+// ============================================================================
+// CSV / DATA WINDOW EXPORT — 27 SERIES
+// ============================================================================
+
+// SPX — 9
+plot(spxDateKey, "MKT_OPEN_SPX_DateKey", display=display.data_window)
+plot(spxC1O, "MKT_OPEN_SPX_C1_Open", display=display.data_window)
+plot(spxC1H, "MKT_OPEN_SPX_C1_High", display=display.data_window)
+plot(spxC1L, "MKT_OPEN_SPX_C1_Low", display=display.data_window)
+plot(spxC1C, "MKT_OPEN_SPX_C1_Close", display=display.data_window)
+plot(spxC2O, "MKT_OPEN_SPX_C2_Open", display=display.data_window)
+plot(spxC2H, "MKT_OPEN_SPX_C2_High", display=display.data_window)
+plot(spxC2L, "MKT_OPEN_SPX_C2_Low", display=display.data_window)
+plot(spxC2C, "MKT_OPEN_SPX_C2_Close", display=display.data_window)
+
+// Nasdaq — 9
+plot(nasDateKey, "MKT_OPEN_NASDAQ_DateKey", display=display.data_window)
+plot(nasC1O, "MKT_OPEN_NASDAQ_C1_Open", display=display.data_window)
+plot(nasC1H, "MKT_OPEN_NASDAQ_C1_High", display=display.data_window)
+plot(nasC1L, "MKT_OPEN_NASDAQ_C1_Low", display=display.data_window)
+plot(nasC1C, "MKT_OPEN_NASDAQ_C1_Close", display=display.data_window)
+plot(nasC2O, "MKT_OPEN_NASDAQ_C2_Open", display=display.data_window)
+plot(nasC2H, "MKT_OPEN_NASDAQ_C2_High", display=display.data_window)
+plot(nasC2L, "MKT_OPEN_NASDAQ_C2_Low", display=display.data_window)
+plot(nasC2C, "MKT_OPEN_NASDAQ_C2_Close", display=display.data_window)
+
+// DJIA — 9
+plot(djiDateKey, "MKT_OPEN_DJIA_DateKey", display=display.data_window)
+plot(djiC1O, "MKT_OPEN_DJIA_C1_Open", display=display.data_window)
+plot(djiC1H, "MKT_OPEN_DJIA_C1_High", display=display.data_window)
+plot(djiC1L, "MKT_OPEN_DJIA_C1_Low", display=display.data_window)
+plot(djiC1C, "MKT_OPEN_DJIA_C1_Close", display=display.data_window)
+plot(djiC2O, "MKT_OPEN_DJIA_C2_Open", display=display.data_window)
+plot(djiC2H, "MKT_OPEN_DJIA_C2_High", display=display.data_window)
+plot(djiC2L, "MKT_OPEN_DJIA_C2_Low", display=display.data_window)
+plot(djiC2C, "MKT_OPEN_DJIA_C2_Close", display=display.data_window)
+
+// ============================================================================
+// STATUS TABLE — DOES NOT CONSUME PLOT BUDGET
+// ============================================================================
+
+var table statusTable = table.new(
+     position.bottom_center,
+     2,
+     5,
+     frame_color=color.gray,
+     frame_width=1
+     )
+
+if barstate.islast
+    table.clear(statusTable, 0, 0, 1, 4)
+
+    if showStatusTable
+        table.cell(statusTable, 0, 0, "BUILD")
+        table.cell(statusTable, 1, 0, BUILD_ID)
+        table.cell(statusTable, 0, 1, "SPX")
+        table.cell(statusTable, 1, 1, spxSymbol)
+        table.cell(statusTable, 0, 2, "Nasdaq")
+        table.cell(statusTable, 1, 2, nasdaqSymbol)
+        table.cell(statusTable, 0, 3, "DJIA")
+        table.cell(statusTable, 1, 3, djiaSymbol)
+        table.cell(statusTable, 0, 4, "Purpose")
+        table.cell(statusTable, 1, 4, "Exact 1M C1/C2")

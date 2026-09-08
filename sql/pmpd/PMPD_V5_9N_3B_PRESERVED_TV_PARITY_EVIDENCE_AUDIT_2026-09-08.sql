@@ -1,0 +1,4 @@
+-- PM+PD V5 9N-3B preserved TradingView parity evidence audit — 2026-09-08
+-- Static V4 reconstruction gate passed.
+-- This step inventories preserved Pine/TradingView parity evidence before executing the reconstructed V4 engine.
+-- No 2026 head-to-head run is authorized by this audit alone.

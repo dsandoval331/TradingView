@@ -1,0 +1,6 @@
+-- PM+PD V5 9N-3A V4 reconstruction from frozen contract — 2026-09-08
+-- New external reproduction only; frozen TradingView V4 is not modified.
+-- Contract: PMPD_V4_PARITY_SPEC_V1
+-- Required spec SHA256:
+-- e40351c02088aa2b7528fd98f5be6c651a010f4b3cc8d62905b5dda8aa0474fb
+-- No 2026 V4 head-to-head run is authorized until preserved TradingView parity evidence is checked.

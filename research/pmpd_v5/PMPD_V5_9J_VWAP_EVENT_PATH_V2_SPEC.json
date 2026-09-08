@@ -1,0 +1,14 @@
+{
+  "version": "PMPD_V5_9J_VWAP_EVENT_PATH_V2",
+  "purpose": "Correct V1 path semantics by anchoring VWAP touch/cross/path fields at each parent event's DP1 first-contact bar.",
+  "why_v2": "V1 snapshot VWAP fields are valid, but its touch/cross counts are cumulative from RTH open and therefore cannot be interpreted as event-path behavior.",
+  "guardrails": [
+    "RTH VWAP still resets 09:30 ET",
+    "completed 1m bars only",
+    "event window DP1 through current decision inclusive",
+    "no future bars",
+    "no outcome data",
+    "no optimized thresholds"
+  ],
+  "production_rule_authorized": false
+}

@@ -35,3 +35,7 @@ htmlcov/
 .vscode/
 .DS_Store
 Thumbs.db
+# Large generated research artifacts
+research_outputs/
+archive/packages/
+OlderProjectFolders/PMPD_Historical_1M/

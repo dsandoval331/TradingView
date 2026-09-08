@@ -1,0 +1,16 @@
+feature,available_n,coverage_pct
+pre_open,8208,98.80823401950163
+pre_high,8208,98.80823401950163
+pre_low,8208,98.80823401950163
+pre_close,8208,98.80823401950163
+pre_volume,8208,98.80823401950163
+pmctx_prior_rth_close,8178,98.44709281329
+premarket_return_pct,8208,98.80823401950163
+premarket_range_pct,8178,98.44709281329
+premarket_gap_from_prior_close_pct,8178,98.44709281329
+premarket_close_vs_prior_close_pct,8178,98.44709281329
+premarket_close_location_pct,8108,97.60442999879619
+premarket_rvol_20d,7957,95.786685927531
+rth_open_gap_pct,8178,98.44709281329
+abs_rth_open_gap_pct,8178,98.44709281329
+abs_premarket_return_pct,8208,98.80823401950163

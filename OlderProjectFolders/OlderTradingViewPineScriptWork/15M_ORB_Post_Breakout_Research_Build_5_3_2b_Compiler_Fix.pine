@@ -1,0 +1,5981 @@
+//@version=6
+indicator(
+     "15M ORB Post-Breakout Research - Build 5.3.2b",
+     overlay = true,
+     max_labels_count = 500)
+
+//=============================================================================
+// BUILD 5.3 — STRONG EXPANSION / INITIAL SEPARATION STUDY
+//
+// CORE RULES
+//
+// BUILD 5.3.2b — COMPILER FIX / CONTRACT DIAGNOSTIC:
+// • Preserves all Build 5.3.1 signal, checkpoint, retest, trajectory,
+//   quality, failure-audit, and outcome logic unchanged.
+// • Adds diagnostic instrumentation ONLY for EST events classified
+//   CONTRACT from the 10m→15m separation trajectory.
+// • Goal: distinguish EST CONTRACT winners from EST CONTRACT failures.
+// • Predetermined diagnostics: 10M state, 10M separation, 10M MFE,
+//   10M MAE, 10M Q, Bull/Bear direction, and contraction severity.
+// • Compiler refactor: large top-center table rendering moved into functions.
+// • Research calculations, thresholds, classifications, and outcomes unchanged.
+// • CONTRACT severity respects the existing CONTRACT <0.80 definition:
+//   Severe <0.50, Moderate 0.50–<0.65, Mild 0.65–<0.80.
+//
+// • 1-minute chart only.
+// • ORB = 09:30–09:44 ET.
+// • ORB freezes at 09:45 ET.
+// • First qualified 1M close outside ORB is the day's primary breakout.
+// • Only one primary breakout per day.
+//
+// PRIMARY BASELINE:
+// +0.50% favorable BEFORE -0.50% adverse from breakout close.
+//
+// RETEST:
+// • ATR freezes at breakout.
+// • Retest zone = ±10% frozen 1M ATR around broken ORB boundary.
+// • Wick/high-low overlap with zone = retest.
+// • Provisional failure = close ≥25% frozen ATR back inside ORB.
+// • Successful confirmation = later directional candle closes back outside
+//   the outer retest-zone boundary.
+//
+// FIRST-EVENT PATH PRINCIPLE:
+//
+// NR CONTINUE:
+// +0.50% favorable reached before first retest.
+//
+// NR FAIL:
+// -0.50% adverse reached before first retest and before +0.50% favorable.
+//
+// RETEST CONTINUE:
+// Retest occurs first → no failure → confirmation → +0.50% favorable later.
+//
+// RETEST FAIL:
+// Retest occurs first → provisional failure before successful confirmation.
+//
+// RETEST UNCONFIRMED:
+// Retest occurs, but no failure and no confirmation by RTH close.
+//
+// UNRESOLVED:
+// Does not meet another path by RTH close.
+//
+// MARKET REGIME:
+// RTH and Daily regime metadata remain available for future Build 4 analysis.
+//=============================================================================
+
+
+//=============================================================================
+// CONSTANTS
+//=============================================================================
+
+string TZ = "America/New_York"
+
+int REGIME_BULL = 1
+int REGIME_MIXED = 0
+int REGIME_BEAR = -1
+int REGIME_INVALID = 99
+
+int PATH_NONE = 0
+int PATH_NR_CONTINUE = 1
+int PATH_RETEST_CONTINUE = 2
+int PATH_RETEST_FAIL = 3
+int PATH_NR_FAIL = 4
+int PATH_RETEST_UNCONFIRMED = 5
+int PATH_UNRESOLVED = 6
+
+
+//=============================================================================
+// INPUTS — RESEARCH PERIOD
+//=============================================================================
+
+groupResearch = "Research Period"
+
+useStartDate =
+     input.bool(
+         true,
+         "Use Research Start Date",
+         group = groupResearch)
+
+researchStart =
+     input.time(
+         timestamp("13 Jul 2026 00:00 -0500"),
+         "Research Start Date",
+         group = groupResearch)
+
+useEndDate =
+     input.bool(
+         true,
+         "Use Research End Date",
+         group = groupResearch)
+
+researchEnd =
+     input.time(
+         timestamp("20 Aug 2026 23:59 -0500"),
+         "Research End Date",
+         group = groupResearch)
+
+
+//=============================================================================
+// INPUTS — OUTCOME RESEARCH
+//=============================================================================
+
+groupOutcome = "Outcome Research"
+
+primaryPct =
+     input.float(
+         0.50,
+         "Primary Favorable / Adverse %",
+         minval = 0.01,
+         step = 0.05,
+         group = groupOutcome)
+
+secondary025 =
+     input.float(
+         0.25,
+         "Secondary Favorable 1 %",
+         minval = 0.01,
+         step = 0.05,
+         group = groupOutcome)
+
+secondary075 =
+     input.float(
+         0.75,
+         "Secondary Favorable 2 %",
+         minval = 0.01,
+         step = 0.05,
+         group = groupOutcome)
+
+secondary100 =
+     input.float(
+         1.00,
+         "Secondary Favorable 3 %",
+         minval = 0.01,
+         step = 0.05,
+         group = groupOutcome)
+
+
+//=============================================================================
+// INPUTS — BREAKOUT CONFIRMATION
+//=============================================================================
+
+groupBreakout = "Breakout Confirmation"
+
+atrLength =
+     input.int(
+         14,
+         "1M ATR Length",
+         minval = 1,
+         group = groupBreakout)
+
+reqDirectional =
+     input.bool(
+         false,
+         "Require Directional Candle",
+         group = groupBreakout)
+
+reqPenetration =
+     input.bool(
+         false,
+         "Require Minimum ATR Penetration",
+         group = groupBreakout)
+
+minPenetrationPct =
+     input.float(
+         10.0,
+         "Minimum Penetration % ATR",
+         minval = 0.0,
+         step = 1.0,
+         group = groupBreakout)
+
+reqBody =
+     input.bool(
+         false,
+         "Require Body / Range Strength",
+         group = groupBreakout)
+
+minBodyPct =
+     input.float(
+         50.0,
+         "Minimum Body / Range %",
+         minval = 0.0,
+         maxval = 100.0,
+         step = 1.0,
+         group = groupBreakout)
+
+reqRange =
+     input.bool(
+         false,
+         "Require Minimum Candle Range vs ATR",
+         group = groupBreakout)
+
+minRangeAtrPct =
+     input.float(
+         25.0,
+         "Minimum Range % ATR",
+         minval = 0.0,
+         step = 1.0,
+         group = groupBreakout)
+
+reqClosePosition =
+     input.bool(
+         false,
+         "Require Strong Close Position",
+         group = groupBreakout)
+
+minClosePositionPct =
+     input.float(
+         80.0,
+         "Minimum Close Position %",
+         minval = 0.0,
+         maxval = 100.0,
+         step = 1.0,
+         group = groupBreakout)
+
+
+//=============================================================================
+// INPUTS — STRENGTH SCORE
+//=============================================================================
+
+groupStrength = "Strength Score"
+
+enableStrengthScore =
+     input.bool(
+         true,
+         "Enable Strength Score",
+         group = groupStrength)
+
+showScoreOnLabel =
+     input.bool(
+         true,
+         "Show Score on Breakout Label",
+         group = groupStrength)
+
+reqMinimumGrade =
+     input.bool(
+         false,
+         "Require Minimum Grade",
+         group = groupStrength)
+
+minimumGrade =
+     input.string(
+         "B",
+         "Minimum Signal Grade",
+         options = [
+             "A+",
+             "A",
+             "A-",
+             "B+",
+             "B",
+             "B-",
+             "C+",
+             "C",
+             "C-",
+             "Weak"
+         ],
+         group = groupStrength)
+
+
+//=============================================================================
+// INPUTS — RETEST RESEARCH
+//=============================================================================
+
+groupRetest = "Retest Research"
+
+retestZoneAtrPct =
+     input.float(
+         10.0,
+         "Retest Zone ± % of Frozen ATR",
+         minval = 0.0,
+         step = 1.0,
+         group = groupRetest)
+
+failureAtrPct =
+     input.float(
+         25.0,
+         "Failure Close Penetration % of Frozen ATR",
+         minval = 0.0,
+         step = 1.0,
+         group = groupRetest)
+
+requireDirectionalConfirmation =
+     input.bool(
+         true,
+         "Require Directional Retest Confirmation Candle",
+         group = groupRetest)
+
+showRetestZone =
+     input.bool(
+         false,
+         "Show Active Retest Zone",
+         group = groupRetest)
+
+showRetestLabels =
+     input.bool(
+         true,
+         "Show Retest / Confirmation / Failure Labels",
+         group = groupRetest)
+
+
+//=============================================================================
+// INPUTS — NO-RETEST CHECKPOINT RESEARCH
+//=============================================================================
+
+groupCheckpoint = "No-Retest Checkpoints"
+
+enableCheckpointResearch =
+     input.bool(
+         true,
+         "Enable No-Retest Checkpoint Research",
+         group = groupCheckpoint)
+
+showCheckpointTable =
+     input.bool(
+         true,
+         "Show No-Retest Checkpoint Table",
+         group = groupCheckpoint)
+
+
+showContractDiagnostic =
+     input.bool(
+         true,
+         "Show Build 5.3.2 CONTRACT Diagnostic",
+         group = groupCheckpoint)
+
+showCheckpointLabels =
+     input.bool(
+         false,
+         "Show 5/10/15/30m Checkpoint Labels",
+         group = groupCheckpoint)
+
+
+//=============================================================================
+// INPUTS — MARKET REGIME
+//=============================================================================
+
+groupRegime = "Market Regime"
+
+spxSymbol =
+     input.symbol(
+         "SP:SPX",
+         "S&P 500 Symbol",
+         group = groupRegime)
+
+nasdaqSymbol =
+     input.symbol(
+         "NASDAQ:IXIC",
+         "Nasdaq Composite Symbol",
+         group = groupRegime)
+
+dowSymbol =
+     input.symbol(
+         "TVC:DJI",
+         "Dow Jones Symbol",
+         group = groupRegime)
+
+
+//=============================================================================
+// INPUTS — DISPLAY
+//=============================================================================
+
+groupDisplay = "Display"
+
+showORB =
+     input.bool(
+         true,
+         "Show ORB High / Low",
+         group = groupDisplay)
+
+showBreakoutLabels =
+     input.bool(
+         true,
+         "Show Breakout Labels",
+         group = groupDisplay)
+
+showBaselineTable =
+     input.bool(
+         true,
+         "Show Baseline Table",
+         group = groupDisplay)
+
+showPathTable =
+     input.bool(
+         true,
+         "Show Post-Breakout Path Table",
+         group = groupDisplay)
+
+showRetestTable =
+     input.bool(
+         true,
+         "Show Retest Summary",
+         group = groupDisplay)
+
+showDebug =
+     input.bool(
+         false,
+         "Show Debug Table",
+         group = groupDisplay)
+
+
+//=============================================================================
+// HELPERS
+//=============================================================================
+
+f_clamp(float value, float minValue, float maxValue) =>
+    math.max(
+         minValue,
+         math.min(
+             maxValue,
+             value))
+
+
+f_grade(float score) =>
+    score >= 95.0 ? "A+" :
+     score >= 90.0 ? "A" :
+     score >= 85.0 ? "A-" :
+     score >= 80.0 ? "B+" :
+     score >= 75.0 ? "B" :
+     score >= 70.0 ? "B-" :
+     score >= 65.0 ? "C+" :
+     score >= 60.0 ? "C" :
+     score >= 55.0 ? "C-" :
+     "Weak"
+
+
+f_minGradeScore(string grade) =>
+    grade == "A+" ? 95.0 :
+     grade == "A" ? 90.0 :
+     grade == "A-" ? 85.0 :
+     grade == "B+" ? 80.0 :
+     grade == "B" ? 75.0 :
+     grade == "B-" ? 70.0 :
+     grade == "C+" ? 65.0 :
+     grade == "C" ? 60.0 :
+     grade == "C-" ? 55.0 :
+     0.0
+
+
+f_speedScore(int minuteOfDay) =>
+    minuteOfDay < 600 ? 10.0 :
+     minuteOfDay < 630 ? 8.0 :
+     minuteOfDay < 660 ? 6.0 :
+     minuteOfDay < 720 ? 4.0 :
+     2.0
+
+
+f_pct(float value) =>
+    na(value)
+     ? "—"
+     : str.tostring(
+         value,
+         "#.##") + "%"
+
+
+f_num(int value) =>
+    str.tostring(value)
+
+
+f_rate(int fav, int adv) =>
+    int decisive =
+         fav + adv
+
+    decisive > 0
+     ? float(fav) /
+       float(decisive) *
+       100.0
+     : na
+
+
+f_share(int hits, int population) =>
+    population > 0
+     ? float(hits) /
+       float(population) *
+       100.0
+     : na
+
+
+f_median(array<float> values) =>
+    int n = array.size(values)
+    if n == 0
+        na
+    else
+        array<float> sorted = array.copy(values)
+        array.sort(sorted, order.ascending)
+        int mid = int(math.floor(n / 2))
+        n % 2 == 1
+         ? array.get(sorted, mid)
+         : (array.get(sorted, mid - 1) + array.get(sorted, mid)) / 2.0
+
+
+// Separation bucket based on checkpoint distance from broken ORB,
+// expressed as % of frozen 1M ATR.
+// 0 = <100%, 1 = 100-200%, 2 = 200-300%, 3 = >300%.
+f_sepBucket(float sepAtrPct) =>
+    na(sepAtrPct) ? -1 :
+     sepAtrPct < 100.0 ? 0 :
+     sepAtrPct < 200.0 ? 1 :
+     sepAtrPct < 300.0 ? 2 :
+     3
+
+
+f_sepBucketName(int bucket) =>
+    bucket == 0 ? "<100%" :
+     bucket == 1 ? "100-200%" :
+     bucket == 2 ? "200-300%" :
+     bucket == 3 ? ">300%" :
+     "Invalid"
+
+
+// 10m -> 15m separation ratio study.
+// Ratio = 15m separation / 10m separation.
+//
+// 0 = Strong Contraction   (<0.50)
+// 1 = Moderate Contraction (0.50-0.79)
+// 2 = Stable               (0.80-1.19)
+// 3 = Moderate Expansion   (1.20-1.99)
+// 4 = Strong Expansion     (>=2.00)
+f_ratioBucket(float sep10, float sep15) =>
+    na(sep10) or na(sep15) or sep10 <= 0.0
+     ? -1
+     : sep15 / sep10 < 0.50
+       ? 0
+       : sep15 / sep10 < 0.80
+         ? 1
+         : sep15 / sep10 < 1.20
+           ? 2
+           : sep15 / sep10 < 2.00
+             ? 3
+             : 4
+
+
+f_ratioName(int bucket) =>
+    bucket == 0 ? "Strong Contract" :
+     bucket == 1 ? "Mod Contract" :
+     bucket == 2 ? "Stable" :
+     bucket == 3 ? "Mod Expand" :
+     bucket == 4 ? "Strong Expand" :
+     "Invalid"
+
+
+// BUILD 5.3 — 10M QUALITY STUDY helpers.
+// 0 = Low (<100% ATR)
+// 1 = Established (100-300% ATR)
+// 2 = Extended (>300% ATR)
+f_qualitySepGroup(float sepAtrPct) =>
+    na(sepAtrPct) ? -1 :
+     sepAtrPct < 100.0 ? 0 :
+     sepAtrPct <= 300.0 ? 1 :
+     2
+
+f_qualitySepName(int group) =>
+    group == 0 ? "LOW <100%" :
+     group == 1 ? "EST 100-300%" :
+     group == 2 ? "EXT >300%" :
+     "Invalid"
+
+// Snapshot retest state.
+// 0 = no retest, 1 = retest hold confirmed, 2 = retest failure,
+// 3 = retest occurred but was still unresolved at the snapshot.
+f_qualityRetestName(int state) =>
+    state == 0 ? "NR" :
+     state == 1 ? "RH" :
+     state == 2 ? "RF" :
+     state == 3 ? "RT OPEN" :
+     "—"
+
+
+f_auditTrajectoryClass(float ratio) =>
+    na(ratio) ? -1 :
+     ratio < 0.80 ? 0 :
+     ratio < 1.20 ? 1 :
+     2
+
+f_extDepthBucket(float sepAtrPct) =>
+    na(sepAtrPct) or sepAtrPct <= 300.0 ? -1 :
+     sepAtrPct < 400.0 ? 0 :
+     sepAtrPct < 600.0 ? 1 :
+     2
+
+f_extDepthName(int bucket) =>
+    bucket == 0 ? "300-400%" :
+     bucket == 1 ? "400-600%" :
+     bucket == 2 ? ">600%" :
+     "—"
+
+
+f_contractSepBucket(float v) =>
+    na(v) ? -1 :
+     v < 150.0 ? 0 :
+     v < 200.0 ? 1 :
+     v < 250.0 ? 2 :
+     v < 300.0 ? 3 :
+     -1
+
+f_contractMfeBucket(float v) =>
+    na(v) ? -1 :
+     v < 0.25 ? 0 :
+     v < 0.50 ? 1 :
+     v < 0.75 ? 2 :
+     3
+
+f_contractMaeBucket(float v) =>
+    na(v) ? -1 :
+     v < 0.10 ? 0 :
+     v < 0.25 ? 1 :
+     v < 0.40 ? 2 :
+     3
+
+f_contractQBucket(float v) =>
+    na(v) ? -1 :
+     v < 1.0 ? 0 :
+     v < 2.0 ? 1 :
+     v < 4.0 ? 2 :
+     3
+
+f_contractSeverityBucket(float ratio) =>
+    na(ratio) or ratio >= 0.80 ? -1 :
+     ratio < 0.50 ? 0 :
+     ratio < 0.65 ? 1 :
+     2
+
+f_contractFailPct(int wins, int fails) =>
+    int n = wins + fails
+    n > 0 ? float(fails) / float(n) * 100.0 : na
+
+
+f_date(int ts) =>
+    na(ts)
+     ? "—"
+     : str.format_time(
+         ts,
+         "yyyy-MM-dd",
+         TZ)
+
+
+f_pathName(int path) =>
+    path == PATH_NR_CONTINUE ? "NR Continue" :
+     path == PATH_RETEST_CONTINUE ? "Retest Continue" :
+     path == PATH_RETEST_FAIL ? "Retest Fail" :
+     path == PATH_NR_FAIL ? "NR Fail" :
+     path == PATH_RETEST_UNCONFIRMED ? "Retest Unconfirmed" :
+     path == PATH_UNRESOLVED ? "Unresolved" :
+     "Pending"
+
+
+//=============================================================================
+// TIMEFRAME + SESSION
+//=============================================================================
+
+bool isOneMinuteChart =
+     timeframe.in_seconds(
+         timeframe.period) == 60
+
+int hh =
+     hour(
+         time,
+         TZ)
+
+int mm =
+     minute(
+         time,
+         TZ)
+
+int mins =
+     hh * 60 + mm
+
+bool isRTH =
+     mins >= 570 and
+     mins < 960
+
+bool isORB =
+     mins >= 570 and
+     mins < 585
+
+bool canTrigger =
+     mins >= 585 and
+     mins < 960
+
+bool is930 =
+     mins == 570
+
+bool isLastRTH =
+     mins == 959
+
+bool afterStartDate =
+     not useStartDate or
+     time >= researchStart
+
+bool beforeEndDate =
+     not useEndDate or
+     time <= researchEnd
+
+bool researchEligible =
+     isOneMinuteChart and
+     afterStartDate and
+     beforeEndDate
+
+
+//=============================================================================
+// ATR
+//=============================================================================
+
+float atr1m =
+     ta.atr(
+         atrLength)
+
+
+//=============================================================================
+// MARKET DATA
+// Retained for future Build 4 regime analysis.
+//=============================================================================
+
+float spxOpen1m =
+     request.security(
+         spxSymbol,
+         "1",
+         open,
+         gaps = barmerge.gaps_off,
+         lookahead = barmerge.lookahead_off)
+
+float spxClose1m =
+     request.security(
+         spxSymbol,
+         "1",
+         close,
+         gaps = barmerge.gaps_off,
+         lookahead = barmerge.lookahead_off)
+
+float nasdaqOpen1m =
+     request.security(
+         nasdaqSymbol,
+         "1",
+         open,
+         gaps = barmerge.gaps_off,
+         lookahead = barmerge.lookahead_off)
+
+float nasdaqClose1m =
+     request.security(
+         nasdaqSymbol,
+         "1",
+         close,
+         gaps = barmerge.gaps_off,
+         lookahead = barmerge.lookahead_off)
+
+float dowOpen1m =
+     request.security(
+         dowSymbol,
+         "1",
+         open,
+         gaps = barmerge.gaps_off,
+         lookahead = barmerge.lookahead_off)
+
+float dowClose1m =
+     request.security(
+         dowSymbol,
+         "1",
+         close,
+         gaps = barmerge.gaps_off,
+         lookahead = barmerge.lookahead_off)
+
+
+float spxPrevClose =
+     request.security(
+         spxSymbol,
+         "1D",
+         close[1],
+         gaps = barmerge.gaps_off,
+         lookahead = barmerge.lookahead_on)
+
+float nasdaqPrevClose =
+     request.security(
+         nasdaqSymbol,
+         "1D",
+         close[1],
+         gaps = barmerge.gaps_off,
+         lookahead = barmerge.lookahead_on)
+
+float dowPrevClose =
+     request.security(
+         dowSymbol,
+         "1D",
+         close[1],
+         gaps = barmerge.gaps_off,
+         lookahead = barmerge.lookahead_on)
+
+
+//=============================================================================
+// MARKET RTH OPEN
+//=============================================================================
+
+var float spxRthOpen = na
+var float nasdaqRthOpen = na
+var float dowRthOpen = na
+
+if is930
+
+    spxRthOpen :=
+         spxOpen1m
+
+    nasdaqRthOpen :=
+         nasdaqOpen1m
+
+    dowRthOpen :=
+         dowOpen1m
+
+
+float spxRthPct =
+     not na(spxRthOpen) and
+     spxRthOpen != 0.0
+     ? (
+         spxClose1m -
+         spxRthOpen
+       ) /
+       spxRthOpen *
+       100.0
+     : na
+
+float nasdaqRthPct =
+     not na(nasdaqRthOpen) and
+     nasdaqRthOpen != 0.0
+     ? (
+         nasdaqClose1m -
+         nasdaqRthOpen
+       ) /
+       nasdaqRthOpen *
+       100.0
+     : na
+
+float dowRthPct =
+     not na(dowRthOpen) and
+     dowRthOpen != 0.0
+     ? (
+         dowClose1m -
+         dowRthOpen
+       ) /
+       dowRthOpen *
+       100.0
+     : na
+
+
+float spxDailyPct =
+     not na(spxPrevClose) and
+     spxPrevClose != 0.0
+     ? (
+         spxClose1m -
+         spxPrevClose
+       ) /
+       spxPrevClose *
+       100.0
+     : na
+
+float nasdaqDailyPct =
+     not na(nasdaqPrevClose) and
+     nasdaqPrevClose != 0.0
+     ? (
+         nasdaqClose1m -
+         nasdaqPrevClose
+       ) /
+       nasdaqPrevClose *
+       100.0
+     : na
+
+float dowDailyPct =
+     not na(dowPrevClose) and
+     dowPrevClose != 0.0
+     ? (
+         dowClose1m -
+         dowPrevClose
+       ) /
+       dowPrevClose *
+       100.0
+     : na
+
+
+bool rthIndexesValid =
+     not na(spxRthPct) and
+     not na(nasdaqRthPct) and
+     not na(dowRthPct)
+
+bool dailyIndexesValid =
+     not na(spxDailyPct) and
+     not na(nasdaqDailyPct) and
+     not na(dowDailyPct)
+
+
+int currentRthRegime =
+     REGIME_INVALID
+
+if rthIndexesValid
+
+    if spxRthPct > 0.0 and
+       nasdaqRthPct > 0.0 and
+       dowRthPct > 0.0
+
+        currentRthRegime :=
+             REGIME_BULL
+
+    else if spxRthPct < 0.0 and nasdaqRthPct < 0.0 and dowRthPct < 0.0
+
+        currentRthRegime :=
+             REGIME_BEAR
+
+    else
+
+        currentRthRegime :=
+             REGIME_MIXED
+
+
+int currentDailyRegime =
+     REGIME_INVALID
+
+if dailyIndexesValid
+
+    if spxDailyPct > 0.0 and
+       nasdaqDailyPct > 0.0 and
+       dowDailyPct > 0.0
+
+        currentDailyRegime :=
+             REGIME_BULL
+
+    else if spxDailyPct < 0.0 and nasdaqDailyPct < 0.0 and dowDailyPct < 0.0
+
+        currentDailyRegime :=
+             REGIME_BEAR
+
+    else
+
+        currentDailyRegime :=
+             REGIME_MIXED
+
+
+//=============================================================================
+// ORB
+//=============================================================================
+
+var float orbHigh = na
+var float orbLow = na
+
+if is930
+
+    orbHigh :=
+         high
+
+    orbLow :=
+         low
+
+else if isORB
+
+    orbHigh :=
+         na(orbHigh)
+         ? high
+         : math.max(
+             orbHigh,
+             high)
+
+    orbLow :=
+         na(orbLow)
+         ? low
+         : math.min(
+             orbLow,
+             low)
+
+
+//=============================================================================
+// RESEARCH SAMPLE METADATA
+//=============================================================================
+
+var int firstAnalyzedDate = na
+var int lastAnalyzedDate = na
+var int analyzedDays = 0
+
+if is930 and
+   researchEligible
+
+    analyzedDays += 1
+
+    if na(firstAnalyzedDate)
+
+        firstAnalyzedDate :=
+             time
+
+    lastAnalyzedDate :=
+         time
+
+
+//=============================================================================
+// DAILY SIGNAL STATE
+//=============================================================================
+
+var bool signalTakenToday = false
+
+if is930
+
+    signalTakenToday :=
+         false
+
+
+//=============================================================================
+// BASELINE STATISTICS
+//=============================================================================
+
+var int totalSignals = 0
+var int completed = 0
+
+var int bullishSignals = 0
+var int bearishSignals = 0
+
+var int favorableFirst = 0
+var int adverseFirst = 0
+var int bothSameBar = 0
+var int unresolved = 0
+
+var int hits025 = 0
+var int hits075 = 0
+var int hits100 = 0
+
+var float totalMFE = 0.0
+var float totalMAE = 0.0
+
+
+//=============================================================================
+// CHECKPOINT AGGREGATES
+//=============================================================================
+
+var int cp5NoRetestN = 0
+var int cp10NoRetestN = 0
+var int cp15NoRetestN = 0
+var int cp30NoRetestN = 0
+
+var int cp5ForwardN = 0
+var int cp10ForwardN = 0
+var int cp15ForwardN = 0
+var int cp30ForwardN = 0
+
+var int cp5Fav = 0
+var int cp5Adv = 0
+var int cp5Both = 0
+var int cp5Unresolved = 0
+
+var int cp10Fav = 0
+var int cp10Adv = 0
+var int cp10Both = 0
+var int cp10Unresolved = 0
+
+var int cp15Fav = 0
+var int cp15Adv = 0
+var int cp15Both = 0
+var int cp15Unresolved = 0
+
+var int cp30Fav = 0
+var int cp30Adv = 0
+var int cp30Both = 0
+var int cp30Unresolved = 0
+
+var float cp5SepAtrTotal = 0.0
+var float cp10SepAtrTotal = 0.0
+var float cp15SepAtrTotal = 0.0
+var float cp30SepAtrTotal = 0.0
+
+
+//=============================================================================
+// BUILD 4.2 — NO-RETEST RUNNER AGGREGATES
+//
+// Each checkpoint cohort contains every breakout that has NOT retested by
+// that checkpoint. These statistics are descriptive and independent of the
+// stricter fresh ±0.50% forward test.
+//
+// EXTENSION = later session high/low reaches the stated favorable percentage
+//             from the ORIGINAL breakout close.
+// POST-CP MFE = maximum favorable excursion from the CHECKPOINT close,
+//               beginning on the NEXT 1-minute bar.
+// EVENTUAL RETEST = first ORB retest occurs AFTER that checkpoint.
+// RETEST MIN = minutes from checkpoint close to that later first retest.
+//=============================================================================
+
+var int cp5Ext075 = 0
+var int cp5Ext100 = 0
+var int cp5Ext150 = 0
+var int cp5Ext200 = 0
+var float cp5PostMfeTotal = 0.0
+var int cp5EventualRetestN = 0
+var float cp5MinutesToRetestTotal = 0.0
+
+var int cp10Ext075 = 0
+var int cp10Ext100 = 0
+var int cp10Ext150 = 0
+var int cp10Ext200 = 0
+var float cp10PostMfeTotal = 0.0
+var int cp10EventualRetestN = 0
+var float cp10MinutesToRetestTotal = 0.0
+
+var int cp15Ext075 = 0
+var int cp15Ext100 = 0
+var int cp15Ext150 = 0
+var int cp15Ext200 = 0
+var float cp15PostMfeTotal = 0.0
+var int cp15EventualRetestN = 0
+var float cp15MinutesToRetestTotal = 0.0
+
+var int cp30Ext075 = 0
+var int cp30Ext100 = 0
+var int cp30Ext150 = 0
+var int cp30Ext200 = 0
+var float cp30PostMfeTotal = 0.0
+var int cp30EventualRetestN = 0
+var float cp30MinutesToRetestTotal = 0.0
+
+
+//=============================================================================
+// BUILD 4.3 — NO-RETEST FORWARD EXCURSION AGGREGATES
+//
+// Window starts on the bar AFTER each no-retest checkpoint and ends BEFORE
+// the first later retest candle. If no retest occurs, it ends at RTH close.
+// The retest candle is excluded because intrabar sequencing is unknowable.
+//=============================================================================
+
+var float cp5WindowMfeTotal = 0.0
+var float cp5WindowMaeTotal = 0.0
+var int cp5WindowHit025 = 0
+var int cp5WindowHit050 = 0
+var int cp5WindowHit075 = 0
+var int cp5WindowHit100 = 0
+var array<float> cp5WindowMfeValues = array.new_float()
+var array<float> cp5WindowMaeValues = array.new_float()
+
+var float cp10WindowMfeTotal = 0.0
+var float cp10WindowMaeTotal = 0.0
+var int cp10WindowHit025 = 0
+var int cp10WindowHit050 = 0
+var int cp10WindowHit075 = 0
+var int cp10WindowHit100 = 0
+var array<float> cp10WindowMfeValues = array.new_float()
+var array<float> cp10WindowMaeValues = array.new_float()
+
+var float cp15WindowMfeTotal = 0.0
+var float cp15WindowMaeTotal = 0.0
+var int cp15WindowHit025 = 0
+var int cp15WindowHit050 = 0
+var int cp15WindowHit075 = 0
+var int cp15WindowHit100 = 0
+var array<float> cp15WindowMfeValues = array.new_float()
+var array<float> cp15WindowMaeValues = array.new_float()
+
+var float cp30WindowMfeTotal = 0.0
+var float cp30WindowMaeTotal = 0.0
+var int cp30WindowHit025 = 0
+var int cp30WindowHit050 = 0
+var int cp30WindowHit075 = 0
+var int cp30WindowHit100 = 0
+var array<float> cp30WindowMfeValues = array.new_float()
+var array<float> cp30WindowMaeValues = array.new_float()
+
+
+//=============================================================================
+// BUILD 4.4 — 10M / 15M ORB SEPARATION BUCKET AGGREGATES
+//
+// Buckets:
+//   0 = <100% ATR
+//   1 = 100-200% ATR
+//   2 = 200-300% ATR
+//   3 = >300% ATR
+//
+// Outcomes use the Build 4.3 forward excursion window:
+// checkpoint close -> bars before first later retest, or RTH close.
+//=============================================================================
+
+var array<int> sep10N = array.new_int(4, 0)
+var array<float> sep10MfeTotal = array.new_float(4, 0.0)
+var array<float> sep10MaeTotal = array.new_float(4, 0.0)
+var array<int> sep10Hit050 = array.new_int(4, 0)
+var array<int> sep10Hit075 = array.new_int(4, 0)
+var array<int> sep10Hit100 = array.new_int(4, 0)
+var array<int> sep10RetestN = array.new_int(4, 0)
+
+var array<float> sep10MfeB0 = array.new_float()
+var array<float> sep10MfeB1 = array.new_float()
+var array<float> sep10MfeB2 = array.new_float()
+var array<float> sep10MfeB3 = array.new_float()
+var array<float> sep10MaeB0 = array.new_float()
+var array<float> sep10MaeB1 = array.new_float()
+var array<float> sep10MaeB2 = array.new_float()
+var array<float> sep10MaeB3 = array.new_float()
+
+var array<int> sep15N = array.new_int(4, 0)
+var array<float> sep15MfeTotal = array.new_float(4, 0.0)
+var array<float> sep15MaeTotal = array.new_float(4, 0.0)
+var array<int> sep15Hit050 = array.new_int(4, 0)
+var array<int> sep15Hit075 = array.new_int(4, 0)
+var array<int> sep15Hit100 = array.new_int(4, 0)
+var array<int> sep15RetestN = array.new_int(4, 0)
+
+var array<float> sep15MfeB0 = array.new_float()
+var array<float> sep15MfeB1 = array.new_float()
+var array<float> sep15MfeB2 = array.new_float()
+var array<float> sep15MfeB3 = array.new_float()
+var array<float> sep15MaeB0 = array.new_float()
+var array<float> sep15MaeB1 = array.new_float()
+var array<float> sep15MaeB2 = array.new_float()
+var array<float> sep15MaeB3 = array.new_float()
+
+
+//=============================================================================
+// BUILD 4.6 — 10M -> 15M TRAJECTORY RATIO AGGREGATES
+//
+// Ratio = 15m separation / 10m separation
+//
+// 0 = Strong Contraction   (<0.50)
+// 1 = Moderate Contraction (0.50-0.79)
+// 2 = Stable               (0.80-1.19)
+// 3 = Moderate Expansion   (1.20-1.99)
+// 4 = Strong Expansion     (>=2.00)
+//
+// Forward performance begins after the 15m checkpoint.
+//=============================================================================
+
+var array<int> ratioN = array.new_int(5, 0)
+var array<float> ratioSep10Total = array.new_float(5, 0.0)
+var array<float> ratioSep15Total = array.new_float(5, 0.0)
+var array<float> ratioValueTotal = array.new_float(5, 0.0)
+var array<float> ratioMfeTotal = array.new_float(5, 0.0)
+var array<float> ratioMaeTotal = array.new_float(5, 0.0)
+var array<int> ratioHit050 = array.new_int(5, 0)
+var array<int> ratioHit075 = array.new_int(5, 0)
+var array<int> ratioHit100 = array.new_int(5, 0)
+var array<int> ratioRetestN = array.new_int(5, 0)
+
+var array<float> ratioMfeB0 = array.new_float()
+var array<float> ratioMfeB1 = array.new_float()
+var array<float> ratioMfeB2 = array.new_float()
+var array<float> ratioMfeB3 = array.new_float()
+var array<float> ratioMfeB4 = array.new_float()
+
+var array<float> ratioMaeB0 = array.new_float()
+var array<float> ratioMaeB1 = array.new_float()
+var array<float> ratioMaeB2 = array.new_float()
+var array<float> ratioMaeB3 = array.new_float()
+var array<float> ratioMaeB4 = array.new_float()
+
+
+//=============================================================================
+// BUILD 5.3 — STRONG EXPANSION / INITIAL SEPARATION AGGREGATES
+//
+// Population is restricted to Build 4.6 Strong Expansion events only:
+//   trajectory ratio >= 2.00
+//
+// 0 = 10m separation <100% frozen ATR
+// 1 = 10m separation >=100% frozen ATR
+//
+// Forward performance is unchanged from Build 4.6 and uses the 15m
+// forward-excursion window. This is a descriptive split only; it does not
+// alter signal qualification or the Strong Expansion definition.
+//=============================================================================
+
+var array<int> strongExpSepN = array.new_int(2, 0)
+var array<float> strongExpSepMfeTotal = array.new_float(2, 0.0)
+var array<float> strongExpSepMaeTotal = array.new_float(2, 0.0)
+var array<int> strongExpSepHit050 = array.new_int(2, 0)
+var array<int> strongExpSepHit075 = array.new_int(2, 0)
+var array<int> strongExpSepHit100 = array.new_int(2, 0)
+var array<int> strongExpSepRetestN = array.new_int(2, 0)
+
+var array<float> strongExpSepMfeB0 = array.new_float()
+var array<float> strongExpSepMfeB1 = array.new_float()
+var array<float> strongExpSepMaeB0 = array.new_float()
+var array<float> strongExpSepMaeB1 = array.new_float()
+
+
+//=============================================================================
+// POST-BREAKOUT PATH STATS
+//=============================================================================
+
+var int nrContinueN = 0
+var int retestContinueN = 0
+var int retestFailN = 0
+var int nrFailN = 0
+var int retestUnconfirmedN = 0
+var int pathUnresolvedN = 0
+
+
+var float nrContinueMFE = 0.0
+var float retestContinueMFE = 0.0
+var float retestFailMFE = 0.0
+var float nrFailMFE = 0.0
+
+
+var int nrContinueHit075 = 0
+var int nrContinueHit100 = 0
+
+
+//=============================================================================
+// RETEST AGGREGATES
+//=============================================================================
+
+var int totalRetests = 0
+var float totalMinutesToRetest = 0.0
+
+var float totalPreRetestMFE = 0.0
+var float totalPreRetestMAE = 0.0
+
+var float totalWickPenPctAtr = 0.0
+var float totalClosePenPctAtr = 0.0
+
+var int provisionalFailureN = 0
+var int failureReclaimN = 0
+
+var float totalMinutesToReclaim = 0.0
+
+
+//=============================================================================
+// ACTIVE BREAKOUT STATE
+//=============================================================================
+
+var bool activeSignal = false
+var int activeDir = 0
+
+var float entryPrice = na
+var int entryTime = na
+
+var float frozenAtr = na
+var float brokenOrbLevel = na
+
+var float retestTolerance = na
+var float failureTolerance = na
+
+var float retestUpper = na
+var float retestLower = na
+
+var int primaryOutcome = 0
+
+var bool hit025 = false
+var bool hit075 = false
+var bool hit100 = false
+
+var float mfePct = 0.0
+var float maePct = 0.0
+
+var int activePath = PATH_NONE
+
+
+//=============================================================================
+// ACTIVE CHECKPOINT STATE
+//=============================================================================
+
+var bool cp5Captured = false
+var bool cp10Captured = false
+var bool cp15Captured = false
+var bool cp30Captured = false
+
+// A checkpoint can be descriptive (no retest yet) without being eligible
+// for a fresh forward test. Forward eligibility requires that the original
+// breakout ±0.50% outcome is still unresolved at the checkpoint close.
+var bool cp5ForwardEligible = false
+var bool cp10ForwardEligible = false
+var bool cp15ForwardEligible = false
+var bool cp30ForwardEligible = false
+
+var float cp5Entry = na
+var float cp10Entry = na
+var float cp15Entry = na
+var float cp30Entry = na
+
+var int cp5Time = na
+var int cp10Time = na
+var int cp15Time = na
+var int cp30Time = na
+
+// Forward outcomes:
+// 0 = unresolved
+// 1 = favorable first
+// 2 = adverse first
+// 3 = both same 1M bar
+
+var int cp5Outcome = 0
+var int cp10Outcome = 0
+var int cp15Outcome = 0
+var int cp30Outcome = 0
+
+// Build 4.4 separation bucket captured at checkpoint close.
+var int cp10SepBucket = -1
+var int cp15SepBucket = -1
+
+// Build 4.6 exact checkpoint separations + trajectory ratio bucket.
+var float cp10SepAtrPct = na
+var float cp15SepAtrPct = na
+var float cpTrajectoryRatio = na
+var int cpRatioBucket = -1
+
+
+//=============================================================================
+// BUILD 4.2 — ACTIVE NO-RETEST RUNNER STATE
+//=============================================================================
+
+var float cp5PostMFE = 0.0
+var float cp10PostMFE = 0.0
+var float cp15PostMFE = 0.0
+var float cp30PostMFE = 0.0
+
+var bool cp5EventualRetest = false
+var bool cp10EventualRetest = false
+var bool cp15EventualRetest = false
+var bool cp30EventualRetest = false
+
+var int cp5EventualRetestTime = na
+var int cp10EventualRetestTime = na
+var int cp15EventualRetestTime = na
+var int cp30EventualRetestTime = na
+
+
+//=============================================================================
+// BUILD 4.3 — ACTIVE NO-RETEST FORWARD EXCURSION STATE
+//=============================================================================
+
+var float cp5WindowMFE = 0.0
+var float cp5WindowMAE = 0.0
+var float cp10WindowMFE = 0.0
+var float cp10WindowMAE = 0.0
+var float cp15WindowMFE = 0.0
+var float cp15WindowMAE = 0.0
+var float cp30WindowMFE = 0.0
+var float cp30WindowMAE = 0.0
+
+
+// BUILD 5.3 — all-breakout 10m quality snapshot state.
+var bool quality10Captured = false
+var bool quality15Captured = false
+var float quality10SepAtrPct = na
+var float quality15SepAtrPct = na
+var int quality10SepGroup = -1
+var float quality10MFE = na
+var float quality10MAE = na
+var float quality10Ratio = na
+var int quality10RetestState = -1
+var float qualityTrajectoryRatio = na
+
+var bool auditEligible = false
+var int auditSepGroup = -1
+var int auditDir = 0
+var float auditSep10 = na
+var float auditMfe10 = na
+var float auditMae10 = na
+var float auditQ10 = na
+var int auditRetestState10 = -1
+var float auditTrajectoryRatio = na
+var int auditTrajectoryClass = -1
+
+
+
+//=============================================================================
+// BUILD 5.3 — 10M QUALITY STUDY AGGREGATES
+//
+// Unlike the existing NR checkpoint studies, this population includes EVERY
+// active breakout that survives to the 10-minute timestamp, even if a retest
+// has already occurred. This is intentionally descriptive and does not alter
+// signal qualification.
+//=============================================================================
+
+var array<int> qualityN = array.new_int(3, 0)
+var array<float> qualityMfe10Total = array.new_float(3, 0.0)
+var array<float> qualityMae10Total = array.new_float(3, 0.0)
+var array<float> qualityRatio10Total = array.new_float(3, 0.0)
+var array<float> qualityTrajectoryTotal = array.new_float(3, 0.0)
+var array<int> qualityTrajectoryN = array.new_int(3, 0)
+
+var array<int> qualityNR = array.new_int(3, 0)
+var array<int> qualityRH = array.new_int(3, 0)
+var array<int> qualityRF = array.new_int(3, 0)
+var array<int> qualityRTOpen = array.new_int(3, 0)
+
+var array<int> qualityFav050 = array.new_int(3, 0)
+var array<int> qualityAdv050 = array.new_int(3, 0)
+var array<int> qualityBoth050 = array.new_int(3, 0)
+var array<int> qualityUnresolved050 = array.new_int(3, 0)
+var array<int> qualityHit075 = array.new_int(3, 0)
+var array<int> qualityHit100 = array.new_int(3, 0)
+
+f_qualityAvg(array<float> totals, int group) =>
+    int n = array.get(qualityN, group)
+    n > 0 ? array.get(totals, group) / n : na
+
+f_qualityTrajectoryAvg(int group) =>
+    int n = array.get(qualityTrajectoryN, group)
+    n > 0 ? array.get(qualityTrajectoryTotal, group) / n : na
+
+f_qualityRate(array<int> counts, int group) =>
+    int n = array.get(qualityN, group)
+    n > 0 ? array.get(counts, group) * 100.0 / n : na
+
+
+//=============================================================================
+// BUILD 5.3 — EST / EXT FAILURE AUDIT AGGREGATES
+// 0=EST WIN, 1=EST FAIL, 2=EXT WIN, 3=EXT FAIL
+//=============================================================================
+
+var array<int> auditN = array.new_int(4, 0)
+var array<int> auditNR = array.new_int(4, 0)
+var array<int> auditRH = array.new_int(4, 0)
+var array<int> auditRF = array.new_int(4, 0)
+var array<int> auditRTOpen = array.new_int(4, 0)
+var array<int> auditContract = array.new_int(4, 0)
+var array<int> auditStable = array.new_int(4, 0)
+var array<int> auditExpand = array.new_int(4, 0)
+var array<int> auditNo15 = array.new_int(4, 0)
+var array<int> auditBull = array.new_int(4, 0)
+var array<int> auditBear = array.new_int(4, 0)
+var array<float> auditSep10Total = array.new_float(4, 0.0)
+var array<float> auditMfe10Total = array.new_float(4, 0.0)
+var array<float> auditMae10Total = array.new_float(4, 0.0)
+var array<float> auditQ10Total = array.new_float(4, 0.0)
+
+var int auditEstBoth = 0
+var int auditEstUnresolved = 0
+var int auditExtBoth = 0
+var int auditExtUnresolved = 0
+
+f_auditAvg(array<float> totals, int col) =>
+    int n = array.get(auditN, col)
+    n > 0 ? array.get(totals, col) / float(n) : na
+
+//=============================================================================
+// BUILD 5.3.2 — EST CONTRACT DIAGNOSTIC AGGREGATES
+// 0 = EST CONTRACT WIN, 1 = EST CONTRACT FAIL
+//=============================================================================
+
+var array<int> contractDiagN = array.new_int(2, 0)
+var array<float> contractDiagSepTotal = array.new_float(2, 0.0)
+var array<float> contractDiagMfeTotal = array.new_float(2, 0.0)
+var array<float> contractDiagMaeTotal = array.new_float(2, 0.0)
+var array<float> contractDiagQTotal = array.new_float(2, 0.0)
+var array<int> contractDiagBull = array.new_int(2, 0)
+var array<int> contractDiagBear = array.new_int(2, 0)
+
+// Flattened arrays: index = bucket * 2 + outcome column.
+var array<int> contractState = array.new_int(8, 0)
+var array<int> contractSep = array.new_int(8, 0)
+var array<int> contractMfe = array.new_int(8, 0)
+var array<int> contractMae = array.new_int(8, 0)
+var array<int> contractQ = array.new_int(8, 0)
+var array<int> contractSeverity = array.new_int(6, 0)
+
+f_contractIdx(int bucket, int outcomeCol) =>
+    bucket >= 0 and outcomeCol >= 0 ? bucket * 2 + outcomeCol : -1
+
+f_contractCount(array<int> a, int bucket, int outcomeCol) =>
+    int idx = f_contractIdx(bucket, outcomeCol)
+    idx >= 0 ? array.get(a, idx) : 0
+
+f_contractAvg(array<float> totals, int outcomeCol) =>
+    int n = array.get(contractDiagN, outcomeCol)
+    n > 0 ? array.get(totals, outcomeCol) / float(n) : na
+
+//=============================================================================
+// BUILD 5.3 — EXT DEPTH AGGREGATES
+//=============================================================================
+
+var array<int> extDepthN = array.new_int(3, 0)
+var array<int> extDepthFav050 = array.new_int(3, 0)
+var array<int> extDepthHit075 = array.new_int(3, 0)
+var array<int> extDepthHit100 = array.new_int(3, 0)
+var array<float> extDepthMfeTotal = array.new_float(3, 0.0)
+var array<float> extDepthMaeTotal = array.new_float(3, 0.0)
+
+f_extDepthAvg(array<float> totals, int bucket) =>
+    int n = array.get(extDepthN, bucket)
+    n > 0 ? array.get(totals, bucket) / float(n) : na
+
+f_extDepthRate(array<int> hits, int bucket) =>
+    int n = array.get(extDepthN, bucket)
+    n > 0 ? float(array.get(hits, bucket)) / float(n) * 100.0 : na
+
+
+//=============================================================================
+// ACTIVE RETEST STATE
+//=============================================================================
+
+var bool firstRetestOccurred = false
+var int firstRetestTime = na
+
+var float preRetestMFE = 0.0
+var float preRetestMAE = 0.0
+
+var float maxWickPenAtrPct = 0.0
+var float maxClosePenAtrPct = 0.0
+
+// Stops first-retest penetration measurements after
+// confirmation or provisional failure.
+var bool retestPenetrationFrozen = false
+
+var bool provisionalFailure = false
+var int failureTime = na
+
+var bool retestConfirmed = false
+var int confirmationTime = na
+var float confirmationPrice = na
+
+var bool reclaimedAfterFailure = false
+var int reclaimTime = na
+
+var int retestCount = 0
+
+var bool inRetestZonePrev = false
+
+
+//=============================================================================
+// ACTIVE REGIME SNAPSHOT
+//=============================================================================
+
+var int breakoutRthRegime = REGIME_INVALID
+var int breakoutDailyRegime = REGIME_INVALID
+
+
+//=============================================================================
+// BREAKOUT CANDLE METRICS
+//=============================================================================
+
+bool validORB =
+     not na(orbHigh) and
+     not na(orbLow)
+
+float candleRange =
+     high - low
+
+float candleBody =
+     math.abs(
+         close -
+         open)
+
+float bodyPct =
+     candleRange > 0.0
+     ? candleBody /
+       candleRange *
+       100.0
+     : 0.0
+
+bool bullDirectional =
+     close > open
+
+bool bearDirectional =
+     close < open
+
+
+float bullPenetration =
+     validORB
+     ? math.max(
+         close -
+         orbHigh,
+         0.0)
+     : 0.0
+
+float bearPenetration =
+     validORB
+     ? math.max(
+         orbLow -
+         close,
+         0.0)
+     : 0.0
+
+
+float bullPenetrationPct =
+     atr1m > 0.0
+     ? bullPenetration /
+       atr1m *
+       100.0
+     : 0.0
+
+float bearPenetrationPct =
+     atr1m > 0.0
+     ? bearPenetration /
+       atr1m *
+       100.0
+     : 0.0
+
+
+float bullClosePct =
+     candleRange > 0.0
+     ? (
+         close -
+         low
+       ) /
+       candleRange *
+       100.0
+     : 0.0
+
+float bearClosePct =
+     candleRange > 0.0
+     ? (
+         high -
+         close
+       ) /
+       candleRange *
+       100.0
+     : 0.0
+
+
+float rangeAtrPct =
+     atr1m > 0.0
+     ? candleRange /
+       atr1m *
+       100.0
+     : 0.0
+
+
+//=============================================================================
+// STRENGTH SCORE
+//=============================================================================
+
+float bullPenScore =
+     f_clamp(
+         bullPenetrationPct /
+         50.0 *
+         30.0,
+         0.0,
+         30.0)
+
+float bearPenScore =
+     f_clamp(
+         bearPenetrationPct /
+         50.0 *
+         30.0,
+         0.0,
+         30.0)
+
+float bodyScore =
+     f_clamp(
+         bodyPct /
+         100.0 *
+         25.0,
+         0.0,
+         25.0)
+
+float bullCloseScore =
+     f_clamp(
+         bullClosePct /
+         100.0 *
+         20.0,
+         0.0,
+         20.0)
+
+float bearCloseScore =
+     f_clamp(
+         bearClosePct /
+         100.0 *
+         20.0,
+         0.0,
+         20.0)
+
+float rangeScore =
+     f_clamp(
+         rangeAtrPct /
+         150.0 *
+         15.0,
+         0.0,
+         15.0)
+
+float speedScore =
+     f_speedScore(
+         mins)
+
+float bullScore =
+     enableStrengthScore
+     ? bullPenScore +
+       bodyScore +
+       bullCloseScore +
+       rangeScore +
+       speedScore
+     : 0.0
+
+float bearScore =
+     enableStrengthScore
+     ? bearPenScore +
+       bodyScore +
+       bearCloseScore +
+       rangeScore +
+       speedScore
+     : 0.0
+
+
+//=============================================================================
+// FILTERS
+//=============================================================================
+
+float requiredGradeScore =
+     f_minGradeScore(
+         minimumGrade)
+
+bool bullDirectionalOK =
+     not reqDirectional or
+     bullDirectional
+
+bool bearDirectionalOK =
+     not reqDirectional or
+     bearDirectional
+
+bool bullPenOK =
+     not reqPenetration or
+     bullPenetrationPct >=
+     minPenetrationPct
+
+bool bearPenOK =
+     not reqPenetration or
+     bearPenetrationPct >=
+     minPenetrationPct
+
+bool bodyOK =
+     not reqBody or
+     bodyPct >=
+     minBodyPct
+
+bool rangeOK =
+     not reqRange or
+     rangeAtrPct >=
+     minRangeAtrPct
+
+bool bullCloseOK =
+     not reqClosePosition or
+     bullClosePct >=
+     minClosePositionPct
+
+bool bearCloseOK =
+     not reqClosePosition or
+     bearClosePct >=
+     minClosePositionPct
+
+bool bullGradeOK =
+     not reqMinimumGrade or
+     bullScore >=
+     requiredGradeScore
+
+bool bearGradeOK =
+     not reqMinimumGrade or
+     bearScore >=
+     requiredGradeScore
+
+
+//=============================================================================
+// BREAKOUT DETECTION
+//=============================================================================
+
+bool rawBull =
+     researchEligible and
+     canTrigger and
+     validORB and
+     not signalTakenToday and
+     close > orbHigh
+
+bool rawBear =
+     researchEligible and
+     canTrigger and
+     validORB and
+     not signalTakenToday and
+     close < orbLow
+
+bool bullBreak =
+     rawBull and
+     bullDirectionalOK and
+     bullPenOK and
+     bodyOK and
+     rangeOK and
+     bullCloseOK and
+     bullGradeOK
+
+bool bearBreak =
+     rawBear and
+     bearDirectionalOK and
+     bearPenOK and
+     bodyOK and
+     rangeOK and
+     bearCloseOK and
+     bearGradeOK
+
+
+//=============================================================================
+// NEW BREAKOUT INITIALIZATION
+//=============================================================================
+
+if bullBreak or bearBreak
+
+    signalTakenToday :=
+         true
+
+    activeSignal :=
+         true
+
+    activeDir :=
+         bullBreak
+         ? 1
+         : -1
+
+    entryPrice :=
+         close
+
+    entryTime :=
+         time
+
+    frozenAtr :=
+         atr1m
+
+    brokenOrbLevel :=
+         activeDir == 1
+         ? orbHigh
+         : orbLow
+
+    retestTolerance :=
+         frozenAtr *
+         (
+             retestZoneAtrPct /
+             100.0
+         )
+
+    failureTolerance :=
+         frozenAtr *
+         (
+             failureAtrPct /
+             100.0
+         )
+
+    retestUpper :=
+         brokenOrbLevel +
+         retestTolerance
+
+    retestLower :=
+         brokenOrbLevel -
+         retestTolerance
+
+
+    primaryOutcome :=
+         0
+
+    hit025 :=
+         false
+
+    hit075 :=
+         false
+
+    hit100 :=
+         false
+
+    mfePct :=
+         0.0
+
+    maePct :=
+         0.0
+
+    activePath :=
+         PATH_NONE
+
+
+    firstRetestOccurred :=
+         false
+
+    firstRetestTime :=
+         na
+
+    preRetestMFE :=
+         0.0
+
+    preRetestMAE :=
+         0.0
+
+    maxWickPenAtrPct :=
+         0.0
+
+    maxClosePenAtrPct :=
+         0.0
+
+    retestPenetrationFrozen :=
+         false
+
+    provisionalFailure :=
+         false
+
+    failureTime :=
+         na
+
+    retestConfirmed :=
+         false
+
+    confirmationTime :=
+         na
+
+    confirmationPrice :=
+         na
+
+    reclaimedAfterFailure :=
+         false
+
+    reclaimTime :=
+         na
+
+    retestCount :=
+         0
+
+    inRetestZonePrev :=
+         false
+
+
+    breakoutRthRegime :=
+         currentRthRegime
+
+    breakoutDailyRegime :=
+         currentDailyRegime
+
+
+    totalSignals += 1
+
+    if activeDir == 1
+        bullishSignals += 1
+    else
+        bearishSignals += 1
+
+
+    cp5Captured := false
+    cp10Captured := false
+    cp15Captured := false
+    cp30Captured := false
+
+    cp5ForwardEligible := false
+    cp10ForwardEligible := false
+    cp15ForwardEligible := false
+    cp30ForwardEligible := false
+
+    cp5Entry := na
+    cp10Entry := na
+    cp15Entry := na
+    cp30Entry := na
+
+    cp5Time := na
+    cp10Time := na
+    cp15Time := na
+    cp30Time := na
+
+    cp5Outcome := 0
+    cp10Outcome := 0
+    cp15Outcome := 0
+    cp30Outcome := 0
+
+    cp10SepBucket := -1
+    cp15SepBucket := -1
+
+    cp10SepAtrPct := na
+    cp15SepAtrPct := na
+    cpTrajectoryRatio := na
+    cpRatioBucket := -1
+
+    cp5PostMFE := 0.0
+    cp10PostMFE := 0.0
+    cp15PostMFE := 0.0
+    cp30PostMFE := 0.0
+
+    cp5EventualRetest := false
+    cp10EventualRetest := false
+    cp15EventualRetest := false
+    cp30EventualRetest := false
+
+    cp5EventualRetestTime := na
+    cp10EventualRetestTime := na
+    cp15EventualRetestTime := na
+    cp30EventualRetestTime := na
+
+    cp5WindowMFE := 0.0
+    cp5WindowMAE := 0.0
+    cp10WindowMFE := 0.0
+    cp10WindowMAE := 0.0
+    cp15WindowMFE := 0.0
+    cp15WindowMAE := 0.0
+
+    quality10Captured := false
+    quality15Captured := false
+    quality10SepAtrPct := na
+    quality15SepAtrPct := na
+    quality10SepGroup := -1
+    quality10MFE := na
+    quality10MAE := na
+    quality10Ratio := na
+    quality10RetestState := -1
+    qualityTrajectoryRatio := na
+    auditEligible := false
+    auditSepGroup := -1
+    auditDir := 0
+    auditSep10 := na
+    auditMfe10 := na
+    auditMae10 := na
+    auditQ10 := na
+    auditRetestState10 := -1
+    auditTrajectoryRatio := na
+    auditTrajectoryClass := -1
+    cp30WindowMFE := 0.0
+    cp30WindowMAE := 0.0
+
+
+//=============================================================================
+// BREAKOUT LABEL
+//=============================================================================
+
+if showBreakoutLabels and
+   (bullBreak or bearBreak)
+
+    float activeScoreNow =
+         bullBreak
+         ? bullScore
+         : bearScore
+
+    string gradeText =
+         showScoreOnLabel and
+         enableStrengthScore
+         ? "\n" +
+           f_grade(
+               activeScoreNow) +
+           " · " +
+           str.tostring(
+               activeScoreNow,
+               "#.0")
+         : ""
+
+    label.new(
+         time,
+         close,
+         activeDir == 1
+         ? "ORB LONG\n" +
+           str.tostring(
+               close,
+               format.mintick) +
+           gradeText
+         : "ORB SHORT\n" +
+           str.tostring(
+               close,
+               format.mintick) +
+           gradeText,
+         xloc = xloc.bar_time,
+         yloc = yloc.price,
+         style =
+             activeDir == 1
+             ? label.style_label_up
+             : label.style_label_down,
+         color =
+             activeDir == 1
+             ? color.new(
+                 color.green,
+                 0)
+             : color.new(
+                 color.red,
+                 0),
+         textcolor =
+             color.white, 
+         size =
+             size.small)
+
+
+//=============================================================================
+// ACTIVE POST-BREAKOUT ENGINE
+//=============================================================================
+
+//=============================================================================
+// POST-ENTRY BAR STATE
+//=============================================================================
+
+bool postEntryBar =
+     activeSignal and
+     not na(entryTime) and
+     time > entryTime and
+     isRTH
+
+
+// These are declared at bar scope so every post-breakout
+// research section can reference the same values.
+
+float favorableMove = na
+float adverseMove = na
+
+
+if postEntryBar
+
+    //---------------------------------------------------------------------
+    // FAVORABLE / ADVERSE EXCURSION
+    //---------------------------------------------------------------------
+
+    if activeDir == 1
+
+        // Bullish ORB breakout
+        favorableMove :=
+             (high - entryPrice) /
+             entryPrice *
+             100.0
+
+        adverseMove :=
+             (entryPrice - low) /
+             entryPrice *
+             100.0
+
+    else if activeDir == -1
+
+        // Bearish ORB breakout
+        favorableMove :=
+             (entryPrice - low) /
+             entryPrice *
+             100.0
+
+        adverseMove :=
+             (high - entryPrice) /
+             entryPrice *
+             100.0
+
+
+    int minutesSinceBreakout =
+         int(
+             (time - entryTime) /
+             60000)
+
+
+    mfePct :=
+         math.max(
+             mfePct,
+             favorableMove)
+
+    maePct :=
+         math.max(
+             maePct,
+             adverseMove)
+
+
+    float currentOrbSeparation =
+         activeDir == 1
+         ? close - brokenOrbLevel
+         : brokenOrbLevel - close
+
+    float currentOrbSepAtrPct =
+         frozenAtr > 0.0
+         ? currentOrbSeparation /
+           frozenAtr *
+           100.0
+         : na
+
+
+    //---------------------------------------------------------------------
+    // PRE-RETEST EXCURSION
+    //---------------------------------------------------------------------
+
+    if not firstRetestOccurred
+
+        preRetestMFE :=
+             math.max(
+                 preRetestMFE,
+                 favorableMove)
+
+        preRetestMAE :=
+             math.max(
+                 preRetestMAE,
+                 adverseMove)
+
+
+    //---------------------------------------------------------------------
+    // SECONDARY FAVORABLE TARGETS
+    //---------------------------------------------------------------------
+
+    if not hit025 and
+       favorableMove >=
+       secondary025
+
+        hit025 :=
+             true
+
+
+    if not hit075 and
+       favorableMove >=
+       secondary075
+
+        hit075 :=
+             true
+
+
+    if not hit100 and
+       favorableMove >=
+       secondary100
+
+        hit100 :=
+             true
+
+
+    //---------------------------------------------------------------------
+    // RETEST ZONE OVERLAP
+    //
+    // Candle range overlaps the frozen zone.
+    //---------------------------------------------------------------------
+
+    bool overlapsRetestZone =
+         high >= retestLower and
+         low <= retestUpper
+
+
+    //---------------------------------------------------------------------
+    // FIRST-EVENT CLASSIFICATION BEFORE RETEST
+    //---------------------------------------------------------------------
+
+    if activePath == PATH_NONE and
+       not firstRetestOccurred
+
+        bool favorableHitNow =
+             favorableMove >=
+             primaryPct
+
+        bool adverseHitNow =
+             adverseMove >=
+             primaryPct
+
+
+        // If target and retest occur on same 1M candle, sequencing
+        // is unknowable. Retest takes precedence for path classification.
+        // Baseline ±0.50 logic remains independent below.
+
+        if overlapsRetestZone
+
+            firstRetestOccurred :=
+                 true
+
+            firstRetestTime :=
+                 time
+
+            totalRetests +=
+                 1
+
+            retestCount +=
+                 1
+
+            totalMinutesToRetest +=
+                 (
+                     time -
+                     entryTime
+                 ) /
+                 60000.0
+
+            totalPreRetestMFE +=
+                 preRetestMFE
+
+            totalPreRetestMAE +=
+                 preRetestMAE
+
+
+            if showRetestLabels
+
+                label.new(
+                     time,
+                     brokenOrbLevel,
+                     "RETEST\n+" +
+                     str.tostring(
+                         int(
+                             (
+                                 time -
+                                 entryTime
+                             ) /
+                             60000
+                         )
+                     ) +
+                     "m",
+                     xloc = xloc.bar_time,
+                     yloc = yloc.price,
+                     style =
+                         activeDir == 1
+                         ? label.style_label_down
+                         : label.style_label_up,
+                     color =
+                         color.new(
+                             color.orange,
+                             0),
+                     textcolor =
+                         color.white,
+                     size =
+                         size.tiny)
+
+
+        else if favorableHitNow
+
+            activePath :=
+                 PATH_NR_CONTINUE
+
+
+        else if adverseHitNow
+
+            activePath :=
+                 PATH_NR_FAIL
+
+
+    //---------------------------------------------------------------------
+    // RETEST COUNT
+    //
+    // Count a new zone entry after previously being outside.
+    //---------------------------------------------------------------------
+
+    if firstRetestOccurred
+
+        if overlapsRetestZone and
+           not inRetestZonePrev and
+           time != firstRetestTime
+
+            retestCount +=
+                 1
+
+
+    inRetestZonePrev :=
+         overlapsRetestZone
+
+
+    //---------------------------------------------------------------------
+    // FIRST-RETEST PENETRATION
+    //
+    // ONLY this measurement freezes after the first decisive retest
+    // outcome. Failure / confirmation / continuation / reclaim logic
+    // remains active on subsequent bars.
+    //---------------------------------------------------------------------
+
+    if firstRetestOccurred and
+       not retestPenetrationFrozen and
+       frozenAtr > 0.0
+
+        float wickPen =
+             activeDir == 1
+             ? math.max(
+                 brokenOrbLevel -
+                 low,
+                 0.0)
+             : math.max(
+                 high -
+                 brokenOrbLevel,
+                 0.0)
+
+        float closePen =
+             activeDir == 1
+             ? math.max(
+                 brokenOrbLevel -
+                 close,
+                 0.0)
+             : math.max(
+                 close -
+                 brokenOrbLevel,
+                 0.0)
+
+
+        float wickPenPctAtr =
+             wickPen /
+             frozenAtr *
+             100.0
+
+        float closePenPctAtr =
+             closePen /
+             frozenAtr *
+             100.0
+
+
+        maxWickPenAtrPct :=
+             math.max(
+                 maxWickPenAtrPct,
+                 wickPenPctAtr)
+
+        maxClosePenAtrPct :=
+             math.max(
+                 maxClosePenAtrPct,
+                 closePenPctAtr)
+
+
+
+    //=====================================================================
+    // BUILD 5.3 — ALL-BREAKOUT 10M QUALITY SNAPSHOT
+    //
+    // This runs independently of the NR checkpoint study. A breakout may
+    // therefore be represented here even if it already retested the ORB.
+    // MFE/MAE are the original-breakout excursions observed THROUGH the
+    // checkpoint bar. The quality ratio uses a 0.01% MAE floor only to
+    // prevent division-by-zero; the raw MFE and MAE remain separately shown.
+    //=====================================================================
+
+    if enableCheckpointResearch
+
+        if not quality10Captured and minutesSinceBreakout >= 10
+            quality10Captured := true
+            quality10SepAtrPct := currentOrbSepAtrPct
+            quality10SepGroup := f_qualitySepGroup(currentOrbSepAtrPct)
+            quality10MFE := mfePct
+            quality10MAE := maePct
+            quality10Ratio := quality10MFE / math.max(quality10MAE, 0.01)
+
+            quality10RetestState :=
+                 not firstRetestOccurred ? 0 :
+                 retestConfirmed ? 1 :
+                 provisionalFailure ? 2 :
+                 3
+
+
+            if quality10SepGroup == 1 or quality10SepGroup == 2
+                auditEligible := true
+                auditSepGroup := quality10SepGroup
+                auditDir := activeDir
+                auditSep10 := quality10SepAtrPct
+                auditMfe10 := quality10MFE
+                auditMae10 := quality10MAE
+                auditQ10 := quality10Ratio
+                auditRetestState10 := quality10RetestState
+
+        if quality10Captured and
+           not quality15Captured and
+           minutesSinceBreakout >= 15
+
+            quality15Captured := true
+            quality15SepAtrPct := currentOrbSepAtrPct
+
+            if not na(quality10SepAtrPct) and quality10SepAtrPct > 0.0
+                qualityTrajectoryRatio := quality15SepAtrPct / quality10SepAtrPct
+                if auditEligible
+                    auditTrajectoryRatio := qualityTrajectoryRatio
+                    auditTrajectoryClass := f_auditTrajectoryClass(auditTrajectoryRatio)
+
+
+    //=====================================================================
+    // NO-RETEST CHECKPOINT CAPTURE
+    //
+    // NR N is descriptive: no first retest has occurred by the checkpoint.
+    //
+    // FWD N is stricter: the original breakout ±0.50% outcome must still
+    // be unresolved at the checkpoint CLOSE. We therefore also inspect the
+    // current checkpoint candle's high/low before declaring eligibility.
+    // The fresh checkpoint outcome begins on the NEXT 1-minute bar.
+    //=====================================================================
+
+    if enableCheckpointResearch and
+       not firstRetestOccurred
+
+        bool originalStillUnresolvedNow =
+             primaryOutcome == 0 and
+             favorableMove < primaryPct and
+             adverseMove < primaryPct
+
+        if not cp5Captured and
+           minutesSinceBreakout >= 5
+
+            cp5Captured := true
+            cp5NoRetestN += 1
+            cp5SepAtrTotal += currentOrbSepAtrPct
+
+            cp5Entry := close
+            cp5Time := time
+
+            cp5ForwardEligible := originalStillUnresolvedNow
+
+            if cp5ForwardEligible
+                cp5ForwardN += 1
+
+            if showCheckpointLabels
+                label.new(
+                     time,
+                     close,
+                     cp5ForwardEligible ? "NR 5m FWD" : "NR 5m",
+                     xloc = xloc.bar_time,
+                     yloc = yloc.price,
+                     style =
+                         activeDir == 1
+                         ? label.style_label_up
+                         : label.style_label_down,
+                     color = color.new(color.gray, 20),
+                     textcolor = color.white,
+                     size = size.tiny)
+
+
+        if not cp10Captured and
+           minutesSinceBreakout >= 10
+
+            cp10Captured := true
+            cp10NoRetestN += 1
+            cp10SepAtrTotal += currentOrbSepAtrPct
+
+            cp10Entry := close
+            cp10Time := time
+            cp10SepAtrPct := currentOrbSepAtrPct
+            cp10SepBucket := f_sepBucket(currentOrbSepAtrPct)
+
+            cp10ForwardEligible := originalStillUnresolvedNow
+
+            if cp10ForwardEligible
+                cp10ForwardN += 1
+
+            if showCheckpointLabels
+                label.new(
+                     time,
+                     close,
+                     cp10ForwardEligible ? "NR 10m FWD" : "NR 10m",
+                     xloc = xloc.bar_time,
+                     yloc = yloc.price,
+                     style =
+                         activeDir == 1
+                         ? label.style_label_up
+                         : label.style_label_down,
+                     color = color.new(color.gray, 20),
+                     textcolor = color.white,
+                     size = size.tiny)
+
+
+        if not cp15Captured and
+           minutesSinceBreakout >= 15
+
+            cp15Captured := true
+            cp15NoRetestN += 1
+            cp15SepAtrTotal += currentOrbSepAtrPct
+
+            cp15Entry := close
+            cp15Time := time
+            cp15SepAtrPct := currentOrbSepAtrPct
+            cp15SepBucket := f_sepBucket(currentOrbSepAtrPct)
+
+            if cp10Captured and not na(cp10SepAtrPct) and cp10SepAtrPct > 0.0
+                cpTrajectoryRatio := cp15SepAtrPct / cp10SepAtrPct
+                cpRatioBucket := f_ratioBucket(cp10SepAtrPct, cp15SepAtrPct)
+
+            cp15ForwardEligible := originalStillUnresolvedNow
+
+            if cp15ForwardEligible
+                cp15ForwardN += 1
+
+            if showCheckpointLabels
+                label.new(
+                     time,
+                     close,
+                     cp15ForwardEligible ? "NR 15m FWD" : "NR 15m",
+                     xloc = xloc.bar_time,
+                     yloc = yloc.price,
+                     style =
+                         activeDir == 1
+                         ? label.style_label_up
+                         : label.style_label_down,
+                     color = color.new(color.gray, 20),
+                     textcolor = color.white,
+                     size = size.tiny)
+
+
+        if not cp30Captured and
+           minutesSinceBreakout >= 30
+
+            cp30Captured := true
+            cp30NoRetestN += 1
+            cp30SepAtrTotal += currentOrbSepAtrPct
+
+            cp30Entry := close
+            cp30Time := time
+
+            cp30ForwardEligible := originalStillUnresolvedNow
+
+            if cp30ForwardEligible
+                cp30ForwardN += 1
+
+            if showCheckpointLabels
+                label.new(
+                     time,
+                     close,
+                     cp30ForwardEligible ? "NR 30m FWD" : "NR 30m",
+                     xloc = xloc.bar_time,
+                     yloc = yloc.price,
+                     style =
+                         activeDir == 1
+                         ? label.style_label_up
+                         : label.style_label_down,
+                     color = color.new(color.gray, 20),
+                     textcolor = color.white,
+                     size = size.tiny)
+
+
+    //=====================================================================
+    // BUILD 4.3 — FORWARD EXCURSION UNTIL FIRST RETEST / RTH CLOSE
+    //
+    // Only bars strictly after the checkpoint are eligible. The first later
+    // retest candle is excluded, so the window contains only fully observable
+    // no-retest bars.
+    //=====================================================================
+
+    if not firstRetestOccurred
+
+        if cp5Captured and not na(cp5Time) and time > cp5Time
+            float cp5WindowFav = activeDir == 1 ? (high - cp5Entry) / cp5Entry * 100.0 : (cp5Entry - low) / cp5Entry * 100.0
+            float cp5WindowAdv = activeDir == 1 ? (cp5Entry - low) / cp5Entry * 100.0 : (high - cp5Entry) / cp5Entry * 100.0
+            cp5WindowMFE := math.max(cp5WindowMFE, cp5WindowFav)
+            cp5WindowMAE := math.max(cp5WindowMAE, cp5WindowAdv)
+
+        if cp10Captured and not na(cp10Time) and time > cp10Time
+            float cp10WindowFav = activeDir == 1 ? (high - cp10Entry) / cp10Entry * 100.0 : (cp10Entry - low) / cp10Entry * 100.0
+            float cp10WindowAdv = activeDir == 1 ? (cp10Entry - low) / cp10Entry * 100.0 : (high - cp10Entry) / cp10Entry * 100.0
+            cp10WindowMFE := math.max(cp10WindowMFE, cp10WindowFav)
+            cp10WindowMAE := math.max(cp10WindowMAE, cp10WindowAdv)
+
+        if cp15Captured and not na(cp15Time) and time > cp15Time
+            float cp15WindowFav = activeDir == 1 ? (high - cp15Entry) / cp15Entry * 100.0 : (cp15Entry - low) / cp15Entry * 100.0
+            float cp15WindowAdv = activeDir == 1 ? (cp15Entry - low) / cp15Entry * 100.0 : (high - cp15Entry) / cp15Entry * 100.0
+            cp15WindowMFE := math.max(cp15WindowMFE, cp15WindowFav)
+            cp15WindowMAE := math.max(cp15WindowMAE, cp15WindowAdv)
+
+        if cp30Captured and not na(cp30Time) and time > cp30Time
+            float cp30WindowFav = activeDir == 1 ? (high - cp30Entry) / cp30Entry * 100.0 : (cp30Entry - low) / cp30Entry * 100.0
+            float cp30WindowAdv = activeDir == 1 ? (cp30Entry - low) / cp30Entry * 100.0 : (high - cp30Entry) / cp30Entry * 100.0
+            cp30WindowMFE := math.max(cp30WindowMFE, cp30WindowFav)
+            cp30WindowMAE := math.max(cp30WindowMAE, cp30WindowAdv)
+
+
+    //=====================================================================
+    // BUILD 4.2 — POST-CHECKPOINT RUNNER TRACKING
+    //
+    // For every descriptive no-retest checkpoint cohort:
+    // 1) track post-checkpoint MFE from the checkpoint close;
+    // 2) flag the first later retest and its elapsed minutes.
+    //
+    // Tracking starts on the NEXT bar so the checkpoint candle itself is not
+    // reused as post-checkpoint information.
+    //=====================================================================
+
+    if cp5Captured and not na(cp5Time) and time > cp5Time
+
+        float cp5RunnerFav =
+             activeDir == 1
+             ? (high - cp5Entry) / cp5Entry * 100.0
+             : (cp5Entry - low) / cp5Entry * 100.0
+
+        cp5PostMFE := math.max(cp5PostMFE, cp5RunnerFav)
+
+        if not cp5EventualRetest and overlapsRetestZone
+            cp5EventualRetest := true
+            cp5EventualRetestTime := time
+
+
+    if cp10Captured and not na(cp10Time) and time > cp10Time
+
+        float cp10RunnerFav =
+             activeDir == 1
+             ? (high - cp10Entry) / cp10Entry * 100.0
+             : (cp10Entry - low) / cp10Entry * 100.0
+
+        cp10PostMFE := math.max(cp10PostMFE, cp10RunnerFav)
+
+        if not cp10EventualRetest and overlapsRetestZone
+            cp10EventualRetest := true
+            cp10EventualRetestTime := time
+
+
+    if cp15Captured and not na(cp15Time) and time > cp15Time
+
+        float cp15RunnerFav =
+             activeDir == 1
+             ? (high - cp15Entry) / cp15Entry * 100.0
+             : (cp15Entry - low) / cp15Entry * 100.0
+
+        cp15PostMFE := math.max(cp15PostMFE, cp15RunnerFav)
+
+        if not cp15EventualRetest and overlapsRetestZone
+            cp15EventualRetest := true
+            cp15EventualRetestTime := time
+
+
+    if cp30Captured and not na(cp30Time) and time > cp30Time
+
+        float cp30RunnerFav =
+             activeDir == 1
+             ? (high - cp30Entry) / cp30Entry * 100.0
+             : (cp30Entry - low) / cp30Entry * 100.0
+
+        cp30PostMFE := math.max(cp30PostMFE, cp30RunnerFav)
+
+        if not cp30EventualRetest and overlapsRetestZone
+            cp30EventualRetest := true
+            cp30EventualRetestTime := time
+
+
+    //=====================================================================
+    // CHECKPOINT FORWARD OUTCOMES
+    //
+    // These tests continue even if a retest happens later. Once a checkpoint
+    // was valid and forward-eligible, the research question is simply:
+    // from the checkpoint close, does +0.50% occur before -0.50%?
+    //=====================================================================
+
+    if cp5ForwardEligible and
+       cp5Outcome == 0 and
+       not na(cp5Time) and
+       time > cp5Time
+
+        float cp5FavMove =
+             activeDir == 1
+             ? (high - cp5Entry) / cp5Entry * 100.0
+             : (cp5Entry - low) / cp5Entry * 100.0
+
+        float cp5AdvMove =
+             activeDir == 1
+             ? (cp5Entry - low) / cp5Entry * 100.0
+             : (high - cp5Entry) / cp5Entry * 100.0
+
+        bool cp5FavHit = cp5FavMove >= primaryPct
+        bool cp5AdvHit = cp5AdvMove >= primaryPct
+
+        if cp5FavHit and cp5AdvHit
+            cp5Outcome := 3
+        else if cp5FavHit
+            cp5Outcome := 1
+        else if cp5AdvHit
+            cp5Outcome := 2
+
+
+    if cp10ForwardEligible and
+       cp10Outcome == 0 and
+       not na(cp10Time) and
+       time > cp10Time
+
+        float cp10FavMove =
+             activeDir == 1
+             ? (high - cp10Entry) / cp10Entry * 100.0
+             : (cp10Entry - low) / cp10Entry * 100.0
+
+        float cp10AdvMove =
+             activeDir == 1
+             ? (cp10Entry - low) / cp10Entry * 100.0
+             : (high - cp10Entry) / cp10Entry * 100.0
+
+        bool cp10FavHit = cp10FavMove >= primaryPct
+        bool cp10AdvHit = cp10AdvMove >= primaryPct
+
+        if cp10FavHit and cp10AdvHit
+            cp10Outcome := 3
+        else if cp10FavHit
+            cp10Outcome := 1
+        else if cp10AdvHit
+            cp10Outcome := 2
+
+
+    if cp15ForwardEligible and
+       cp15Outcome == 0 and
+       not na(cp15Time) and
+       time > cp15Time
+
+        float cp15FavMove =
+             activeDir == 1
+             ? (high - cp15Entry) / cp15Entry * 100.0
+             : (cp15Entry - low) / cp15Entry * 100.0
+
+        float cp15AdvMove =
+             activeDir == 1
+             ? (cp15Entry - low) / cp15Entry * 100.0
+             : (high - cp15Entry) / cp15Entry * 100.0
+
+        bool cp15FavHit = cp15FavMove >= primaryPct
+        bool cp15AdvHit = cp15AdvMove >= primaryPct
+
+        if cp15FavHit and cp15AdvHit
+            cp15Outcome := 3
+        else if cp15FavHit
+            cp15Outcome := 1
+        else if cp15AdvHit
+            cp15Outcome := 2
+
+
+    if cp30ForwardEligible and
+       cp30Outcome == 0 and
+       not na(cp30Time) and
+       time > cp30Time
+
+        float cp30FavMove =
+             activeDir == 1
+             ? (high - cp30Entry) / cp30Entry * 100.0
+             : (cp30Entry - low) / cp30Entry * 100.0
+
+        float cp30AdvMove =
+             activeDir == 1
+             ? (cp30Entry - low) / cp30Entry * 100.0
+             : (high - cp30Entry) / cp30Entry * 100.0
+
+        bool cp30FavHit = cp30FavMove >= primaryPct
+        bool cp30AdvHit = cp30AdvMove >= primaryPct
+
+        if cp30FavHit and cp30AdvHit
+            cp30Outcome := 3
+        else if cp30FavHit
+            cp30Outcome := 1
+        else if cp30AdvHit
+            cp30Outcome := 2
+
+
+    //---------------------------------------------------------------------
+    // PROVISIONAL RETEST FAILURE
+    //---------------------------------------------------------------------
+
+    bool failureClose =
+         firstRetestOccurred and
+         not provisionalFailure and
+         not retestConfirmed and
+         (
+             activeDir == 1
+             ? close <=
+               brokenOrbLevel -
+               failureTolerance
+             : close >=
+               brokenOrbLevel +
+               failureTolerance
+         )
+
+
+    if failureClose
+
+        provisionalFailure :=
+             true
+
+        // Freeze first-retest penetration after this failure bar.
+        retestPenetrationFrozen :=
+             true
+
+        failureTime :=
+             time
+
+        provisionalFailureN +=
+             1
+
+        if activePath == PATH_NONE
+
+            activePath :=
+                 PATH_RETEST_FAIL
+
+
+        if showRetestLabels
+
+            label.new(
+                 time,
+                 close,
+                 "RETEST FAIL\n" +
+                 str.tostring(
+                     failureAtrPct,
+                     "#") +
+                 "% ATR+",
+                 xloc = xloc.bar_time,
+                 yloc = yloc.price,
+                 style =
+                     activeDir == 1
+                     ? label.style_label_down
+                     : label.style_label_up,
+                 color =
+                     color.new(
+                         color.red,
+                         0),
+                 textcolor =
+                     color.white,
+                 size =
+                     size.tiny)
+
+
+    //---------------------------------------------------------------------
+    // SUCCESSFUL RETEST CONFIRMATION
+    //
+    // Must occur AFTER first retest.
+    //---------------------------------------------------------------------
+
+    bool directionConfirm =
+         activeDir == 1
+         ? close > open
+         : close < open
+
+    bool outsideRetestZone =
+         activeDir == 1
+         ? close > retestUpper
+         : close < retestLower
+
+    bool validConfirmation =
+         firstRetestOccurred and
+         not provisionalFailure and
+         not retestConfirmed and
+         time > firstRetestTime and
+         outsideRetestZone and
+         (
+             not requireDirectionalConfirmation or
+             directionConfirm
+         )
+
+
+    if validConfirmation
+
+        retestConfirmed :=
+             true
+
+        // Freeze first-retest penetration after this confirmation bar.
+        retestPenetrationFrozen :=
+             true
+
+        confirmationTime :=
+             time
+
+        confirmationPrice :=
+             close
+
+
+        if showRetestLabels
+
+            label.new(
+                 time,
+                 close,
+                 "RETEST CONFIRM\n" +
+                 str.tostring(
+                     close,
+                     format.mintick),
+                 xloc = xloc.bar_time,
+                 yloc = yloc.price,
+                 style =
+                     activeDir == 1
+                     ? label.style_label_up
+                     : label.style_label_down,
+                 color =
+                     color.new(
+                         color.teal,
+                         0),
+                 textcolor =
+                     color.white,
+                 size =
+                     size.tiny)
+
+
+    //---------------------------------------------------------------------
+    // RETEST CONTINUATION
+    //
+    // Confirmation must already exist and the +0.50% original breakout
+    // target must be reached on a later bar.
+    //---------------------------------------------------------------------
+
+    if activePath == PATH_NONE and
+       retestConfirmed and
+       time > confirmationTime and
+       favorableMove >= primaryPct
+
+        activePath :=
+             PATH_RETEST_CONTINUE
+
+
+    //---------------------------------------------------------------------
+    // FAILED RETEST -> RECLAIM
+    //---------------------------------------------------------------------
+
+    bool reclaimed =
+         provisionalFailure and
+         not reclaimedAfterFailure and
+         (
+             activeDir == 1
+             ? close > retestUpper
+             : close < retestLower
+         )
+
+
+    if reclaimed
+
+        reclaimedAfterFailure :=
+             true
+
+        reclaimTime :=
+             time
+
+        failureReclaimN +=
+             1
+
+        totalMinutesToReclaim +=
+             (
+                 time -
+                 failureTime
+             ) /
+             60000.0
+
+
+        if showRetestLabels
+
+            label.new(
+                 time,
+                 close,
+                 "FAIL -> RECLAIM",
+                 xloc = xloc.bar_time,
+                 yloc = yloc.price,
+                 style =
+                     activeDir == 1
+                     ? label.style_label_up
+                     : label.style_label_down,
+                 color =
+                     color.new(
+                         color.blue,
+                         0),
+                 textcolor =
+                     color.white,
+                 size =
+                     size.tiny)
+
+
+    //---------------------------------------------------------------------
+    // BASELINE ±0.50% FIRST-REACHED
+    //
+    // IMPORTANT:
+    // This executes on EVERY post-entry bar until the first baseline
+    // outcome is known. It is independent of retest penetration state.
+    //---------------------------------------------------------------------
+
+    if primaryOutcome == 0
+
+        bool baselineFav =
+             favorableMove >=
+             primaryPct
+
+        bool baselineAdv =
+             adverseMove >=
+             primaryPct
+
+        if baselineFav and
+           baselineAdv
+
+            primaryOutcome :=
+                 3
+
+        else if baselineFav
+
+            primaryOutcome :=
+                 1
+
+        else if baselineAdv
+
+            primaryOutcome :=
+                 2
+
+
+//=============================================================================
+// END-OF-DAY FINALIZATION
+//=============================================================================
+
+if isLastRTH and
+   activeSignal
+
+    completed +=
+         1
+
+
+    //---------------------------------------------------------------------
+    // BASELINE RESULTS
+    //---------------------------------------------------------------------
+
+    if primaryOutcome == 1
+
+        favorableFirst +=
+             1
+
+    else if primaryOutcome == 2
+
+        adverseFirst +=
+             1
+
+    else if primaryOutcome == 3
+
+        bothSameBar +=
+             1
+
+    else
+
+        unresolved +=
+             1
+
+
+    if hit025
+        hits025 += 1
+
+    if hit075
+        hits075 += 1
+
+    if hit100
+        hits100 += 1
+
+
+    totalMFE +=
+         mfePct
+
+    totalMAE +=
+         maePct
+
+
+    //---------------------------------------------------------------------
+    // FINAL PATH RESOLUTION
+    //---------------------------------------------------------------------
+
+    if activePath == PATH_NONE
+
+        if firstRetestOccurred and
+           not retestConfirmed and
+           not provisionalFailure
+
+            activePath :=
+                 PATH_RETEST_UNCONFIRMED
+
+        else
+
+            activePath :=
+                 PATH_UNRESOLVED
+
+
+    //---------------------------------------------------------------------
+    // PATH COUNTERS
+    //---------------------------------------------------------------------
+
+    if activePath == PATH_NR_CONTINUE
+
+        nrContinueN +=
+             1
+
+        nrContinueMFE +=
+             mfePct
+
+        if hit075
+            nrContinueHit075 += 1
+
+        if hit100
+            nrContinueHit100 += 1
+
+
+    else if activePath == PATH_RETEST_CONTINUE
+
+        retestContinueN +=
+             1
+
+        retestContinueMFE +=
+             mfePct
+
+
+    else if activePath == PATH_RETEST_FAIL
+
+        retestFailN +=
+             1
+
+        retestFailMFE +=
+             mfePct
+
+
+    else if activePath == PATH_NR_FAIL
+
+        nrFailN +=
+             1
+
+        nrFailMFE +=
+             mfePct
+
+
+    else if activePath == PATH_RETEST_UNCONFIRMED
+
+        retestUnconfirmedN +=
+             1
+
+
+    else
+
+        pathUnresolvedN +=
+             1
+
+
+    //---------------------------------------------------------------------
+    // RETEST PENETRATION AGGREGATES
+    //---------------------------------------------------------------------
+
+    if firstRetestOccurred
+
+        totalWickPenPctAtr +=
+             maxWickPenAtrPct
+
+        totalClosePenPctAtr +=
+             maxClosePenAtrPct
+
+
+
+
+    //---------------------------------------------------------------------
+    // BUILD 5.3 — EST / EXT FAILURE AUDIT FINALIZATION
+    //---------------------------------------------------------------------
+
+    if auditEligible and (auditSepGroup == 1 or auditSepGroup == 2)
+        int auditCol = -1
+
+        if auditSepGroup == 1
+            if primaryOutcome == 1
+                auditCol := 0
+            else if primaryOutcome == 2
+                auditCol := 1
+            else if primaryOutcome == 3
+                auditEstBoth += 1
+            else
+                auditEstUnresolved += 1
+        else
+            if primaryOutcome == 1
+                auditCol := 2
+            else if primaryOutcome == 2
+                auditCol := 3
+            else if primaryOutcome == 3
+                auditExtBoth += 1
+            else
+                auditExtUnresolved += 1
+
+        if auditCol >= 0
+            array.set(auditN, auditCol, array.get(auditN, auditCol) + 1)
+            array.set(auditSep10Total, auditCol, array.get(auditSep10Total, auditCol) + nz(auditSep10))
+            array.set(auditMfe10Total, auditCol, array.get(auditMfe10Total, auditCol) + nz(auditMfe10))
+            array.set(auditMae10Total, auditCol, array.get(auditMae10Total, auditCol) + nz(auditMae10))
+            array.set(auditQ10Total, auditCol, array.get(auditQ10Total, auditCol) + nz(auditQ10))
+
+            if auditRetestState10 == 0
+                array.set(auditNR, auditCol, array.get(auditNR, auditCol) + 1)
+            else if auditRetestState10 == 1
+                array.set(auditRH, auditCol, array.get(auditRH, auditCol) + 1)
+            else if auditRetestState10 == 2
+                array.set(auditRF, auditCol, array.get(auditRF, auditCol) + 1)
+            else if auditRetestState10 == 3
+                array.set(auditRTOpen, auditCol, array.get(auditRTOpen, auditCol) + 1)
+
+            if auditTrajectoryClass == 0
+                array.set(auditContract, auditCol, array.get(auditContract, auditCol) + 1)
+            else if auditTrajectoryClass == 1
+                array.set(auditStable, auditCol, array.get(auditStable, auditCol) + 1)
+            else if auditTrajectoryClass == 2
+                array.set(auditExpand, auditCol, array.get(auditExpand, auditCol) + 1)
+            else
+                array.set(auditNo15, auditCol, array.get(auditNo15, auditCol) + 1)
+
+            if auditDir == 1
+                array.set(auditBull, auditCol, array.get(auditBull, auditCol) + 1)
+            else if auditDir == -1
+                array.set(auditBear, auditCol, array.get(auditBear, auditCol) + 1)
+
+
+            //-----------------------------------------------------------------
+            // BUILD 5.3.2 — EST CONTRACT DIAGNOSTIC FINALIZATION
+            //-----------------------------------------------------------------
+            if auditSepGroup == 1 and auditTrajectoryClass == 0 and (auditCol == 0 or auditCol == 1)
+                int dc = auditCol
+
+                array.set(contractDiagN, dc, array.get(contractDiagN, dc) + 1)
+                array.set(contractDiagSepTotal, dc, array.get(contractDiagSepTotal, dc) + nz(auditSep10))
+                array.set(contractDiagMfeTotal, dc, array.get(contractDiagMfeTotal, dc) + nz(auditMfe10))
+                array.set(contractDiagMaeTotal, dc, array.get(contractDiagMaeTotal, dc) + nz(auditMae10))
+                array.set(contractDiagQTotal, dc, array.get(contractDiagQTotal, dc) + nz(auditQ10))
+
+                if auditDir == 1
+                    array.set(contractDiagBull, dc, array.get(contractDiagBull, dc) + 1)
+                else if auditDir == -1
+                    array.set(contractDiagBear, dc, array.get(contractDiagBear, dc) + 1)
+
+                int stateIdx = f_contractIdx(auditRetestState10, dc)
+                int sepIdx = f_contractIdx(f_contractSepBucket(auditSep10), dc)
+                int mfeIdx = f_contractIdx(f_contractMfeBucket(auditMfe10), dc)
+                int maeIdx = f_contractIdx(f_contractMaeBucket(auditMae10), dc)
+                int qIdx = f_contractIdx(f_contractQBucket(auditQ10), dc)
+                int sevIdx = f_contractIdx(f_contractSeverityBucket(auditTrajectoryRatio), dc)
+
+                if stateIdx >= 0
+                    array.set(contractState, stateIdx, array.get(contractState, stateIdx) + 1)
+                if sepIdx >= 0
+                    array.set(contractSep, sepIdx, array.get(contractSep, sepIdx) + 1)
+                if mfeIdx >= 0
+                    array.set(contractMfe, mfeIdx, array.get(contractMfe, mfeIdx) + 1)
+                if maeIdx >= 0
+                    array.set(contractMae, maeIdx, array.get(contractMae, maeIdx) + 1)
+                if qIdx >= 0
+                    array.set(contractQ, qIdx, array.get(contractQ, qIdx) + 1)
+                if sevIdx >= 0
+                    array.set(contractSeverity, sevIdx, array.get(contractSeverity, sevIdx) + 1)
+
+    //---------------------------------------------------------------------
+    // BUILD 5.3 — EXT DEPTH FINALIZATION
+    //---------------------------------------------------------------------
+
+    if quality10Captured and quality10SepGroup == 2
+        int edb = f_extDepthBucket(quality10SepAtrPct)
+        if edb >= 0
+            array.set(extDepthN, edb, array.get(extDepthN, edb) + 1)
+            array.set(extDepthMfeTotal, edb, array.get(extDepthMfeTotal, edb) + mfePct)
+            array.set(extDepthMaeTotal, edb, array.get(extDepthMaeTotal, edb) + maePct)
+
+            if primaryOutcome == 1
+                array.set(extDepthFav050, edb, array.get(extDepthFav050, edb) + 1)
+            if hit075
+                array.set(extDepthHit075, edb, array.get(extDepthHit075, edb) + 1)
+            if hit100
+                array.set(extDepthHit100, edb, array.get(extDepthHit100, edb) + 1)
+
+
+    //---------------------------------------------------------------------
+    // BUILD 5.3 — 10M QUALITY STUDY FINALIZATION
+    //
+    // Outcome columns use the ORIGINAL breakout outcome/extension measures,
+    // so the table answers whether the state observed at 10m was associated
+    // with the eventual session result.
+    //---------------------------------------------------------------------
+
+    if quality10Captured and quality10SepGroup >= 0
+        int qg = quality10SepGroup
+
+        array.set(qualityN, qg, array.get(qualityN, qg) + 1)
+        array.set(qualityMfe10Total, qg, array.get(qualityMfe10Total, qg) + nz(quality10MFE))
+        array.set(qualityMae10Total, qg, array.get(qualityMae10Total, qg) + nz(quality10MAE))
+        array.set(qualityRatio10Total, qg, array.get(qualityRatio10Total, qg) + nz(quality10Ratio))
+
+        if not na(qualityTrajectoryRatio)
+            array.set(qualityTrajectoryN, qg, array.get(qualityTrajectoryN, qg) + 1)
+            array.set(qualityTrajectoryTotal, qg, array.get(qualityTrajectoryTotal, qg) + qualityTrajectoryRatio)
+
+        if quality10RetestState == 0
+            array.set(qualityNR, qg, array.get(qualityNR, qg) + 1)
+        else if quality10RetestState == 1
+            array.set(qualityRH, qg, array.get(qualityRH, qg) + 1)
+        else if quality10RetestState == 2
+            array.set(qualityRF, qg, array.get(qualityRF, qg) + 1)
+        else if quality10RetestState == 3
+            array.set(qualityRTOpen, qg, array.get(qualityRTOpen, qg) + 1)
+
+        if primaryOutcome == 1
+            array.set(qualityFav050, qg, array.get(qualityFav050, qg) + 1)
+        else if primaryOutcome == 2
+            array.set(qualityAdv050, qg, array.get(qualityAdv050, qg) + 1)
+        else if primaryOutcome == 3
+            array.set(qualityBoth050, qg, array.get(qualityBoth050, qg) + 1)
+        else
+            array.set(qualityUnresolved050, qg, array.get(qualityUnresolved050, qg) + 1)
+
+        if hit075
+            array.set(qualityHit075, qg, array.get(qualityHit075, qg) + 1)
+        if hit100
+            array.set(qualityHit100, qg, array.get(qualityHit100, qg) + 1)
+
+
+    //---------------------------------------------------------------------
+    // CHECKPOINT RESULT FINALIZATION
+    //
+    // Only forward-eligible checkpoints contribute to forward outcomes.
+    // NR N was already counted at checkpoint capture.
+    //---------------------------------------------------------------------
+
+    if cp5ForwardEligible
+        if cp5Outcome == 1
+            cp5Fav += 1
+        else if cp5Outcome == 2
+            cp5Adv += 1
+        else if cp5Outcome == 3
+            cp5Both += 1
+        else
+            cp5Unresolved += 1
+
+    if cp10ForwardEligible
+        if cp10Outcome == 1
+            cp10Fav += 1
+        else if cp10Outcome == 2
+            cp10Adv += 1
+        else if cp10Outcome == 3
+            cp10Both += 1
+        else
+            cp10Unresolved += 1
+
+    if cp15ForwardEligible
+        if cp15Outcome == 1
+            cp15Fav += 1
+        else if cp15Outcome == 2
+            cp15Adv += 1
+        else if cp15Outcome == 3
+            cp15Both += 1
+        else
+            cp15Unresolved += 1
+
+    if cp30ForwardEligible
+        if cp30Outcome == 1
+            cp30Fav += 1
+        else if cp30Outcome == 2
+            cp30Adv += 1
+        else if cp30Outcome == 3
+            cp30Both += 1
+        else
+            cp30Unresolved += 1
+
+
+    //---------------------------------------------------------------------
+    // BUILD 4.3 — FORWARD EXCURSION FINALIZATION
+    //---------------------------------------------------------------------
+
+    if cp5Captured
+        cp5WindowMfeTotal += cp5WindowMFE
+        cp5WindowMaeTotal += cp5WindowMAE
+        array.push(cp5WindowMfeValues, cp5WindowMFE)
+        array.push(cp5WindowMaeValues, cp5WindowMAE)
+        if cp5WindowMFE >= 0.25
+            cp5WindowHit025 += 1
+        if cp5WindowMFE >= 0.50
+            cp5WindowHit050 += 1
+        if cp5WindowMFE >= 0.75
+            cp5WindowHit075 += 1
+        if cp5WindowMFE >= 1.00
+            cp5WindowHit100 += 1
+
+    if cp10Captured
+        cp10WindowMfeTotal += cp10WindowMFE
+        cp10WindowMaeTotal += cp10WindowMAE
+        array.push(cp10WindowMfeValues, cp10WindowMFE)
+        array.push(cp10WindowMaeValues, cp10WindowMAE)
+        if cp10WindowMFE >= 0.25
+            cp10WindowHit025 += 1
+        if cp10WindowMFE >= 0.50
+            cp10WindowHit050 += 1
+        if cp10WindowMFE >= 0.75
+            cp10WindowHit075 += 1
+        if cp10WindowMFE >= 1.00
+            cp10WindowHit100 += 1
+
+    if cp15Captured
+        cp15WindowMfeTotal += cp15WindowMFE
+        cp15WindowMaeTotal += cp15WindowMAE
+        array.push(cp15WindowMfeValues, cp15WindowMFE)
+        array.push(cp15WindowMaeValues, cp15WindowMAE)
+        if cp15WindowMFE >= 0.25
+            cp15WindowHit025 += 1
+        if cp15WindowMFE >= 0.50
+            cp15WindowHit050 += 1
+        if cp15WindowMFE >= 0.75
+            cp15WindowHit075 += 1
+        if cp15WindowMFE >= 1.00
+            cp15WindowHit100 += 1
+
+    if cp30Captured
+        cp30WindowMfeTotal += cp30WindowMFE
+        cp30WindowMaeTotal += cp30WindowMAE
+        array.push(cp30WindowMfeValues, cp30WindowMFE)
+        array.push(cp30WindowMaeValues, cp30WindowMAE)
+        if cp30WindowMFE >= 0.25
+            cp30WindowHit025 += 1
+        if cp30WindowMFE >= 0.50
+            cp30WindowHit050 += 1
+        if cp30WindowMFE >= 0.75
+            cp30WindowHit075 += 1
+        if cp30WindowMFE >= 1.00
+            cp30WindowHit100 += 1
+
+
+    //---------------------------------------------------------------------
+    // BUILD 4.4 — 10M / 15M SEPARATION BUCKET FINALIZATION
+    //---------------------------------------------------------------------
+
+    if cp10Captured and cp10SepBucket >= 0
+        int b10 = cp10SepBucket
+        array.set(sep10N, b10, array.get(sep10N, b10) + 1)
+        array.set(sep10MfeTotal, b10, array.get(sep10MfeTotal, b10) + cp10WindowMFE)
+        array.set(sep10MaeTotal, b10, array.get(sep10MaeTotal, b10) + cp10WindowMAE)
+
+        if cp10WindowMFE >= 0.50
+            array.set(sep10Hit050, b10, array.get(sep10Hit050, b10) + 1)
+        if cp10WindowMFE >= 0.75
+            array.set(sep10Hit075, b10, array.get(sep10Hit075, b10) + 1)
+        if cp10WindowMFE >= 1.00
+            array.set(sep10Hit100, b10, array.get(sep10Hit100, b10) + 1)
+        if cp10EventualRetest
+            array.set(sep10RetestN, b10, array.get(sep10RetestN, b10) + 1)
+
+        if b10 == 0
+            array.push(sep10MfeB0, cp10WindowMFE)
+            array.push(sep10MaeB0, cp10WindowMAE)
+        else if b10 == 1
+            array.push(sep10MfeB1, cp10WindowMFE)
+            array.push(sep10MaeB1, cp10WindowMAE)
+        else if b10 == 2
+            array.push(sep10MfeB2, cp10WindowMFE)
+            array.push(sep10MaeB2, cp10WindowMAE)
+        else if b10 == 3
+            array.push(sep10MfeB3, cp10WindowMFE)
+            array.push(sep10MaeB3, cp10WindowMAE)
+
+
+    if cp15Captured and cp15SepBucket >= 0
+        int b15 = cp15SepBucket
+        array.set(sep15N, b15, array.get(sep15N, b15) + 1)
+        array.set(sep15MfeTotal, b15, array.get(sep15MfeTotal, b15) + cp15WindowMFE)
+        array.set(sep15MaeTotal, b15, array.get(sep15MaeTotal, b15) + cp15WindowMAE)
+
+        if cp15WindowMFE >= 0.50
+            array.set(sep15Hit050, b15, array.get(sep15Hit050, b15) + 1)
+        if cp15WindowMFE >= 0.75
+            array.set(sep15Hit075, b15, array.get(sep15Hit075, b15) + 1)
+        if cp15WindowMFE >= 1.00
+            array.set(sep15Hit100, b15, array.get(sep15Hit100, b15) + 1)
+        if cp15EventualRetest
+            array.set(sep15RetestN, b15, array.get(sep15RetestN, b15) + 1)
+
+        if b15 == 0
+            array.push(sep15MfeB0, cp15WindowMFE)
+            array.push(sep15MaeB0, cp15WindowMAE)
+        else if b15 == 1
+            array.push(sep15MfeB1, cp15WindowMFE)
+            array.push(sep15MaeB1, cp15WindowMAE)
+        else if b15 == 2
+            array.push(sep15MfeB2, cp15WindowMFE)
+            array.push(sep15MaeB2, cp15WindowMAE)
+        else if b15 == 3
+            array.push(sep15MfeB3, cp15WindowMFE)
+            array.push(sep15MaeB3, cp15WindowMAE)
+
+
+    //---------------------------------------------------------------------
+    // BUILD 4.6 — TRAJECTORY RATIO FINALIZATION
+    //
+    // Only events that reached BOTH 10m and 15m no-retest checkpoints
+    // receive a ratio bucket. Performance is measured from the Build 4.3
+    // 15m forward excursion window.
+    //---------------------------------------------------------------------
+
+    if cp15Captured and cp10Captured and cpRatioBucket >= 0 and not na(cpTrajectoryRatio)
+        int rb = cpRatioBucket
+
+        array.set(ratioN, rb, array.get(ratioN, rb) + 1)
+        array.set(ratioSep10Total, rb, array.get(ratioSep10Total, rb) + cp10SepAtrPct)
+        array.set(ratioSep15Total, rb, array.get(ratioSep15Total, rb) + cp15SepAtrPct)
+        array.set(ratioValueTotal, rb, array.get(ratioValueTotal, rb) + cpTrajectoryRatio)
+        array.set(ratioMfeTotal, rb, array.get(ratioMfeTotal, rb) + cp15WindowMFE)
+        array.set(ratioMaeTotal, rb, array.get(ratioMaeTotal, rb) + cp15WindowMAE)
+
+        if cp15WindowMFE >= 0.50
+            array.set(ratioHit050, rb, array.get(ratioHit050, rb) + 1)
+        if cp15WindowMFE >= 0.75
+            array.set(ratioHit075, rb, array.get(ratioHit075, rb) + 1)
+        if cp15WindowMFE >= 1.00
+            array.set(ratioHit100, rb, array.get(ratioHit100, rb) + 1)
+        if cp15EventualRetest
+            array.set(ratioRetestN, rb, array.get(ratioRetestN, rb) + 1)
+
+        if rb == 0
+            array.push(ratioMfeB0, cp15WindowMFE)
+            array.push(ratioMaeB0, cp15WindowMAE)
+        else if rb == 1
+            array.push(ratioMfeB1, cp15WindowMFE)
+            array.push(ratioMaeB1, cp15WindowMAE)
+        else if rb == 2
+            array.push(ratioMfeB2, cp15WindowMFE)
+            array.push(ratioMaeB2, cp15WindowMAE)
+        else if rb == 3
+            array.push(ratioMfeB3, cp15WindowMFE)
+            array.push(ratioMaeB3, cp15WindowMAE)
+        else if rb == 4
+            array.push(ratioMfeB4, cp15WindowMFE)
+            array.push(ratioMaeB4, cp15WindowMAE)
+
+            // BUILD 5.3 — split Strong Expansion by initial 10m separation.
+            int seGroup = cp10SepAtrPct < 100.0 ? 0 : 1
+            array.set(strongExpSepN, seGroup, array.get(strongExpSepN, seGroup) + 1)
+            array.set(strongExpSepMfeTotal, seGroup, array.get(strongExpSepMfeTotal, seGroup) + cp15WindowMFE)
+            array.set(strongExpSepMaeTotal, seGroup, array.get(strongExpSepMaeTotal, seGroup) + cp15WindowMAE)
+
+            if cp15WindowMFE >= 0.50
+                array.set(strongExpSepHit050, seGroup, array.get(strongExpSepHit050, seGroup) + 1)
+            if cp15WindowMFE >= 0.75
+                array.set(strongExpSepHit075, seGroup, array.get(strongExpSepHit075, seGroup) + 1)
+            if cp15WindowMFE >= 1.00
+                array.set(strongExpSepHit100, seGroup, array.get(strongExpSepHit100, seGroup) + 1)
+            if cp15EventualRetest
+                array.set(strongExpSepRetestN, seGroup, array.get(strongExpSepRetestN, seGroup) + 1)
+
+            if seGroup == 0
+                array.push(strongExpSepMfeB0, cp15WindowMFE)
+                array.push(strongExpSepMaeB0, cp15WindowMAE)
+            else
+                array.push(strongExpSepMfeB1, cp15WindowMFE)
+                array.push(strongExpSepMaeB1, cp15WindowMAE)
+
+
+    //---------------------------------------------------------------------
+    // BUILD 4.2 — NO-RETEST RUNNER FINALIZATION
+    //
+    // Extension targets use the ORIGINAL breakout MFE, but only for events
+    // that qualified for the relevant no-retest checkpoint cohort.
+    //---------------------------------------------------------------------
+
+    if cp5Captured
+        if mfePct >= 0.75
+            cp5Ext075 += 1
+        if mfePct >= 1.00
+            cp5Ext100 += 1
+        if mfePct >= 1.50
+            cp5Ext150 += 1
+        if mfePct >= 2.00
+            cp5Ext200 += 1
+
+        cp5PostMfeTotal += cp5PostMFE
+
+        if cp5EventualRetest
+            cp5EventualRetestN += 1
+            cp5MinutesToRetestTotal +=
+                 (cp5EventualRetestTime - cp5Time) / 60000.0
+
+
+    if cp10Captured
+        if mfePct >= 0.75
+            cp10Ext075 += 1
+        if mfePct >= 1.00
+            cp10Ext100 += 1
+        if mfePct >= 1.50
+            cp10Ext150 += 1
+        if mfePct >= 2.00
+            cp10Ext200 += 1
+
+        cp10PostMfeTotal += cp10PostMFE
+
+        if cp10EventualRetest
+            cp10EventualRetestN += 1
+            cp10MinutesToRetestTotal +=
+                 (cp10EventualRetestTime - cp10Time) / 60000.0
+
+
+    if cp15Captured
+        if mfePct >= 0.75
+            cp15Ext075 += 1
+        if mfePct >= 1.00
+            cp15Ext100 += 1
+        if mfePct >= 1.50
+            cp15Ext150 += 1
+        if mfePct >= 2.00
+            cp15Ext200 += 1
+
+        cp15PostMfeTotal += cp15PostMFE
+
+        if cp15EventualRetest
+            cp15EventualRetestN += 1
+            cp15MinutesToRetestTotal +=
+                 (cp15EventualRetestTime - cp15Time) / 60000.0
+
+
+    if cp30Captured
+        if mfePct >= 0.75
+            cp30Ext075 += 1
+        if mfePct >= 1.00
+            cp30Ext100 += 1
+        if mfePct >= 1.50
+            cp30Ext150 += 1
+        if mfePct >= 2.00
+            cp30Ext200 += 1
+
+        cp30PostMfeTotal += cp30PostMFE
+
+        if cp30EventualRetest
+            cp30EventualRetestN += 1
+            cp30MinutesToRetestTotal +=
+                 (cp30EventualRetestTime - cp30Time) / 60000.0
+
+
+    //---------------------------------------------------------------------
+    // RESET ACTIVE BREAKOUT
+    //---------------------------------------------------------------------
+
+    activeSignal :=
+         false
+
+    activeDir :=
+         0
+
+    entryPrice :=
+         na
+
+    entryTime :=
+         na
+
+    frozenAtr :=
+         na
+
+    brokenOrbLevel :=
+         na
+
+    retestTolerance :=
+         na
+
+    failureTolerance :=
+         na
+
+    retestUpper :=
+         na
+
+    retestLower :=
+         na
+
+    activePath :=
+         PATH_NONE
+
+    firstRetestOccurred :=
+         false
+
+    firstRetestTime :=
+         na
+
+    retestPenetrationFrozen :=
+         false
+
+    provisionalFailure :=
+         false
+
+    failureTime :=
+         na
+
+    retestConfirmed :=
+         false
+
+    confirmationTime :=
+         na
+
+    confirmationPrice :=
+         na
+
+    reclaimedAfterFailure :=
+         false
+
+    reclaimTime :=
+         na
+
+    retestCount :=
+         0
+
+    inRetestZonePrev :=
+         false
+
+    cp5Captured := false
+    cp10Captured := false
+    cp15Captured := false
+    cp30Captured := false
+
+    cp5ForwardEligible := false
+    cp10ForwardEligible := false
+    cp15ForwardEligible := false
+    cp30ForwardEligible := false
+
+    cp5Entry := na
+    cp10Entry := na
+    cp15Entry := na
+    cp30Entry := na
+
+    cp5Time := na
+    cp10Time := na
+    cp15Time := na
+    cp30Time := na
+
+    cp5Outcome := 0
+    cp10Outcome := 0
+    cp15Outcome := 0
+    cp30Outcome := 0
+
+    cp10SepBucket := -1
+    cp15SepBucket := -1
+
+    cp10SepAtrPct := na
+    cp15SepAtrPct := na
+    cpTrajectoryRatio := na
+    cpRatioBucket := -1
+
+    cp5PostMFE := 0.0
+    cp10PostMFE := 0.0
+    cp15PostMFE := 0.0
+    cp30PostMFE := 0.0
+
+    cp5EventualRetest := false
+    cp10EventualRetest := false
+    cp15EventualRetest := false
+    cp30EventualRetest := false
+
+    cp5EventualRetestTime := na
+    cp10EventualRetestTime := na
+    cp15EventualRetestTime := na
+    cp30EventualRetestTime := na
+
+    cp5WindowMFE := 0.0
+    cp5WindowMAE := 0.0
+    cp10WindowMFE := 0.0
+    cp10WindowMAE := 0.0
+    cp15WindowMFE := 0.0
+    cp15WindowMAE := 0.0
+    cp30WindowMFE := 0.0
+    cp30WindowMAE := 0.0
+
+
+//=============================================================================
+// ORB VISUALS
+//=============================================================================
+
+plot(
+     showORB and
+     isRTH
+     ? orbHigh
+     : na,
+     title = "ORB High",
+     color = color.new(
+         color.green,
+         0),
+     linewidth = 2,
+     style = plot.style_linebr)
+
+
+plot(
+     showORB and
+     isRTH
+     ? orbLow
+     : na,
+     title = "ORB Low",
+     color = color.new(
+         color.red,
+         0),
+     linewidth = 2,
+     style = plot.style_linebr)
+
+
+//=============================================================================
+// ACTIVE RETEST ZONE VISUALS
+//=============================================================================
+
+plot(
+     showRetestZone and
+     activeSignal
+     ? retestUpper
+     : na,
+     title = "Retest Upper",
+     color = color.new(
+         color.orange,
+         40),
+     linewidth = 1,
+     style = plot.style_linebr)
+
+
+plot(
+     showRetestZone and
+     activeSignal
+     ? retestLower
+     : na,
+     title = "Retest Lower",
+     color = color.new(
+         color.orange,
+         40),
+     linewidth = 1,
+     style = plot.style_linebr)
+
+
+//=============================================================================
+// PERFORMANCE CALCULATIONS
+//=============================================================================
+
+int decisive =
+     favorableFirst +
+     adverseFirst
+
+float baselineFavRate =
+     decisive > 0
+     ? float(
+         favorableFirst) /
+       float(
+         decisive) *
+       100.0
+     : na
+
+float avgMFE =
+     completed > 0
+     ? totalMFE /
+       float(
+         completed)
+     : na
+
+float avgMAE =
+     completed > 0
+     ? totalMAE /
+       float(
+         completed)
+     : na
+
+float hit025Rate =
+     completed > 0
+     ? float(
+         hits025) /
+       float(
+         completed) *
+       100.0
+     : na
+
+float hit075Rate =
+     completed > 0
+     ? float(
+         hits075) /
+       float(
+         completed) *
+       100.0
+     : na
+
+float hit100Rate =
+     completed > 0
+     ? float(
+         hits100) /
+       float(
+         completed) *
+       100.0
+     : na
+
+
+int totalFinalPaths =
+     nrContinueN +
+     retestContinueN +
+     retestFailN +
+     nrFailN +
+     retestUnconfirmedN +
+     pathUnresolvedN
+
+
+float nrContinuePct =
+     completed > 0
+     ? float(
+         nrContinueN) /
+       float(
+         completed) *
+       100.0
+     : na
+
+float retestContinuePct =
+     completed > 0
+     ? float(
+         retestContinueN) /
+       float(
+         completed) *
+       100.0
+     : na
+
+float retestFailPct =
+     completed > 0
+     ? float(
+         retestFailN) /
+       float(
+         completed) *
+       100.0
+     : na
+
+float nrFailPct =
+     completed > 0
+     ? float(
+         nrFailN) /
+       float(
+         completed) *
+       100.0
+     : na
+
+
+float avgMinutesToRetest =
+     totalRetests > 0
+     ? totalMinutesToRetest /
+       float(
+         totalRetests)
+     : na
+
+float avgPreRetestMFE =
+     totalRetests > 0
+     ? totalPreRetestMFE /
+       float(
+         totalRetests)
+     : na
+
+float avgPreRetestMAE =
+     totalRetests > 0
+     ? totalPreRetestMAE /
+       float(
+         totalRetests)
+     : na
+
+float avgWickPen =
+     totalRetests > 0
+     ? totalWickPenPctAtr /
+       float(
+         totalRetests)
+     : na
+
+float avgClosePen =
+     totalRetests > 0
+     ? totalClosePenPctAtr /
+       float(
+         totalRetests)
+     : na
+
+float reclaimRate =
+     provisionalFailureN > 0
+     ? float(
+         failureReclaimN) /
+       float(
+         provisionalFailureN) *
+       100.0
+     : na
+
+float avgMinutesToReclaim =
+     failureReclaimN > 0
+     ? totalMinutesToReclaim /
+       float(
+         failureReclaimN)
+     : na
+
+float nr075Rate =
+     nrContinueN > 0
+     ? float(
+         nrContinueHit075) /
+       float(
+         nrContinueN) *
+       100.0
+     : na
+
+float nr100Rate =
+     nrContinueN > 0
+     ? float(
+         nrContinueHit100) /
+       float(
+         nrContinueN) *
+       100.0
+     : na
+
+
+float cp5Rate =
+     f_rate(
+         cp5Fav,
+         cp5Adv)
+
+float cp10Rate =
+     f_rate(
+         cp10Fav,
+         cp10Adv)
+
+float cp15Rate =
+     f_rate(
+         cp15Fav,
+         cp15Adv)
+
+float cp30Rate =
+     f_rate(
+         cp30Fav,
+         cp30Adv)
+
+float cp5AvgSepAtr =
+     cp5NoRetestN > 0
+     ? cp5SepAtrTotal /
+       float(cp5NoRetestN)
+     : na
+
+float cp10AvgSepAtr =
+     cp10NoRetestN > 0
+     ? cp10SepAtrTotal /
+       float(cp10NoRetestN)
+     : na
+
+float cp15AvgSepAtr =
+     cp15NoRetestN > 0
+     ? cp15SepAtrTotal /
+       float(cp15NoRetestN)
+     : na
+
+float cp30AvgSepAtr =
+     cp30NoRetestN > 0
+     ? cp30SepAtrTotal /
+       float(cp30NoRetestN)
+     : na
+
+
+//=============================================================================
+// BUILD 4.2 — NO-RETEST RUNNER CALCULATIONS
+//=============================================================================
+
+float cp5Ext075Rate = f_share(cp5Ext075, cp5NoRetestN)
+float cp5Ext100Rate = f_share(cp5Ext100, cp5NoRetestN)
+float cp5Ext150Rate = f_share(cp5Ext150, cp5NoRetestN)
+float cp5Ext200Rate = f_share(cp5Ext200, cp5NoRetestN)
+float cp5AvgPostMFE = cp5NoRetestN > 0 ? cp5PostMfeTotal / float(cp5NoRetestN) : na
+float cp5RetestRate = f_share(cp5EventualRetestN, cp5NoRetestN)
+float cp5AvgRetestMin = cp5EventualRetestN > 0 ? cp5MinutesToRetestTotal / float(cp5EventualRetestN) : na
+
+float cp10Ext075Rate = f_share(cp10Ext075, cp10NoRetestN)
+float cp10Ext100Rate = f_share(cp10Ext100, cp10NoRetestN)
+float cp10Ext150Rate = f_share(cp10Ext150, cp10NoRetestN)
+float cp10Ext200Rate = f_share(cp10Ext200, cp10NoRetestN)
+float cp10AvgPostMFE = cp10NoRetestN > 0 ? cp10PostMfeTotal / float(cp10NoRetestN) : na
+float cp10RetestRate = f_share(cp10EventualRetestN, cp10NoRetestN)
+float cp10AvgRetestMin = cp10EventualRetestN > 0 ? cp10MinutesToRetestTotal / float(cp10EventualRetestN) : na
+
+float cp15Ext075Rate = f_share(cp15Ext075, cp15NoRetestN)
+float cp15Ext100Rate = f_share(cp15Ext100, cp15NoRetestN)
+float cp15Ext150Rate = f_share(cp15Ext150, cp15NoRetestN)
+float cp15Ext200Rate = f_share(cp15Ext200, cp15NoRetestN)
+float cp15AvgPostMFE = cp15NoRetestN > 0 ? cp15PostMfeTotal / float(cp15NoRetestN) : na
+float cp15RetestRate = f_share(cp15EventualRetestN, cp15NoRetestN)
+float cp15AvgRetestMin = cp15EventualRetestN > 0 ? cp15MinutesToRetestTotal / float(cp15EventualRetestN) : na
+
+float cp30Ext075Rate = f_share(cp30Ext075, cp30NoRetestN)
+float cp30Ext100Rate = f_share(cp30Ext100, cp30NoRetestN)
+float cp30Ext150Rate = f_share(cp30Ext150, cp30NoRetestN)
+float cp30Ext200Rate = f_share(cp30Ext200, cp30NoRetestN)
+float cp30AvgPostMFE = cp30NoRetestN > 0 ? cp30PostMfeTotal / float(cp30NoRetestN) : na
+float cp30RetestRate = f_share(cp30EventualRetestN, cp30NoRetestN)
+float cp30AvgRetestMin = cp30EventualRetestN > 0 ? cp30MinutesToRetestTotal / float(cp30EventualRetestN) : na
+
+
+//=============================================================================
+// BUILD 4.3 — FORWARD EXCURSION CALCULATIONS
+//=============================================================================
+
+float cp5WindowAvgMFE = cp5NoRetestN > 0 ? cp5WindowMfeTotal / float(cp5NoRetestN) : na
+float cp5WindowMedMFE = f_median(cp5WindowMfeValues)
+float cp5WindowAvgMAE = cp5NoRetestN > 0 ? cp5WindowMaeTotal / float(cp5NoRetestN) : na
+float cp5WindowMedMAE = f_median(cp5WindowMaeValues)
+float cp5Window025Rate = f_share(cp5WindowHit025, cp5NoRetestN)
+float cp5Window050Rate = f_share(cp5WindowHit050, cp5NoRetestN)
+float cp5Window075Rate = f_share(cp5WindowHit075, cp5NoRetestN)
+float cp5Window100Rate = f_share(cp5WindowHit100, cp5NoRetestN)
+
+float cp10WindowAvgMFE = cp10NoRetestN > 0 ? cp10WindowMfeTotal / float(cp10NoRetestN) : na
+float cp10WindowMedMFE = f_median(cp10WindowMfeValues)
+float cp10WindowAvgMAE = cp10NoRetestN > 0 ? cp10WindowMaeTotal / float(cp10NoRetestN) : na
+float cp10WindowMedMAE = f_median(cp10WindowMaeValues)
+float cp10Window025Rate = f_share(cp10WindowHit025, cp10NoRetestN)
+float cp10Window050Rate = f_share(cp10WindowHit050, cp10NoRetestN)
+float cp10Window075Rate = f_share(cp10WindowHit075, cp10NoRetestN)
+float cp10Window100Rate = f_share(cp10WindowHit100, cp10NoRetestN)
+
+float cp15WindowAvgMFE = cp15NoRetestN > 0 ? cp15WindowMfeTotal / float(cp15NoRetestN) : na
+float cp15WindowMedMFE = f_median(cp15WindowMfeValues)
+float cp15WindowAvgMAE = cp15NoRetestN > 0 ? cp15WindowMaeTotal / float(cp15NoRetestN) : na
+float cp15WindowMedMAE = f_median(cp15WindowMaeValues)
+float cp15Window025Rate = f_share(cp15WindowHit025, cp15NoRetestN)
+float cp15Window050Rate = f_share(cp15WindowHit050, cp15NoRetestN)
+float cp15Window075Rate = f_share(cp15WindowHit075, cp15NoRetestN)
+float cp15Window100Rate = f_share(cp15WindowHit100, cp15NoRetestN)
+
+float cp30WindowAvgMFE = cp30NoRetestN > 0 ? cp30WindowMfeTotal / float(cp30NoRetestN) : na
+float cp30WindowMedMFE = f_median(cp30WindowMfeValues)
+float cp30WindowAvgMAE = cp30NoRetestN > 0 ? cp30WindowMaeTotal / float(cp30NoRetestN) : na
+float cp30WindowMedMAE = f_median(cp30WindowMaeValues)
+float cp30Window025Rate = f_share(cp30WindowHit025, cp30NoRetestN)
+float cp30Window050Rate = f_share(cp30WindowHit050, cp30NoRetestN)
+float cp30Window075Rate = f_share(cp30WindowHit075, cp30NoRetestN)
+float cp30Window100Rate = f_share(cp30WindowHit100, cp30NoRetestN)
+
+
+//=============================================================================
+// BUILD 4.4 — SEPARATION BUCKET CALCULATIONS
+//=============================================================================
+
+f_bucketAvg(array<float> totals, array<int> counts, int bucket) =>
+    int n = array.get(counts, bucket)
+    n > 0 ? array.get(totals, bucket) / float(n) : na
+
+f_bucketRate(array<int> hits, array<int> counts, int bucket) =>
+    int n = array.get(counts, bucket)
+    n > 0 ? float(array.get(hits, bucket)) / float(n) * 100.0 : na
+
+f_sep10MedMFE(int bucket) =>
+    bucket == 0 ? f_median(sep10MfeB0) :
+     bucket == 1 ? f_median(sep10MfeB1) :
+     bucket == 2 ? f_median(sep10MfeB2) :
+     bucket == 3 ? f_median(sep10MfeB3) :
+     na
+
+f_sep10MedMAE(int bucket) =>
+    bucket == 0 ? f_median(sep10MaeB0) :
+     bucket == 1 ? f_median(sep10MaeB1) :
+     bucket == 2 ? f_median(sep10MaeB2) :
+     bucket == 3 ? f_median(sep10MaeB3) :
+     na
+
+f_sep15MedMFE(int bucket) =>
+    bucket == 0 ? f_median(sep15MfeB0) :
+     bucket == 1 ? f_median(sep15MfeB1) :
+     bucket == 2 ? f_median(sep15MfeB2) :
+     bucket == 3 ? f_median(sep15MfeB3) :
+     na
+
+f_sep15MedMAE(int bucket) =>
+    bucket == 0 ? f_median(sep15MaeB0) :
+     bucket == 1 ? f_median(sep15MaeB1) :
+     bucket == 2 ? f_median(sep15MaeB2) :
+     bucket == 3 ? f_median(sep15MaeB3) :
+     na
+
+
+//=============================================================================
+// BUILD 4.6 — TRAJECTORY RATIO CALCULATION HELPERS
+//=============================================================================
+
+f_ratioAvg(array<float> totals, int bucket) =>
+    int n = array.get(ratioN, bucket)
+    n > 0 ? array.get(totals, bucket) / float(n) : na
+
+f_ratioRate(array<int> hits, int bucket) =>
+    int n = array.get(ratioN, bucket)
+    n > 0 ? float(array.get(hits, bucket)) / float(n) * 100.0 : na
+
+f_ratioMedMFE(int bucket) =>
+    bucket == 0 ? f_median(ratioMfeB0) :
+     bucket == 1 ? f_median(ratioMfeB1) :
+     bucket == 2 ? f_median(ratioMfeB2) :
+     bucket == 3 ? f_median(ratioMfeB3) :
+     bucket == 4 ? f_median(ratioMfeB4) :
+     na
+
+f_ratioMedMAE(int bucket) =>
+    bucket == 0 ? f_median(ratioMaeB0) :
+     bucket == 1 ? f_median(ratioMaeB1) :
+     bucket == 2 ? f_median(ratioMaeB2) :
+     bucket == 3 ? f_median(ratioMaeB3) :
+     bucket == 4 ? f_median(ratioMaeB4) :
+     na
+
+
+//=============================================================================
+// BUILD 5.3 — STRONG EXPANSION SPLIT CALCULATION HELPERS
+//=============================================================================
+
+f_strongExpAvg(array<float> totals, int group) =>
+    int n = array.get(strongExpSepN, group)
+    n > 0 ? array.get(totals, group) / float(n) : na
+
+f_strongExpRate(array<int> hits, int group) =>
+    int n = array.get(strongExpSepN, group)
+    n > 0 ? float(array.get(hits, group)) / float(n) * 100.0 : na
+
+f_strongExpMedMFE(int group) =>
+    group == 0 ? f_median(strongExpSepMfeB0) :
+     group == 1 ? f_median(strongExpSepMfeB1) :
+     na
+
+f_strongExpMedMAE(int group) =>
+    group == 0 ? f_median(strongExpSepMaeB0) :
+     group == 1 ? f_median(strongExpSepMaeB1) :
+     na
+
+f_strongExpGroupName(int group) =>
+    group == 0 ? "10m Sep <100%" :
+     group == 1 ? "10m Sep >=100%" :
+     "Invalid"
+
+
+//=============================================================================
+// BASELINE TABLE
+//=============================================================================
+
+var table baselineTable =
+     table.new(
+         position.top_right,
+         3,
+         14,
+         border_width = 1)
+
+
+if barstate.islast
+
+    if showBaselineTable
+
+        table.cell(
+             baselineTable,
+             0,
+             0,
+             "ORB BASELINE",
+             bgcolor =
+                 color.new(
+                     color.blue,
+                     75),
+             text_color =
+                 color.white)
+
+        table.cell(
+             baselineTable,
+             1,
+             0,
+             "BUILD 5.3",
+             bgcolor =
+                 color.new(
+                     color.blue,
+                     75),
+             text_color =
+                 color.white)
+
+        table.cell(
+             baselineTable,
+             2,
+             0,
+             "1M",
+             bgcolor =
+                 color.new(
+                     color.blue,
+                     75),
+             text_color =
+                 color.white)
+
+
+        table.cell(
+             baselineTable,
+             0,
+             1,
+             "First Date")
+
+        table.cell(
+             baselineTable,
+             1,
+             1,
+             f_date(
+                 firstAnalyzedDate))
+
+
+        table.cell(
+             baselineTable,
+             0,
+             2,
+             "Last Date")
+
+        table.cell(
+             baselineTable,
+             1,
+             2,
+             f_date(
+                 lastAnalyzedDate))
+
+
+        table.cell(
+             baselineTable,
+             0,
+             3,
+             "RTH Days")
+
+        table.cell(
+             baselineTable,
+             1,
+             3,
+             f_num(
+                 analyzedDays))
+
+
+        table.cell(
+             baselineTable,
+             0,
+             4,
+             "Signals")
+
+        table.cell(
+             baselineTable,
+             1,
+             4,
+             f_num(
+                 totalSignals))
+
+        table.cell(
+             baselineTable,
+             2,
+             4,
+             "Completed " +
+             f_num(
+                 completed))
+
+
+        table.cell(
+             baselineTable,
+             0,
+             5,
+             "Bull / Bear")
+
+        table.cell(
+             baselineTable,
+             1,
+             5,
+             f_num(
+                 bullishSignals))
+
+        table.cell(
+             baselineTable,
+             2,
+             5,
+             f_num(
+                 bearishSignals))
+
+
+        table.cell(
+             baselineTable,
+             0,
+             6,
+             "Fav First")
+
+        table.cell(
+             baselineTable,
+             1,
+             6,
+             f_num(
+                 favorableFirst))
+
+        table.cell(
+             baselineTable,
+             2,
+             6,
+             f_pct(
+                 baselineFavRate))
+
+
+        table.cell(
+             baselineTable,
+             0,
+             7,
+             "Adv First")
+
+        table.cell(
+             baselineTable,
+             1,
+             7,
+             f_num(
+                 adverseFirst))
+
+
+        table.cell(
+             baselineTable,
+             0,
+             8,
+             "Both / U")
+
+        table.cell(
+             baselineTable,
+             1,
+             8,
+             f_num(
+                 bothSameBar))
+
+        table.cell(
+             baselineTable,
+             2,
+             8,
+             f_num(
+                 unresolved))
+
+
+        table.cell(
+             baselineTable,
+             0,
+             9,
+             "+0.25")
+
+        table.cell(
+             baselineTable,
+             1,
+             9,
+             f_num(
+                 hits025))
+
+        table.cell(
+             baselineTable,
+             2,
+             9,
+             f_pct(
+                 hit025Rate))
+
+
+        table.cell(
+             baselineTable,
+             0,
+             10,
+             "+0.75")
+
+        table.cell(
+             baselineTable,
+             1,
+             10,
+             f_num(
+                 hits075))
+
+        table.cell(
+             baselineTable,
+             2,
+             10,
+             f_pct(
+                 hit075Rate))
+
+
+        table.cell(
+             baselineTable,
+             0,
+             11,
+             "+1.00")
+
+        table.cell(
+             baselineTable,
+             1,
+             11,
+             f_num(
+                 hits100))
+
+        table.cell(
+             baselineTable,
+             2,
+             11,
+             f_pct(
+                 hit100Rate))
+
+
+        table.cell(
+             baselineTable,
+             0,
+             12,
+             "Avg MFE")
+
+        table.cell(
+             baselineTable,
+             1,
+             12,
+             f_pct(
+                 avgMFE))
+
+
+        table.cell(
+             baselineTable,
+             0,
+             13,
+             "Avg MAE")
+
+        table.cell(
+             baselineTable,
+             1,
+             13,
+             f_pct(
+                 avgMAE))
+
+    else
+
+        table.clear(
+             baselineTable,
+             0,
+             0,
+             2,
+             13)
+
+
+//=============================================================================
+// PATH TABLE
+//=============================================================================
+
+var table pathTable =
+     table.new(
+         position.middle_right,
+         4,
+         8,
+         border_width = 1)
+
+
+if barstate.islast
+
+    if showPathTable
+
+        table.cell(
+             pathTable,
+             0,
+             0,
+             "POST-BREAKOUT",
+             bgcolor =
+                 color.new(
+                     color.blue,
+                     75),
+             text_color =
+                 color.white)
+
+        table.cell(
+             pathTable,
+             1,
+             0,
+             "N",
+             bgcolor =
+                 color.new(
+                     color.blue,
+                     75),
+             text_color =
+                 color.white)
+
+        table.cell(
+             pathTable,
+             2,
+             0,
+             "% ALL",
+             bgcolor =
+                 color.new(
+                     color.blue,
+                     75),
+             text_color =
+                 color.white)
+
+        table.cell(
+             pathTable,
+             3,
+             0,
+             "EXTRA",
+             bgcolor =
+                 color.new(
+                     color.blue,
+                     75),
+             text_color =
+                 color.white)
+
+
+        table.cell(
+             pathTable,
+             0,
+             1,
+             "NR Continue")
+
+        table.cell(
+             pathTable,
+             1,
+             1,
+             f_num(
+                 nrContinueN))
+
+        table.cell(
+             pathTable,
+             2,
+             1,
+             f_pct(
+                 nrContinuePct))
+
+        table.cell(
+             pathTable,
+             3,
+             1,
+             "+1% " +
+             f_pct(
+                 nr100Rate))
+
+
+        table.cell(
+             pathTable,
+             0,
+             2,
+             "Retest Continue")
+
+        table.cell(
+             pathTable,
+             1,
+             2,
+             f_num(
+                 retestContinueN))
+
+        table.cell(
+             pathTable,
+             2,
+             2,
+             f_pct(
+                 retestContinuePct))
+
+
+        table.cell(
+             pathTable,
+             0,
+             3,
+             "Retest Fail")
+
+        table.cell(
+             pathTable,
+             1,
+             3,
+             f_num(
+                 retestFailN))
+
+        table.cell(
+             pathTable,
+             2,
+             3,
+             f_pct(
+                 retestFailPct))
+
+
+        table.cell(
+             pathTable,
+             0,
+             4,
+             "NR Fail")
+
+        table.cell(
+             pathTable,
+             1,
+             4,
+             f_num(
+                 nrFailN))
+
+        table.cell(
+             pathTable,
+             2,
+             4,
+             f_pct(
+                 nrFailPct))
+
+
+        table.cell(
+             pathTable,
+             0,
+             5,
+             "Retest Unconfirmed")
+
+        table.cell(
+             pathTable,
+             1,
+             5,
+             f_num(
+                 retestUnconfirmedN))
+
+
+        table.cell(
+             pathTable,
+             0,
+             6,
+             "Unresolved")
+
+        table.cell(
+             pathTable,
+             1,
+             6,
+             f_num(
+                 pathUnresolvedN))
+
+
+        table.cell(
+             pathTable,
+             0,
+             7,
+             "Path Check")
+
+        table.cell(
+             pathTable,
+             1,
+             7,
+             f_num(
+                 totalFinalPaths))
+
+        table.cell(
+             pathTable,
+             2,
+             7,
+             "vs " +
+             f_num(
+                 completed))
+
+        table.cell(
+             pathTable,
+             3,
+             7,
+             totalFinalPaths ==
+             completed
+             ? "OK"
+             : "CHECK")
+
+    else
+
+        table.clear(
+             pathTable,
+             0,
+             0,
+             3,
+             7)
+
+
+//=============================================================================
+// RETEST SUMMARY TABLE
+//=============================================================================
+
+var table retestTable =
+     table.new(
+         position.middle_left,
+         3,
+         10,
+         border_width = 1)
+
+
+if barstate.islast
+
+    if showRetestTable
+
+        table.cell(
+             retestTable,
+             0,
+             0,
+             "RETEST SUMMARY",
+             bgcolor =
+                 color.new(
+                     color.blue,
+                     75),
+             text_color =
+                 color.white)
+
+        table.cell(
+             retestTable,
+             1,
+             0,
+             "VALUE",
+             bgcolor =
+                 color.new(
+                     color.blue,
+                     75),
+             text_color =
+                 color.white)
+
+        table.cell(
+             retestTable,
+             2,
+             0,
+             "NOTE",
+             bgcolor =
+                 color.new(
+                     color.blue,
+                     75),
+             text_color =
+                 color.white)
+
+
+        table.cell(
+             retestTable,
+             0,
+             1,
+             "First Retests")
+
+        table.cell(
+             retestTable,
+             1,
+             1,
+             f_num(
+                 totalRetests))
+
+
+        table.cell(
+             retestTable,
+             0,
+             2,
+             "Avg Min to Retest")
+
+        table.cell(
+             retestTable,
+             1,
+             2,
+             na(
+                 avgMinutesToRetest)
+             ? "—"
+             : str.tostring(
+                 avgMinutesToRetest,
+                 "#.1"))
+
+
+        table.cell(
+             retestTable,
+             0,
+             3,
+             "Avg Pre-Retest MFE")
+
+        table.cell(
+             retestTable,
+             1,
+             3,
+             f_pct(
+                 avgPreRetestMFE))
+
+
+        table.cell(
+             retestTable,
+             0,
+             4,
+             "Avg Pre-Retest MAE")
+
+        table.cell(
+             retestTable,
+             1,
+             4,
+             f_pct(
+                 avgPreRetestMAE))
+
+
+        table.cell(
+             retestTable,
+             0,
+             5,
+             "Avg Wick Pen")
+
+        table.cell(
+             retestTable,
+             1,
+             5,
+             f_pct(
+                 avgWickPen))
+
+        table.cell(
+             retestTable,
+             2,
+             5,
+             "% ATR")
+
+
+        table.cell(
+             retestTable,
+             0,
+             6,
+             "Avg Close Pen")
+
+        table.cell(
+             retestTable,
+             1,
+             6,
+             f_pct(
+                 avgClosePen))
+
+        table.cell(
+             retestTable,
+             2,
+             6,
+             "% ATR")
+
+
+        table.cell(
+             retestTable,
+             0,
+             7,
+             "Failures")
+
+        table.cell(
+             retestTable,
+             1,
+             7,
+             f_num(
+                 provisionalFailureN))
+
+
+        table.cell(
+             retestTable,
+             0,
+             8,
+             "Failure Reclaims")
+
+        table.cell(
+             retestTable,
+             1,
+             8,
+             f_num(
+                 failureReclaimN))
+
+        table.cell(
+             retestTable,
+             2,
+             8,
+             f_pct(
+                 reclaimRate))
+
+
+        table.cell(
+             retestTable,
+             0,
+             9,
+             "Avg Min Reclaim")
+
+        table.cell(
+             retestTable,
+             1,
+             9,
+             na(
+                 avgMinutesToReclaim)
+             ? "—"
+             : str.tostring(
+                 avgMinutesToReclaim,
+                 "#.1"))
+
+    else
+
+        table.clear(
+             retestTable,
+             0,
+             0,
+             2,
+             9)
+
+
+//=============================================================================
+// NO-RETEST CHECKPOINT TABLE
+//=============================================================================
+
+var table checkpointTable =
+     table.new(
+         position.bottom_right,
+         5,
+         5,
+         border_width = 1)
+
+
+if barstate.islast
+
+    if showCheckpointTable
+
+        table.cell(
+             checkpointTable,
+             0,
+             0,
+             "NO-RETEST",
+             bgcolor = color.new(color.blue, 75),
+             text_color = color.white)
+
+        table.cell(
+             checkpointTable,
+             1,
+             0,
+             "NR N",
+             bgcolor = color.new(color.blue, 75),
+             text_color = color.white)
+
+        table.cell(
+             checkpointTable,
+             2,
+             0,
+             "AVG SEP",
+             bgcolor = color.new(color.blue, 75),
+             text_color = color.white)
+
+        table.cell(
+             checkpointTable,
+             3,
+             0,
+             "FWD N",
+             bgcolor = color.new(color.blue, 75),
+             text_color = color.white)
+
+        table.cell(
+             checkpointTable,
+             4,
+             0,
+             "FWD FAV%",
+             bgcolor = color.new(color.blue, 75),
+             text_color = color.white)
+
+
+        table.cell(checkpointTable, 0, 1, "5m")
+        table.cell(checkpointTable, 1, 1, f_num(cp5NoRetestN))
+        table.cell(checkpointTable, 2, 1, f_pct(cp5AvgSepAtr))
+        table.cell(checkpointTable, 3, 1, f_num(cp5ForwardN))
+        table.cell(checkpointTable, 4, 1, f_pct(cp5Rate))
+
+
+        table.cell(checkpointTable, 0, 2, "10m")
+        table.cell(checkpointTable, 1, 2, f_num(cp10NoRetestN))
+        table.cell(checkpointTable, 2, 2, f_pct(cp10AvgSepAtr))
+        table.cell(checkpointTable, 3, 2, f_num(cp10ForwardN))
+        table.cell(checkpointTable, 4, 2, f_pct(cp10Rate))
+
+
+        table.cell(checkpointTable, 0, 3, "15m")
+        table.cell(checkpointTable, 1, 3, f_num(cp15NoRetestN))
+        table.cell(checkpointTable, 2, 3, f_pct(cp15AvgSepAtr))
+        table.cell(checkpointTable, 3, 3, f_num(cp15ForwardN))
+        table.cell(checkpointTable, 4, 3, f_pct(cp15Rate))
+
+
+        table.cell(checkpointTable, 0, 4, "30m")
+        table.cell(checkpointTable, 1, 4, f_num(cp30NoRetestN))
+        table.cell(checkpointTable, 2, 4, f_pct(cp30AvgSepAtr))
+        table.cell(checkpointTable, 3, 4, f_num(cp30ForwardN))
+        table.cell(checkpointTable, 4, 4, f_pct(cp30Rate))
+
+    else
+
+        table.clear(
+             checkpointTable,
+             0,
+             0,
+             4,
+             4)
+
+
+//=============================================================================
+// BUILD 4.2 — NO-RETEST RUNNER RESEARCH TABLE
+//=============================================================================
+
+var table runnerTable =
+     table.new(
+         position.bottom_center,
+         9,
+         5,
+         border_width = 1)
+
+
+if barstate.islast
+
+    if showCheckpointTable
+
+        table.cell(runnerTable, 0, 0, "NR RUNNER", bgcolor = color.new(color.blue, 75), text_color = color.white)
+        table.cell(runnerTable, 1, 0, "N", bgcolor = color.new(color.blue, 75), text_color = color.white)
+        table.cell(runnerTable, 2, 0, "+.75", bgcolor = color.new(color.blue, 75), text_color = color.white)
+        table.cell(runnerTable, 3, 0, "+1.0", bgcolor = color.new(color.blue, 75), text_color = color.white)
+        table.cell(runnerTable, 4, 0, "+1.5", bgcolor = color.new(color.blue, 75), text_color = color.white)
+        table.cell(runnerTable, 5, 0, "+2.0", bgcolor = color.new(color.blue, 75), text_color = color.white)
+        table.cell(runnerTable, 6, 0, "POST MFE", bgcolor = color.new(color.blue, 75), text_color = color.white)
+        table.cell(runnerTable, 7, 0, "RETEST", bgcolor = color.new(color.blue, 75), text_color = color.white)
+        table.cell(runnerTable, 8, 0, "RT MIN", bgcolor = color.new(color.blue, 75), text_color = color.white)
+
+        table.cell(runnerTable, 0, 1, "5m")
+        table.cell(runnerTable, 1, 1, f_num(cp5NoRetestN))
+        table.cell(runnerTable, 2, 1, f_pct(cp5Ext075Rate))
+        table.cell(runnerTable, 3, 1, f_pct(cp5Ext100Rate))
+        table.cell(runnerTable, 4, 1, f_pct(cp5Ext150Rate))
+        table.cell(runnerTable, 5, 1, f_pct(cp5Ext200Rate))
+        table.cell(runnerTable, 6, 1, f_pct(cp5AvgPostMFE))
+        table.cell(runnerTable, 7, 1, f_pct(cp5RetestRate))
+        table.cell(runnerTable, 8, 1, na(cp5AvgRetestMin) ? "—" : str.tostring(cp5AvgRetestMin, "#.1"))
+
+        table.cell(runnerTable, 0, 2, "10m")
+        table.cell(runnerTable, 1, 2, f_num(cp10NoRetestN))
+        table.cell(runnerTable, 2, 2, f_pct(cp10Ext075Rate))
+        table.cell(runnerTable, 3, 2, f_pct(cp10Ext100Rate))
+        table.cell(runnerTable, 4, 2, f_pct(cp10Ext150Rate))
+        table.cell(runnerTable, 5, 2, f_pct(cp10Ext200Rate))
+        table.cell(runnerTable, 6, 2, f_pct(cp10AvgPostMFE))
+        table.cell(runnerTable, 7, 2, f_pct(cp10RetestRate))
+        table.cell(runnerTable, 8, 2, na(cp10AvgRetestMin) ? "—" : str.tostring(cp10AvgRetestMin, "#.1"))
+
+        table.cell(runnerTable, 0, 3, "15m")
+        table.cell(runnerTable, 1, 3, f_num(cp15NoRetestN))
+        table.cell(runnerTable, 2, 3, f_pct(cp15Ext075Rate))
+        table.cell(runnerTable, 3, 3, f_pct(cp15Ext100Rate))
+        table.cell(runnerTable, 4, 3, f_pct(cp15Ext150Rate))
+        table.cell(runnerTable, 5, 3, f_pct(cp15Ext200Rate))
+        table.cell(runnerTable, 6, 3, f_pct(cp15AvgPostMFE))
+        table.cell(runnerTable, 7, 3, f_pct(cp15RetestRate))
+        table.cell(runnerTable, 8, 3, na(cp15AvgRetestMin) ? "—" : str.tostring(cp15AvgRetestMin, "#.1"))
+
+        table.cell(runnerTable, 0, 4, "30m")
+        table.cell(runnerTable, 1, 4, f_num(cp30NoRetestN))
+        table.cell(runnerTable, 2, 4, f_pct(cp30Ext075Rate))
+        table.cell(runnerTable, 3, 4, f_pct(cp30Ext100Rate))
+        table.cell(runnerTable, 4, 4, f_pct(cp30Ext150Rate))
+        table.cell(runnerTable, 5, 4, f_pct(cp30Ext200Rate))
+        table.cell(runnerTable, 6, 4, f_pct(cp30AvgPostMFE))
+        table.cell(runnerTable, 7, 4, f_pct(cp30RetestRate))
+        table.cell(runnerTable, 8, 4, na(cp30AvgRetestMin) ? "—" : str.tostring(cp30AvgRetestMin, "#.1"))
+
+    else
+
+        table.clear(
+             runnerTable,
+             0,
+             0,
+             8,
+             4)
+
+
+//=============================================================================
+// BUILD 4.3 — NO-RETEST FORWARD EXCURSION TABLE
+//=============================================================================
+
+var table excursionTable =
+     table.new(
+         position.top_left,
+         9,
+         5,
+         border_width = 1)
+
+if barstate.islast
+
+    if showCheckpointTable
+
+        table.cell(excursionTable, 0, 0, "NR EXCURSION", bgcolor = color.new(color.blue, 75), text_color = color.white)
+        table.cell(excursionTable, 1, 0, "N", bgcolor = color.new(color.blue, 75), text_color = color.white)
+        table.cell(excursionTable, 2, 0, "AVG MFE", bgcolor = color.new(color.blue, 75), text_color = color.white)
+        table.cell(excursionTable, 3, 0, "MED MFE", bgcolor = color.new(color.blue, 75), text_color = color.white)
+        table.cell(excursionTable, 4, 0, "AVG MAE", bgcolor = color.new(color.blue, 75), text_color = color.white)
+        table.cell(excursionTable, 5, 0, "MED MAE", bgcolor = color.new(color.blue, 75), text_color = color.white)
+        table.cell(excursionTable, 6, 0, "+.25", bgcolor = color.new(color.blue, 75), text_color = color.white)
+        table.cell(excursionTable, 7, 0, "+.50", bgcolor = color.new(color.blue, 75), text_color = color.white)
+        table.cell(excursionTable, 8, 0, "+.75 / +1.0", bgcolor = color.new(color.blue, 75), text_color = color.white)
+
+        table.cell(excursionTable, 0, 1, "5m")
+        table.cell(excursionTable, 1, 1, f_num(cp5NoRetestN))
+        table.cell(excursionTable, 2, 1, f_pct(cp5WindowAvgMFE))
+        table.cell(excursionTable, 3, 1, f_pct(cp5WindowMedMFE))
+        table.cell(excursionTable, 4, 1, f_pct(cp5WindowAvgMAE))
+        table.cell(excursionTable, 5, 1, f_pct(cp5WindowMedMAE))
+        table.cell(excursionTable, 6, 1, f_pct(cp5Window025Rate))
+        table.cell(excursionTable, 7, 1, f_pct(cp5Window050Rate))
+        table.cell(excursionTable, 8, 1, f_pct(cp5Window075Rate) + " / " + f_pct(cp5Window100Rate))
+
+        table.cell(excursionTable, 0, 2, "10m")
+        table.cell(excursionTable, 1, 2, f_num(cp10NoRetestN))
+        table.cell(excursionTable, 2, 2, f_pct(cp10WindowAvgMFE))
+        table.cell(excursionTable, 3, 2, f_pct(cp10WindowMedMFE))
+        table.cell(excursionTable, 4, 2, f_pct(cp10WindowAvgMAE))
+        table.cell(excursionTable, 5, 2, f_pct(cp10WindowMedMAE))
+        table.cell(excursionTable, 6, 2, f_pct(cp10Window025Rate))
+        table.cell(excursionTable, 7, 2, f_pct(cp10Window050Rate))
+        table.cell(excursionTable, 8, 2, f_pct(cp10Window075Rate) + " / " + f_pct(cp10Window100Rate))
+
+        table.cell(excursionTable, 0, 3, "15m")
+        table.cell(excursionTable, 1, 3, f_num(cp15NoRetestN))
+        table.cell(excursionTable, 2, 3, f_pct(cp15WindowAvgMFE))
+        table.cell(excursionTable, 3, 3, f_pct(cp15WindowMedMFE))
+        table.cell(excursionTable, 4, 3, f_pct(cp15WindowAvgMAE))
+        table.cell(excursionTable, 5, 3, f_pct(cp15WindowMedMAE))
+        table.cell(excursionTable, 6, 3, f_pct(cp15Window025Rate))
+        table.cell(excursionTable, 7, 3, f_pct(cp15Window050Rate))
+        table.cell(excursionTable, 8, 3, f_pct(cp15Window075Rate) + " / " + f_pct(cp15Window100Rate))
+
+        table.cell(excursionTable, 0, 4, "30m")
+        table.cell(excursionTable, 1, 4, f_num(cp30NoRetestN))
+        table.cell(excursionTable, 2, 4, f_pct(cp30WindowAvgMFE))
+        table.cell(excursionTable, 3, 4, f_pct(cp30WindowMedMFE))
+        table.cell(excursionTable, 4, 4, f_pct(cp30WindowAvgMAE))
+        table.cell(excursionTable, 5, 4, f_pct(cp30WindowMedMAE))
+        table.cell(excursionTable, 6, 4, f_pct(cp30Window025Rate))
+        table.cell(excursionTable, 7, 4, f_pct(cp30Window050Rate))
+        table.cell(excursionTable, 8, 4, f_pct(cp30Window075Rate) + " / " + f_pct(cp30Window100Rate))
+
+    else
+
+        table.clear(excursionTable, 0, 0, 8, 4)
+
+
+//=============================================================================
+// BUILD 4.4 — 10M / 15M ORB SEPARATION TABLE
+//=============================================================================
+
+var table separationTable =
+     table.new(
+         position.middle_center,
+         9,
+         9,
+         border_width = 1)
+
+
+if barstate.islast
+
+    if showCheckpointTable
+
+        table.cell(separationTable, 0, 0, "SEP STUDY", bgcolor = color.new(color.blue, 75), text_color = color.white)
+        table.cell(separationTable, 1, 0, "BUCKET", bgcolor = color.new(color.blue, 75), text_color = color.white)
+        table.cell(separationTable, 2, 0, "N", bgcolor = color.new(color.blue, 75), text_color = color.white)
+        table.cell(separationTable, 3, 0, "AVG MFE", bgcolor = color.new(color.blue, 75), text_color = color.white)
+        table.cell(separationTable, 4, 0, "MED MFE", bgcolor = color.new(color.blue, 75), text_color = color.white)
+        table.cell(separationTable, 5, 0, "AVG MAE", bgcolor = color.new(color.blue, 75), text_color = color.white)
+        table.cell(separationTable, 6, 0, "MED MAE", bgcolor = color.new(color.blue, 75), text_color = color.white)
+        table.cell(separationTable, 7, 0, ".50/.75/1.0", bgcolor = color.new(color.blue, 75), text_color = color.white)
+        table.cell(separationTable, 8, 0, "RETEST", bgcolor = color.new(color.blue, 75), text_color = color.white)
+
+        for b = 0 to 3
+            int row10 = b + 1
+            int n10 = array.get(sep10N, b)
+            float avg10Mfe = f_bucketAvg(sep10MfeTotal, sep10N, b)
+            float avg10Mae = f_bucketAvg(sep10MaeTotal, sep10N, b)
+            float hit10_50 = f_bucketRate(sep10Hit050, sep10N, b)
+            float hit10_75 = f_bucketRate(sep10Hit075, sep10N, b)
+            float hit10_100 = f_bucketRate(sep10Hit100, sep10N, b)
+            float rt10 = f_bucketRate(sep10RetestN, sep10N, b)
+
+            table.cell(separationTable, 0, row10, "10m")
+            table.cell(separationTable, 1, row10, f_sepBucketName(b))
+            table.cell(separationTable, 2, row10, f_num(n10))
+            table.cell(separationTable, 3, row10, f_pct(avg10Mfe))
+            table.cell(separationTable, 4, row10, f_pct(f_sep10MedMFE(b)))
+            table.cell(separationTable, 5, row10, f_pct(avg10Mae))
+            table.cell(separationTable, 6, row10, f_pct(f_sep10MedMAE(b)))
+            table.cell(separationTable, 7, row10, f_pct(hit10_50) + "/" + f_pct(hit10_75) + "/" + f_pct(hit10_100))
+            table.cell(separationTable, 8, row10, f_pct(rt10))
+
+        for b = 0 to 3
+            int row15 = b + 5
+            int n15 = array.get(sep15N, b)
+            float avg15Mfe = f_bucketAvg(sep15MfeTotal, sep15N, b)
+            float avg15Mae = f_bucketAvg(sep15MaeTotal, sep15N, b)
+            float hit15_50 = f_bucketRate(sep15Hit050, sep15N, b)
+            float hit15_75 = f_bucketRate(sep15Hit075, sep15N, b)
+            float hit15_100 = f_bucketRate(sep15Hit100, sep15N, b)
+            float rt15 = f_bucketRate(sep15RetestN, sep15N, b)
+
+            table.cell(separationTable, 0, row15, "15m")
+            table.cell(separationTable, 1, row15, f_sepBucketName(b))
+            table.cell(separationTable, 2, row15, f_num(n15))
+            table.cell(separationTable, 3, row15, f_pct(avg15Mfe))
+            table.cell(separationTable, 4, row15, f_pct(f_sep15MedMFE(b)))
+            table.cell(separationTable, 5, row15, f_pct(avg15Mae))
+            table.cell(separationTable, 6, row15, f_pct(f_sep15MedMAE(b)))
+            table.cell(separationTable, 7, row15, f_pct(hit15_50) + "/" + f_pct(hit15_75) + "/" + f_pct(hit15_100))
+            table.cell(separationTable, 8, row15, f_pct(rt15))
+
+    else
+
+        table.clear(
+             separationTable,
+             0,
+             0,
+             8,
+             8)
+
+
+//=============================================================================
+// BUILD 4.6 — 10M -> 15M TRAJECTORY RATIO TABLE
+//=============================================================================
+
+var table ratioTable =
+     table.new(
+         position.middle_left,
+         11,
+         10,
+         border_width = 1)
+
+
+if barstate.islast
+
+    if showCheckpointTable
+
+        table.cell(ratioTable, 0, 0, "RATIO STUDY", bgcolor = color.new(color.blue, 75), text_color = color.white)
+        table.cell(ratioTable, 1, 0, "N", bgcolor = color.new(color.blue, 75), text_color = color.white)
+        table.cell(ratioTable, 2, 0, "AVG RATIO", bgcolor = color.new(color.blue, 75), text_color = color.white)
+        table.cell(ratioTable, 3, 0, "10M SEP", bgcolor = color.new(color.blue, 75), text_color = color.white)
+        table.cell(ratioTable, 4, 0, "15M SEP", bgcolor = color.new(color.blue, 75), text_color = color.white)
+        table.cell(ratioTable, 5, 0, "AVG MFE", bgcolor = color.new(color.blue, 75), text_color = color.white)
+        table.cell(ratioTable, 6, 0, "MED MFE", bgcolor = color.new(color.blue, 75), text_color = color.white)
+        table.cell(ratioTable, 7, 0, "AVG MAE", bgcolor = color.new(color.blue, 75), text_color = color.white)
+        table.cell(ratioTable, 8, 0, "MED MAE", bgcolor = color.new(color.blue, 75), text_color = color.white)
+        table.cell(ratioTable, 9, 0, ".50/.75/1.0", bgcolor = color.new(color.blue, 75), text_color = color.white)
+        table.cell(ratioTable, 10, 0, "RETEST", bgcolor = color.new(color.blue, 75), text_color = color.white)
+
+        for rb = 0 to 4
+            int row = rb + 1
+            int n = array.get(ratioN, rb)
+
+            table.cell(ratioTable, 0, row, f_ratioName(rb))
+            table.cell(ratioTable, 1, row, f_num(n))
+            table.cell(ratioTable, 2, row, na(f_ratioAvg(ratioValueTotal, rb)) ? "—" : str.tostring(f_ratioAvg(ratioValueTotal, rb), "#.##"))
+            table.cell(ratioTable, 3, row, f_pct(f_ratioAvg(ratioSep10Total, rb)))
+            table.cell(ratioTable, 4, row, f_pct(f_ratioAvg(ratioSep15Total, rb)))
+            table.cell(ratioTable, 5, row, f_pct(f_ratioAvg(ratioMfeTotal, rb)))
+            table.cell(ratioTable, 6, row, f_pct(f_ratioMedMFE(rb)))
+            table.cell(ratioTable, 7, row, f_pct(f_ratioAvg(ratioMaeTotal, rb)))
+            table.cell(ratioTable, 8, row, f_pct(f_ratioMedMAE(rb)))
+            table.cell(
+                 ratioTable,
+                 9,
+                 row,
+                 f_pct(f_ratioRate(ratioHit050, rb)) + "/" +
+                 f_pct(f_ratioRate(ratioHit075, rb)) + "/" +
+                 f_pct(f_ratioRate(ratioHit100, rb)))
+            table.cell(ratioTable, 10, row, f_pct(f_ratioRate(ratioRetestN, rb)))
+
+        // BUILD 5.3 — Strong Expansion split. Kept in the same panel to
+        // avoid adding another chart-position collision.
+        table.cell(ratioTable, 0, 7, "STRONG EXP STUDY", bgcolor = color.new(color.orange, 70), text_color = color.white)
+        table.cell(ratioTable, 1, 7, "N", bgcolor = color.new(color.orange, 70), text_color = color.white)
+        table.cell(ratioTable, 2, 7, "", bgcolor = color.new(color.orange, 70))
+        table.cell(ratioTable, 3, 7, "", bgcolor = color.new(color.orange, 70))
+        table.cell(ratioTable, 4, 7, "", bgcolor = color.new(color.orange, 70))
+        table.cell(ratioTable, 5, 7, "AVG MFE", bgcolor = color.new(color.orange, 70), text_color = color.white)
+        table.cell(ratioTable, 6, 7, "MED MFE", bgcolor = color.new(color.orange, 70), text_color = color.white)
+        table.cell(ratioTable, 7, 7, "AVG MAE", bgcolor = color.new(color.orange, 70), text_color = color.white)
+        table.cell(ratioTable, 8, 7, "MED MAE", bgcolor = color.new(color.orange, 70), text_color = color.white)
+        table.cell(ratioTable, 9, 7, ".50/.75/1.0", bgcolor = color.new(color.orange, 70), text_color = color.white)
+        table.cell(ratioTable, 10, 7, "RETEST", bgcolor = color.new(color.orange, 70), text_color = color.white)
+
+        for sg = 0 to 1
+            int seRow = sg + 8
+            int seN = array.get(strongExpSepN, sg)
+            table.cell(ratioTable, 0, seRow, f_strongExpGroupName(sg))
+            table.cell(ratioTable, 1, seRow, f_num(seN))
+            table.cell(ratioTable, 2, seRow, "")
+            table.cell(ratioTable, 3, seRow, "")
+            table.cell(ratioTable, 4, seRow, "")
+            table.cell(ratioTable, 5, seRow, f_pct(f_strongExpAvg(strongExpSepMfeTotal, sg)))
+            table.cell(ratioTable, 6, seRow, f_pct(f_strongExpMedMFE(sg)))
+            table.cell(ratioTable, 7, seRow, f_pct(f_strongExpAvg(strongExpSepMaeTotal, sg)))
+            table.cell(ratioTable, 8, seRow, f_pct(f_strongExpMedMAE(sg)))
+            table.cell(
+                 ratioTable,
+                 9,
+                 seRow,
+                 f_pct(f_strongExpRate(strongExpSepHit050, sg)) + "/" +
+                 f_pct(f_strongExpRate(strongExpSepHit075, sg)) + "/" +
+                 f_pct(f_strongExpRate(strongExpSepHit100, sg)))
+            table.cell(ratioTable, 10, seRow, f_pct(f_strongExpRate(strongExpSepRetestN, sg)))
+
+    else
+
+        table.clear(
+             ratioTable,
+             0,
+             0,
+             10,
+             9)
+
+
+
+//=============================================================================
+// BUILD 5.3 — 10M QUALITY STUDY TABLE
+//
+// Population: all active breakouts that reached the 10m timestamp.
+// SEP groups are intentionally broad to avoid threshold overfitting:
+// Low <100%, Established 100-300%, Extended >300% of frozen 1M ATR.
+// Q = 10m MFE / max(10m MAE, 0.01%).
+// RT column = NR / RH / RF / RT OPEN counts observed at 10m.
+// TRAJ = average 15m separation / 10m separation where 15m was available.
+// .50F is original +0.50% favorable-first rate; .75/1.0 are eventual hits.
+//=============================================================================
+
+var table qualityTable =
+     table.new(
+         position.bottom_center,
+         10,
+         4,
+         border_width = 1)
+
+if barstate.islast
+
+    if showCheckpointTable
+
+        table.cell(qualityTable, 0, 0, "10M QUALITY", bgcolor = color.new(color.purple, 70), text_color = color.white)
+        table.cell(qualityTable, 1, 0, "N", bgcolor = color.new(color.purple, 70), text_color = color.white)
+        table.cell(qualityTable, 2, 0, "10M MFE", bgcolor = color.new(color.purple, 70), text_color = color.white)
+        table.cell(qualityTable, 3, 0, "10M MAE", bgcolor = color.new(color.purple, 70), text_color = color.white)
+        table.cell(qualityTable, 4, 0, "Q MFE/MAE", bgcolor = color.new(color.purple, 70), text_color = color.white)
+        table.cell(qualityTable, 5, 0, "RT @10M", bgcolor = color.new(color.purple, 70), text_color = color.white)
+        table.cell(qualityTable, 6, 0, "AVG TRAJ", bgcolor = color.new(color.purple, 70), text_color = color.white)
+        table.cell(qualityTable, 7, 0, ".50F", bgcolor = color.new(color.purple, 70), text_color = color.white)
+        table.cell(qualityTable, 8, 0, ".75", bgcolor = color.new(color.purple, 70), text_color = color.white)
+        table.cell(qualityTable, 9, 0, "1.0", bgcolor = color.new(color.purple, 70), text_color = color.white)
+
+        for qg = 0 to 2
+            int row = qg + 1
+            int qn = array.get(qualityN, qg)
+
+            string rtText =
+                 str.tostring(array.get(qualityNR, qg)) + "/" +
+                 str.tostring(array.get(qualityRH, qg)) + "/" +
+                 str.tostring(array.get(qualityRF, qg)) + "/" +
+                 str.tostring(array.get(qualityRTOpen, qg))
+
+            table.cell(qualityTable, 0, row, f_qualitySepName(qg))
+            table.cell(qualityTable, 1, row, f_num(qn))
+            table.cell(qualityTable, 2, row, f_pct(f_qualityAvg(qualityMfe10Total, qg)))
+            table.cell(qualityTable, 3, row, f_pct(f_qualityAvg(qualityMae10Total, qg)))
+            table.cell(qualityTable, 4, row, na(f_qualityAvg(qualityRatio10Total, qg)) ? "—" : str.tostring(f_qualityAvg(qualityRatio10Total, qg), "#.##"))
+            table.cell(qualityTable, 5, row, rtText)
+            table.cell(qualityTable, 6, row, na(f_qualityTrajectoryAvg(qg)) ? "—" : str.tostring(f_qualityTrajectoryAvg(qg), "#.##"))
+            table.cell(qualityTable, 7, row, f_pct(f_qualityRate(qualityFav050, qg)))
+            table.cell(qualityTable, 8, row, f_pct(f_qualityRate(qualityHit075, qg)))
+            table.cell(qualityTable, 9, row, f_pct(f_qualityRate(qualityHit100, qg)))
+
+    else
+        table.clear(qualityTable, 0, 0, 9, 3)
+
+
+
+//=============================================================================
+// BUILD 5.3.2 — FAILURE AUDIT / CONTRACT DIAGNOSTIC TABLE
+//=============================================================================
+var table failureAuditTable = table.new(position.top_center, 5, 35, border_width = 1)
+
+f_renderContractDiagnostic(t) =>
+        table.clear(t, 0, 0, 4, 34)
+
+        int cWin = array.get(contractDiagN, 0)
+        int cFail = array.get(contractDiagN, 1)
+
+        table.cell(t, 0, 0, "CONTRACT DIAG 5.3.2", bgcolor = color.new(color.purple, 55), text_color = color.white)
+        table.cell(t, 1, 0, "WIN", bgcolor = color.new(color.purple, 55), text_color = color.white)
+        table.cell(t, 2, 0, "FAIL", bgcolor = color.new(color.purple, 55), text_color = color.white)
+        table.cell(t, 3, 0, "FAIL %", bgcolor = color.new(color.purple, 55), text_color = color.white)
+        table.cell(t, 4, 0, "N", bgcolor = color.new(color.purple, 55), text_color = color.white)
+
+        table.cell(t, 0, 1, "TOTAL")
+        table.cell(t, 1, 1, f_num(cWin))
+        table.cell(t, 2, 1, f_num(cFail))
+        table.cell(t, 3, 1, f_pct(f_contractFailPct(cWin, cFail)))
+        table.cell(t, 4, 1, f_num(cWin + cFail))
+
+        table.cell(t, 0, 2, "AVG 10M SEP")
+        table.cell(t, 1, 2, f_pct(f_contractAvg(contractDiagSepTotal, 0)))
+        table.cell(t, 2, 2, f_pct(f_contractAvg(contractDiagSepTotal, 1)))
+        table.cell(t, 0, 3, "AVG 10M MFE")
+        table.cell(t, 1, 3, f_pct(f_contractAvg(contractDiagMfeTotal, 0)))
+        table.cell(t, 2, 3, f_pct(f_contractAvg(contractDiagMfeTotal, 1)))
+        table.cell(t, 0, 4, "AVG 10M MAE")
+        table.cell(t, 1, 4, f_pct(f_contractAvg(contractDiagMaeTotal, 0)))
+        table.cell(t, 2, 4, f_pct(f_contractAvg(contractDiagMaeTotal, 1)))
+        table.cell(t, 0, 5, "AVG Q")
+        table.cell(t, 1, 5, na(f_contractAvg(contractDiagQTotal, 0)) ? "—" : str.tostring(f_contractAvg(contractDiagQTotal, 0), "#.##"))
+        table.cell(t, 2, 5, na(f_contractAvg(contractDiagQTotal, 1)) ? "—" : str.tostring(f_contractAvg(contractDiagQTotal, 1), "#.##"))
+        table.cell(t, 0, 6, "BULL / BEAR")
+        table.cell(t, 1, 6, f_num(array.get(contractDiagBull, 0)) + " / " + f_num(array.get(contractDiagBear, 0)))
+        table.cell(t, 2, 6, f_num(array.get(contractDiagBull, 1)) + " / " + f_num(array.get(contractDiagBear, 1)))
+
+        string[] stateNames = array.from("NR @10M","RH @10M","RF @10M","RT OPEN")
+        for b = 0 to 3
+            int row = 8 + b
+            int w = f_contractCount(contractState, b, 0)
+            int f = f_contractCount(contractState, b, 1)
+            table.cell(t, 0, row, array.get(stateNames, b))
+            table.cell(t, 1, row, f_num(w))
+            table.cell(t, 2, row, f_num(f))
+            table.cell(t, 3, row, f_pct(f_contractFailPct(w, f)))
+            table.cell(t, 4, row, f_num(w + f))
+
+        string[] sepNames = array.from("SEP 100-150","SEP 150-200","SEP 200-250","SEP 250-300")
+        for b = 0 to 3
+            int row = 13 + b
+            int w = f_contractCount(contractSep, b, 0)
+            int f = f_contractCount(contractSep, b, 1)
+            table.cell(t, 0, row, array.get(sepNames, b))
+            table.cell(t, 1, row, f_num(w))
+            table.cell(t, 2, row, f_num(f))
+            table.cell(t, 3, row, f_pct(f_contractFailPct(w, f)))
+            table.cell(t, 4, row, f_num(w + f))
+
+        string[] mfeNames = array.from("MFE <.25","MFE .25-.50","MFE .50-.75","MFE >=.75")
+        for b = 0 to 3
+            int row = 18 + b
+            int w = f_contractCount(contractMfe, b, 0)
+            int f = f_contractCount(contractMfe, b, 1)
+            table.cell(t, 0, row, array.get(mfeNames, b))
+            table.cell(t, 1, row, f_num(w))
+            table.cell(t, 2, row, f_num(f))
+            table.cell(t, 3, row, f_pct(f_contractFailPct(w, f)))
+            table.cell(t, 4, row, f_num(w + f))
+
+        string[] maeNames = array.from("MAE <.10","MAE .10-.25","MAE .25-.40","MAE >=.40")
+        for b = 0 to 3
+            int row = 23 + b
+            int w = f_contractCount(contractMae, b, 0)
+            int f = f_contractCount(contractMae, b, 1)
+            table.cell(t, 0, row, array.get(maeNames, b))
+            table.cell(t, 1, row, f_num(w))
+            table.cell(t, 2, row, f_num(f))
+            table.cell(t, 3, row, f_pct(f_contractFailPct(w, f)))
+            table.cell(t, 4, row, f_num(w + f))
+
+        string[] qNames = array.from("Q <1","Q 1-2","Q 2-4","Q >4")
+        for b = 0 to 3
+            int row = 28 + b
+            int w = f_contractCount(contractQ, b, 0)
+            int f = f_contractCount(contractQ, b, 1)
+            table.cell(t, 0, row, array.get(qNames, b))
+            table.cell(t, 1, row, f_num(w))
+            table.cell(t, 2, row, f_num(f))
+            table.cell(t, 3, row, f_pct(f_contractFailPct(w, f)))
+            table.cell(t, 4, row, f_num(w + f))
+
+        string[] sevNames = array.from("SEV <.50","MOD .50-.65","MILD .65-.80")
+        for b = 0 to 2
+            int row = 32 + b
+            int w = f_contractCount(contractSeverity, b, 0)
+            int f = f_contractCount(contractSeverity, b, 1)
+            table.cell(t, 0, row, array.get(sevNames, b))
+            table.cell(t, 1, row, f_num(w))
+            table.cell(t, 2, row, f_num(f))
+            table.cell(t, 3, row, f_pct(f_contractFailPct(w, f)))
+            table.cell(t, 4, row, f_num(w + f))
+
+f_renderFailureAudit(t) =>
+        table.clear(t, 0, 0, 4, 34)
+
+        table.cell(t, 0, 0, "FAILURE AUDIT", bgcolor = color.new(color.maroon, 65), text_color = color.white)
+        table.cell(t, 1, 0, "EST WIN", bgcolor = color.new(color.maroon, 65), text_color = color.white)
+        table.cell(t, 2, 0, "EST FAIL", bgcolor = color.new(color.maroon, 65), text_color = color.white)
+        table.cell(t, 3, 0, "EXT WIN", bgcolor = color.new(color.maroon, 65), text_color = color.white)
+        table.cell(t, 4, 0, "EXT FAIL", bgcolor = color.new(color.maroon, 65), text_color = color.white)
+
+        string[] labels = array.from(
+             "N","NR @10M","RH @10M","RF @10M","RT OPEN",
+             "CONTRACT","STABLE","EXPAND","NO 15M","BULL","BEAR",
+             "AVG 10M SEP","AVG 10M MFE","AVG 10M MAE","AVG Q")
+
+        for r = 0 to 14
+            table.cell(t, 0, r + 1, array.get(labels, r))
+
+        for c = 0 to 3
+            int col = c + 1
+            table.cell(t, col, 1, f_num(array.get(auditN, c)))
+            table.cell(t, col, 2, f_num(array.get(auditNR, c)))
+            table.cell(t, col, 3, f_num(array.get(auditRH, c)))
+            table.cell(t, col, 4, f_num(array.get(auditRF, c)))
+            table.cell(t, col, 5, f_num(array.get(auditRTOpen, c)))
+            table.cell(t, col, 6, f_num(array.get(auditContract, c)))
+            table.cell(t, col, 7, f_num(array.get(auditStable, c)))
+            table.cell(t, col, 8, f_num(array.get(auditExpand, c)))
+            table.cell(t, col, 9, f_num(array.get(auditNo15, c)))
+            table.cell(t, col, 10, f_num(array.get(auditBull, c)))
+            table.cell(t, col, 11, f_num(array.get(auditBear, c)))
+            table.cell(t, col, 12, f_pct(f_auditAvg(auditSep10Total, c)))
+            table.cell(t, col, 13, f_pct(f_auditAvg(auditMfe10Total, c)))
+            table.cell(t, col, 14, f_pct(f_auditAvg(auditMae10Total, c)))
+            table.cell(t, col, 15, na(f_auditAvg(auditQ10Total, c)) ? "—" : str.tostring(f_auditAvg(auditQ10Total, c), "#.##"))
+
+        table.cell(t, 0, 16, "BOTH / U")
+        table.cell(t, 1, 16, f_num(auditEstBoth) + " / " + f_num(auditEstUnresolved))
+        table.cell(t, 3, 16, f_num(auditExtBoth) + " / " + f_num(auditExtUnresolved))
+        table.cell(t, 0, 17, "Trajectory = 10→15m")
+
+if barstate.islast
+    if showCheckpointTable and showContractDiagnostic
+        f_renderContractDiagnostic(failureAuditTable)
+    else if showCheckpointTable
+        f_renderFailureAudit(failureAuditTable)
+    else
+        table.clear(failureAuditTable, 0, 0, 4, 34)
+
+
+//=============================================================================
+// BUILD 5.3 — EXT DEPTH TABLE
+// Uses bottom_left; debug table occupies this position only when enabled.
+//=============================================================================
+
+var table extDepthTable = table.new(position.bottom_left, 7, 4, border_width = 1)
+
+if barstate.islast
+    if showCheckpointTable
+        table.cell(extDepthTable, 0, 0, "EXT DEPTH", bgcolor = color.new(color.orange, 65), text_color = color.white)
+        table.cell(extDepthTable, 1, 0, "N", bgcolor = color.new(color.orange, 65), text_color = color.white)
+        table.cell(extDepthTable, 2, 0, ".50F", bgcolor = color.new(color.orange, 65), text_color = color.white)
+        table.cell(extDepthTable, 3, 0, ".75", bgcolor = color.new(color.orange, 65), text_color = color.white)
+        table.cell(extDepthTable, 4, 0, "1.0", bgcolor = color.new(color.orange, 65), text_color = color.white)
+        table.cell(extDepthTable, 5, 0, "AVG MFE", bgcolor = color.new(color.orange, 65), text_color = color.white)
+        table.cell(extDepthTable, 6, 0, "AVG MAE", bgcolor = color.new(color.orange, 65), text_color = color.white)
+
+        for edb = 0 to 2
+            int row = edb + 1
+            table.cell(extDepthTable, 0, row, f_extDepthName(edb))
+            table.cell(extDepthTable, 1, row, f_num(array.get(extDepthN, edb)))
+            table.cell(extDepthTable, 2, row, f_pct(f_extDepthRate(extDepthFav050, edb)))
+            table.cell(extDepthTable, 3, row, f_pct(f_extDepthRate(extDepthHit075, edb)))
+            table.cell(extDepthTable, 4, row, f_pct(f_extDepthRate(extDepthHit100, edb)))
+            table.cell(extDepthTable, 5, row, f_pct(f_extDepthAvg(extDepthMfeTotal, edb)))
+            table.cell(extDepthTable, 6, row, f_pct(f_extDepthAvg(extDepthMaeTotal, edb)))
+    else
+        table.clear(extDepthTable, 0, 0, 6, 3)
+
+
+//=============================================================================
+// CHECKPOINT RECONCILIATION NOTES
+//
+// NR N should be non-increasing:
+//   5m >= 10m >= 15m >= 30m
+//
+// FWD N <= NR N at every checkpoint.
+//
+// FWD FAV% uses only decisive forward outcomes (Fav + Adv).
+// Both-same-bar and unresolved events remain tracked internally.
+//=============================================================================
+
+
+//=============================================================================
+// DEBUG TABLE
+//=============================================================================
+
+var table debugTable =
+     table.new(
+         position.bottom_left,
+         2,
+         14,
+         border_width = 1)
+
+
+if barstate.islast
+
+    if showDebug
+
+        table.cell(
+             debugTable,
+             0,
+             0,
+             "BUILD 4.6 DEBUG",
+             bgcolor =
+                 color.new(
+                     color.orange,
+                     65),
+             text_color =
+                 color.white)
+
+        table.cell(
+             debugTable,
+             1,
+             0,
+             "ACTIVE",
+             bgcolor =
+                 color.new(
+                     color.orange,
+                     65),
+             text_color =
+                 color.white)
+
+
+        table.cell(
+             debugTable,
+             0,
+             1,
+             "Path")
+
+        table.cell(
+             debugTable,
+             1,
+             1,
+             f_pathName(
+                 activePath))
+
+
+        table.cell(
+             debugTable,
+             0,
+             2,
+             "Entry")
+
+        table.cell(
+             debugTable,
+             1,
+             2,
+             na(entryPrice)
+             ? "—"
+             : str.tostring(
+                 entryPrice,
+                 format.mintick))
+
+
+        table.cell(
+             debugTable,
+             0,
+             3,
+             "Frozen ATR")
+
+        table.cell(
+             debugTable,
+             1,
+             3,
+             na(frozenAtr)
+             ? "—"
+             : str.tostring(
+                 frozenAtr,
+                 format.mintick))
+
+
+        table.cell(
+             debugTable,
+             0,
+             4,
+             "Broken ORB")
+
+        table.cell(
+             debugTable,
+             1,
+             4,
+             na(brokenOrbLevel)
+             ? "—"
+             : str.tostring(
+                 brokenOrbLevel,
+                 format.mintick))
+
+
+        table.cell(
+             debugTable,
+             0,
+             5,
+             "Retest?")
+
+        table.cell(
+             debugTable,
+             1,
+             5,
+             str.tostring(
+                 firstRetestOccurred))
+
+
+        table.cell(
+             debugTable,
+             0,
+             6,
+             "Retest Count")
+
+        table.cell(
+             debugTable,
+             1,
+             6,
+             f_num(
+                 retestCount))
+
+
+        table.cell(
+             debugTable,
+             0,
+             7,
+             "Pre-Retest MFE")
+
+        table.cell(
+             debugTable,
+             1,
+             7,
+             f_pct(
+                 preRetestMFE))
+
+
+        table.cell(
+             debugTable,
+             0,
+             8,
+             "Wick Pen ATR")
+
+        table.cell(
+             debugTable,
+             1,
+             8,
+             f_pct(
+                 maxWickPenAtrPct))
+
+
+        table.cell(
+             debugTable,
+             0,
+             9,
+             "Close Pen ATR")
+
+        table.cell(
+             debugTable,
+             1,
+             9,
+             f_pct(
+                 maxClosePenAtrPct))
+
+
+        table.cell(
+             debugTable,
+             0,
+             10,
+             "Confirmed?")
+
+        table.cell(
+             debugTable,
+             1,
+             10,
+             str.tostring(
+                 retestConfirmed))
+
+
+        table.cell(
+             debugTable,
+             0,
+             11,
+             "Failed?")
+
+        table.cell(
+             debugTable,
+             1,
+             11,
+             str.tostring(
+                 provisionalFailure))
+
+
+        table.cell(
+             debugTable,
+             0,
+             12,
+             "Reclaimed?")
+
+        table.cell(
+             debugTable,
+             1,
+             12,
+             str.tostring(
+                 reclaimedAfterFailure))
+
+
+        table.cell(
+             debugTable,
+             0,
+             13,
+             "Pen Frozen?")
+
+        table.cell(
+             debugTable,
+             1,
+             13,
+             str.tostring(
+                 retestPenetrationFrozen))
+
+
+    else
+
+        table.clear(
+             debugTable,
+             0,
+             0,
+             1,
+             13)

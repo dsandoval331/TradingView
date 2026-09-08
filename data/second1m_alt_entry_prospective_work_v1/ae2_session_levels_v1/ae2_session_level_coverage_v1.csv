@@ -1,0 +1,15 @@
+feature,available_n,coverage_pct
+pmh,8358,98.82937211777227
+pml,8358,98.82937211777227
+ahh,8411,99.4560718931063
+ahl,8411,99.4560718931063
+pdh,8427,99.6452642781128
+pdl,8427,99.6452642781128
+pm_directional_level,8358,98.82937211777227
+ah_directional_level,8411,99.4560718931063
+pd_directional_level,8427,99.6452642781128
+pm_directional_distance_pct,8358,98.82937211777227
+ah_directional_distance_pct,8411,99.4560718931063
+pd_directional_distance_pct,8427,99.6452642781128
+relevant_level_cluster_span_pct,8426,99.6334397540499
+nearest_ahead_level_distance_pct,6498,76.83575736076622

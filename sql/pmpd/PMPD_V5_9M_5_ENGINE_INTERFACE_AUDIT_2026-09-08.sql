@@ -1,0 +1,6 @@
+-- PM+PD V5 9M-5 engine interface audit checkpoint — 2026-09-08
+-- Prior engine preflight PASS: existing V5 modules found and 112 certified 2026 source files selected.
+-- This audit only inspects imports, call signatures, selected public source, and CLI argument definitions.
+-- It does not run outcome calculations.
+-- Candidate remains PMPD_V5_CANDIDATE_DP4_UNSCORED_V1 and frozen.
+-- No candidate modification, threshold tuning, score fitting, validation refit, or production authorization.

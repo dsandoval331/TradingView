@@ -1,0 +1,45 @@
+A35.2 / R14 - ALTERNATIVE C2 FROZEN CANDIDATE MODEL LADDER V1
+
+METHODOLOGY NOTE:
+A34.4 already used discovery + validation evidence. This is model-development evaluation, not untouched OOS.
+
+MODEL SUMMARY
+research_period                model_id  binary_retention_pct  total_n  binary_n  favorable_n  adverse_n  both_n  unresolved_n  favorable_first_pct  avg_mfe_pct  avg_mae_pct  median_mfe_pct  median_mae_pct  symbol_n  trade_date_n
+      DISCOVERY             M0_BASELINE                100.00     4173      4078         2080       1998      14            81                51.01         1.29         1.24            0.91            0.88       112           158
+      DISCOVERY     M1_AVOIDANCE_FILTER                 74.28     3097      3029         1585       1444      13            55                52.33         1.30         1.24            0.93            0.88       112           158
+      DISCOVERY        M2_POSITIVE_ONLY                  8.93      376       364          204        160       8             4                56.04         1.41         1.43            1.06            0.99       107           117
+      DISCOVERY     M3_TRIAGE_PREFERRED                  8.93      376       364          204        160       8             4                56.04         1.41         1.43            1.06            0.99       107           117
+      DISCOVERY M4_TRIAGE_STANDARD_PLUS                 74.28     3097      3029         1585       1444      13            55                52.33         1.30         1.24            0.93            0.88       112           158
+     VALIDATION             M0_BASELINE                100.00     4134      4040         1998       2042      67            27                49.46         1.67         1.55            1.17            1.12       112           159
+     VALIDATION     M1_AVOIDANCE_FILTER                 76.51     3156      3091         1585       1506      53            12                51.28         1.72         1.53            1.20            1.10       112           159
+     VALIDATION        M2_POSITIVE_ONLY                  9.63      396       389          225        164       5             2                57.84         1.92         1.48            1.49            0.97       110           117
+     VALIDATION     M3_TRIAGE_PREFERRED                  9.63      396       389          225        164       5             2                57.84         1.92         1.48            1.49            0.97       110           117
+     VALIDATION M4_TRIAGE_STANDARD_PLUS                 76.51     3156      3091         1585       1506      53            12                51.28         1.72         1.53            1.20            1.10       112           159
+            ALL             M0_BASELINE                100.00     8307      8118         4078       4040      81           108                50.23         1.48         1.40            1.04            1.00       112           317
+            ALL     M1_AVOIDANCE_FILTER                 75.39     6253      6120         3170       2950      66            67                51.80         1.51         1.38            1.06            0.99       112           317
+            ALL        M2_POSITIVE_ONLY                  9.28      772       753          429        324      13             6                56.97         1.67         1.46            1.25            0.98       112           234
+            ALL     M3_TRIAGE_PREFERRED                  9.28      772       753          429        324      13             6                56.97         1.67         1.46            1.25            0.98       112           234
+            ALL M4_TRIAGE_STANDARD_PLUS                 75.39     6253      6120         3170       2950      66            67                51.80         1.51         1.38            1.06            0.99       112           317
+
+TRIAGE STATES
+research_period candidate_triage_state  total_n  binary_n  favorable_n  adverse_n  both_n  unresolved_n  favorable_first_pct  avg_mfe_pct  avg_mae_pct  median_mfe_pct  median_mae_pct  symbol_n  trade_date_n
+      DISCOVERY                  AVOID     1076      1049          495        554       1            26                47.19         1.25         1.26            0.86            0.88       112           152
+      DISCOVERY                NEUTRAL     2721      2665         1381       1284       5            51                51.82         1.29         1.21            0.92            0.87       112           158
+      DISCOVERY              PREFERRED      376       364          204        160       8             4                56.04         1.41         1.43            1.06            0.99       107           117
+     VALIDATION                  AVOID      978       949          413        536      14            15                43.52         1.52         1.63            1.12            1.17       112           153
+     VALIDATION                NEUTRAL     2760      2702         1360       1342      48            10                50.33         1.69         1.54            1.16            1.11       112           159
+     VALIDATION              PREFERRED      396       389          225        164       5             2                57.84         1.92         1.48            1.49            0.97       110           117
+
+OVERLAP
+                       flag  total_n  binary_n  favorable_n  adverse_n  both_n  unresolved_n  favorable_first_pct  avg_mfe_pct  avg_mae_pct  median_mfe_pct  median_mae_pct  symbol_n  trade_date_n
+                     P1_H1A      772       753          429        324      13             6                56.97         1.67         1.46            1.25            0.98       112           234
+                     P1_H1B      602       587          335        252      10             5                57.07         1.62         1.49            1.17            0.99       112           185
+                  P1_FAMILY      772       753          429        324      13             6                56.97         1.67         1.46            1.25            0.98       112           234
+N1_MARKET_RELATIVE_CONFLICT     1054      1022          453        569       9            23                44.32         1.38         1.44            0.95            1.06       112           223
+                     N2_H4A      401       392          177        215       4             5                45.15         1.37         1.25            0.95            0.99       108           228
+                     N2_H2A      789       768          354        414       6            15                46.09         1.39         1.47            0.97            1.02       111           268
+                  N2_FAMILY     1052      1025          476        549       7            20                46.44         1.38         1.42            0.97            1.01       112           294
+               ANY_NEGATIVE     2054      1998          908       1090      15            41                45.45         1.38         1.43            0.97            1.03       112           305
+             P1_H1A_AND_H1B      602       587          335        252      10             5                57.07         1.62         1.49            1.17            0.99       112           185
+             N2_H4A_AND_H2A      138       135           55         80       3             0                40.74         1.43         1.24            0.96            1.03        78           115
+        P1_AND_ANY_NEGATIVE        0         0            0          0       0             0                  NaN          NaN          NaN             NaN             NaN         0             0

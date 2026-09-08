@@ -1,0 +1,89 @@
+=== STAGE 3 SOURCE MIGRATION AUDIT ===
+Root source files: 276
+
+Projects:
+  market_data        5
+  orb                9
+  pmpd               79
+  second1m           69
+  unclassified       110
+  utilities          4
+
+Dispositions:
+  DEPENDENCY_REVIEW_REQUIRED       25
+  MANUAL_CLASSIFICATION_REQUIRED   110
+  MOVE_CANDIDATE_AFTER_REVIEW      129
+  PROVENANCE_REVIEW_REQUIRED       12
+
+Roles:
+  AUDIT_DIAGNOSTIC         83
+  BACKUP_PROVENANCE        2
+  CANONICAL_OR_FROZEN      28
+  PATCH_OR_FIX             29
+  PINE_SOURCE              19
+  RESEARCH_EXECUTABLE      84
+  UTILITY_OR_UNKNOWN       31
+
+Protected path references:
+  pmpd_v5_9m_oos_candidate_dp4_v1.parquet: 7
+      - cleanup_tradingresearch_stage3_audit.py
+      - freeze_9m_dp4_candidate_population_v1.py
+      - research_outputs\pmpd\9m\pmpd_v5_9m_oos_candidate_dp4_v1_manifest.json
+      - research_outputs\pmpd\9n\pmpd_v5_9n_3r_h2h_preflight.json
+      - run_9m_frozen_oos_evaluation_v1.py
+      - run_9n_3s2_final_h2h.py
+      - run_9n_3s_final_h2h.py
+  pmpd_v5_9m_oos_candidate_dp4_v1_manifest.json: 4
+      - cleanup_tradingresearch_stage3_audit.py
+      - freeze_9m_dp4_candidate_population_v1.py
+      - research_outputs\pmpd\9n\pmpd_v5_9n_3r_h2h_preflight.json
+      - run_9m_frozen_oos_evaluation_v1.py
+  pmpd_v5_9n_3s_h2h_summary.json: 5
+      - cleanup_tradingresearch_stage3_audit.py
+      - research_outputs\pmpd\docs_history\README_9N_3S.md
+      - research_outputs\pmpd\docs_history\README_9N_3S2.md
+      - run_9n_3s2_final_h2h.py
+      - run_9n_3s_final_h2h.py
+  pmpd_v5_9n_3s_symbol_h2h.csv: 6
+      - cleanup_tradingresearch_stage3_audit.py
+      - research_outputs\pmpd\9n\pmpd_v5_9n_3s_h2h_summary.json
+      - research_outputs\pmpd\docs_history\README_9N_3S.md
+      - research_outputs\pmpd\docs_history\README_9N_3S2.md
+      - run_9n_3s2_final_h2h.py
+      - run_9n_3s_final_h2h.py
+  pmpd_v5_9n_3s_monthly_h2h.csv: 6
+      - cleanup_tradingresearch_stage3_audit.py
+      - research_outputs\pmpd\9n\pmpd_v5_9n_3s_h2h_summary.json
+      - research_outputs\pmpd\docs_history\README_9N_3S.md
+      - research_outputs\pmpd\docs_history\README_9N_3S2.md
+      - run_9n_3s2_final_h2h.py
+      - run_9n_3s_final_h2h.py
+  pmpd_v5_9n_3s_v4_events_2026.parquet: 4
+      - cleanup_tradingresearch_stage3_audit.py
+      - research_outputs\pmpd\9n\pmpd_v5_9n_3s_h2h_summary.json
+      - run_9n_3s2_final_h2h.py
+      - run_9n_3s_final_h2h.py
+  data/second1m_alt_entry_cache_v1: 7
+      - a56_1g_raw_bar_audit_v1.py
+      - audit_a41_benchmark_opening_bar_parity_v1.py
+      - build_a41_market_open_impulse_features_v1.py
+      - cleanup_tradingresearch_stage3_audit.py
+      - research_outputs\pmpd\9n\pmpd_v5_9n_3k_massive_pipeline_inventory.txt
+      - research_outputs\pmpd\docs_history\README_9N_3G2.md
+      - research_outputs\pmpd\docs_history\README_9N_3I.md
+  data\second1m_alt_entry_cache_v1: 11
+      - a56_1g_raw_bar_audit_v1.py
+      - cleanup_tradingresearch_stage3_audit.py
+      - data\second1m_alt_entry_research_v1\ae2_market_open_impulse_v1\a41_benchmark_intraday_source_inventory_v1.csv
+      - data\second1m_alt_entry_research_v1\ae2_market_open_impulse_v1\a41_benchmark_opening_bar_parity_v1.csv
+      - research_outputs\misc\repo_file_inventory.csv
+      - research_outputs\pmpd\9n\pmpd_v5_9n_3i_24case_market_data_coverage.csv
+      - research_outputs\pmpd\9n\pmpd_v5_9n_3j_alternate_market_data_source_audit.csv
+      - research_outputs\pmpd\9n\pmpd_v5_9n_3k_massive_pipeline_inventory.txt
+      - research_outputs\second1m\legacy_research\a56_1g_raw_bar_audit.csv
+      - research_outputs\second1m\legacy_research\a56_1g_raw_bar_audit.txt
+
+NO SOURCE CODE WAS MOVED, DELETED, OR EDITED.
+CSV: C:\Users\DirtySouth\TradingResearch\cleanup_reports\stage3_source_migration_audit_20260908_150645.csv
+JSON: C:\Users\DirtySouth\TradingResearch\cleanup_reports\stage3_source_migration_audit_20260908_150645.json
+Protected refs: C:\Users\DirtySouth\TradingResearch\cleanup_reports\stage3_protected_path_references_20260908_150645.json

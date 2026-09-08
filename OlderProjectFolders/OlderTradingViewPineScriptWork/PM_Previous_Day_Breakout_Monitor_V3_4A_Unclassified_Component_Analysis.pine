@@ -1,0 +1,6433 @@
+// This Pine Script® code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © danny331
+
+//@version=6
+indicator("PM + Previous Day Breakout Monitor - Research Capture", overlay = true, max_labels_count = 500, max_lines_count = 500)
+
+//=============================================================================
+// 1. SESSIONS & CONFIRMATION TIMEFRAME
+//=============================================================================
+
+groupSession = "1. Sessions & Confirmation Timeframe"
+
+confirmTF = input.timeframe(
+     "5",
+     "Confirmation Timeframe",
+     tooltip = "Timeframe used internally to evaluate breakout confirmation, strength, and historical performance.",
+     group = groupSession)
+
+pmSession = input.session(
+     "0400-0929",
+     "Premarket Session",
+     tooltip = "Premarket session used to calculate PMH/PML. Times use New York time.",
+     group = groupSession)
+
+rthSession = input.session(
+     "0930-1600",
+     "Regular Trading Hours",
+     tooltip = "RTH session used for displaying levels and monitoring signals.",
+     group = groupSession)
+
+//=============================================================================
+// 2. BREAKOUT CONFIRMATION
+//=============================================================================
+
+groupConfirm = "2. Breakout Confirmation"
+
+atrLength = input.int(
+     14,
+     "ATR Length",
+     minval = 1,
+     group = groupConfirm)
+
+usePenetration = input.bool(
+     true,
+     "Require Minimum ATR Penetration",
+     group = groupConfirm)
+
+minPenATR = input.float(
+     10.0,
+     "Minimum Penetration (% ATR)",
+     minval = 0.0,
+     step = 1.0,
+     group = groupConfirm)
+
+useDirectionalCandle = input.bool(
+     true,
+     "Require Directional Candle",
+     group = groupConfirm)
+
+useBodyRatio = input.bool(
+     true,
+     "Require Body / Range Strength",
+     group = groupConfirm)
+
+minBodyRatio = input.float(
+     50.0,
+     "Minimum Body / Range (%)",
+     minval = 0.0,
+     maxval = 100.0,
+     step = 5.0,
+     group = groupConfirm)
+
+useRangeATR = input.bool(
+     false,
+     "Require Minimum Candle Range vs ATR",
+     group = groupConfirm)
+
+minRangeATR = input.float(
+     25.0,
+     "Minimum Candle Range (% ATR)",
+     minval = 0.0,
+     step = 5.0,
+     group = groupConfirm)
+
+useClosePosition = input.bool(
+     false,
+     "Require Strong Close Position",
+     group = groupConfirm)
+
+minClosePosition = input.float(
+     80.0,
+     "Minimum Close Position (%)",
+     minval = 50.0,
+     maxval = 100.0,
+     step = 5.0,
+     group = groupConfirm)
+
+//=============================================================================
+// 3. STRENGTH SCORE
+//=============================================================================
+
+groupScore = "3. Strength Score"
+
+enableStrengthScore = input.bool(
+     true,
+     "Enable Strength Score",
+     group = groupScore)
+
+showScoreOnLabel = input.bool(
+     true,
+     "Show Score on Standard Label",
+     group = groupScore)
+
+requireMinGrade = input.bool(
+     false,
+     "Require Minimum Grade for Alert",
+     group = groupScore)
+
+minimumGrade = input.string(
+     "B",
+     "Minimum Alert Grade",
+     options = ["A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-"],
+     group = groupScore)
+
+//=============================================================================
+// 4. HISTORICAL PERFORMANCE - RESEARCH CAPTURE DEFAULTS
+//=============================================================================
+
+groupHistory = "4. Historical Performance"
+
+enableHistoricalTracking = input.bool(
+     true,
+     "Enable Historical Performance Tracking",
+     group = groupHistory)
+
+showHistoricalPanel = input.bool(
+     false,
+     "Show Historical Performance Panel",
+     group = groupHistory)
+
+showV3GradePanel = input.bool(
+     false,
+     "Show V3 Grade Performance Panel",
+     tooltip = "Shows detailed A+/A/A-/B+/B/B-/C+/C/C-/Weak historical results for the V3 strength score.",
+     group = groupHistory)
+
+showGradeProfileMatrix = input.bool(
+     false,
+     "Show Grade x Profile Matrix",
+     tooltip = "Shows the pooled A/B/C/Weak grade-family interaction with each combination profile. Enabled by default for research capture.",
+     group = groupHistory)
+
+showCombinationProfiles = input.bool(
+     false,
+     "Show Combination Profiles",
+     tooltip = "Shows pooled historical performance for each combination profile. Enabled by default for research capture.",
+     group = groupHistory)
+
+showHistoricalCoverage = input.bool(
+     true,
+     "Show Historical Coverage Panel",
+     tooltip = "Shows requested/available historical coverage and PMH/PML/PDH/PDL availability. Enabled by default for research capture.",
+     group = groupHistory)
+
+showUnclassifiedComponentAnalysis = input.bool(
+     true,
+     "Show Unclassified Component Analysis",
+     tooltip = "Research Phase 4A. Splits only Unclassified signals by Penetration, Range/ATR, Body/Range, Close Position, and Confirmation Speed while preserving A/B/C/Weak grade families.",
+     group = groupHistory)
+
+showAnalysisPanel = input.bool(
+     false,
+     "Show Specialty Analytics Panel",
+     tooltip = "Optional research views such as Exact Grade x Profile, Profile Component Analysis, Sweet Spot Buckets, and Component Summary. The main capture tables have independent toggles below.",
+     group = groupHistory)
+
+analyticsView = input.string(
+     "Component Summary",
+     "Analytics Panel View",
+     options = [
+         "Combination Profiles",
+         "Grade x Profile Matrix",
+         "Exact Grade x Profile",
+         "Profile Component Analysis",
+         "Sweet Spot Buckets",
+         "Component Summary"],
+     tooltip = "Switches the lower-left analytics panel between combination-profile testing, grade-by-profile interaction analysis, profile-specific component analysis, single-component sweet spots, and component summary.",
+     group = groupHistory)
+
+profileAnalysisSelection = input.string(
+     "Efficient Moderate",
+     "Profile Analysis Selection",
+     options = [
+         "Efficient Moderate",
+         "Controlled Strong",
+         "Explosive",
+         "Delayed Strong",
+         "Pretty but Weak",
+         "All Classified"],
+     tooltip = "Selects which combination profile is analyzed when Analytics Panel View is Profile Component Analysis.",
+     group = groupHistory)
+
+profileAnalysisComponent = input.string(
+     "Penetration",
+     "Profile Analysis Component",
+     options = [
+         "Penetration",
+         "Range / ATR",
+         "Body / Range",
+         "Close Position",
+         "Confirmation Speed"],
+     tooltip = "Selects the component whose five buckets are analyzed inside the selected profile.",
+     group = groupHistory)
+sweetSpotComponent = input.string(
+     "Penetration",
+     "Sweet Spot Component",
+     options = [
+         "Penetration",
+         "Range / ATR",
+         "Body / Range",
+         "Close Position",
+         "Confirmation Speed"],
+     tooltip = "Used when Analytics Panel View is set to Sweet Spot Buckets.",
+     group = groupHistory)
+
+useHistoricalLookback = input.bool(
+     true,
+     "Use Historical Lookback",
+     group = groupHistory)
+
+historicalWindow = input.string(
+     "Recent",
+     "Historical Window",
+     options = ["Recent", "Custom Historical"],
+     tooltip = "Recent uses the most recent lookback window. Custom Historical uses the selected historical end date and looks backward by Historical Lookback Days.",
+     group = groupHistory)
+
+historicalEndDate = input.time(
+    timestamp("17 Apr 2026 23:59 -0400"),
+    "Historical End Date",
+    tooltip = "Used only when Historical Window is Custom Historical.",
+    group = groupHistory)
+
+historicalLookbackDays = input.int(
+     120,
+     "Historical Lookback Days",
+     minval = 1,
+     maxval = 2000,
+     group = groupHistory)
+
+favorableTarget1 = input.float(
+     0.50,
+     "Primary Favorable Target (%)",
+     minval = 0.05,
+     step = 0.05,
+     tooltip = "Primary favorable excursion used for First outcome analysis.",
+     group = groupHistory)
+
+favorableTarget2 = input.float(
+     1.00,
+     "Secondary Favorable Target (%)",
+     minval = 0.05,
+     step = 0.05,
+     tooltip = "Secondary continuation target.",
+     group = groupHistory)
+
+adverseTarget = input.float(
+     0.50,
+     "Adverse Target (%)",
+     minval = 0.05,
+     step = 0.05,
+     tooltip = "Adverse excursion compared against the Primary Favorable Target.",
+     group = groupHistory)
+
+//=============================================================================
+// 5. LEVEL DISPLAY
+//=============================================================================
+
+groupLevels = "5. Level Display"
+
+showLevels = input.bool(
+     true,
+     "Show PMH / PML / PDH / PDL",
+     group = groupLevels)
+
+lineWidth = input.int(
+     1,
+     "Level Line Width",
+     minval = 1,
+     maxval = 3,
+     group = groupLevels)
+
+showLevelPrices = input.bool(
+     true,
+     "Show Price in Level Labels",
+     group = groupLevels)
+
+strongHighColor = input.color(
+     color.rgb(0, 150, 60),
+     "Strong High Color",
+     group = groupLevels)
+
+secondaryHighColor = input.color(
+     color.rgb(105, 190, 120),
+     "Secondary High Color",
+     group = groupLevels)
+
+strongLowColor = input.color(
+     color.rgb(210, 45, 45),
+     "Strong Low Color",
+     group = groupLevels)
+
+secondaryLowColor = input.color(
+     color.rgb(225, 125, 125),
+     "Secondary Low Color",
+     group = groupLevels)
+
+//=============================================================================
+// 6. ALERTS & SIGNAL DISPLAY
+//=============================================================================
+
+groupDisplay = "6. Alerts & Signal Display"
+
+showSignalLabels = input.bool(
+     true,
+     "Show Standard Signal Labels",
+     group = groupDisplay)
+
+showDebug = input.bool(
+     false,
+     "Show Debug Panel",
+     tooltip = "Displays the most recent alert diagnostics in the upper-right corner.",
+     group = groupDisplay)
+
+//=============================================================================
+// CONSTANTS
+//=============================================================================
+
+string tz = "America/New_York"
+
+//-----------------------------------------------------------------------------
+// V3 SCORE MODEL
+//
+// Penetration       = 40
+// Body / Range      = 15
+// Close Position    = 15
+// Range / ATR       = 25
+// Confirmation Speed = 5
+//
+// IMPORTANT:
+// Combination Profiles are ANALYTICS ONLY.
+// They do not change the V3 alert score or alert trigger behavior.
+//-----------------------------------------------------------------------------
+
+float MAX_PEN_POINTS = 40.0
+float MAX_BODY_POINTS = 15.0
+float MAX_CLOSE_POINTS = 15.0
+float MAX_RANGE_POINTS = 25.0
+float MAX_SPEED_POINTS = 5.0
+
+float PEN_FULL_SCORE_ATR_PCT = 100.0
+float RANGE_FULL_SCORE_ATR_PCT = 150.0
+
+//-----------------------------------------------------------------------------
+// Grade-family buckets
+//-----------------------------------------------------------------------------
+
+int BUCKET_A = 0
+int BUCKET_B = 1
+int BUCKET_C = 2
+int BUCKET_WEAK = 3
+int BUCKET_ALL = 4
+
+//-----------------------------------------------------------------------------
+// First-outcome classification
+//-----------------------------------------------------------------------------
+
+int FIRST_NONE = 0
+int FIRST_FAVORABLE = 1
+int FIRST_ADVERSE = 2
+int FIRST_BOTH = 3
+
+//-----------------------------------------------------------------------------
+// Component indexes
+//-----------------------------------------------------------------------------
+
+int COMP_PEN = 0
+int COMP_BODY = 1
+int COMP_CLOSE = 2
+int COMP_RANGE = 3
+int COMP_SPEED = 4
+
+//-----------------------------------------------------------------------------
+// NEW: Combination Profile indexes
+//-----------------------------------------------------------------------------
+
+int PROFILE_CONTROLLED = 0
+int PROFILE_EXPLOSIVE = 1
+int PROFILE_EFFICIENT = 2
+int PROFILE_PRETTY_WEAK = 3
+int PROFILE_DELAYED = 4
+int PROFILE_UNCLASSIFIED = 5
+
+int PROFILE_COUNT = 6
+
+//-----------------------------------------------------------------------------
+// Historical lookback
+//-----------------------------------------------------------------------------
+
+int MS_PER_DAY = 86400000
+int historicalRecentStart = timenow - historicalLookbackDays * MS_PER_DAY
+int historicalCustomStart = historicalEndDate - historicalLookbackDays * MS_PER_DAY
+
+//-----------------------------------------------------------------------------
+// HISTORICAL COVERAGE DIAGNOSTICS
+//-----------------------------------------------------------------------------
+
+var int diagOldestLoadedBar = na
+var int diagNewestLoadedBar = na
+
+var int diagBarsInRequestedWindow = 0
+
+var int diagFirstSignalTime = na
+var int diagLastSignalTime = na
+
+var int diagBarsWithPMH = 0
+var int diagBarsWithPML = 0
+var int diagBarsWithPDH = 0
+var int diagBarsWithPDL = 0
+var int diagBarsLevelsReady = 0
+
+if barstate.isfirst
+    diagOldestLoadedBar := time
+
+diagNewestLoadedBar := time
+
+bool diagInsideRequestedWindow = false
+
+if useHistoricalLookback
+    if historicalWindow == "Recent"
+        diagInsideRequestedWindow :=
+             time >= historicalRecentStart
+    else
+        diagInsideRequestedWindow :=
+             time >= historicalCustomStart and
+             time <= historicalEndDate
+else
+    diagInsideRequestedWindow := true
+
+if diagInsideRequestedWindow
+    diagBarsInRequestedWindow += 1
+
+//=============================================================================
+// SYMBOL DEFINITIONS
+//=============================================================================
+
+string regularTicker = ticker.new(
+     syminfo.prefix,
+     syminfo.ticker,
+     session.regular)
+
+string extendedTicker = ticker.new(
+     syminfo.prefix,
+     syminfo.ticker,
+     session.extended)
+
+//=============================================================================
+// GENERAL HELPERS
+//=============================================================================
+
+f_clamp(float value, float minimum, float maximum) =>
+    math.max(minimum, math.min(value, maximum))
+
+f_signalInLookback(int signalTime) =>
+    bool result = true
+
+    if useHistoricalLookback
+        if historicalWindow == "Recent"
+            result := signalTime >= historicalRecentStart
+        else
+            result := signalTime >= historicalCustomStart and signalTime <= historicalEndDate
+
+    result
+
+//=============================================================================
+// GRADE HELPERS
+//=============================================================================
+
+f_grade(float score) =>
+    string result = "Weak"
+
+    if score >= 97.0
+        result := "A+"
+    else if score >= 93.0
+        result := "A"
+    else if score >= 90.0
+        result := "A-"
+    else if score >= 87.0
+        result := "B+"
+    else if score >= 83.0
+        result := "B"
+    else if score >= 80.0
+        result := "B-"
+    else if score >= 77.0
+        result := "C+"
+    else if score >= 73.0
+        result := "C"
+    else if score >= 70.0
+        result := "C-"
+
+    result
+
+f_gradeThreshold(string grade) =>
+    float threshold = 70.0
+
+    switch grade
+        "A+" => threshold := 97.0
+        "A"  => threshold := 93.0
+        "A-" => threshold := 90.0
+        "B+" => threshold := 87.0
+        "B"  => threshold := 83.0
+        "B-" => threshold := 80.0
+        "C+" => threshold := 77.0
+        "C"  => threshold := 73.0
+        "C-" => threshold := 70.0
+
+    threshold
+
+f_gradeBucket(string grade) =>
+    int bucket = BUCKET_WEAK
+
+    if grade == "A+" or grade == "A" or grade == "A-"
+        bucket := BUCKET_A
+
+    else if grade == "B+" or grade == "B" or grade == "B-"
+        bucket := BUCKET_B
+
+    else if grade == "C+" or grade == "C" or grade == "C-"
+        bucket := BUCKET_C
+
+    bucket
+
+//-----------------------------------------------------------------------------
+// Detailed V3 grade buckets
+//-----------------------------------------------------------------------------
+int V3_GRADE_A_PLUS = 0
+int V3_GRADE_A = 1
+int V3_GRADE_A_MINUS = 2
+int V3_GRADE_B_PLUS = 3
+int V3_GRADE_B = 4
+int V3_GRADE_B_MINUS = 5
+int V3_GRADE_C_PLUS = 6
+int V3_GRADE_C = 7
+int V3_GRADE_C_MINUS = 8
+int V3_GRADE_WEAK = 9
+int V3_GRADE_ALL = 10
+int V3_GRADE_COUNT = 11
+
+f_v3DetailedBucket(string grade) =>
+    int bucket = V3_GRADE_WEAK
+    if grade == "A+"
+        bucket := V3_GRADE_A_PLUS
+    else if grade == "A"
+        bucket := V3_GRADE_A
+    else if grade == "A-"
+        bucket := V3_GRADE_A_MINUS
+    else if grade == "B+"
+        bucket := V3_GRADE_B_PLUS
+    else if grade == "B"
+        bucket := V3_GRADE_B
+    else if grade == "B-"
+        bucket := V3_GRADE_B_MINUS
+    else if grade == "C+"
+        bucket := V3_GRADE_C_PLUS
+    else if grade == "C"
+        bucket := V3_GRADE_C
+    else if grade == "C-"
+        bucket := V3_GRADE_C_MINUS
+    bucket
+
+//=============================================================================
+// V3 SCORING FUNCTIONS
+//=============================================================================
+
+f_penetrationScore(float penetrationATR) =>
+    float normalized = f_clamp(
+         penetrationATR / PEN_FULL_SCORE_ATR_PCT,
+         0.0,
+         1.0)
+
+    normalized * MAX_PEN_POINTS
+
+f_bodyScore(float ratio) =>
+    f_clamp(
+         ratio / 100.0,
+         0.0,
+         1.0) *
+         MAX_BODY_POINTS
+
+f_closeScore(float closePosition) =>
+    float normalized = f_clamp(
+         (closePosition - 50.0) / 50.0,
+         0.0,
+         1.0)
+
+    normalized * MAX_CLOSE_POINTS
+
+f_rangeScore(float candleRangeATR) =>
+    float normalized = f_clamp(
+         candleRangeATR / RANGE_FULL_SCORE_ATR_PCT,
+         0.0,
+         1.0)
+
+    normalized * MAX_RANGE_POINTS
+
+f_speedScore(int barsToConfirm) =>
+    float score = 0.0
+
+    if barsToConfirm <= 0
+        score := 5.0
+
+    else if barsToConfirm == 1
+        score := 4.5
+
+    else if barsToConfirm == 2
+        score := 3.0
+
+    else if barsToConfirm == 3
+        score := 1.5
+
+    else
+        score := 0.0
+
+    score
+
+//=============================================================================
+// SWEET-SPOT BUCKET HELPERS
+//=============================================================================
+
+f_sweetBucket(
+     float penetration,
+     float rangeValue,
+     float bodyValue,
+     float closeValue,
+     int speedBars) =>
+
+    int bucket = 0
+
+    if sweetSpotComponent == "Penetration"
+
+        if penetration < 20.0
+            bucket := 0
+
+        else if penetration < 40.0
+            bucket := 1
+
+        else if penetration < 60.0
+            bucket := 2
+
+        else if penetration < 100.0
+            bucket := 3
+
+        else
+            bucket := 4
+
+    else if sweetSpotComponent == "Range / ATR"
+
+        if rangeValue < 50.0
+            bucket := 0
+
+        else if rangeValue < 100.0
+            bucket := 1
+
+        else if rangeValue < 150.0
+            bucket := 2
+
+        else if rangeValue < 200.0
+            bucket := 3
+
+        else
+            bucket := 4
+
+    else if sweetSpotComponent == "Body / Range"
+
+        if bodyValue < 60.0
+            bucket := 0
+
+        else if bodyValue < 70.0
+            bucket := 1
+
+        else if bodyValue < 80.0
+            bucket := 2
+
+        else if bodyValue < 90.0
+            bucket := 3
+
+        else
+            bucket := 4
+
+    else if sweetSpotComponent == "Close Position"
+
+        if closeValue < 60.0
+            bucket := 0
+
+        else if closeValue < 70.0
+            bucket := 1
+
+        else if closeValue < 80.0
+            bucket := 2
+
+        else if closeValue < 90.0
+            bucket := 3
+
+        else
+            bucket := 4
+
+    else
+
+        if speedBars <= 0
+            bucket := 0
+
+        else if speedBars == 1
+            bucket := 1
+
+        else if speedBars == 2
+            bucket := 2
+
+        else if speedBars == 3
+            bucket := 3
+
+        else
+            bucket := 4
+
+    bucket
+
+f_sweetBucketName(int bucket) =>
+    string result = ""
+
+    if sweetSpotComponent == "Penetration"
+
+        if bucket == 0
+            result := "<20% ATR"
+
+        else if bucket == 1
+            result := "20-40% ATR"
+
+        else if bucket == 2
+            result := "40-60% ATR"
+
+        else if bucket == 3
+            result := "60-100% ATR"
+
+        else
+            result := "100%+ ATR"
+
+    else if sweetSpotComponent == "Range / ATR"
+
+        if bucket == 0
+            result := "<50% ATR"
+
+        else if bucket == 1
+            result := "50-100% ATR"
+
+        else if bucket == 2
+            result := "100-150% ATR"
+
+        else if bucket == 3
+            result := "150-200% ATR"
+
+        else
+            result := "200%+ ATR"
+
+    else if sweetSpotComponent == "Body / Range"
+
+        if bucket == 0
+            result := "<60%"
+
+        else if bucket == 1
+            result := "60-70%"
+
+        else if bucket == 2
+            result := "70-80%"
+
+        else if bucket == 3
+            result := "80-90%"
+
+        else
+            result := "90%+"
+
+    else if sweetSpotComponent == "Close Position"
+
+        if bucket == 0
+            result := "<60%"
+
+        else if bucket == 1
+            result := "60-70%"
+
+        else if bucket == 2
+            result := "70-80%"
+
+        else if bucket == 3
+            result := "80-90%"
+
+        else
+            result := "90%+"
+
+    else
+
+        if bucket == 0
+            result := "0 bars"
+
+        else if bucket == 1
+            result := "1 bar"
+
+        else if bucket == 2
+            result := "2 bars"
+
+        else if bucket == 3
+            result := "3 bars"
+
+        else
+            result := "4+ bars"
+
+    result
+
+//=============================================================================
+// NEW: COMBINATION PROFILE CLASSIFICATION
+//=============================================================================
+//
+// These profiles are for HISTORICAL ANALYSIS ONLY.
+//
+// Priority is important because some setups can technically satisfy more than
+// one definition. More specific profiles are checked first.
+//
+// 1. EXPLOSIVE
+//    Penetration >= 100% ATR
+//    Range / ATR >= 200%
+//    Body / Range >= 80%
+//    Close Position >= 90%
+//    Immediate confirmation
+//
+// 2. CONTROLLED STRONG
+//    Penetration 60-100% ATR
+//    Range / ATR 100-200%
+//    Body / Range 70-90%
+//    Close Position >= 80%
+//    Confirmation in 0-1 bars
+//
+// 3. EFFICIENT MODERATE
+//    Penetration 40-60% ATR
+//    Range / ATR 100-150%
+//    Body / Range 70-90%
+//    Close Position >= 80%
+//    Confirmation in 0-1 bars
+//
+// 4. PRETTY BUT WEAK
+//    Penetration < 40% ATR
+//    Range / ATR < 100%
+//    Body / Range >= 90%
+//    Close Position >= 90%
+//    Immediate confirmation
+//
+// 5. DELAYED STRONG
+//    Penetration >= 60% ATR
+//    Range / ATR >= 100%
+//    Body / Range >= 70%
+//    Close Position >= 80%
+//    Confirmation in 1-2 bars
+//
+// Anything else is UNCLASSIFIED.
+//=============================================================================
+
+f_combinationProfile(
+     float penetration,
+     float rangeValue,
+     float bodyValue,
+     float closeValue,
+     int speedBars) =>
+
+    int profile = PROFILE_UNCLASSIFIED
+
+    bool explosive =
+         penetration >= 100.0 and
+         rangeValue >= 200.0 and
+         bodyValue >= 80.0 and
+         closeValue >= 90.0 and
+         speedBars == 0
+
+    bool controlledStrong =
+         penetration >= 60.0 and
+         penetration < 100.0 and
+         rangeValue >= 100.0 and
+         rangeValue < 200.0 and
+         bodyValue >= 70.0 and
+         bodyValue < 90.0 and
+         closeValue >= 80.0 and
+         speedBars >= 0 and
+         speedBars <= 1
+
+    bool efficientModerate =
+         penetration >= 40.0 and
+         penetration < 60.0 and
+         rangeValue >= 100.0 and
+         rangeValue < 150.0 and
+         bodyValue >= 70.0 and
+         bodyValue < 90.0 and
+         closeValue >= 80.0 and
+         speedBars >= 0 and
+         speedBars <= 1
+
+    bool prettyButWeak =
+         penetration < 40.0 and
+         rangeValue < 100.0 and
+         bodyValue >= 90.0 and
+         closeValue >= 90.0 and
+         speedBars == 0
+
+    bool delayedStrong =
+         penetration >= 60.0 and
+         rangeValue >= 100.0 and
+         bodyValue >= 70.0 and
+         closeValue >= 80.0 and
+         speedBars >= 1 and
+         speedBars <= 2
+
+    if explosive
+        profile := PROFILE_EXPLOSIVE
+
+    else if controlledStrong
+        profile := PROFILE_CONTROLLED
+
+    else if efficientModerate
+        profile := PROFILE_EFFICIENT
+
+    else if prettyButWeak
+        profile := PROFILE_PRETTY_WEAK
+
+    else if delayedStrong
+        profile := PROFILE_DELAYED
+
+    profile
+
+f_profileName(int profile) =>
+    string result = "Unclassified"
+
+    if profile == PROFILE_CONTROLLED
+        result := "Controlled Strong"
+
+    else if profile == PROFILE_EXPLOSIVE
+        result := "Explosive"
+
+    else if profile == PROFILE_EFFICIENT
+        result := "Efficient Moderate"
+
+    else if profile == PROFILE_PRETTY_WEAK
+        result := "Pretty but Weak"
+
+    else if profile == PROFILE_DELAYED
+        result := "Delayed Strong"
+
+    result
+
+//=============================================================================
+// PROFILE COMPONENT ANALYSIS HELPERS
+//=============================================================================
+
+f_selectedProfileIndex() =>
+    int result = PROFILE_EFFICIENT
+
+    if profileAnalysisSelection == "Controlled Strong"
+        result := PROFILE_CONTROLLED
+    else if profileAnalysisSelection == "Explosive"
+        result := PROFILE_EXPLOSIVE
+    else if profileAnalysisSelection == "Efficient Moderate"
+        result := PROFILE_EFFICIENT
+    else if profileAnalysisSelection == "Pretty but Weak"
+        result := PROFILE_PRETTY_WEAK
+    else if profileAnalysisSelection == "Delayed Strong"
+        result := PROFILE_DELAYED
+
+    result
+
+f_profileIncluded(int signalProfile) =>
+    bool included = false
+
+    if profileAnalysisSelection == "All Classified"
+        included := signalProfile != PROFILE_UNCLASSIFIED
+    else
+        included := signalProfile == f_selectedProfileIndex()
+
+    included
+
+f_profileAnalysisComponentIndex() =>
+    int result = COMP_PEN
+
+    if profileAnalysisComponent == "Penetration"
+        result := COMP_PEN
+    else if profileAnalysisComponent == "Range / ATR"
+        result := COMP_RANGE
+    else if profileAnalysisComponent == "Body / Range"
+        result := COMP_BODY
+    else if profileAnalysisComponent == "Close Position"
+        result := COMP_CLOSE
+    else
+        result := COMP_SPEED
+
+    result
+
+f_profileComponentBucket(
+     int componentIndex,
+     float penetration,
+     float rangeValue,
+     float bodyValue,
+     float closeValue,
+     int speedBars) =>
+
+    int bucket = 0
+
+    if componentIndex == COMP_PEN
+        if penetration < 20.0
+            bucket := 0
+        else if penetration < 40.0
+            bucket := 1
+        else if penetration < 60.0
+            bucket := 2
+        else if penetration < 100.0
+            bucket := 3
+        else
+            bucket := 4
+
+    else if componentIndex == COMP_RANGE
+        if rangeValue < 50.0
+            bucket := 0
+        else if rangeValue < 100.0
+            bucket := 1
+        else if rangeValue < 150.0
+            bucket := 2
+        else if rangeValue < 200.0
+            bucket := 3
+        else
+            bucket := 4
+
+    else if componentIndex == COMP_BODY
+        if bodyValue < 60.0
+            bucket := 0
+        else if bodyValue < 70.0
+            bucket := 1
+        else if bodyValue < 80.0
+            bucket := 2
+        else if bodyValue < 90.0
+            bucket := 3
+        else
+            bucket := 4
+
+    else if componentIndex == COMP_CLOSE
+        if closeValue < 60.0
+            bucket := 0
+        else if closeValue < 70.0
+            bucket := 1
+        else if closeValue < 80.0
+            bucket := 2
+        else if closeValue < 90.0
+            bucket := 3
+        else
+            bucket := 4
+
+    else
+        if speedBars <= 0
+            bucket := 0
+        else if speedBars == 1
+            bucket := 1
+        else if speedBars == 2
+            bucket := 2
+        else if speedBars == 3
+            bucket := 3
+        else
+            bucket := 4
+
+    bucket
+
+f_profileComponentBucketName(int componentIndex, int bucket) =>
+    string result = ""
+
+    if componentIndex == COMP_PEN
+        if bucket == 0
+            result := "<20% ATR"
+        else if bucket == 1
+            result := "20-40% ATR"
+        else if bucket == 2
+            result := "40-60% ATR"
+        else if bucket == 3
+            result := "60-100% ATR"
+        else
+            result := "100%+ ATR"
+
+    else if componentIndex == COMP_RANGE
+        if bucket == 0
+            result := "<50% ATR"
+        else if bucket == 1
+            result := "50-100% ATR"
+        else if bucket == 2
+            result := "100-150% ATR"
+        else if bucket == 3
+            result := "150-200% ATR"
+        else
+            result := "200%+ ATR"
+
+    else if componentIndex == COMP_BODY
+        if bucket == 0
+            result := "<60%"
+        else if bucket == 1
+            result := "60-70%"
+        else if bucket == 2
+            result := "70-80%"
+        else if bucket == 3
+            result := "80-90%"
+        else
+            result := "90%+"
+
+    else if componentIndex == COMP_CLOSE
+        if bucket == 0
+            result := "<60%"
+        else if bucket == 1
+            result := "60-70%"
+        else if bucket == 2
+            result := "70-80%"
+        else if bucket == 3
+            result := "80-90%"
+        else
+            result := "90%+"
+
+    else
+        if bucket == 0
+            result := "0 bars"
+        else if bucket == 1
+            result := "1 bar"
+        else if bucket == 2
+            result := "2 bars"
+        else if bucket == 3
+            result := "3 bars"
+        else
+            result := "4+ bars"
+
+    result
+
+//=============================================================================
+// DISPLAY HELPERS
+//=============================================================================
+
+f_levelText(string levelName, float price) =>
+    string result = levelName
+
+    if showLevelPrices
+        result :=
+             levelName +
+             " " +
+             str.tostring(price, format.mintick)
+
+    result
+
+f_num(float value) =>
+    string result = "-"
+
+    if not na(value)
+        result := str.tostring(value, format.mintick)
+
+    result
+
+f_pct(float value) =>
+    string result = "-"
+
+    if not na(value)
+        result := str.tostring(value, "#.0") + "%"
+
+    result
+
+f_points(float value, float maximum) =>
+    string result = "-"
+
+    if not na(value)
+        result :=
+             str.tostring(value, "#.0") +
+             " / " +
+             str.tostring(maximum, "#.0")
+
+    result
+
+f_timeText(int t) =>
+    string result = "-"
+
+    if not na(t)
+        result :=
+             str.format_time(
+                 t,
+                 "HH:mm",
+                 tz)
+
+    result
+
+f_passText(bool enabled, bool passed) =>
+    string result = "OFF"
+
+    if enabled
+        result :=
+             passed ?
+             "PASS" :
+             "FAIL"
+
+    result
+
+f_signedPct(float value) =>
+    string result = "-"
+
+    if not na(value)
+        result :=
+             value > 0 ?
+             "+" + str.tostring(value, "#.00") + "%" :
+             str.tostring(value, "#.00") + "%"
+
+    result
+
+f_decimal(float value) =>
+    string result = "-"
+
+    if not na(value)
+        result := str.tostring(value, "#.00")
+
+    result
+
+f_signedDecimal(float value) =>
+    string result = "-"
+
+    if not na(value)
+        result :=
+             value > 0 ?
+             "+" + str.tostring(value, "#.00") :
+             str.tostring(value, "#.00")
+
+    result
+
+f_plainPct(float value) =>
+    string result = "-"
+
+    if not na(value)
+        result := str.tostring(value, "#.0") + "%"
+
+    result
+
+f_signedOnePct(float value) =>
+    string result = "-"
+
+    if not na(value)
+        result :=
+             value > 0 ?
+             "+" + str.tostring(value, "#.0") + "%" :
+             str.tostring(value, "#.0") + "%"
+
+    result
+
+//=============================================================================
+// PREVIOUS DAY HIGH / LOW
+//=============================================================================
+
+float pdh = request.security(
+     regularTicker,
+     "D",
+     high[1],
+     gaps = barmerge.gaps_off,
+     lookahead = barmerge.lookahead_on)
+
+float pdl = request.security(
+     regularTicker,
+     "D",
+     low[1],
+     gaps = barmerge.gaps_off,
+     lookahead = barmerge.lookahead_on)
+
+//=============================================================================
+// PREMARKET HIGH / LOW
+//=============================================================================
+
+f_premarketLevels() =>
+    var float localPMH = na
+    var float localPML = na
+
+    bool inPM = not na(time("", pmSession, tz))
+    bool newPM = inPM and not inPM[1]
+
+    if newPM
+        localPMH := high
+        localPML := low
+
+    else if inPM
+        localPMH := na(localPMH) ?
+             high :
+             math.max(localPMH, high)
+
+        localPML := na(localPML) ?
+             low :
+             math.min(localPML, low)
+
+    [localPMH, localPML]
+
+[pmh, pml] = request.security(
+     extendedTicker,
+     confirmTF,
+     f_premarketLevels(),
+     gaps = barmerge.gaps_off,
+     lookahead = barmerge.lookahead_off)
+
+//=============================================================================
+// SESSION STATUS
+//=============================================================================
+
+bool inRTH = not na(time(timeframe.period, rthSession, tz))
+
+bool previousInRTH = false
+
+if bar_index > 0
+    previousInRTH := inRTH[1]
+
+bool rthStart = inRTH and not previousInRTH
+bool newDay = timeframe.change("D")
+
+//=============================================================================
+// FINAL LEVELS
+//=============================================================================
+
+bool levelsReady =
+     not na(pmh) and
+     not na(pml) and
+     not na(pdh) and
+     not na(pdl)
+
+if diagInsideRequestedWindow
+    if not na(pmh)
+        diagBarsWithPMH += 1
+
+    if not na(pml)
+        diagBarsWithPML += 1
+
+    if not na(pdh)
+        diagBarsWithPDH += 1
+
+    if not na(pdl)
+        diagBarsWithPDL += 1
+
+    if levelsReady
+        diagBarsLevelsReady += 1
+
+float bullishFinalLevel = na
+float bearishFinalLevel = na
+
+string bullishFinalName = ""
+string bearishFinalName = ""
+
+if levelsReady
+    bullishFinalLevel := math.max(pmh, pdh)
+    bearishFinalLevel := math.min(pml, pdl)
+
+    bullishFinalName :=
+         pmh >= pdh ?
+         "PMH" :
+         "PDH"
+
+    bearishFinalName :=
+         pml <= pdl ?
+         "PML" :
+         "PDL"
+
+//=============================================================================
+// LEVEL COLORS
+//=============================================================================
+
+color pmhColor = secondaryHighColor
+color pdhColor = secondaryHighColor
+color pmlColor = secondaryLowColor
+color pdlColor = secondaryLowColor
+
+if levelsReady
+    if pmh >= pdh
+        pmhColor := strongHighColor
+        pdhColor := secondaryHighColor
+    else
+        pmhColor := secondaryHighColor
+        pdhColor := strongHighColor
+
+    if pml <= pdl
+        pmlColor := strongLowColor
+        pdlColor := secondaryLowColor
+    else
+        pmlColor := secondaryLowColor
+        pdlColor := strongLowColor
+
+//=============================================================================
+// RTH LEVEL LINES
+//=============================================================================
+
+var line currentPMHLine = na
+var line currentPDHLine = na
+var line currentPMLLine = na
+var line currentPDLLine = na
+
+var label currentPMHLabel = na
+var label currentPDHLabel = na
+var label currentPMLLabel = na
+var label currentPDLLabel = na
+
+if newDay
+    currentPMHLine := na
+    currentPDHLine := na
+    currentPMLLine := na
+    currentPDLLine := na
+
+    currentPMHLabel := na
+    currentPDHLabel := na
+    currentPMLLabel := na
+    currentPDLLabel := na
+
+if rthStart and levelsReady and showLevels
+    currentPMHLine := line.new(
+         time,
+         pmh,
+         time_close,
+         pmh,
+         xloc = xloc.bar_time,
+         extend = extend.none,
+         color = pmhColor,
+         style = line.style_dotted,
+         width = lineWidth)
+
+    currentPDHLine := line.new(
+         time,
+         pdh,
+         time_close,
+         pdh,
+         xloc = xloc.bar_time,
+         extend = extend.none,
+         color = pdhColor,
+         style = line.style_dotted,
+         width = lineWidth)
+
+    currentPMLLine := line.new(
+         time,
+         pml,
+         time_close,
+         pml,
+         xloc = xloc.bar_time,
+         extend = extend.none,
+         color = pmlColor,
+         style = line.style_dotted,
+         width = lineWidth)
+
+    currentPDLLine := line.new(
+         time,
+         pdl,
+         time_close,
+         pdl,
+         xloc = xloc.bar_time,
+         extend = extend.none,
+         color = pdlColor,
+         style = line.style_dotted,
+         width = lineWidth)
+
+    currentPMHLabel := label.new(
+         time_close,
+         pmh,
+         f_levelText("PMH", pmh),
+         xloc = xloc.bar_time,
+         yloc = yloc.price,
+         style = label.style_none,
+         textcolor = pmhColor,
+         size = size.tiny)
+
+    currentPDHLabel := label.new(
+         time_close,
+         pdh,
+         f_levelText("PDH", pdh),
+         xloc = xloc.bar_time,
+         yloc = yloc.price,
+         style = label.style_none,
+         textcolor = pdhColor,
+         size = size.tiny)
+
+    currentPMLLabel := label.new(
+         time_close,
+         pml,
+         f_levelText("PML", pml),
+         xloc = xloc.bar_time,
+         yloc = yloc.price,
+         style = label.style_none,
+         textcolor = pmlColor,
+         size = size.tiny)
+
+    currentPDLLabel := label.new(
+         time_close,
+         pdl,
+         f_levelText("PDL", pdl),
+         xloc = xloc.bar_time,
+         yloc = yloc.price,
+         style = label.style_none,
+         textcolor = pdlColor,
+         size = size.tiny)
+
+if inRTH and showLevels and levelsReady
+    if not na(currentPMHLine)
+        line.set_x2(
+             currentPMHLine,
+             time_close)
+
+    if not na(currentPDHLine)
+        line.set_x2(
+             currentPDHLine,
+             time_close)
+
+    if not na(currentPMLLine)
+        line.set_x2(
+             currentPMLLine,
+             time_close)
+
+    if not na(currentPDLLine)
+        line.set_x2(
+             currentPDLLine,
+             time_close)
+
+    if not na(currentPMHLabel)
+        label.set_x(
+             currentPMHLabel,
+             time_close)
+
+        label.set_y(
+             currentPMHLabel,
+             pmh)
+
+        label.set_text(
+             currentPMHLabel,
+             f_levelText("PMH", pmh))
+
+    if not na(currentPDHLabel)
+        label.set_x(
+             currentPDHLabel,
+             time_close)
+
+        label.set_y(
+             currentPDHLabel,
+             pdh)
+
+        label.set_text(
+             currentPDHLabel,
+             f_levelText("PDH", pdh))
+
+    if not na(currentPMLLabel)
+        label.set_x(
+             currentPMLLabel,
+             time_close)
+
+        label.set_y(
+             currentPMLLabel,
+             pml)
+
+        label.set_text(
+             currentPMLLabel,
+             f_levelText("PML", pml))
+
+    if not na(currentPDLLabel)
+        label.set_x(
+             currentPDLLabel,
+             time_close)
+
+        label.set_y(
+             currentPDLLabel,
+             pdl)
+
+        label.set_text(
+             currentPDLLabel,
+             f_levelText("PDL", pdl))
+
+//=============================================================================
+// CONFIRMATION-TIMEFRAME DATA
+//=============================================================================
+
+float confOpen = request.security(
+     regularTicker,
+     confirmTF,
+     open[1],
+     gaps = barmerge.gaps_off,
+     lookahead = barmerge.lookahead_on)
+
+float confHigh = request.security(
+     regularTicker,
+     confirmTF,
+     high[1],
+     gaps = barmerge.gaps_off,
+     lookahead = barmerge.lookahead_on)
+
+float confLow = request.security(
+     regularTicker,
+     confirmTF,
+     low[1],
+     gaps = barmerge.gaps_off,
+     lookahead = barmerge.lookahead_on)
+
+float confClose = request.security(
+     regularTicker,
+     confirmTF,
+     close[1],
+     gaps = barmerge.gaps_off,
+     lookahead = barmerge.lookahead_on)
+
+float confATR = request.security(
+     regularTicker,
+     confirmTF,
+     ta.atr(atrLength)[1],
+     gaps = barmerge.gaps_off,
+     lookahead = barmerge.lookahead_on)
+
+int confTime = request.security(
+     regularTicker,
+     confirmTF,
+     time[1],
+     gaps = barmerge.gaps_off,
+     lookahead = barmerge.lookahead_on)
+
+int confTimeClose = request.security(
+     regularTicker,
+     confirmTF,
+     time_close[1],
+     gaps = barmerge.gaps_off,
+     lookahead = barmerge.lookahead_on)
+
+int liveConfTime = request.security(
+     regularTicker,
+     confirmTF,
+     time,
+     gaps = barmerge.gaps_off,
+     lookahead = barmerge.lookahead_on)
+
+int liveConfTimeChange = ta.change(liveConfTime)
+
+bool newConfirmationCandle = false
+
+if not na(liveConfTime)
+    if liveConfTimeChange != 0
+        newConfirmationCandle := true
+
+bool completedPriorSession = false
+
+if newConfirmationCandle and
+   not na(confTime) and
+   not na(liveConfTime)
+
+    completedPriorSession :=
+         year(confTime) != year(liveConfTime) or
+         month(confTime) != month(liveConfTime) or
+         dayofmonth(confTime) != dayofmonth(liveConfTime)
+
+//=============================================================================
+// CANDLE METRICS
+//=============================================================================
+
+float confRange = confHigh - confLow
+float confBody = math.abs(confClose - confOpen)
+
+float bodyRatio = 0.0
+float rangeATR = 0.0
+
+float bullClosePosition = 0.0
+float bearClosePosition = 0.0
+
+if confRange > 0
+    bodyRatio :=
+         confBody /
+         confRange *
+         100.0
+
+    bullClosePosition :=
+         (confClose - confLow) /
+         confRange *
+         100.0
+
+    bearClosePosition :=
+         (confHigh - confClose) /
+         confRange *
+         100.0
+
+if confATR > 0
+    rangeATR :=
+         confRange /
+         confATR *
+         100.0
+
+float bullPenATR = na
+float bearPenATR = na
+
+if levelsReady and confATR > 0
+    bullPenATR :=
+         (confClose - bullishFinalLevel) /
+         confATR *
+         100.0
+
+    bearPenATR :=
+         (bearishFinalLevel - confClose) /
+         confATR *
+         100.0
+
+//=============================================================================
+// FILTERS
+//=============================================================================
+
+bool bullDirectionalPass =
+     not useDirectionalCandle or
+     confClose > confOpen
+
+bool bearDirectionalPass =
+     not useDirectionalCandle or
+     confClose < confOpen
+
+bool bodyPass =
+     not useBodyRatio or
+     bodyRatio >= minBodyRatio
+
+bool rangePass =
+     not useRangeATR or
+     rangeATR >= minRangeATR
+
+bool bullClosePosPass =
+     not useClosePosition or
+     bullClosePosition >= minClosePosition
+
+bool bearClosePosPass =
+     not useClosePosition or
+     bearClosePosition >= minClosePosition
+
+bool bullPenPass =
+     not usePenetration or
+     bullPenATR >= minPenATR
+
+bool bearPenPass =
+     not usePenetration or
+     bearPenATR >= minPenATR
+
+//=============================================================================
+// ACTIVE SIGNAL STORAGE
+//=============================================================================
+
+var activeDirection = array.new_int()
+var activeReference = array.new_float()
+var activeBucket = array.new_int()
+var activeSignalTime = array.new_int()
+
+var activeMFE = array.new_float()
+var activeMAE = array.new_float()
+
+var activeHitFav1 = array.new_bool()
+var activeHitFav2 = array.new_bool()
+var activeHitAdverse = array.new_bool()
+
+var activeFirstOutcome = array.new_int()
+
+var activePenScore = array.new_float()
+var activeBodyScore = array.new_float()
+var activeCloseScore = array.new_float()
+var activeRangeScore = array.new_float()
+var activeSpeedScore = array.new_float()
+
+//-----------------------------------------------------------------------------
+// Raw values used for sweet-spot and combination-profile research.
+//-----------------------------------------------------------------------------
+
+var activeRawPen = array.new_float()
+var activeRawBody = array.new_float()
+var activeRawClose = array.new_float()
+var activeRawRange = array.new_float()
+var activeRawSpeedBars = array.new_int()
+
+//-----------------------------------------------------------------------------
+// NEW:
+// Combination profile assigned at the time the alert is generated.
+//-----------------------------------------------------------------------------
+
+var activeProfile = array.new_int()
+
+//=============================================================================
+// GRADE AGGREGATES
+//=============================================================================
+
+var histSignals = array.new_int(5, 0)
+
+var histFavFirst = array.new_int(5, 0)
+var histAdvFirst = array.new_int(5, 0)
+var histBothFirst = array.new_int(5, 0)
+
+var histFav1Hit = array.new_int(5, 0)
+var histFav2Hit = array.new_int(5, 0)
+
+var histMFESum = array.new_float(5, 0.0)
+var histMAESum = array.new_float(5, 0.0)
+
+var v3GradeSignals = array.new_int(V3_GRADE_COUNT, 0)
+var v3GradeFavFirst = array.new_int(V3_GRADE_COUNT, 0)
+var v3GradeBothFirst = array.new_int(V3_GRADE_COUNT, 0)
+var v3GradeFav2Hit = array.new_int(V3_GRADE_COUNT, 0)
+var v3GradeMFESum = array.new_float(V3_GRADE_COUNT, 0.0)
+var v3GradeMAESum = array.new_float(V3_GRADE_COUNT, 0.0)
+
+//=============================================================================
+// COMPONENT SUMMARY AGGREGATES
+//=============================================================================
+
+var int compFavCount = 0
+var compFavSums = array.new_float(5, 0.0)
+
+var int compAdvCount = 0
+var compAdvSums = array.new_float(5, 0.0)
+
+var int compAllCount = 0
+var compAllSums = array.new_float(5, 0.0)
+
+//=============================================================================
+// SWEET-SPOT AGGREGATES
+//=============================================================================
+
+var sweetSignals = array.new_int(5, 0)
+
+var sweetFavFirst = array.new_int(5, 0)
+var sweetBothFirst = array.new_int(5, 0)
+
+var sweetFav2Hit = array.new_int(5, 0)
+
+var sweetMFESum = array.new_float(5, 0.0)
+var sweetMAESum = array.new_float(5, 0.0)
+
+//=============================================================================
+// PHASE 4A: UNCLASSIFIED COMPONENT ANALYSIS AGGREGATES
+//=============================================================================
+//
+// 5 components x 5 buckets x 5 grade columns.
+// Grade columns: A, B, C, Weak, ALL.
+// Only signals whose combination profile is PROFILE_UNCLASSIFIED are stored.
+//=============================================================================
+
+int UNCLASS_COMPONENTS = 5
+int UNCLASS_BUCKETS = 5
+int UNCLASS_GRADES = 5
+int UNCLASS_GRADE_ALL = 4
+int UNCLASS_TOTAL_CELLS = UNCLASS_COMPONENTS * UNCLASS_BUCKETS * UNCLASS_GRADES
+
+var unclassSignals = array.new_int(UNCLASS_TOTAL_CELLS, 0)
+var unclassFavFirst = array.new_int(UNCLASS_TOTAL_CELLS, 0)
+var unclassBothFirst = array.new_int(UNCLASS_TOTAL_CELLS, 0)
+var unclassFav2Hit = array.new_int(UNCLASS_TOTAL_CELLS, 0)
+var unclassMFESum = array.new_float(UNCLASS_TOTAL_CELLS, 0.0)
+var unclassMAESum = array.new_float(UNCLASS_TOTAL_CELLS, 0.0)
+
+f_unclassIndex(int component, int bucketValue, int gradeValue) =>
+    component * (UNCLASS_BUCKETS * UNCLASS_GRADES) +
+     bucketValue * UNCLASS_GRADES +
+     gradeValue
+
+f_unclassBucket(
+     int component,
+     float penetration,
+     float rangeValue,
+     float bodyValue,
+     float closeValue,
+     int speedBars) =>
+
+    int result = 0
+
+    if component == 0
+        result := penetration < 20.0 ? 0 :
+             penetration < 40.0 ? 1 :
+             penetration < 60.0 ? 2 :
+             penetration < 100.0 ? 3 : 4
+
+    else if component == 1
+        result := rangeValue < 50.0 ? 0 :
+             rangeValue < 100.0 ? 1 :
+             rangeValue < 150.0 ? 2 :
+             rangeValue < 200.0 ? 3 : 4
+
+    else if component == 2
+        result := bodyValue < 60.0 ? 0 :
+             bodyValue < 70.0 ? 1 :
+             bodyValue < 80.0 ? 2 :
+             bodyValue < 90.0 ? 3 : 4
+
+    else if component == 3
+        result := closeValue < 60.0 ? 0 :
+             closeValue < 70.0 ? 1 :
+             closeValue < 80.0 ? 2 :
+             closeValue < 90.0 ? 3 : 4
+
+    else
+        result := speedBars <= 0 ? 0 :
+             speedBars == 1 ? 1 :
+             speedBars == 2 ? 2 :
+             speedBars == 3 ? 3 : 4
+
+    result
+
+f_unclassComponentName(int component) =>
+    component == 0 ? "PENETRATION" :
+     component == 1 ? "RANGE / ATR" :
+     component == 2 ? "BODY / RANGE" :
+     component == 3 ? "CLOSE POSITION" :
+     "CONFIRMATION SPEED"
+
+f_unclassBucketName(int component, int bucketValue) =>
+    string result = ""
+
+    if component == 0
+        result := bucketValue == 0 ? "<20% ATR" :
+             bucketValue == 1 ? "20-40% ATR" :
+             bucketValue == 2 ? "40-60% ATR" :
+             bucketValue == 3 ? "60-100% ATR" : ">=100% ATR"
+
+    else if component == 1
+        result := bucketValue == 0 ? "<50% ATR" :
+             bucketValue == 1 ? "50-100% ATR" :
+             bucketValue == 2 ? "100-150% ATR" :
+             bucketValue == 3 ? "150-200% ATR" : ">=200% ATR"
+
+    else if component == 2
+        result := bucketValue == 0 ? "<60%" :
+             bucketValue == 1 ? "60-70%" :
+             bucketValue == 2 ? "70-80%" :
+             bucketValue == 3 ? "80-90%" : ">=90%"
+
+    else if component == 3
+        result := bucketValue == 0 ? "<60%" :
+             bucketValue == 1 ? "60-70%" :
+             bucketValue == 2 ? "70-80%" :
+             bucketValue == 3 ? "80-90%" : ">=90%"
+
+    else
+        result := bucketValue == 0 ? "Immediate" :
+             bucketValue == 1 ? "1 bar" :
+             bucketValue == 2 ? "2 bars" :
+             bucketValue == 3 ? "3 bars" : "4+ bars"
+
+    result
+
+//=============================================================================
+// NEW: COMBINATION PROFILE AGGREGATES
+//=============================================================================
+//
+// Each profile stores:
+//
+// N
+// Favorable-first count
+// Both-same-candle count
+// +1% hit count
+// MFE sum
+// MAE sum
+//
+// Profiles:
+// Controlled Strong
+// Explosive
+// Efficient Moderate
+// Pretty but Weak
+// Delayed Strong
+// Unclassified
+//=============================================================================
+
+var profileSignals =
+     array.new_int(
+         PROFILE_COUNT,
+         0)
+
+var profileFavFirst =
+     array.new_int(
+         PROFILE_COUNT,
+         0)
+
+var profileBothFirst =
+     array.new_int(
+         PROFILE_COUNT,
+         0)
+
+var profileFav2Hit =
+     array.new_int(
+         PROFILE_COUNT,
+         0)
+
+var profileMFESum =
+     array.new_float(
+         PROFILE_COUNT,
+         0.0)
+
+var profileMAESum =
+     array.new_float(
+         PROFILE_COUNT,
+         0.0)
+
+//=============================================================================
+// GRADE x PROFILE INTERACTION AGGREGATES
+//=============================================================================
+//
+// Flat index = grade family * PROFILE_COUNT + profile.
+// Grade families: A, B, C, Weak.
+// Each cell stores N, favorable-first, both-same-candle, +1% hit, MFE, MAE.
+//=============================================================================
+
+int GRADE_FAMILY_COUNT = 4
+int GRADE_PROFILE_CELL_COUNT = GRADE_FAMILY_COUNT * PROFILE_COUNT
+
+// Exact-grade x profile research cells: A+, A, A-, B+, B, B-, C+, C, C-, Weak.
+int EXACT_GRADE_COUNT = 10
+int EXACT_GRADE_PROFILE_CELL_COUNT = EXACT_GRADE_COUNT * PROFILE_COUNT
+
+var gradeProfileSignals = array.new_int(GRADE_PROFILE_CELL_COUNT, 0)
+var gradeProfileFavFirst = array.new_int(GRADE_PROFILE_CELL_COUNT, 0)
+var gradeProfileBothFirst = array.new_int(GRADE_PROFILE_CELL_COUNT, 0)
+var gradeProfileFav2Hit = array.new_int(GRADE_PROFILE_CELL_COUNT, 0)
+var gradeProfileMFESum = array.new_float(GRADE_PROFILE_CELL_COUNT, 0.0)
+var gradeProfileMAESum = array.new_float(GRADE_PROFILE_CELL_COUNT, 0.0)
+
+var exactGradeProfileSignals = array.new_int(EXACT_GRADE_PROFILE_CELL_COUNT, 0)
+var exactGradeProfileFavFirst = array.new_int(EXACT_GRADE_PROFILE_CELL_COUNT, 0)
+var exactGradeProfileBothFirst = array.new_int(EXACT_GRADE_PROFILE_CELL_COUNT, 0)
+var exactGradeProfileFav2Hit = array.new_int(EXACT_GRADE_PROFILE_CELL_COUNT, 0)
+var exactGradeProfileMFESum = array.new_float(EXACT_GRADE_PROFILE_CELL_COUNT, 0.0)
+var exactGradeProfileMAESum = array.new_float(EXACT_GRADE_PROFILE_CELL_COUNT, 0.0)
+
+//=============================================================================
+// PROFILE COMPONENT ANALYSIS AGGREGATES
+//=============================================================================
+
+var profileCompSignals = array.new_int(5, 0)
+var profileCompFavFirst = array.new_int(5, 0)
+var profileCompBothFirst = array.new_int(5, 0)
+var profileCompFav2Hit = array.new_int(5, 0)
+var profileCompMFESum = array.new_float(5, 0.0)
+var profileCompMAESum = array.new_float(5, 0.0)
+
+//=============================================================================
+// UPDATE ACTIVE HISTORICAL SIGNALS
+//=============================================================================
+
+if enableHistoricalTracking and newConfirmationCandle
+    int activeCount =
+         array.size(activeDirection)
+
+    if activeCount > 0
+        for i = 0 to activeCount - 1
+
+            int direction =
+                 array.get(
+                     activeDirection,
+                     i)
+
+            float reference =
+                 array.get(
+                     activeReference,
+                     i)
+
+            float oldMFE =
+                 array.get(
+                     activeMFE,
+                     i)
+
+            float oldMAE =
+                 array.get(
+                     activeMAE,
+                     i)
+
+            bool oldFav1 =
+                 array.get(
+                     activeHitFav1,
+                     i)
+
+            bool oldFav2 =
+                 array.get(
+                     activeHitFav2,
+                     i)
+
+            bool oldAdverse =
+                 array.get(
+                     activeHitAdverse,
+                     i)
+
+            int firstOutcome =
+                 array.get(
+                     activeFirstOutcome,
+                     i)
+
+            float currentMFE = oldMFE
+            float currentMAE = oldMAE
+
+            bool hitFav1Now = false
+            bool hitFav2Now = false
+            bool hitAdverseNow = false
+
+            if direction == 1
+
+                float mfeCandidate =
+                     (confHigh - reference) /
+                     reference *
+                     100.0
+
+                float maeCandidate =
+                     (confLow - reference) /
+                     reference *
+                     100.0
+
+                currentMFE :=
+                     math.max(
+                         oldMFE,
+                         mfeCandidate)
+
+                currentMAE :=
+                     math.min(
+                         oldMAE,
+                         maeCandidate)
+
+                float fav1Price =
+                     reference *
+                     (1.0 +
+                      favorableTarget1 /
+                      100.0)
+
+                float fav2Price =
+                     reference *
+                     (1.0 +
+                      favorableTarget2 /
+                      100.0)
+
+                float adversePrice =
+                     reference *
+                     (1.0 -
+                      adverseTarget /
+                      100.0)
+
+                hitFav1Now :=
+                     confHigh >=
+                     fav1Price
+
+                hitFav2Now :=
+                     confHigh >=
+                     fav2Price
+
+                hitAdverseNow :=
+                     confLow <=
+                     adversePrice
+
+            else
+
+                float mfeCandidate =
+                     (reference - confLow) /
+                     reference *
+                     100.0
+
+                float maeCandidate =
+                     (reference - confHigh) /
+                     reference *
+                     100.0
+
+                currentMFE :=
+                     math.max(
+                         oldMFE,
+                         mfeCandidate)
+
+                currentMAE :=
+                     math.min(
+                         oldMAE,
+                         maeCandidate)
+
+                float fav1Price =
+                     reference *
+                     (1.0 -
+                      favorableTarget1 /
+                      100.0)
+
+                float fav2Price =
+                     reference *
+                     (1.0 -
+                      favorableTarget2 /
+                      100.0)
+
+                float adversePrice =
+                     reference *
+                     (1.0 +
+                      adverseTarget /
+                      100.0)
+
+                hitFav1Now :=
+                     confLow <=
+                     fav1Price
+
+                hitFav2Now :=
+                     confLow <=
+                     fav2Price
+
+                hitAdverseNow :=
+                     confHigh >=
+                     adversePrice
+
+            bool newFav1 =
+                 oldFav1 or
+                 hitFav1Now
+
+            bool newFav2 =
+                 oldFav2 or
+                 hitFav2Now
+
+            bool newAdverse =
+                 oldAdverse or
+                 hitAdverseNow
+
+            if firstOutcome == FIRST_NONE
+
+                if hitFav1Now and
+                   hitAdverseNow
+
+                    firstOutcome :=
+                         FIRST_BOTH
+
+                else if hitFav1Now
+
+                    firstOutcome :=
+                         FIRST_FAVORABLE
+
+                else if hitAdverseNow
+
+                    firstOutcome :=
+                         FIRST_ADVERSE
+
+            array.set(
+                 activeMFE,
+                 i,
+                 currentMFE)
+
+            array.set(
+                 activeMAE,
+                 i,
+                 currentMAE)
+
+            array.set(
+                 activeHitFav1,
+                 i,
+                 newFav1)
+
+            array.set(
+                 activeHitFav2,
+                 i,
+                 newFav2)
+
+            array.set(
+                 activeHitAdverse,
+                 i,
+                 newAdverse)
+
+            array.set(
+                 activeFirstOutcome,
+                 i,
+                 firstOutcome)
+
+//=============================================================================
+// STATE MACHINE
+//=============================================================================
+
+var int bullState = 0
+var int bearState = 0
+
+var int bullArmedTime = na
+var int bearArmedTime = na
+
+var int bullArmedBars = 0
+var int bearArmedBars = 0
+
+var float bullInitialPenATR = na
+var float bearInitialPenATR = na
+
+bool bullAlert = false
+bool bearAlert = false
+
+float bullPenScore = na
+float bullBodyScore = na
+float bullCloseScore = na
+float bullRangeScore = na
+float bullSpeedScore = na
+float bullTotalScore = na
+
+string bullGrade = ""
+
+float bearPenScore = na
+float bearBodyScore = na
+float bearCloseScore = na
+float bearRangeScore = na
+float bearSpeedScore = na
+float bearTotalScore = na
+
+string bearGrade = ""
+
+float selectedGradeThreshold =
+     f_gradeThreshold(
+         minimumGrade)
+
+if newDay
+    bullState := 0
+    bearState := 0
+
+    bullArmedTime := na
+    bearArmedTime := na
+
+    bullArmedBars := 0
+    bearArmedBars := 0
+
+    bullInitialPenATR := na
+    bearInitialPenATR := na
+
+//=============================================================================
+// ARM -> CONFIRM -> SCORE -> ALERT
+//=============================================================================
+
+if newConfirmationCandle and
+   levelsReady and
+   not na(confClose) and
+   not na(confATR)
+
+    //-------------------------------------------------------------------------
+    // BULLISH
+    //-------------------------------------------------------------------------
+
+    if bullState == 2
+        if confClose <= bullishFinalLevel
+            bullState := 0
+            bullArmedTime := na
+            bullArmedBars := 0
+            bullInitialPenATR := na
+
+    if bullState == 1
+        if confClose < bullishFinalLevel
+            bullState := 0
+            bullArmedTime := na
+            bullArmedBars := 0
+            bullInitialPenATR := na
+
+        else
+            bullArmedBars += 1
+
+            bool bullCoreFilters =
+                 bullPenPass and
+                 bullDirectionalPass and
+                 bodyPass and
+                 rangePass and
+                 bullClosePosPass
+
+            if bullCoreFilters
+                bullPenScore :=
+                     f_penetrationScore(
+                         bullPenATR)
+
+                bullBodyScore :=
+                     f_bodyScore(
+                         bodyRatio)
+
+                bullCloseScore :=
+                     f_closeScore(
+                         bullClosePosition)
+
+                bullRangeScore :=
+                     f_rangeScore(
+                         rangeATR)
+
+                bullSpeedScore :=
+                     f_speedScore(
+                         bullArmedBars)
+
+                bullTotalScore :=
+                     bullPenScore +
+                     bullBodyScore +
+                     bullCloseScore +
+                     bullRangeScore +
+                     bullSpeedScore
+
+                bullGrade :=
+                     f_grade(
+                         bullTotalScore)
+
+                bool bullGradePass = true
+
+                if requireMinGrade and
+                   enableStrengthScore
+
+                    bullGradePass :=
+                         bullTotalScore >=
+                         selectedGradeThreshold
+
+                if bullGradePass
+                    bullAlert := true
+                    bullState := 2
+
+    if bullState == 0
+        if confClose > bullishFinalLevel
+            bullState := 1
+            bullArmedTime := confTime
+            bullArmedBars := 0
+            bullInitialPenATR := bullPenATR
+
+            bool bullInitialCoreFilters =
+                 bullPenPass and
+                 bullDirectionalPass and
+                 bodyPass and
+                 rangePass and
+                 bullClosePosPass
+
+            if bullInitialCoreFilters
+                bullPenScore :=
+                     f_penetrationScore(
+                         bullPenATR)
+
+                bullBodyScore :=
+                     f_bodyScore(
+                         bodyRatio)
+
+                bullCloseScore :=
+                     f_closeScore(
+                         bullClosePosition)
+
+                bullRangeScore :=
+                     f_rangeScore(
+                         rangeATR)
+
+                bullSpeedScore :=
+                     f_speedScore(0)
+
+                bullTotalScore :=
+                     bullPenScore +
+                     bullBodyScore +
+                     bullCloseScore +
+                     bullRangeScore +
+                     bullSpeedScore
+
+                bullGrade :=
+                     f_grade(
+                         bullTotalScore)
+
+                bool bullInitialGradePass = true
+
+                if requireMinGrade and
+                   enableStrengthScore
+
+                    bullInitialGradePass :=
+                         bullTotalScore >=
+                         selectedGradeThreshold
+
+                if bullInitialGradePass
+                    bullAlert := true
+                    bullState := 2
+
+    //-------------------------------------------------------------------------
+    // BEARISH
+    //-------------------------------------------------------------------------
+
+    if bearState == 2
+        if confClose >= bearishFinalLevel
+            bearState := 0
+            bearArmedTime := na
+            bearArmedBars := 0
+            bearInitialPenATR := na
+
+    if bearState == 1
+        if confClose > bearishFinalLevel
+            bearState := 0
+            bearArmedTime := na
+            bearArmedBars := 0
+            bearInitialPenATR := na
+
+        else
+            bearArmedBars += 1
+
+            bool bearCoreFilters =
+                 bearPenPass and
+                 bearDirectionalPass and
+                 bodyPass and
+                 rangePass and
+                 bearClosePosPass
+
+            if bearCoreFilters
+                bearPenScore :=
+                     f_penetrationScore(
+                         bearPenATR)
+
+                bearBodyScore :=
+                     f_bodyScore(
+                         bodyRatio)
+
+                bearCloseScore :=
+                     f_closeScore(
+                         bearClosePosition)
+
+                bearRangeScore :=
+                     f_rangeScore(
+                         rangeATR)
+
+                bearSpeedScore :=
+                     f_speedScore(
+                         bearArmedBars)
+
+                bearTotalScore :=
+                     bearPenScore +
+                     bearBodyScore +
+                     bearCloseScore +
+                     bearRangeScore +
+                     bearSpeedScore
+
+                bearGrade :=
+                     f_grade(
+                         bearTotalScore)
+
+                bool bearGradePass = true
+
+                if requireMinGrade and
+                   enableStrengthScore
+
+                    bearGradePass :=
+                         bearTotalScore >=
+                         selectedGradeThreshold
+
+                if bearGradePass
+                    bearAlert := true
+                    bearState := 2
+
+    if bearState == 0
+        if confClose < bearishFinalLevel
+            bearState := 1
+            bearArmedTime := confTime
+            bearArmedBars := 0
+            bearInitialPenATR := bearPenATR
+
+            bool bearInitialCoreFilters =
+                 bearPenPass and
+                 bearDirectionalPass and
+                 bodyPass and
+                 rangePass and
+                 bearClosePosPass
+
+            if bearInitialCoreFilters
+                bearPenScore :=
+                     f_penetrationScore(
+                         bearPenATR)
+
+                bearBodyScore :=
+                     f_bodyScore(
+                         bodyRatio)
+
+                bearCloseScore :=
+                     f_closeScore(
+                         bearClosePosition)
+
+                bearRangeScore :=
+                     f_rangeScore(
+                         rangeATR)
+
+                bearSpeedScore :=
+                     f_speedScore(0)
+
+                bearTotalScore :=
+                     bearPenScore +
+                     bearBodyScore +
+                     bearCloseScore +
+                     bearRangeScore +
+                     bearSpeedScore
+
+                bearGrade :=
+                     f_grade(
+                         bearTotalScore)
+
+                bool bearInitialGradePass = true
+
+                if requireMinGrade and
+                   enableStrengthScore
+
+                    bearInitialGradePass :=
+                         bearTotalScore >=
+                         selectedGradeThreshold
+
+                if bearInitialGradePass
+                    bearAlert := true
+                    bearState := 2
+
+//=============================================================================
+// ADD SIGNALS TO HISTORICAL TRACKER
+//=============================================================================
+
+if enableHistoricalTracking and bullAlert
+    if f_signalInLookback(confTimeClose)
+
+        if na(diagFirstSignalTime)
+            diagFirstSignalTime := confTimeClose
+
+        diagLastSignalTime := confTimeClose
+
+        int bucket =
+             f_gradeBucket(
+                 bullGrade)
+
+        int profile =
+             f_combinationProfile(
+                 bullPenATR,
+                 rangeATR,
+                 bodyRatio,
+                 bullClosePosition,
+                 bullArmedBars)
+
+        array.push(
+             activeDirection,
+             1)
+
+        array.push(
+             activeReference,
+             confClose)
+
+        array.push(
+             activeBucket,
+             bucket)
+
+        array.push(
+             activeSignalTime,
+             confTimeClose)
+
+        array.push(
+             activeMFE,
+             0.0)
+
+        array.push(
+             activeMAE,
+             0.0)
+
+        array.push(
+             activeHitFav1,
+             false)
+
+        array.push(
+             activeHitFav2,
+             false)
+
+        array.push(
+             activeHitAdverse,
+             false)
+
+        array.push(
+             activeFirstOutcome,
+             FIRST_NONE)
+
+        array.push(
+             activePenScore,
+             bullPenScore)
+
+        array.push(
+             activeBodyScore,
+             bullBodyScore)
+
+        array.push(
+             activeCloseScore,
+             bullCloseScore)
+
+        array.push(
+             activeRangeScore,
+             bullRangeScore)
+
+        array.push(
+             activeSpeedScore,
+             bullSpeedScore)
+
+        array.push(
+             activeRawPen,
+             bullPenATR)
+
+        array.push(
+             activeRawBody,
+             bodyRatio)
+
+        array.push(
+             activeRawClose,
+             bullClosePosition)
+
+        array.push(
+             activeRawRange,
+             rangeATR)
+
+        array.push(
+             activeRawSpeedBars,
+             bullArmedBars)
+
+        array.push(
+             activeProfile,
+             profile)
+
+if enableHistoricalTracking and bearAlert
+    if f_signalInLookback(confTimeClose)
+
+        if na(diagFirstSignalTime)
+            diagFirstSignalTime := confTimeClose
+
+        diagLastSignalTime := confTimeClose
+
+        int bucket =
+             f_gradeBucket(
+                 bearGrade)
+
+        int profile =
+             f_combinationProfile(
+                 bearPenATR,
+                 rangeATR,
+                 bodyRatio,
+                 bearClosePosition,
+                 bearArmedBars)
+
+        array.push(
+             activeDirection,
+             -1)
+
+        array.push(
+             activeReference,
+             confClose)
+
+        array.push(
+             activeBucket,
+             bucket)
+
+        array.push(
+             activeSignalTime,
+             confTimeClose)
+
+        array.push(
+             activeMFE,
+             0.0)
+
+        array.push(
+             activeMAE,
+             0.0)
+
+        array.push(
+             activeHitFav1,
+             false)
+
+        array.push(
+             activeHitFav2,
+             false)
+
+        array.push(
+             activeHitAdverse,
+             false)
+
+        array.push(
+             activeFirstOutcome,
+             FIRST_NONE)
+
+        array.push(
+             activePenScore,
+             bearPenScore)
+
+        array.push(
+             activeBodyScore,
+             bearBodyScore)
+
+        array.push(
+             activeCloseScore,
+             bearCloseScore)
+
+        array.push(
+             activeRangeScore,
+             bearRangeScore)
+
+        array.push(
+             activeSpeedScore,
+             bearSpeedScore)
+
+        array.push(
+             activeRawPen,
+             bearPenATR)
+
+        array.push(
+             activeRawBody,
+             bodyRatio)
+
+        array.push(
+             activeRawClose,
+             bearClosePosition)
+
+        array.push(
+             activeRawRange,
+             rangeATR)
+
+        array.push(
+             activeRawSpeedBars,
+             bearArmedBars)
+
+        array.push(
+             activeProfile,
+             profile)
+
+//=============================================================================
+// FINALIZE PREVIOUS SESSION
+//=============================================================================
+
+if enableHistoricalTracking and completedPriorSession
+
+    int activeCount =
+         array.size(
+             activeDirection)
+
+    if activeCount > 0
+        for i = 0 to activeCount - 1
+
+            int bucket =
+                 array.get(
+                     activeBucket,
+                     i)
+
+            int signalTime =
+                 array.get(
+                     activeSignalTime,
+                     i)
+
+            if f_signalInLookback(signalTime)
+
+                float signalMFE =
+                     array.get(
+                         activeMFE,
+                         i)
+
+                float signalMAE =
+                     array.get(
+                         activeMAE,
+                         i)
+
+                bool fav1Hit =
+                     array.get(
+                         activeHitFav1,
+                         i)
+
+                bool fav2Hit =
+                     array.get(
+                         activeHitFav2,
+                         i)
+
+                int firstOutcome =
+                     array.get(
+                         activeFirstOutcome,
+                         i)
+
+                float signalPenScore =
+                     array.get(
+                         activePenScore,
+                         i)
+
+                float signalBodyScore =
+                     array.get(
+                         activeBodyScore,
+                         i)
+
+                float signalCloseScore =
+                     array.get(
+                         activeCloseScore,
+                         i)
+
+                float signalRangeScore =
+                     array.get(
+                         activeRangeScore,
+                         i)
+
+                float signalSpeedScore =
+                     array.get(
+                         activeSpeedScore,
+                         i)
+
+                //-------------------------------------------------------------
+                // Grade-family statistics
+                //-------------------------------------------------------------
+
+                for j = 0 to 1
+
+                    int targetBucket =
+                         bucket
+
+                    if j == 1
+                        targetBucket :=
+                             BUCKET_ALL
+
+                    array.set(
+                         histSignals,
+                         targetBucket,
+                         array.get(
+                             histSignals,
+                             targetBucket) +
+                         1)
+
+                    if fav1Hit
+                        array.set(
+                             histFav1Hit,
+                             targetBucket,
+                             array.get(
+                                 histFav1Hit,
+                                 targetBucket) +
+                             1)
+
+                    if fav2Hit
+                        array.set(
+                             histFav2Hit,
+                             targetBucket,
+                             array.get(
+                                 histFav2Hit,
+                                 targetBucket) +
+                             1)
+
+                    if firstOutcome == FIRST_FAVORABLE
+                        array.set(
+                             histFavFirst,
+                             targetBucket,
+                             array.get(
+                                 histFavFirst,
+                                 targetBucket) +
+                             1)
+
+                    else if firstOutcome == FIRST_ADVERSE
+                        array.set(
+                             histAdvFirst,
+                             targetBucket,
+                             array.get(
+                                 histAdvFirst,
+                                 targetBucket) +
+                             1)
+
+                    else if firstOutcome == FIRST_BOTH
+                        array.set(
+                             histBothFirst,
+                             targetBucket,
+                             array.get(
+                                 histBothFirst,
+                                 targetBucket) +
+                             1)
+
+                    array.set(
+                         histMFESum,
+                         targetBucket,
+                         array.get(
+                             histMFESum,
+                             targetBucket) +
+                         signalMFE)
+
+                    array.set(
+                         histMAESum,
+                         targetBucket,
+                         array.get(
+                             histMAESum,
+                             targetBucket) +
+                         signalMAE)
+
+                //-------------------------------------------------------------
+                // Detailed V3 grade statistics
+                //-------------------------------------------------------------
+                float signalTotalScore = signalPenScore + signalBodyScore + signalCloseScore + signalRangeScore + signalSpeedScore
+                int detailedGradeBucket = f_v3DetailedBucket(f_grade(signalTotalScore))
+
+                for k = 0 to 1
+                    int v3TargetBucket = detailedGradeBucket
+                    if k == 1
+                        v3TargetBucket := V3_GRADE_ALL
+
+                    array.set(v3GradeSignals, v3TargetBucket, array.get(v3GradeSignals, v3TargetBucket) + 1)
+                    if firstOutcome == FIRST_FAVORABLE
+                        array.set(v3GradeFavFirst, v3TargetBucket, array.get(v3GradeFavFirst, v3TargetBucket) + 1)
+                    else if firstOutcome == FIRST_BOTH
+                        array.set(v3GradeBothFirst, v3TargetBucket, array.get(v3GradeBothFirst, v3TargetBucket) + 1)
+                    if fav2Hit
+                        array.set(v3GradeFav2Hit, v3TargetBucket, array.get(v3GradeFav2Hit, v3TargetBucket) + 1)
+                    array.set(v3GradeMFESum, v3TargetBucket, array.get(v3GradeMFESum, v3TargetBucket) + signalMFE)
+                    array.set(v3GradeMAESum, v3TargetBucket, array.get(v3GradeMAESum, v3TargetBucket) + signalMAE)
+
+                //-------------------------------------------------------------
+                // Component-summary statistics
+                //-------------------------------------------------------------
+
+                compAllCount += 1
+
+                array.set(
+                     compAllSums,
+                     COMP_PEN,
+                     array.get(
+                         compAllSums,
+                         COMP_PEN) +
+                     signalPenScore)
+
+                array.set(
+                     compAllSums,
+                     COMP_BODY,
+                     array.get(
+                         compAllSums,
+                         COMP_BODY) +
+                     signalBodyScore)
+
+                array.set(
+                     compAllSums,
+                     COMP_CLOSE,
+                     array.get(
+                         compAllSums,
+                         COMP_CLOSE) +
+                     signalCloseScore)
+
+                array.set(
+                     compAllSums,
+                     COMP_RANGE,
+                     array.get(
+                         compAllSums,
+                         COMP_RANGE) +
+                     signalRangeScore)
+
+                array.set(
+                     compAllSums,
+                     COMP_SPEED,
+                     array.get(
+                         compAllSums,
+                         COMP_SPEED) +
+                     signalSpeedScore)
+
+                if firstOutcome == FIRST_FAVORABLE
+
+                    compFavCount += 1
+
+                    array.set(
+                         compFavSums,
+                         COMP_PEN,
+                         array.get(
+                             compFavSums,
+                             COMP_PEN) +
+                         signalPenScore)
+
+                    array.set(
+                         compFavSums,
+                         COMP_BODY,
+                         array.get(
+                             compFavSums,
+                             COMP_BODY) +
+                         signalBodyScore)
+
+                    array.set(
+                         compFavSums,
+                         COMP_CLOSE,
+                         array.get(
+                             compFavSums,
+                             COMP_CLOSE) +
+                         signalCloseScore)
+
+                    array.set(
+                         compFavSums,
+                         COMP_RANGE,
+                         array.get(
+                             compFavSums,
+                             COMP_RANGE) +
+                         signalRangeScore)
+
+                    array.set(
+                         compFavSums,
+                         COMP_SPEED,
+                         array.get(
+                             compFavSums,
+                             COMP_SPEED) +
+                         signalSpeedScore)
+
+                else if firstOutcome == FIRST_ADVERSE
+
+                    compAdvCount += 1
+
+                    array.set(
+                         compAdvSums,
+                         COMP_PEN,
+                         array.get(
+                             compAdvSums,
+                             COMP_PEN) +
+                         signalPenScore)
+
+                    array.set(
+                         compAdvSums,
+                         COMP_BODY,
+                         array.get(
+                             compAdvSums,
+                             COMP_BODY) +
+                         signalBodyScore)
+
+                    array.set(
+                         compAdvSums,
+                         COMP_CLOSE,
+                         array.get(
+                             compAdvSums,
+                             COMP_CLOSE) +
+                         signalCloseScore)
+
+                    array.set(
+                         compAdvSums,
+                         COMP_RANGE,
+                         array.get(
+                             compAdvSums,
+                             COMP_RANGE) +
+                         signalRangeScore)
+
+                    array.set(
+                         compAdvSums,
+                         COMP_SPEED,
+                         array.get(
+                             compAdvSums,
+                             COMP_SPEED) +
+                         signalSpeedScore)
+
+                //-------------------------------------------------------------
+                // Sweet-spot statistics
+                //-------------------------------------------------------------
+
+                float rawPen =
+                     array.get(
+                         activeRawPen,
+                         i)
+
+                float rawBody =
+                     array.get(
+                         activeRawBody,
+                         i)
+
+                float rawClose =
+                     array.get(
+                         activeRawClose,
+                         i)
+
+                float rawRange =
+                     array.get(
+                         activeRawRange,
+                         i)
+
+                int rawSpeed =
+                     array.get(
+                         activeRawSpeedBars,
+                         i)
+
+                int sweetBucket =
+                     f_sweetBucket(
+                         rawPen,
+                         rawRange,
+                         rawBody,
+                         rawClose,
+                         rawSpeed)
+
+                array.set(
+                     sweetSignals,
+                     sweetBucket,
+                     array.get(
+                         sweetSignals,
+                         sweetBucket) +
+                     1)
+
+                if firstOutcome == FIRST_FAVORABLE
+                    array.set(
+                         sweetFavFirst,
+                         sweetBucket,
+                         array.get(
+                             sweetFavFirst,
+                             sweetBucket) +
+                         1)
+
+                if firstOutcome == FIRST_BOTH
+                    array.set(
+                         sweetBothFirst,
+                         sweetBucket,
+                         array.get(
+                             sweetBothFirst,
+                             sweetBucket) +
+                         1)
+
+                if fav2Hit
+                    array.set(
+                         sweetFav2Hit,
+                         sweetBucket,
+                         array.get(
+                             sweetFav2Hit,
+                             sweetBucket) +
+                         1)
+
+                array.set(
+                     sweetMFESum,
+                     sweetBucket,
+                     array.get(
+                         sweetMFESum,
+                         sweetBucket) +
+                     signalMFE)
+
+                array.set(
+                     sweetMAESum,
+                     sweetBucket,
+                     array.get(
+                         sweetMAESum,
+                         sweetBucket) +
+                     signalMAE)
+
+                //-------------------------------------------------------------
+                // NEW: Combination-profile statistics
+                //-------------------------------------------------------------
+
+                int signalProfile =
+                     array.get(
+                         activeProfile,
+                         i)
+
+                //-------------------------------------------------------------
+                // PHASE 4A: Unclassified component analysis
+                //-------------------------------------------------------------
+
+                if signalProfile == PROFILE_UNCLASSIFIED
+                    for component = 0 to 4
+                        int unclassBucket =
+                             f_unclassBucket(
+                                 component,
+                                 rawPen,
+                                 rawRange,
+                                 rawBody,
+                                 rawClose,
+                                 rawSpeed)
+
+                        int gradeIdx =
+                             f_unclassIndex(
+                                 component,
+                                 unclassBucket,
+                                 bucket)
+
+                        int allIdx =
+                             f_unclassIndex(
+                                 component,
+                                 unclassBucket,
+                                 UNCLASS_GRADE_ALL)
+
+                        array.set(unclassSignals, gradeIdx, array.get(unclassSignals, gradeIdx) + 1)
+                        array.set(unclassSignals, allIdx, array.get(unclassSignals, allIdx) + 1)
+
+                        if firstOutcome == FIRST_FAVORABLE
+                            array.set(unclassFavFirst, gradeIdx, array.get(unclassFavFirst, gradeIdx) + 1)
+                            array.set(unclassFavFirst, allIdx, array.get(unclassFavFirst, allIdx) + 1)
+
+                        if firstOutcome == FIRST_BOTH
+                            array.set(unclassBothFirst, gradeIdx, array.get(unclassBothFirst, gradeIdx) + 1)
+                            array.set(unclassBothFirst, allIdx, array.get(unclassBothFirst, allIdx) + 1)
+
+                        if fav2Hit
+                            array.set(unclassFav2Hit, gradeIdx, array.get(unclassFav2Hit, gradeIdx) + 1)
+                            array.set(unclassFav2Hit, allIdx, array.get(unclassFav2Hit, allIdx) + 1)
+
+                        array.set(unclassMFESum, gradeIdx, array.get(unclassMFESum, gradeIdx) + signalMFE)
+                        array.set(unclassMFESum, allIdx, array.get(unclassMFESum, allIdx) + signalMFE)
+
+                        array.set(unclassMAESum, gradeIdx, array.get(unclassMAESum, gradeIdx) + signalMAE)
+                        array.set(unclassMAESum, allIdx, array.get(unclassMAESum, allIdx) + signalMAE)
+
+                //-------------------------------------------------------------
+                // Exact Grade x Profile research statistics
+                //-------------------------------------------------------------
+                int exactGradeProfileIndex = detailedGradeBucket * PROFILE_COUNT + signalProfile
+
+                array.set(exactGradeProfileSignals, exactGradeProfileIndex, array.get(exactGradeProfileSignals, exactGradeProfileIndex) + 1)
+                if firstOutcome == FIRST_FAVORABLE
+                    array.set(exactGradeProfileFavFirst, exactGradeProfileIndex, array.get(exactGradeProfileFavFirst, exactGradeProfileIndex) + 1)
+                else if firstOutcome == FIRST_BOTH
+                    array.set(exactGradeProfileBothFirst, exactGradeProfileIndex, array.get(exactGradeProfileBothFirst, exactGradeProfileIndex) + 1)
+                if fav2Hit
+                    array.set(exactGradeProfileFav2Hit, exactGradeProfileIndex, array.get(exactGradeProfileFav2Hit, exactGradeProfileIndex) + 1)
+                array.set(exactGradeProfileMFESum, exactGradeProfileIndex, array.get(exactGradeProfileMFESum, exactGradeProfileIndex) + signalMFE)
+                array.set(exactGradeProfileMAESum, exactGradeProfileIndex, array.get(exactGradeProfileMAESum, exactGradeProfileIndex) + signalMAE)
+
+                array.set(
+                     profileSignals,
+                     signalProfile,
+                     array.get(
+                         profileSignals,
+                         signalProfile) +
+                     1)
+
+                if firstOutcome == FIRST_FAVORABLE
+                    array.set(
+                         profileFavFirst,
+                         signalProfile,
+                         array.get(
+                             profileFavFirst,
+                             signalProfile) +
+                         1)
+
+                if firstOutcome == FIRST_BOTH
+                    array.set(
+                         profileBothFirst,
+                         signalProfile,
+                         array.get(
+                             profileBothFirst,
+                             signalProfile) +
+                         1)
+
+                if fav2Hit
+                    array.set(
+                         profileFav2Hit,
+                         signalProfile,
+                         array.get(
+                             profileFav2Hit,
+                             signalProfile) +
+                         1)
+
+                array.set(
+                     profileMFESum,
+                     signalProfile,
+                     array.get(
+                         profileMFESum,
+                         signalProfile) +
+                     signalMFE)
+
+                array.set(
+                     profileMAESum,
+                     signalProfile,
+                     array.get(
+                         profileMAESum,
+                         signalProfile) +
+                     signalMAE)
+
+                //-------------------------------------------------------------
+                // Grade x Profile interaction statistics
+                //-------------------------------------------------------------
+
+                int gradeProfileIndex = bucket * PROFILE_COUNT + signalProfile
+
+                array.set(
+                     gradeProfileSignals,
+                     gradeProfileIndex,
+                     array.get(gradeProfileSignals, gradeProfileIndex) + 1)
+
+                if firstOutcome == FIRST_FAVORABLE
+                    array.set(
+                         gradeProfileFavFirst,
+                         gradeProfileIndex,
+                         array.get(gradeProfileFavFirst, gradeProfileIndex) + 1)
+
+                if firstOutcome == FIRST_BOTH
+                    array.set(
+                         gradeProfileBothFirst,
+                         gradeProfileIndex,
+                         array.get(gradeProfileBothFirst, gradeProfileIndex) + 1)
+
+                if fav2Hit
+                    array.set(
+                         gradeProfileFav2Hit,
+                         gradeProfileIndex,
+                         array.get(gradeProfileFav2Hit, gradeProfileIndex) + 1)
+
+                array.set(
+                     gradeProfileMFESum,
+                     gradeProfileIndex,
+                     array.get(gradeProfileMFESum, gradeProfileIndex) + signalMFE)
+
+                array.set(
+                     gradeProfileMAESum,
+                     gradeProfileIndex,
+                     array.get(gradeProfileMAESum, gradeProfileIndex) + signalMAE)
+
+                //-------------------------------------------------------------
+                // Profile Component Analysis statistics
+                //-------------------------------------------------------------
+
+                if f_profileIncluded(signalProfile)
+                    int selectedComponent = f_profileAnalysisComponentIndex()
+                    int profileCompBucket = f_profileComponentBucket(
+                         selectedComponent,
+                         rawPen,
+                         rawRange,
+                         rawBody,
+                         rawClose,
+                         rawSpeed)
+
+                    array.set(
+                         profileCompSignals,
+                         profileCompBucket,
+                         array.get(profileCompSignals, profileCompBucket) + 1)
+
+                    if firstOutcome == FIRST_FAVORABLE
+                        array.set(
+                             profileCompFavFirst,
+                             profileCompBucket,
+                             array.get(profileCompFavFirst, profileCompBucket) + 1)
+
+                    if firstOutcome == FIRST_BOTH
+                        array.set(
+                             profileCompBothFirst,
+                             profileCompBucket,
+                             array.get(profileCompBothFirst, profileCompBucket) + 1)
+
+                    if fav2Hit
+                        array.set(
+                             profileCompFav2Hit,
+                             profileCompBucket,
+                             array.get(profileCompFav2Hit, profileCompBucket) + 1)
+
+                    array.set(
+                         profileCompMFESum,
+                         profileCompBucket,
+                         array.get(profileCompMFESum, profileCompBucket) + signalMFE)
+
+                    array.set(
+                         profileCompMAESum,
+                         profileCompBucket,
+                         array.get(profileCompMAESum, profileCompBucket) + signalMAE)
+
+//=============================================================================
+// CLEAR ACTIVE ARRAYS AFTER SESSION FINALIZATION
+//=============================================================================
+
+    array.clear(activeDirection)
+    array.clear(activeReference)
+    array.clear(activeBucket)
+    array.clear(activeSignalTime)
+
+    array.clear(activeMFE)
+    array.clear(activeMAE)
+
+    array.clear(activeHitFav1)
+    array.clear(activeHitFav2)
+    array.clear(activeHitAdverse)
+
+    array.clear(activeFirstOutcome)
+
+    array.clear(activePenScore)
+    array.clear(activeBodyScore)
+    array.clear(activeCloseScore)
+    array.clear(activeRangeScore)
+    array.clear(activeSpeedScore)
+
+    array.clear(activeRawPen)
+    array.clear(activeRawBody)
+    array.clear(activeRawClose)
+    array.clear(activeRawRange)
+    array.clear(activeRawSpeedBars)
+
+    array.clear(activeProfile)
+
+//=============================================================================
+// STANDARD SIGNAL LABELS
+//=============================================================================
+
+if bullAlert and showSignalLabels
+    string bullScoreText = ""
+
+    if enableStrengthScore and showScoreOnLabel
+        bullScoreText :=
+             "\nScore: " +
+             str.tostring(bullTotalScore, "#.0") +
+             "/100 - " +
+             bullGrade
+
+    string bullLabelText =
+         "BULLISH BREAKOUT\nPMH + PDH" +
+         bullScoreText
+
+    bullLabelText :=
+         bullLabelText +
+         "\nFinal: " +
+         bullishFinalName +
+         " " +
+         str.tostring(
+             bullishFinalLevel,
+             format.mintick)
+
+    bullLabelText :=
+         bullLabelText +
+         "\nClose: " +
+         str.tostring(
+             confClose,
+             format.mintick)
+
+    label.new(
+         confTime,
+         confLow,
+         bullLabelText,
+         xloc = xloc.bar_time,
+         yloc = yloc.price,
+         style = label.style_label_up,
+         color = color.new(color.green, 10),
+         textcolor = color.white,
+         size = size.small)
+
+if bearAlert and showSignalLabels
+    string bearScoreText = ""
+
+    if enableStrengthScore and showScoreOnLabel
+        bearScoreText :=
+             "\nScore: " +
+             str.tostring(bearTotalScore, "#.0") +
+             "/100 - " +
+             bearGrade
+
+    string bearLabelText =
+         "BEARISH BREAKDOWN\nPML + PDL" +
+         bearScoreText
+
+    bearLabelText :=
+         bearLabelText +
+         "\nFinal: " +
+         bearishFinalName +
+         " " +
+         str.tostring(
+             bearishFinalLevel,
+             format.mintick)
+
+    bearLabelText :=
+         bearLabelText +
+         "\nClose: " +
+         str.tostring(
+             confClose,
+             format.mintick)
+
+    label.new(
+         confTime,
+         confHigh,
+         bearLabelText,
+         xloc = xloc.bar_time,
+         yloc = yloc.price,
+         style = label.style_label_down,
+         color = color.new(color.red, 10),
+         textcolor = color.white,
+         size = size.small)
+
+//=============================================================================
+// COMBINED DYNAMIC ALERT
+//=============================================================================
+
+if bullAlert
+    string bullScoreMessage = ""
+
+    if enableStrengthScore
+        bullScoreMessage :=
+             " | Score: " +
+             str.tostring(
+                 bullTotalScore,
+                 "#.0") +
+             "/100 " +
+             bullGrade
+
+    string bullMessage =
+         "BULLISH | " +
+         syminfo.ticker +
+         " | PMH + PDH BREAKOUT"
+
+    bullMessage :=
+         bullMessage +
+         bullScoreMessage
+
+    bullMessage :=
+         bullMessage +
+         " | Final: " +
+         bullishFinalName +
+         " " +
+         str.tostring(
+             bullishFinalLevel,
+             format.mintick)
+
+    bullMessage :=
+         bullMessage +
+         " | Close: " +
+         str.tostring(
+             confClose,
+             format.mintick)
+
+    bullMessage :=
+         bullMessage +
+         " | Pen: " +
+         str.tostring(
+             bullPenATR,
+             "#.0") +
+         "% ATR"
+
+    bullMessage :=
+         bullMessage +
+         " | Body: " +
+         str.tostring(
+             bodyRatio,
+             "#.0") +
+         "%"
+
+    alert(
+         bullMessage,
+         alert.freq_once_per_bar)
+
+if bearAlert
+    string bearScoreMessage = ""
+
+    if enableStrengthScore
+        bearScoreMessage :=
+             " | Score: " +
+             str.tostring(
+                 bearTotalScore,
+                 "#.0") +
+             "/100 " +
+             bearGrade
+
+    string bearMessage =
+         "BEARISH | " +
+         syminfo.ticker +
+         " | PML + PDL BREAKDOWN"
+
+    bearMessage :=
+         bearMessage +
+         bearScoreMessage
+
+    bearMessage :=
+         bearMessage +
+         " | Final: " +
+         bearishFinalName +
+         " " +
+         str.tostring(
+             bearishFinalLevel,
+             format.mintick)
+
+    bearMessage :=
+         bearMessage +
+         " | Close: " +
+         str.tostring(
+             confClose,
+             format.mintick)
+
+    bearMessage :=
+         bearMessage +
+         " | Pen: " +
+         str.tostring(
+             bearPenATR,
+             "#.0") +
+         "% ATR"
+
+    bearMessage :=
+         bearMessage +
+         " | Body: " +
+         str.tostring(
+             bodyRatio,
+             "#.0") +
+         "%"
+
+    alert(
+         bearMessage,
+         alert.freq_once_per_bar)
+
+alertcondition(
+     bullAlert or bearAlert,
+     title = "PM + Previous Day Breakout",
+     message = "PM + Previous Day breakout detected. Use Any alert() function call for the detailed notification.")
+
+//=============================================================================
+// DEBUG STORAGE
+//=============================================================================
+
+var string dbgSignal = "No alert yet"
+var bool dbgBull = false
+
+var string dbgFinalName = "-"
+var float dbgFinalPrice = na
+
+var float dbgPMH = na
+var float dbgPDH = na
+var float dbgPML = na
+var float dbgPDL = na
+
+var int dbgArmedTime = na
+var int dbgConfirmedTime = na
+var int dbgBarsToConfirm = na
+
+var float dbgOpen = na
+var float dbgHigh = na
+var float dbgLow = na
+var float dbgClose = na
+
+var float dbgATR = na
+var float dbgInitialPen = na
+var float dbgPen = na
+
+var float dbgRange = na
+var float dbgRangeATR = na
+
+var float dbgBody = na
+var float dbgBodyRatio = na
+var float dbgClosePosition = na
+
+var float dbgTotalScore = na
+var string dbgGrade = "-"
+
+var float dbgPenScore = na
+var float dbgBodyScore = na
+var float dbgCloseScore = na
+var float dbgRangeScore = na
+var float dbgSpeedScore = na
+
+var bool dbgDirectionalPass = false
+var bool dbgPenPass = false
+var bool dbgBodyPass = false
+var bool dbgRangePass = false
+var bool dbgClosePositionPass = false
+
+//=============================================================================
+// CAPTURE MOST RECENT BULLISH ALERT
+//=============================================================================
+
+if bullAlert
+    dbgSignal := "BULLISH BREAKOUT"
+    dbgBull := true
+
+    dbgFinalName := bullishFinalName
+    dbgFinalPrice := bullishFinalLevel
+
+    dbgPMH := pmh
+    dbgPDH := pdh
+    dbgPML := pml
+    dbgPDL := pdl
+
+    dbgArmedTime := bullArmedTime
+    dbgConfirmedTime := confTimeClose
+    dbgBarsToConfirm := bullArmedBars
+
+    dbgOpen := confOpen
+    dbgHigh := confHigh
+    dbgLow := confLow
+    dbgClose := confClose
+
+    dbgATR := confATR
+    dbgInitialPen := bullInitialPenATR
+    dbgPen := bullPenATR
+
+    dbgRange := confRange
+    dbgRangeATR := rangeATR
+
+    dbgBody := confBody
+    dbgBodyRatio := bodyRatio
+    dbgClosePosition := bullClosePosition
+
+    dbgTotalScore := bullTotalScore
+    dbgGrade := bullGrade
+
+    dbgPenScore := bullPenScore
+    dbgBodyScore := bullBodyScore
+    dbgCloseScore := bullCloseScore
+    dbgRangeScore := bullRangeScore
+    dbgSpeedScore := bullSpeedScore
+
+    dbgDirectionalPass := bullDirectionalPass
+    dbgPenPass := bullPenPass
+    dbgBodyPass := bodyPass
+    dbgRangePass := rangePass
+    dbgClosePositionPass := bullClosePosPass
+
+//=============================================================================
+// CAPTURE MOST RECENT BEARISH ALERT
+//=============================================================================
+
+if bearAlert
+    dbgSignal := "BEARISH BREAKDOWN"
+    dbgBull := false
+
+    dbgFinalName := bearishFinalName
+    dbgFinalPrice := bearishFinalLevel
+
+    dbgPMH := pmh
+    dbgPDH := pdh
+    dbgPML := pml
+    dbgPDL := pdl
+
+    dbgArmedTime := bearArmedTime
+    dbgConfirmedTime := confTimeClose
+    dbgBarsToConfirm := bearArmedBars
+
+    dbgOpen := confOpen
+    dbgHigh := confHigh
+    dbgLow := confLow
+    dbgClose := confClose
+
+    dbgATR := confATR
+    dbgInitialPen := bearInitialPenATR
+    dbgPen := bearPenATR
+
+    dbgRange := confRange
+    dbgRangeATR := rangeATR
+
+    dbgBody := confBody
+    dbgBodyRatio := bodyRatio
+    dbgClosePosition := bearClosePosition
+
+    dbgTotalScore := bearTotalScore
+    dbgGrade := bearGrade
+
+    dbgPenScore := bearPenScore
+    dbgBodyScore := bearBodyScore
+    dbgCloseScore := bearCloseScore
+    dbgRangeScore := bearRangeScore
+    dbgSpeedScore := bearSpeedScore
+
+    dbgDirectionalPass := bearDirectionalPass
+    dbgPenPass := bearPenPass
+    dbgBodyPass := bodyPass
+    dbgRangePass := rangePass
+    dbgClosePositionPass := bearClosePosPass
+
+//=============================================================================
+// DEBUG TABLE - TOP RIGHT
+//=============================================================================
+
+var table debugTable =
+     table.new(
+         position.top_right,
+         3,
+         31,
+         border_width = 1)
+
+f_setDebugRow(
+     int row,
+     string name,
+     string value,
+     string status) =>
+
+    table.cell(
+         debugTable,
+         0,
+         row,
+         name,
+         text_color = color.silver,
+         bgcolor = color.new(color.black, 15),
+         text_size = size.small)
+
+    table.cell(
+         debugTable,
+         1,
+         row,
+         value,
+         text_color = color.white,
+         bgcolor = color.new(color.black, 15),
+         text_size = size.small)
+
+    table.cell(
+         debugTable,
+         2,
+         row,
+         status,
+         text_color = color.white,
+         bgcolor = color.new(color.black, 15),
+         text_size = size.small)
+
+if barstate.islast
+
+    if showDebug
+
+        color headerColor =
+             color.new(
+                 color.gray,
+                 45)
+
+        if dbgSignal != "No alert yet"
+
+            if dbgBull
+                headerColor :=
+                     color.new(
+                         color.green,
+                         25)
+
+            else
+                headerColor :=
+                     color.new(
+                         color.red,
+                         25)
+
+        table.cell(
+             debugTable,
+             0,
+             0,
+             "BREAKOUT DEBUG",
+             text_color = color.white,
+             bgcolor = headerColor,
+             text_size = size.small)
+
+        table.cell(
+             debugTable,
+             1,
+             0,
+             dbgSignal,
+             text_color = color.white,
+             bgcolor = headerColor,
+             text_size = size.small)
+
+        table.cell(
+             debugTable,
+             2,
+             0,
+             "",
+             bgcolor = headerColor)
+
+        string scoreValue = "OFF"
+        string scoreGrade = ""
+
+        if enableStrengthScore
+
+            if not na(dbgTotalScore)
+                scoreValue :=
+                     str.tostring(
+                         dbgTotalScore,
+                         "#.0") +
+                     " / 100"
+
+            scoreGrade :=
+                 dbgGrade
+
+        f_setDebugRow(
+             1,
+             "Strength Score",
+             scoreValue,
+             scoreGrade)
+
+        f_setDebugRow(
+             2,
+             "Pen Score",
+             enableStrengthScore ?
+             f_points(
+                 dbgPenScore,
+                 MAX_PEN_POINTS) :
+             "OFF",
+             "")
+
+        f_setDebugRow(
+             3,
+             "Body Score",
+             enableStrengthScore ?
+             f_points(
+                 dbgBodyScore,
+                 MAX_BODY_POINTS) :
+             "OFF",
+             "")
+
+        f_setDebugRow(
+             4,
+             "Close Score",
+             enableStrengthScore ?
+             f_points(
+                 dbgCloseScore,
+                 MAX_CLOSE_POINTS) :
+             "OFF",
+             "")
+
+        f_setDebugRow(
+             5,
+             "Range Score",
+             enableStrengthScore ?
+             f_points(
+                 dbgRangeScore,
+                 MAX_RANGE_POINTS) :
+             "OFF",
+             "")
+
+        f_setDebugRow(
+             6,
+             "Speed Score",
+             enableStrengthScore ?
+             f_points(
+                 dbgSpeedScore,
+                 MAX_SPEED_POINTS) :
+             "OFF",
+             "")
+
+        f_setDebugRow(
+             7,
+             "PMH",
+             f_num(dbgPMH),
+             "")
+
+        f_setDebugRow(
+             8,
+             "PDH",
+             f_num(dbgPDH),
+             "")
+
+        f_setDebugRow(
+             9,
+             "PML",
+             f_num(dbgPML),
+             "")
+
+        f_setDebugRow(
+             10,
+             "PDL",
+             f_num(dbgPDL),
+             "")
+
+        f_setDebugRow(
+             11,
+             "Final Level",
+             dbgFinalName +
+             " " +
+             f_num(dbgFinalPrice),
+             "")
+
+        f_setDebugRow(
+             12,
+             "Armed",
+             f_timeText(dbgArmedTime),
+             "")
+
+        f_setDebugRow(
+             13,
+             "Confirmed",
+             f_timeText(dbgConfirmedTime),
+             "")
+
+        string barsText = "-"
+
+        if not na(dbgBarsToConfirm)
+            barsText :=
+                 str.tostring(
+                     dbgBarsToConfirm)
+
+        f_setDebugRow(
+             14,
+             "Bars to Confirm",
+             barsText,
+             "")
+
+        f_setDebugRow(
+             15,
+             "Open",
+             f_num(dbgOpen),
+             "")
+
+        f_setDebugRow(
+             16,
+             "High",
+             f_num(dbgHigh),
+             "")
+
+        f_setDebugRow(
+             17,
+             "Low",
+             f_num(dbgLow),
+             "")
+
+        f_setDebugRow(
+             18,
+             "Close",
+             f_num(dbgClose),
+             "")
+
+        f_setDebugRow(
+             19,
+             "ATR",
+             f_num(dbgATR),
+             "")
+
+        f_setDebugRow(
+             20,
+             "Initial Break",
+             f_pct(dbgInitialPen) +
+             " ATR",
+             "")
+
+        string penetrationStatus = "OFF"
+
+        if usePenetration
+            penetrationStatus :=
+                 "Min " +
+                 str.tostring(
+                     minPenATR,
+                     "#.0") +
+                 "% | " +
+                 f_passText(
+                     true,
+                     dbgPenPass)
+
+        f_setDebugRow(
+             21,
+             "Penetration",
+             f_pct(dbgPen) +
+             " ATR",
+             penetrationStatus)
+
+        f_setDebugRow(
+             22,
+             "Range",
+             f_num(dbgRange),
+             "")
+
+        string rangeStatus = "OFF"
+
+        if useRangeATR
+            rangeStatus :=
+                 "Min " +
+                 str.tostring(
+                     minRangeATR,
+                     "#.0") +
+                 "% | " +
+                 f_passText(
+                     true,
+                     dbgRangePass)
+
+        f_setDebugRow(
+             23,
+             "Range / ATR",
+             f_pct(dbgRangeATR),
+             rangeStatus)
+
+        f_setDebugRow(
+             24,
+             "Body",
+             f_num(dbgBody),
+             "")
+
+        string bodyStatus = "OFF"
+
+        if useBodyRatio
+            bodyStatus :=
+                 "Min " +
+                 str.tostring(
+                     minBodyRatio,
+                     "#.0") +
+                 "% | " +
+                 f_passText(
+                     true,
+                     dbgBodyPass)
+
+        f_setDebugRow(
+             25,
+             "Body / Range",
+             f_pct(dbgBodyRatio),
+             bodyStatus)
+
+        string closeStatus = "OFF"
+
+        if useClosePosition
+            closeStatus :=
+                 "Min " +
+                 str.tostring(
+                     minClosePosition,
+                     "#.0") +
+                 "% | " +
+                 f_passText(
+                     true,
+                     dbgClosePositionPass)
+
+        f_setDebugRow(
+             26,
+             "Close Position",
+             f_pct(dbgClosePosition),
+             closeStatus)
+
+        string directionalStatus = "OFF"
+
+        if useDirectionalCandle
+            directionalStatus :=
+                 f_passText(
+                     true,
+                     dbgDirectionalPass)
+
+        string directionalValue = "-"
+
+        if dbgSignal != "No alert yet"
+
+            if dbgBull
+                directionalValue :=
+                     "Green"
+
+            else
+                directionalValue :=
+                     "Red"
+
+        f_setDebugRow(
+             27,
+             "Directional Candle",
+             directionalValue,
+             directionalStatus)
+
+        string gradeFilterText = "OFF"
+
+        if requireMinGrade and
+           enableStrengthScore
+
+            gradeFilterText :=
+                 minimumGrade +
+                 " or better"
+
+        f_setDebugRow(
+             28,
+             "Grade Filter",
+             gradeFilterText,
+             "")
+
+        f_setDebugRow(
+             29,
+             "Score Model",
+             enableStrengthScore ?
+             "40/15/15/25/5" :
+             "OFF",
+             "")
+
+        f_setDebugRow(
+             30,
+             "RESULT",
+             dbgSignal == "No alert yet" ?
+             "Waiting" :
+             "ALERT TRIGGERED",
+             dbgSignal == "No alert yet" ?
+             "" :
+             "PASS")
+
+    else
+        table.clear(
+             debugTable,
+             0,
+             0,
+             2,
+             30)
+
+//=============================================================================
+// HISTORICAL PERFORMANCE TABLE - TOP LEFT
+//=============================================================================
+
+var table historyTable =
+     table.new(
+         position.top_left,
+         6,
+         8,
+         border_width = 1)
+
+f_historyRow(
+     int row,
+     string name,
+     int bucket) =>
+
+    int signalCount =
+         array.get(
+             histSignals,
+             bucket)
+
+    int favFirstCount =
+         array.get(
+             histFavFirst,
+             bucket)
+
+    int bothCount =
+         array.get(
+             histBothFirst,
+             bucket)
+
+    int fav2Count =
+         array.get(
+             histFav2Hit,
+             bucket)
+
+    float mfeSum =
+         array.get(
+             histMFESum,
+             bucket)
+
+    float maeSum =
+         array.get(
+             histMAESum,
+             bucket)
+
+    string favFirstText = "-"
+
+    if signalCount > 0
+        favFirstText :=
+             str.tostring(
+                 favFirstCount /
+                 float(signalCount) *
+                 100.0,
+                 "#.0") +
+             "%"
+
+        if bothCount > 0
+            favFirstText :=
+                 favFirstText +
+                 "*"
+
+    string fav2Text = "-"
+
+    if signalCount > 0
+        fav2Text :=
+             str.tostring(
+                 fav2Count /
+                 float(signalCount) *
+                 100.0,
+                 "#.0") +
+             "%"
+
+    string avgMFEText = "-"
+    string avgMAEText = "-"
+
+    if signalCount > 0
+        avgMFEText :=
+             f_signedPct(
+                 mfeSum /
+                 signalCount)
+
+        avgMAEText :=
+             f_signedPct(
+                 maeSum /
+                 signalCount)
+
+    table.cell(
+         historyTable,
+         0,
+         row,
+         name,
+         text_color = color.white,
+         bgcolor = color.new(color.black, 15),
+         text_size = size.small)
+
+    table.cell(
+         historyTable,
+         1,
+         row,
+         str.tostring(signalCount),
+         text_color = color.white,
+         bgcolor = color.new(color.black, 15),
+         text_size = size.small)
+
+    table.cell(
+         historyTable,
+         2,
+         row,
+         favFirstText,
+         text_color = color.white,
+         bgcolor = color.new(color.black, 15),
+         text_size = size.small)
+
+    table.cell(
+         historyTable,
+         3,
+         row,
+         fav2Text,
+         text_color = color.white,
+         bgcolor = color.new(color.black, 15),
+         text_size = size.small)
+
+    table.cell(
+         historyTable,
+         4,
+         row,
+         avgMFEText,
+         text_color = color.white,
+         bgcolor = color.new(color.black, 15),
+         text_size = size.small)
+
+    table.cell(
+         historyTable,
+         5,
+         row,
+         avgMAEText,
+         text_color = color.white,
+         bgcolor = color.new(color.black, 15),
+         text_size = size.small)
+
+if barstate.islast
+
+    if enableHistoricalTracking and
+       showHistoricalPanel
+
+        color histHeader =
+             color.new(
+                 color.gray,
+                 35)
+
+        color histBody =
+             color.new(
+                 color.black,
+                 15)
+
+        table.cell(
+             historyTable,
+             0,
+             0,
+             "HISTORICAL PERFORMANCE",
+             text_color = color.white,
+             bgcolor = histHeader,
+             text_size = size.small)
+
+        table.cell(
+             historyTable,
+             1,
+             0,
+             "",
+             bgcolor = histHeader)
+
+        table.cell(
+             historyTable,
+             2,
+             0,
+             "",
+             bgcolor = histHeader)
+
+        table.cell(
+             historyTable,
+             3,
+             0,
+             "",
+             bgcolor = histHeader)
+
+        table.cell(
+             historyTable,
+             4,
+             0,
+             "",
+             bgcolor = histHeader)
+
+        table.cell(
+             historyTable,
+             5,
+             0,
+             "",
+             bgcolor = histHeader)
+
+        string lookbackText =
+             "All Available"
+
+        if useHistoricalLookback
+            lookbackText :=
+                 historicalWindow == "Recent" ?
+                 "Recent " + str.tostring(historicalLookbackDays) + " days" :
+                 "Custom " + str.tostring(historicalLookbackDays) + " days ending " + str.format_time(historicalEndDate, "MMM dd, yyyy")
+
+        table.cell(
+             historyTable,
+             0,
+             1,
+             "Lookback",
+             text_color = color.silver,
+             bgcolor = histBody,
+             text_size = size.tiny)
+
+        table.cell(
+             historyTable,
+             1,
+             1,
+             lookbackText,
+             text_color = color.white,
+             bgcolor = histBody,
+             text_size = size.tiny)
+
+        table.cell(
+             historyTable,
+             2,
+             1,
+             "",
+             bgcolor = histBody)
+
+        table.cell(
+             historyTable,
+             3,
+             1,
+             "",
+             bgcolor = histBody)
+
+        table.cell(
+             historyTable,
+             4,
+             1,
+             "",
+             bgcolor = histBody)
+
+        table.cell(
+             historyTable,
+             5,
+             1,
+             "",
+             bgcolor = histBody)
+
+        table.cell(
+             historyTable,
+             0,
+             2,
+             "Grade",
+             text_color = color.silver,
+             bgcolor = histBody,
+             text_size = size.tiny)
+
+        table.cell(
+             historyTable,
+             1,
+             2,
+             "N",
+             text_color = color.silver,
+             bgcolor = histBody,
+             text_size = size.tiny)
+
+        table.cell(
+             historyTable,
+             2,
+             2,
+             str.tostring(
+                 favorableTarget1,
+                 "#.##") +
+             "% First",
+             text_color = color.silver,
+             bgcolor = histBody,
+             text_size = size.tiny)
+
+        table.cell(
+             historyTable,
+             3,
+             2,
+             str.tostring(
+                 favorableTarget2,
+                 "#.##") +
+             "% Hit",
+             text_color = color.silver,
+             bgcolor = histBody,
+             text_size = size.tiny)
+
+        table.cell(
+             historyTable,
+             4,
+             2,
+             "Avg MFE",
+             text_color = color.silver,
+             bgcolor = histBody,
+             text_size = size.tiny)
+
+        table.cell(
+             historyTable,
+             5,
+             2,
+             "Avg MAE",
+             text_color = color.silver,
+             bgcolor = histBody,
+             text_size = size.tiny)
+
+        f_historyRow(
+             3,
+             "A Range",
+             BUCKET_A)
+
+        f_historyRow(
+             4,
+             "B Range",
+             BUCKET_B)
+
+        f_historyRow(
+             5,
+             "C Range",
+             BUCKET_C)
+
+        f_historyRow(
+             6,
+             "Weak",
+             BUCKET_WEAK)
+
+        f_historyRow(
+             7,
+             "ALL",
+             BUCKET_ALL)
+
+    else
+        table.clear(
+             historyTable,
+             0,
+             0,
+             5,
+             7)
+
+//=============================================================================
+// V3 DETAILED GRADE PERFORMANCE TABLE - MIDDLE RIGHT
+//=============================================================================
+var table v3GradeTable = table.new(position.middle_right, 6, 14, border_width = 1)
+
+f_v3GradeRow(int row, string name, int bucket) =>
+    int signalCount = array.get(v3GradeSignals, bucket)
+    int favFirstCount = array.get(v3GradeFavFirst, bucket)
+    int bothCount = array.get(v3GradeBothFirst, bucket)
+    int fav2Count = array.get(v3GradeFav2Hit, bucket)
+    float mfeSum = array.get(v3GradeMFESum, bucket)
+    float maeSum = array.get(v3GradeMAESum, bucket)
+    string favFirstText = "-"
+    string fav2Text = "-"
+    string avgMFEText = "-"
+    string avgMAEText = "-"
+    if signalCount > 0
+        favFirstText := str.tostring(favFirstCount / float(signalCount) * 100.0, "#.0") + "%"
+        if bothCount > 0
+            favFirstText := favFirstText + "*"
+        fav2Text := str.tostring(fav2Count / float(signalCount) * 100.0, "#.0") + "%"
+        avgMFEText := f_signedPct(mfeSum / signalCount)
+        avgMAEText := f_signedPct(maeSum / signalCount)
+    table.cell(v3GradeTable, 0, row, name, text_color = color.white, bgcolor = color.new(color.black, 15), text_size = size.small)
+    table.cell(v3GradeTable, 1, row, str.tostring(signalCount), text_color = color.white, bgcolor = color.new(color.black, 15), text_size = size.small)
+    table.cell(v3GradeTable, 2, row, favFirstText, text_color = color.white, bgcolor = color.new(color.black, 15), text_size = size.small)
+    table.cell(v3GradeTable, 3, row, fav2Text, text_color = color.white, bgcolor = color.new(color.black, 15), text_size = size.small)
+    table.cell(v3GradeTable, 4, row, avgMFEText, text_color = color.white, bgcolor = color.new(color.black, 15), text_size = size.small)
+    table.cell(v3GradeTable, 5, row, avgMAEText, text_color = color.white, bgcolor = color.new(color.black, 15), text_size = size.small)
+
+if barstate.islast
+    if enableHistoricalTracking and showV3GradePanel
+        color v3Header = color.new(color.gray, 35)
+        color v3Body = color.new(color.black, 15)
+        table.cell(v3GradeTable, 0, 0, "V3 GRADE PERFORMANCE", text_color = color.white, bgcolor = v3Header, text_size = size.small)
+        for col = 1 to 5
+            table.cell(v3GradeTable, col, 0, "", bgcolor = v3Header)
+        string v3LookbackText = "All Available"
+        if useHistoricalLookback
+            v3LookbackText := str.tostring(historicalLookbackDays) + " days"
+        table.cell(v3GradeTable, 0, 1, "Lookback", text_color = color.silver, bgcolor = v3Body, text_size = size.tiny)
+        table.cell(v3GradeTable, 1, 1, v3LookbackText, text_color = color.white, bgcolor = v3Body, text_size = size.tiny)
+        for col = 2 to 5
+            table.cell(v3GradeTable, col, 1, "", bgcolor = v3Body)
+        table.cell(v3GradeTable, 0, 2, "Grade", text_color = color.silver, bgcolor = v3Body, text_size = size.tiny)
+        table.cell(v3GradeTable, 1, 2, "N", text_color = color.silver, bgcolor = v3Body, text_size = size.tiny)
+        table.cell(v3GradeTable, 2, 2, str.tostring(favorableTarget1, "#.##") + "% First", text_color = color.silver, bgcolor = v3Body, text_size = size.tiny)
+        table.cell(v3GradeTable, 3, 2, str.tostring(favorableTarget2, "#.##") + "% Hit", text_color = color.silver, bgcolor = v3Body, text_size = size.tiny)
+        table.cell(v3GradeTable, 4, 2, "Avg MFE", text_color = color.silver, bgcolor = v3Body, text_size = size.tiny)
+        table.cell(v3GradeTable, 5, 2, "Avg MAE", text_color = color.silver, bgcolor = v3Body, text_size = size.tiny)
+        f_v3GradeRow(3, "A+", V3_GRADE_A_PLUS)
+        f_v3GradeRow(4, "A", V3_GRADE_A)
+        f_v3GradeRow(5, "A-", V3_GRADE_A_MINUS)
+        f_v3GradeRow(6, "B+", V3_GRADE_B_PLUS)
+        f_v3GradeRow(7, "B", V3_GRADE_B)
+        f_v3GradeRow(8, "B-", V3_GRADE_B_MINUS)
+        f_v3GradeRow(9, "C+", V3_GRADE_C_PLUS)
+        f_v3GradeRow(10, "C", V3_GRADE_C)
+        f_v3GradeRow(11, "C-", V3_GRADE_C_MINUS)
+        f_v3GradeRow(12, "Weak", V3_GRADE_WEAK)
+        f_v3GradeRow(13, "ALL", V3_GRADE_ALL)
+    else
+        table.clear(v3GradeTable, 0, 0, 5, 13)
+
+//=============================================================================
+// ANALYTICS TABLE - BOTTOM LEFT
+//=============================================================================
+//
+// One shared table is used for:
+//
+// 1. Combination Profiles
+// 2. Profile Component Analysis
+// 3. Sweet Spot Buckets
+// 4. Component Summary
+//
+// This prevents table overlap in compact layouts.
+//=============================================================================
+
+var table analysisTable =
+     table.new(
+         position.middle_left,
+         11,
+         9,
+         border_width = 1)
+
+//=============================================================================
+// COMPONENT SUMMARY ROW
+//=============================================================================
+
+f_componentRow(
+     int row,
+     string componentName,
+     int componentIndex,
+     float maxPoints) =>
+
+    float favAvg = na
+    float advAvg = na
+    float delta = na
+    float normalizedDeltaPct = na
+
+    float allAvg = na
+    float utilizationPct = na
+
+    if compFavCount > 0
+        favAvg :=
+             array.get(
+                 compFavSums,
+                 componentIndex) /
+             compFavCount
+
+    if compAdvCount > 0
+        advAvg :=
+             array.get(
+                 compAdvSums,
+                 componentIndex) /
+             compAdvCount
+
+    if not na(favAvg) and
+       not na(advAvg)
+
+        delta :=
+             favAvg -
+             advAvg
+
+        normalizedDeltaPct :=
+             delta /
+             maxPoints *
+             100.0
+
+    if compAllCount > 0
+        allAvg :=
+             array.get(
+                 compAllSums,
+                 componentIndex) /
+             compAllCount
+
+        utilizationPct :=
+             allAvg /
+             maxPoints *
+             100.0
+
+    table.cell(
+         analysisTable,
+         0,
+         row,
+         componentName,
+         text_color = color.white,
+         bgcolor = color.new(color.black, 15),
+         text_size = size.small)
+
+    table.cell(
+         analysisTable,
+         1,
+         row,
+         f_decimal(favAvg),
+         text_color = color.white,
+         bgcolor = color.new(color.black, 15),
+         text_size = size.small)
+
+    table.cell(
+         analysisTable,
+         2,
+         row,
+         f_decimal(advAvg),
+         text_color = color.white,
+         bgcolor = color.new(color.black, 15),
+         text_size = size.small)
+
+    table.cell(
+         analysisTable,
+         3,
+         row,
+         f_signedDecimal(delta),
+         text_color = color.white,
+         bgcolor = color.new(color.black, 15),
+         text_size = size.small)
+
+    table.cell(
+         analysisTable,
+         4,
+         row,
+         f_signedOnePct(
+             normalizedDeltaPct),
+         text_color = color.white,
+         bgcolor = color.new(color.black, 15),
+         text_size = size.small)
+
+    table.cell(
+         analysisTable,
+         5,
+         row,
+         f_plainPct(
+             utilizationPct),
+         text_color = color.white,
+         bgcolor = color.new(color.black, 15),
+         text_size = size.small)
+
+//=============================================================================
+// SWEET-SPOT ROW
+//=============================================================================
+
+f_sweetRow(
+     int row,
+     int bucket) =>
+
+    int signalCount =
+         array.get(
+             sweetSignals,
+             bucket)
+
+    int favFirstCount =
+         array.get(
+             sweetFavFirst,
+             bucket)
+
+    int bothCount =
+         array.get(
+             sweetBothFirst,
+             bucket)
+
+    int fav2Count =
+         array.get(
+             sweetFav2Hit,
+             bucket)
+
+    float mfeSum =
+         array.get(
+             sweetMFESum,
+             bucket)
+
+    float maeSum =
+         array.get(
+             sweetMAESum,
+             bucket)
+
+    string favFirstText = "-"
+    string fav2Text = "-"
+    string avgMFEText = "-"
+    string avgMAEText = "-"
+
+    if signalCount > 0
+
+        favFirstText :=
+             str.tostring(
+                 favFirstCount /
+                 float(signalCount) *
+                 100.0,
+                 "#.0") +
+             "%"
+
+        if bothCount > 0
+            favFirstText :=
+                 favFirstText +
+                 "*"
+
+        fav2Text :=
+             str.tostring(
+                 fav2Count /
+                 float(signalCount) *
+                 100.0,
+                 "#.0") +
+             "%"
+
+        avgMFEText :=
+             f_signedPct(
+                 mfeSum /
+                 signalCount)
+
+        avgMAEText :=
+             f_signedPct(
+                 maeSum /
+                 signalCount)
+
+    table.cell(
+         analysisTable,
+         0,
+         row,
+         f_sweetBucketName(bucket),
+         text_color = color.white,
+         bgcolor = color.new(color.black, 15),
+         text_size = size.small)
+
+    table.cell(
+         analysisTable,
+         1,
+         row,
+         str.tostring(signalCount),
+         text_color = color.white,
+         bgcolor = color.new(color.black, 15),
+         text_size = size.small)
+
+    table.cell(
+         analysisTable,
+         2,
+         row,
+         favFirstText,
+         text_color = color.white,
+         bgcolor = color.new(color.black, 15),
+         text_size = size.small)
+
+    table.cell(
+         analysisTable,
+         3,
+         row,
+         fav2Text,
+         text_color = color.white,
+         bgcolor = color.new(color.black, 15),
+         text_size = size.small)
+
+    table.cell(
+         analysisTable,
+         4,
+         row,
+         avgMFEText,
+         text_color = color.white,
+         bgcolor = color.new(color.black, 15),
+         text_size = size.small)
+
+    table.cell(
+         analysisTable,
+         5,
+         row,
+         avgMAEText,
+         text_color = color.white,
+         bgcolor = color.new(color.black, 15),
+         text_size = size.small)
+
+//=============================================================================
+// NEW: COMBINATION PROFILE ROW
+//=============================================================================
+
+f_profileRow(
+     int row,
+     int profile) =>
+
+    int signalCount =
+         array.get(
+             profileSignals,
+             profile)
+
+    int favFirstCount =
+         array.get(
+             profileFavFirst,
+             profile)
+
+    int bothCount =
+         array.get(
+             profileBothFirst,
+             profile)
+
+    int fav2Count =
+         array.get(
+             profileFav2Hit,
+             profile)
+
+    float mfeSum =
+         array.get(
+             profileMFESum,
+             profile)
+
+    float maeSum =
+         array.get(
+             profileMAESum,
+             profile)
+
+    string favFirstText = "-"
+    string fav2Text = "-"
+    string avgMFEText = "-"
+    string avgMAEText = "-"
+
+    if signalCount > 0
+
+        favFirstText :=
+             str.tostring(
+                 favFirstCount /
+                 float(signalCount) *
+                 100.0,
+                 "#.0") +
+             "%"
+
+        if bothCount > 0
+            favFirstText :=
+                 favFirstText +
+                 "*"
+
+        fav2Text :=
+             str.tostring(
+                 fav2Count /
+                 float(signalCount) *
+                 100.0,
+                 "#.0") +
+             "%"
+
+        avgMFEText :=
+             f_signedPct(
+                 mfeSum /
+                 signalCount)
+
+        avgMAEText :=
+             f_signedPct(
+                 maeSum /
+                 signalCount)
+
+    table.cell(
+         analysisTable,
+         0,
+         row,
+         f_profileName(profile),
+         text_color = color.white,
+         bgcolor = color.new(color.black, 15),
+         text_size = size.small)
+
+    table.cell(
+         analysisTable,
+         1,
+         row,
+         str.tostring(signalCount),
+         text_color = color.white,
+         bgcolor = color.new(color.black, 15),
+         text_size = size.small)
+
+    table.cell(
+         analysisTable,
+         2,
+         row,
+         favFirstText,
+         text_color = color.white,
+         bgcolor = color.new(color.black, 15),
+         text_size = size.small)
+
+    table.cell(
+         analysisTable,
+         3,
+         row,
+         fav2Text,
+         text_color = color.white,
+         bgcolor = color.new(color.black, 15),
+         text_size = size.small)
+
+    table.cell(
+         analysisTable,
+         4,
+         row,
+         avgMFEText,
+         text_color = color.white,
+         bgcolor = color.new(color.black, 15),
+         text_size = size.small)
+
+    table.cell(
+         analysisTable,
+         5,
+         row,
+         avgMAEText,
+         text_color = color.white,
+         bgcolor = color.new(color.black, 15),
+         text_size = size.small)
+
+//=============================================================================
+// PROFILE COMPONENT ANALYSIS ROW
+//=============================================================================
+
+f_profileComponentRow(int row, int bucket) =>
+    int signalCount = array.get(profileCompSignals, bucket)
+    int favFirstCount = array.get(profileCompFavFirst, bucket)
+    int bothCount = array.get(profileCompBothFirst, bucket)
+    int fav2Count = array.get(profileCompFav2Hit, bucket)
+
+    float mfeSum = array.get(profileCompMFESum, bucket)
+    float maeSum = array.get(profileCompMAESum, bucket)
+
+    string favFirstText = "-"
+    string fav2Text = "-"
+    string avgMFEText = "-"
+    string avgMAEText = "-"
+
+    if signalCount > 0
+        favFirstText := str.tostring(favFirstCount / float(signalCount) * 100.0, "#.0") + "%"
+
+        if bothCount > 0
+            favFirstText := favFirstText + "*"
+
+        fav2Text := str.tostring(fav2Count / float(signalCount) * 100.0, "#.0") + "%"
+        avgMFEText := f_signedPct(mfeSum / signalCount)
+        avgMAEText := f_signedPct(maeSum / signalCount)
+
+    int selectedComponent = f_profileAnalysisComponentIndex()
+
+    table.cell(analysisTable, 0, row, f_profileComponentBucketName(selectedComponent, bucket), text_color = color.white, bgcolor = color.new(color.black, 15), text_size = size.small)
+    table.cell(analysisTable, 1, row, str.tostring(signalCount), text_color = color.white, bgcolor = color.new(color.black, 15), text_size = size.small)
+    table.cell(analysisTable, 2, row, favFirstText, text_color = color.white, bgcolor = color.new(color.black, 15), text_size = size.small)
+    table.cell(analysisTable, 3, row, fav2Text, text_color = color.white, bgcolor = color.new(color.black, 15), text_size = size.small)
+    table.cell(analysisTable, 4, row, avgMFEText, text_color = color.white, bgcolor = color.new(color.black, 15), text_size = size.small)
+    table.cell(analysisTable, 5, row, avgMAEText, text_color = color.white, bgcolor = color.new(color.black, 15), text_size = size.small)
+
+//=============================================================================
+// GRADE x PROFILE MATRIX HELPERS
+//=============================================================================
+
+f_gradeProfileCellText(int gradeFamily, int profile) =>
+    int idx = gradeFamily * PROFILE_COUNT + profile
+    int n = array.get(gradeProfileSignals, idx)
+    string result = "-"
+
+    if n > 0
+        int favFirstCount = array.get(gradeProfileFavFirst, idx)
+        int bothCount = array.get(gradeProfileBothFirst, idx)
+        int fav2Count = array.get(gradeProfileFav2Hit, idx)
+        float mfe = array.get(gradeProfileMFESum, idx) / n
+        float mae = array.get(gradeProfileMAESum, idx) / n
+        string firstText = str.tostring(favFirstCount / float(n) * 100.0, "#.0") + "%"
+
+        if bothCount > 0
+            firstText := firstText + "*"
+
+        result :=
+             "N " + str.tostring(n) +
+             " | F " + firstText +
+             " | H " + str.tostring(fav2Count / float(n) * 100.0, "#.0") + "%" +
+             "\nM " + f_signedPct(mfe) +
+             " | A " + f_signedPct(mae)
+
+    result
+
+f_profileAllCellText(int profile) =>
+    int n = array.get(profileSignals, profile)
+    string result = "-"
+
+    if n > 0
+        int favFirstCount = array.get(profileFavFirst, profile)
+        int bothCount = array.get(profileBothFirst, profile)
+        int fav2Count = array.get(profileFav2Hit, profile)
+        float mfe = array.get(profileMFESum, profile) / n
+        float mae = array.get(profileMAESum, profile) / n
+        string firstText = str.tostring(favFirstCount / float(n) * 100.0, "#.0") + "%"
+
+        if bothCount > 0
+            firstText := firstText + "*"
+
+        result :=
+             "N " + str.tostring(n) +
+             " | F " + firstText +
+             " | H " + str.tostring(fav2Count / float(n) * 100.0, "#.0") + "%" +
+             "\nM " + f_signedPct(mfe) +
+             " | A " + f_signedPct(mae)
+
+    result
+
+f_gradeProfileMatrixRow(int row, int profile) =>
+    color bodyColor = color.new(color.black, 15)
+
+    table.cell(
+         analysisTable,
+         0,
+         row,
+         f_profileName(profile),
+         text_color = color.white,
+         bgcolor = bodyColor,
+         text_size = size.tiny)
+
+    table.cell(analysisTable, 1, row, f_gradeProfileCellText(BUCKET_A, profile), text_color = color.white, bgcolor = bodyColor, text_size = size.tiny)
+    table.cell(analysisTable, 2, row, f_gradeProfileCellText(BUCKET_B, profile), text_color = color.white, bgcolor = bodyColor, text_size = size.tiny)
+    table.cell(analysisTable, 3, row, f_gradeProfileCellText(BUCKET_C, profile), text_color = color.white, bgcolor = bodyColor, text_size = size.tiny)
+    table.cell(analysisTable, 4, row, f_gradeProfileCellText(BUCKET_WEAK, profile), text_color = color.white, bgcolor = bodyColor, text_size = size.tiny)
+    table.cell(analysisTable, 5, row, f_profileAllCellText(profile), text_color = color.white, bgcolor = bodyColor, text_size = size.tiny)
+
+//=============================================================================
+// EXACT GRADE x PROFILE RESEARCH HELPERS
+//=============================================================================
+
+f_exactGradeProfileCellText(int exactGrade, int profile) =>
+    int idx = exactGrade * PROFILE_COUNT + profile
+    int n = array.get(exactGradeProfileSignals, idx)
+    string result = "-"
+
+    if n > 0
+        int favFirstCount = array.get(exactGradeProfileFavFirst, idx)
+        int bothCount = array.get(exactGradeProfileBothFirst, idx)
+        int fav2Count = array.get(exactGradeProfileFav2Hit, idx)
+        float mfe = array.get(exactGradeProfileMFESum, idx) / n
+        float mae = array.get(exactGradeProfileMAESum, idx) / n
+        string firstText = str.tostring(favFirstCount / float(n) * 100.0, "#.0") + "%"
+        if bothCount > 0
+            firstText := firstText + "*"
+        result := "N " + str.tostring(n) + " | F " + firstText + " | H " + str.tostring(fav2Count / float(n) * 100.0, "#.0") + "%" + "\M " + f_signedPct(mfe) + " | A " + f_signedPct(mae)
+    result
+
+f_exactGradeProfileRow(int row, int profile) =>
+    color bodyColor = color.new(color.black, 15)
+    table.cell(analysisTable, 0, row, f_profileName(profile), text_color = color.white, bgcolor = bodyColor, text_size = size.tiny)
+    table.cell(analysisTable, 1, row, f_exactGradeProfileCellText(V3_GRADE_A_PLUS, profile), text_color = color.white, bgcolor = bodyColor, text_size = size.tiny)
+    table.cell(analysisTable, 2, row, f_exactGradeProfileCellText(V3_GRADE_A, profile), text_color = color.white, bgcolor = bodyColor, text_size = size.tiny)
+    table.cell(analysisTable, 3, row, f_exactGradeProfileCellText(V3_GRADE_A_MINUS, profile), text_color = color.white, bgcolor = bodyColor, text_size = size.tiny)
+    table.cell(analysisTable, 4, row, f_exactGradeProfileCellText(V3_GRADE_B_PLUS, profile), text_color = color.white, bgcolor = bodyColor, text_size = size.tiny)
+    table.cell(analysisTable, 5, row, f_exactGradeProfileCellText(V3_GRADE_B, profile), text_color = color.white, bgcolor = bodyColor, text_size = size.tiny)
+    table.cell(analysisTable, 6, row, f_exactGradeProfileCellText(V3_GRADE_B_MINUS, profile), text_color = color.white, bgcolor = bodyColor, text_size = size.tiny)
+    table.cell(analysisTable, 7, row, f_exactGradeProfileCellText(V3_GRADE_C_PLUS, profile), text_color = color.white, bgcolor = bodyColor, text_size = size.tiny)
+    table.cell(analysisTable, 8, row, f_exactGradeProfileCellText(V3_GRADE_C, profile), text_color = color.white, bgcolor = bodyColor, text_size = size.tiny)
+    table.cell(analysisTable, 9, row, f_exactGradeProfileCellText(V3_GRADE_C_MINUS, profile), text_color = color.white, bgcolor = bodyColor, text_size = size.tiny)
+    table.cell(analysisTable, 10, row, f_exactGradeProfileCellText(V3_GRADE_WEAK, profile), text_color = color.white, bgcolor = bodyColor, text_size = size.tiny)
+
+//=============================================================================
+// RESEARCH CAPTURE TABLES - PRIMARY SIMULTANEOUS VIEWS
+//=============================================================================
+//
+// These tables are independent of Analytics Panel View so the Grade x Profile
+// Matrix and Combination Profiles can be captured in the same screenshot.
+// They are display-only and do not change signal or research calculations.
+//=============================================================================
+
+var table gradeProfileCaptureTable =
+     table.new(
+         position.bottom_left,
+         6,
+         9,
+         border_width = 1)
+
+var table combinationCaptureTable =
+     table.new(
+         position.bottom_center,
+         6,
+         9,
+         border_width = 1)
+
+f_gradeProfileCaptureRow(int row, int profile) =>
+    color bodyColor = color.new(color.black, 15)
+    table.cell(gradeProfileCaptureTable, 0, row, f_profileName(profile), text_color = color.white, bgcolor = bodyColor, text_size = size.tiny)
+    table.cell(gradeProfileCaptureTable, 1, row, f_gradeProfileCellText(BUCKET_A, profile), text_color = color.white, bgcolor = bodyColor, text_size = size.tiny)
+    table.cell(gradeProfileCaptureTable, 2, row, f_gradeProfileCellText(BUCKET_B, profile), text_color = color.white, bgcolor = bodyColor, text_size = size.tiny)
+    table.cell(gradeProfileCaptureTable, 3, row, f_gradeProfileCellText(BUCKET_C, profile), text_color = color.white, bgcolor = bodyColor, text_size = size.tiny)
+    table.cell(gradeProfileCaptureTable, 4, row, f_gradeProfileCellText(BUCKET_WEAK, profile), text_color = color.white, bgcolor = bodyColor, text_size = size.tiny)
+    table.cell(gradeProfileCaptureTable, 5, row, f_profileAllCellText(profile), text_color = color.white, bgcolor = bodyColor, text_size = size.tiny)
+
+f_combinationCaptureRow(int row, int profile) =>
+    int signalCount = array.get(profileSignals, profile)
+    int favFirstCount = array.get(profileFavFirst, profile)
+    int bothCount = array.get(profileBothFirst, profile)
+    int fav2Count = array.get(profileFav2Hit, profile)
+    float mfeSum = array.get(profileMFESum, profile)
+    float maeSum = array.get(profileMAESum, profile)
+    string favFirstText = "-"
+    string fav2Text = "-"
+    string avgMFEText = "-"
+    string avgMAEText = "-"
+
+    if signalCount > 0
+        favFirstText := str.tostring(favFirstCount / float(signalCount) * 100.0, "#.0") + "%"
+        if bothCount > 0
+            favFirstText := favFirstText + "*"
+        fav2Text := str.tostring(fav2Count / float(signalCount) * 100.0, "#.0") + "%"
+        avgMFEText := f_signedPct(mfeSum / signalCount)
+        avgMAEText := f_signedPct(maeSum / signalCount)
+
+    color bodyColor = color.new(color.black, 15)
+    table.cell(combinationCaptureTable, 0, row, f_profileName(profile), text_color = color.white, bgcolor = bodyColor, text_size = size.tiny)
+    table.cell(combinationCaptureTable, 1, row, str.tostring(signalCount), text_color = color.white, bgcolor = bodyColor, text_size = size.tiny)
+    table.cell(combinationCaptureTable, 2, row, favFirstText, text_color = color.white, bgcolor = bodyColor, text_size = size.tiny)
+    table.cell(combinationCaptureTable, 3, row, fav2Text, text_color = color.white, bgcolor = bodyColor, text_size = size.tiny)
+    table.cell(combinationCaptureTable, 4, row, avgMFEText, text_color = color.white, bgcolor = bodyColor, text_size = size.tiny)
+    table.cell(combinationCaptureTable, 5, row, avgMAEText, text_color = color.white, bgcolor = bodyColor, text_size = size.tiny)
+
+if barstate.islast
+    color captureHeader = color.new(color.gray, 35)
+    color captureBody = color.new(color.black, 15)
+
+    if enableHistoricalTracking and showGradeProfileMatrix
+        table.clear(gradeProfileCaptureTable, 0, 0, 5, 8)
+        table.cell(gradeProfileCaptureTable, 0, 0, "GRADE x PROFILE MATRIX", text_color = color.white, bgcolor = captureHeader, text_size = size.small)
+        table.cell(gradeProfileCaptureTable, 1, 0, "A", text_color = color.white, bgcolor = captureHeader, text_size = size.small)
+        table.cell(gradeProfileCaptureTable, 2, 0, "B", text_color = color.white, bgcolor = captureHeader, text_size = size.small)
+        table.cell(gradeProfileCaptureTable, 3, 0, "C", text_color = color.white, bgcolor = captureHeader, text_size = size.small)
+        table.cell(gradeProfileCaptureTable, 4, 0, "Weak", text_color = color.white, bgcolor = captureHeader, text_size = size.small)
+        table.cell(gradeProfileCaptureTable, 5, 0, "ALL", text_color = color.white, bgcolor = captureHeader, text_size = size.small)
+        table.cell(gradeProfileCaptureTable, 0, 1, "Cell format", text_color = color.silver, bgcolor = captureBody, text_size = size.tiny)
+        table.cell(gradeProfileCaptureTable, 1, 1, "N | F=.5 First | H=1% Hit", text_color = color.silver, bgcolor = captureBody, text_size = size.tiny)
+        table.cell(gradeProfileCaptureTable, 2, 1, "M=MFE | A=MAE", text_color = color.silver, bgcolor = captureBody, text_size = size.tiny)
+        for col = 3 to 5
+            table.cell(gradeProfileCaptureTable, col, 1, "", bgcolor = captureBody)
+
+        f_gradeProfileCaptureRow(2, PROFILE_CONTROLLED)
+        f_gradeProfileCaptureRow(3, PROFILE_EXPLOSIVE)
+        f_gradeProfileCaptureRow(4, PROFILE_EFFICIENT)
+        f_gradeProfileCaptureRow(5, PROFILE_PRETTY_WEAK)
+        f_gradeProfileCaptureRow(6, PROFILE_DELAYED)
+        f_gradeProfileCaptureRow(7, PROFILE_UNCLASSIFIED)
+
+        table.cell(gradeProfileCaptureTable, 0, 8, "Research capture", text_color = color.silver, bgcolor = captureBody, text_size = size.tiny)
+        table.cell(gradeProfileCaptureTable, 1, 8, "A/B/C = grade families", text_color = color.silver, bgcolor = captureBody, text_size = size.tiny)
+        table.cell(gradeProfileCaptureTable, 2, 8, "*=both targets same candle", text_color = color.silver, bgcolor = captureBody, text_size = size.tiny)
+        for col = 3 to 5
+            table.cell(gradeProfileCaptureTable, col, 8, "", bgcolor = captureBody)
+    else
+        table.clear(gradeProfileCaptureTable, 0, 0, 5, 8)
+
+    if enableHistoricalTracking and showCombinationProfiles
+        table.clear(combinationCaptureTable, 0, 0, 5, 8)
+        table.cell(combinationCaptureTable, 0, 0, "COMBINATION PROFILES", text_color = color.white, bgcolor = captureHeader, text_size = size.small)
+        for col = 1 to 5
+            table.cell(combinationCaptureTable, col, 0, "", bgcolor = captureHeader)
+        table.cell(combinationCaptureTable, 0, 1, "Profile", text_color = color.silver, bgcolor = captureBody, text_size = size.tiny)
+        table.cell(combinationCaptureTable, 1, 1, "N", text_color = color.silver, bgcolor = captureBody, text_size = size.tiny)
+        table.cell(combinationCaptureTable, 2, 1, str.tostring(favorableTarget1, "#.##") + "% First", text_color = color.silver, bgcolor = captureBody, text_size = size.tiny)
+        table.cell(combinationCaptureTable, 3, 1, str.tostring(favorableTarget2, "#.##") + "% Hit", text_color = color.silver, bgcolor = captureBody, text_size = size.tiny)
+        table.cell(combinationCaptureTable, 4, 1, "Avg MFE", text_color = color.silver, bgcolor = captureBody, text_size = size.tiny)
+        table.cell(combinationCaptureTable, 5, 1, "Avg MAE", text_color = color.silver, bgcolor = captureBody, text_size = size.tiny)
+
+        f_combinationCaptureRow(2, PROFILE_CONTROLLED)
+        f_combinationCaptureRow(3, PROFILE_EXPLOSIVE)
+        f_combinationCaptureRow(4, PROFILE_EFFICIENT)
+        f_combinationCaptureRow(5, PROFILE_PRETTY_WEAK)
+        f_combinationCaptureRow(6, PROFILE_DELAYED)
+        f_combinationCaptureRow(7, PROFILE_UNCLASSIFIED)
+
+        int classifiedCountCapture =
+             array.get(profileSignals, PROFILE_CONTROLLED) +
+             array.get(profileSignals, PROFILE_EXPLOSIVE) +
+             array.get(profileSignals, PROFILE_EFFICIENT) +
+             array.get(profileSignals, PROFILE_PRETTY_WEAK) +
+             array.get(profileSignals, PROFILE_DELAYED)
+        int totalProfileCountCapture = classifiedCountCapture + array.get(profileSignals, PROFILE_UNCLASSIFIED)
+        string profileCoverageText = "-"
+        if totalProfileCountCapture > 0
+            profileCoverageText := str.tostring(classifiedCountCapture / float(totalProfileCountCapture) * 100.0, "#.0") + "%"
+
+        table.cell(combinationCaptureTable, 0, 8, "Profile Coverage", text_color = color.silver, bgcolor = captureBody, text_size = size.tiny)
+        table.cell(combinationCaptureTable, 1, 8, profileCoverageText, text_color = color.white, bgcolor = captureBody, text_size = size.tiny)
+        for col = 2 to 5
+            table.cell(combinationCaptureTable, col, 8, "", bgcolor = captureBody)
+    else
+        table.clear(combinationCaptureTable, 0, 0, 5, 8)
+
+//=============================================================================
+// DRAW ANALYTICS TABLE
+//=============================================================================
+
+if barstate.islast
+
+    if enableHistoricalTracking and
+       showAnalysisPanel
+
+        table.clear(
+             analysisTable,
+             0,
+             0,
+             10,
+             8)
+
+        color analyticsHeader =
+             color.new(
+                 color.gray,
+                 35)
+
+        color analyticsBody =
+             color.new(
+                 color.black,
+                 15)
+
+        //=====================================================================
+        // VIEW 1: COMBINATION PROFILES
+        //=====================================================================
+
+        if analyticsView == "Combination Profiles"
+
+            table.cell(
+                 analysisTable,
+                 0,
+                 0,
+                 "COMBINATION PROFILES",
+                 text_color = color.white,
+                 bgcolor = analyticsHeader,
+                 text_size = size.small)
+
+            table.cell(
+                 analysisTable,
+                 1,
+                 0,
+                 "",
+                 bgcolor = analyticsHeader)
+
+            table.cell(
+                 analysisTable,
+                 2,
+                 0,
+                 "",
+                 bgcolor = analyticsHeader)
+
+            table.cell(
+                 analysisTable,
+                 3,
+                 0,
+                 "",
+                 bgcolor = analyticsHeader)
+
+            table.cell(
+                 analysisTable,
+                 4,
+                 0,
+                 "",
+                 bgcolor = analyticsHeader)
+
+            table.cell(
+                 analysisTable,
+                 5,
+                 0,
+                 "",
+                 bgcolor = analyticsHeader)
+
+            table.cell(
+                 analysisTable,
+                 0,
+                 1,
+                 "Profile",
+                 text_color = color.silver,
+                 bgcolor = analyticsBody,
+                 text_size = size.tiny)
+
+            table.cell(
+                 analysisTable,
+                 1,
+                 1,
+                 "N",
+                 text_color = color.silver,
+                 bgcolor = analyticsBody,
+                 text_size = size.tiny)
+
+            table.cell(
+                 analysisTable,
+                 2,
+                 1,
+                 str.tostring(
+                     favorableTarget1,
+                     "#.##") +
+                 "% First",
+                 text_color = color.silver,
+                 bgcolor = analyticsBody,
+                 text_size = size.tiny)
+
+            table.cell(
+                 analysisTable,
+                 3,
+                 1,
+                 str.tostring(
+                     favorableTarget2,
+                     "#.##") +
+                 "% Hit",
+                 text_color = color.silver,
+                 bgcolor = analyticsBody,
+                 text_size = size.tiny)
+
+            table.cell(
+                 analysisTable,
+                 4,
+                 1,
+                 "Avg MFE",
+                 text_color = color.silver,
+                 bgcolor = analyticsBody,
+                 text_size = size.tiny)
+
+            table.cell(
+                 analysisTable,
+                 5,
+                 1,
+                 "Avg MAE",
+                 text_color = color.silver,
+                 bgcolor = analyticsBody,
+                 text_size = size.tiny)
+
+            f_profileRow(
+                 2,
+                 PROFILE_CONTROLLED)
+
+            f_profileRow(
+                 3,
+                 PROFILE_EXPLOSIVE)
+
+            f_profileRow(
+                 4,
+                 PROFILE_EFFICIENT)
+
+            f_profileRow(
+                 5,
+                 PROFILE_PRETTY_WEAK)
+
+            f_profileRow(
+                 6,
+                 PROFILE_DELAYED)
+
+            f_profileRow(
+                 7,
+                 PROFILE_UNCLASSIFIED)
+
+            int classifiedCount =
+                 array.get(
+                     profileSignals,
+                     PROFILE_CONTROLLED) +
+                 array.get(
+                     profileSignals,
+                     PROFILE_EXPLOSIVE) +
+                 array.get(
+                     profileSignals,
+                     PROFILE_EFFICIENT) +
+                 array.get(
+                     profileSignals,
+                     PROFILE_PRETTY_WEAK) +
+                 array.get(
+                     profileSignals,
+                     PROFILE_DELAYED)
+
+            int totalProfileCount =
+                 classifiedCount +
+                 array.get(
+                     profileSignals,
+                     PROFILE_UNCLASSIFIED)
+
+            string coverageText = "-"
+
+            if totalProfileCount > 0
+                coverageText :=
+                     str.tostring(
+                         classifiedCount /
+                         float(totalProfileCount) *
+                         100.0,
+                         "#.0") +
+                     "%"
+
+            table.cell(
+                 analysisTable,
+                 0,
+                 8,
+                 "Profile Coverage",
+                 text_color = color.silver,
+                 bgcolor = analyticsBody,
+                 text_size = size.tiny)
+
+            table.cell(
+                 analysisTable,
+                 1,
+                 8,
+                 coverageText,
+                 text_color = color.white,
+                 bgcolor = analyticsBody,
+                 text_size = size.tiny)
+
+            table.cell(
+                 analysisTable,
+                 2,
+                 8,
+                 "",
+                 bgcolor = analyticsBody)
+
+            table.cell(
+                 analysisTable,
+                 3,
+                 8,
+                 "",
+                 bgcolor = analyticsBody)
+
+            table.cell(
+                 analysisTable,
+                 4,
+                 8,
+                 "",
+                 bgcolor = analyticsBody)
+
+            table.cell(
+                 analysisTable,
+                 5,
+                 8,
+                 "",
+                 bgcolor = analyticsBody)
+
+        //=====================================================================
+        // VIEW 2: SWEET-SPOT BUCKETS
+        //=====================================================================
+
+        else if analyticsView == "Grade x Profile Matrix"
+
+            table.cell(analysisTable, 0, 0, "GRADE x PROFILE MATRIX", text_color = color.white, bgcolor = analyticsHeader, text_size = size.small)
+            table.cell(analysisTable, 1, 0, "A", text_color = color.white, bgcolor = analyticsHeader, text_size = size.small)
+            table.cell(analysisTable, 2, 0, "B", text_color = color.white, bgcolor = analyticsHeader, text_size = size.small)
+            table.cell(analysisTable, 3, 0, "C", text_color = color.white, bgcolor = analyticsHeader, text_size = size.small)
+            table.cell(analysisTable, 4, 0, "Weak", text_color = color.white, bgcolor = analyticsHeader, text_size = size.small)
+            table.cell(analysisTable, 5, 0, "ALL", text_color = color.white, bgcolor = analyticsHeader, text_size = size.small)
+
+            table.cell(analysisTable, 0, 1, "Cell format", text_color = color.silver, bgcolor = analyticsBody, text_size = size.tiny)
+            table.cell(analysisTable, 1, 1, "N | F=.5 First | H=1% Hit", text_color = color.silver, bgcolor = analyticsBody, text_size = size.tiny)
+            table.cell(analysisTable, 2, 1, "M=MFE | A=MAE", text_color = color.silver, bgcolor = analyticsBody, text_size = size.tiny)
+            table.cell(analysisTable, 3, 1, "", bgcolor = analyticsBody)
+            table.cell(analysisTable, 4, 1, "", bgcolor = analyticsBody)
+            table.cell(analysisTable, 5, 1, "", bgcolor = analyticsBody)
+
+            f_gradeProfileMatrixRow(2, PROFILE_CONTROLLED)
+            f_gradeProfileMatrixRow(3, PROFILE_EXPLOSIVE)
+            f_gradeProfileMatrixRow(4, PROFILE_EFFICIENT)
+            f_gradeProfileMatrixRow(5, PROFILE_PRETTY_WEAK)
+            f_gradeProfileMatrixRow(6, PROFILE_DELAYED)
+            f_gradeProfileMatrixRow(7, PROFILE_UNCLASSIFIED)
+
+            table.cell(analysisTable, 0, 8, "Research only", text_color = color.silver, bgcolor = analyticsBody, text_size = size.tiny)
+            table.cell(analysisTable, 1, 8, "A/B/C are grade families", text_color = color.silver, bgcolor = analyticsBody, text_size = size.tiny)
+            table.cell(analysisTable, 2, 8, "* = both targets same candle", text_color = color.silver, bgcolor = analyticsBody, text_size = size.tiny)
+            table.cell(analysisTable, 3, 8, "", bgcolor = analyticsBody)
+            table.cell(analysisTable, 4, 8, "", bgcolor = analyticsBody)
+            table.cell(analysisTable, 5, 8, "", bgcolor = analyticsBody)
+
+        else if analyticsView == "Exact Grade x Profile"
+
+            string[] headers = array.from("EXACT GRADE x PROFILE", "A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-", "Weak")
+            for col = 0 to 10
+                table.cell(analysisTable, col, 0, array.get(headers, col), text_color = color.white, bgcolor = analyticsHeader, text_size = size.tiny)
+
+            table.cell(analysisTable, 0, 1, "N | F=.5 First | H=1% Hit", text_color = color.silver, bgcolor = analyticsBody, text_size = size.tiny)
+            table.cell(analysisTable, 1, 1, "M=MFE | A=MAE", text_color = color.silver, bgcolor = analyticsBody, text_size = size.tiny)
+            for col = 2 to 10
+                table.cell(analysisTable, col, 1, "", bgcolor = analyticsBody)
+
+            f_exactGradeProfileRow(2, PROFILE_CONTROLLED)
+            f_exactGradeProfileRow(3, PROFILE_EXPLOSIVE)
+            f_exactGradeProfileRow(4, PROFILE_EFFICIENT)
+            f_exactGradeProfileRow(5, PROFILE_PRETTY_WEAK)
+            f_exactGradeProfileRow(6, PROFILE_DELAYED)
+            f_exactGradeProfileRow(7, PROFILE_UNCLASSIFIED)
+
+            table.cell(analysisTable, 0, 8, "Research only", text_color = color.silver, bgcolor = analyticsBody, text_size = size.tiny)
+            table.cell(analysisTable, 1, 8, "Exact V3 subgrades", text_color = color.silver, bgcolor = analyticsBody, text_size = size.tiny)
+            for col = 2 to 10
+                table.cell(analysisTable, col, 8, "", bgcolor = analyticsBody)
+
+        else if analyticsView == "Profile Component Analysis"
+
+            table.cell(analysisTable, 0, 0, "PROFILE COMPONENT ANALYSIS", text_color = color.white, bgcolor = analyticsHeader, text_size = size.small)
+            table.cell(analysisTable, 1, 0, "", bgcolor = analyticsHeader)
+            table.cell(analysisTable, 2, 0, "", bgcolor = analyticsHeader)
+            table.cell(analysisTable, 3, 0, "", bgcolor = analyticsHeader)
+            table.cell(analysisTable, 4, 0, "", bgcolor = analyticsHeader)
+            table.cell(analysisTable, 5, 0, "", bgcolor = analyticsHeader)
+
+            table.cell(analysisTable, 0, 1, "Profile", text_color = color.silver, bgcolor = analyticsBody, text_size = size.tiny)
+            table.cell(analysisTable, 1, 1, profileAnalysisSelection, text_color = color.white, bgcolor = analyticsBody, text_size = size.tiny)
+            table.cell(analysisTable, 2, 1, "Component", text_color = color.silver, bgcolor = analyticsBody, text_size = size.tiny)
+            table.cell(analysisTable, 3, 1, profileAnalysisComponent, text_color = color.white, bgcolor = analyticsBody, text_size = size.tiny)
+            table.cell(analysisTable, 4, 1, "", bgcolor = analyticsBody)
+            table.cell(analysisTable, 5, 1, "", bgcolor = analyticsBody)
+
+            table.cell(analysisTable, 0, 2, "Bucket", text_color = color.silver, bgcolor = analyticsBody, text_size = size.tiny)
+            table.cell(analysisTable, 1, 2, "N", text_color = color.silver, bgcolor = analyticsBody, text_size = size.tiny)
+            table.cell(analysisTable, 2, 2, str.tostring(favorableTarget1, "#.##") + "% First", text_color = color.silver, bgcolor = analyticsBody, text_size = size.tiny)
+            table.cell(analysisTable, 3, 2, str.tostring(favorableTarget2, "#.##") + "% Hit", text_color = color.silver, bgcolor = analyticsBody, text_size = size.tiny)
+            table.cell(analysisTable, 4, 2, "Avg MFE", text_color = color.silver, bgcolor = analyticsBody, text_size = size.tiny)
+            table.cell(analysisTable, 5, 2, "Avg MAE", text_color = color.silver, bgcolor = analyticsBody, text_size = size.tiny)
+
+            f_profileComponentRow(3, 0)
+            f_profileComponentRow(4, 1)
+            f_profileComponentRow(5, 2)
+            f_profileComponentRow(6, 3)
+            f_profileComponentRow(7, 4)
+
+        else if analyticsView == "Sweet Spot Buckets"
+
+            table.cell(
+                 analysisTable,
+                 0,
+                 0,
+                 "SWEET SPOT ANALYSIS",
+                 text_color = color.white,
+                 bgcolor = analyticsHeader,
+                 text_size = size.small)
+
+            table.cell(
+                 analysisTable,
+                 1,
+                 0,
+                 "",
+                 bgcolor = analyticsHeader)
+
+            table.cell(
+                 analysisTable,
+                 2,
+                 0,
+                 "",
+                 bgcolor = analyticsHeader)
+
+            table.cell(
+                 analysisTable,
+                 3,
+                 0,
+                 "",
+                 bgcolor = analyticsHeader)
+
+            table.cell(
+                 analysisTable,
+                 4,
+                 0,
+                 "",
+                 bgcolor = analyticsHeader)
+
+            table.cell(
+                 analysisTable,
+                 5,
+                 0,
+                 "",
+                 bgcolor = analyticsHeader)
+
+            table.cell(
+                 analysisTable,
+                 0,
+                 1,
+                 "Component",
+                 text_color = color.silver,
+                 bgcolor = analyticsBody,
+                 text_size = size.tiny)
+
+            table.cell(
+                 analysisTable,
+                 1,
+                 1,
+                 sweetSpotComponent,
+                 text_color = color.white,
+                 bgcolor = analyticsBody,
+                 text_size = size.tiny)
+
+            table.cell(
+                 analysisTable,
+                 2,
+                 1,
+                 "",
+                 bgcolor = analyticsBody)
+
+            table.cell(
+                 analysisTable,
+                 3,
+                 1,
+                 "",
+                 bgcolor = analyticsBody)
+
+            table.cell(
+                 analysisTable,
+                 4,
+                 1,
+                 "",
+                 bgcolor = analyticsBody)
+
+            table.cell(
+                 analysisTable,
+                 5,
+                 1,
+                 "",
+                 bgcolor = analyticsBody)
+
+            table.cell(
+                 analysisTable,
+                 0,
+                 2,
+                 "Bucket",
+                 text_color = color.silver,
+                 bgcolor = analyticsBody,
+                 text_size = size.tiny)
+
+            table.cell(
+                 analysisTable,
+                 1,
+                 2,
+                 "N",
+                 text_color = color.silver,
+                 bgcolor = analyticsBody,
+                 text_size = size.tiny)
+
+            table.cell(
+                 analysisTable,
+                 2,
+                 2,
+                 str.tostring(
+                     favorableTarget1,
+                     "#.##") +
+                 "% First",
+                 text_color = color.silver,
+                 bgcolor = analyticsBody,
+                 text_size = size.tiny)
+
+            table.cell(
+                 analysisTable,
+                 3,
+                 2,
+                 str.tostring(
+                     favorableTarget2,
+                     "#.##") +
+                 "% Hit",
+                 text_color = color.silver,
+                 bgcolor = analyticsBody,
+                 text_size = size.tiny)
+
+            table.cell(
+                 analysisTable,
+                 4,
+                 2,
+                 "Avg MFE",
+                 text_color = color.silver,
+                 bgcolor = analyticsBody,
+                 text_size = size.tiny)
+
+            table.cell(
+                 analysisTable,
+                 5,
+                 2,
+                 "Avg MAE",
+                 text_color = color.silver,
+                 bgcolor = analyticsBody,
+                 text_size = size.tiny)
+
+            f_sweetRow(
+                 3,
+                 0)
+
+            f_sweetRow(
+                 4,
+                 1)
+
+            f_sweetRow(
+                 5,
+                 2)
+
+            f_sweetRow(
+                 6,
+                 3)
+
+            f_sweetRow(
+                 7,
+                 4)
+
+        //=====================================================================
+        // VIEW 3: COMPONENT SUMMARY
+        //=====================================================================
+
+        else
+
+            table.cell(
+                 analysisTable,
+                 0,
+                 0,
+                 "COMPONENT ANALYSIS",
+                 text_color = color.white,
+                 bgcolor = analyticsHeader,
+                 text_size = size.small)
+
+            table.cell(
+                 analysisTable,
+                 1,
+                 0,
+                 "",
+                 bgcolor = analyticsHeader)
+
+            table.cell(
+                 analysisTable,
+                 2,
+                 0,
+                 "",
+                 bgcolor = analyticsHeader)
+
+            table.cell(
+                 analysisTable,
+                 3,
+                 0,
+                 "",
+                 bgcolor = analyticsHeader)
+
+            table.cell(
+                 analysisTable,
+                 4,
+                 0,
+                 "",
+                 bgcolor = analyticsHeader)
+
+            table.cell(
+                 analysisTable,
+                 5,
+                 0,
+                 "",
+                 bgcolor = analyticsHeader)
+
+            string sampleText =
+                 "Fav=" +
+                 str.tostring(
+                     compFavCount) +
+                 " | Adv=" +
+                 str.tostring(
+                     compAdvCount) +
+                 " | All=" +
+                 str.tostring(
+                     compAllCount)
+
+            table.cell(
+                 analysisTable,
+                 0,
+                 1,
+                 "Samples",
+                 text_color = color.silver,
+                 bgcolor = analyticsBody,
+                 text_size = size.tiny)
+
+            table.cell(
+                 analysisTable,
+                 1,
+                 1,
+                 sampleText,
+                 text_color = color.white,
+                 bgcolor = analyticsBody,
+                 text_size = size.tiny)
+
+            table.cell(
+                 analysisTable,
+                 2,
+                 1,
+                 "",
+                 bgcolor = analyticsBody)
+
+            table.cell(
+                 analysisTable,
+                 3,
+                 1,
+                 "",
+                 bgcolor = analyticsBody)
+
+            table.cell(
+                 analysisTable,
+                 4,
+                 1,
+                 "",
+                 bgcolor = analyticsBody)
+
+            table.cell(
+                 analysisTable,
+                 5,
+                 1,
+                 "",
+                 bgcolor = analyticsBody)
+
+            table.cell(
+                 analysisTable,
+                 0,
+                 2,
+                 "Component",
+                 text_color = color.silver,
+                 bgcolor = analyticsBody,
+                 text_size = size.tiny)
+
+            table.cell(
+                 analysisTable,
+                 1,
+                 2,
+                 "Fav Avg",
+                 text_color = color.silver,
+                 bgcolor = analyticsBody,
+                 text_size = size.tiny)
+
+            table.cell(
+                 analysisTable,
+                 2,
+                 2,
+                 "Adv Avg",
+                 text_color = color.silver,
+                 bgcolor = analyticsBody,
+                 text_size = size.tiny)
+
+            table.cell(
+                 analysisTable,
+                 3,
+                 2,
+                 "Delta",
+                 text_color = color.silver,
+                 bgcolor = analyticsBody,
+                 text_size = size.tiny)
+
+            table.cell(
+                 analysisTable,
+                 4,
+                 2,
+                 "Norm Δ",
+                 text_color = color.silver,
+                 bgcolor = analyticsBody,
+                 text_size = size.tiny)
+
+            table.cell(
+                 analysisTable,
+                 5,
+                 2,
+                 "Avg Util",
+                 text_color = color.silver,
+                 bgcolor = analyticsBody,
+                 text_size = size.tiny)
+
+            f_componentRow(
+                 3,
+                 "Penetration",
+                 COMP_PEN,
+                 MAX_PEN_POINTS)
+
+            f_componentRow(
+                 4,
+                 "Body",
+                 COMP_BODY,
+                 MAX_BODY_POINTS)
+
+            f_componentRow(
+                 5,
+                 "Close",
+                 COMP_CLOSE,
+                 MAX_CLOSE_POINTS)
+
+            f_componentRow(
+                 6,
+                 "Range",
+                 COMP_RANGE,
+                 MAX_RANGE_POINTS)
+
+            f_componentRow(
+                 7,
+                 "Speed",
+                 COMP_SPEED,
+                 MAX_SPEED_POINTS)
+
+    else
+        table.clear(
+             analysisTable,
+             0,
+             0,
+             5,
+             8)
+
+//=============================================================================
+// PHASE 4A: UNCLASSIFIED COMPONENT ANALYSIS TABLES
+//=============================================================================
+//
+// Cell format:
+// N = observations
+// F = 0.5% favorable-first
+// H = 1.0% favorable hit
+// M = average MFE
+// A = average MAE
+//
+// Left table: Penetration, Range/ATR, Body/Range
+// Center table: Close Position, Confirmation Speed
+//=============================================================================
+
+f_unclassCellText(int component, int bucketValue, int gradeValue) =>
+    int idx = f_unclassIndex(component, bucketValue, gradeValue)
+    int n = array.get(unclassSignals, idx)
+    string result = "-"
+
+    if n > 0
+        int favFirstCount = array.get(unclassFavFirst, idx)
+        int bothCount = array.get(unclassBothFirst, idx)
+        int fav2Count = array.get(unclassFav2Hit, idx)
+        float mfe = array.get(unclassMFESum, idx) / n
+        float mae = array.get(unclassMAESum, idx) / n
+
+        string firstText =
+             str.tostring(
+                 favFirstCount / float(n) * 100.0,
+                 "#.0") +
+             "%"
+
+        if bothCount > 0
+            firstText := firstText + "*"
+
+        result :=
+             "N " + str.tostring(n) +
+             " | F " + firstText +
+             " | H " +
+             str.tostring(
+                 fav2Count / float(n) * 100.0,
+                 "#.0") +
+             "%" +
+             "\nM " + f_signedPct(mfe) +
+             " | A " + f_signedPct(mae)
+
+    result
+
+var table unclassLeftTable =
+     table.new(
+         position.bottom_left,
+         6,
+         20,
+         border_width = 1)
+
+var table unclassCenterTable =
+     table.new(
+         position.bottom_center,
+         6,
+         14,
+         border_width = 1)
+
+f_unclassHeader(table targetTable, string title) =>
+    color headerColor = color.new(color.gray, 35)
+    table.cell(targetTable, 0, 0, title, text_color = color.white, bgcolor = headerColor, text_size = size.small)
+    table.cell(targetTable, 1, 0, "A", text_color = color.white, bgcolor = headerColor, text_size = size.small)
+    table.cell(targetTable, 2, 0, "B", text_color = color.white, bgcolor = headerColor, text_size = size.small)
+    table.cell(targetTable, 3, 0, "C", text_color = color.white, bgcolor = headerColor, text_size = size.small)
+    table.cell(targetTable, 4, 0, "Weak", text_color = color.white, bgcolor = headerColor, text_size = size.small)
+    table.cell(targetTable, 5, 0, "ALL", text_color = color.white, bgcolor = headerColor, text_size = size.small)
+
+f_unclassSection(table targetTable, int startRow, int component) =>
+    color sectionColor = color.new(color.gray, 55)
+    color bodyColor = color.new(color.black, 15)
+
+    table.cell(targetTable, 0, startRow, f_unclassComponentName(component), text_color = color.white, bgcolor = sectionColor, text_size = size.tiny)
+    for col = 1 to 5
+        table.cell(targetTable, col, startRow, "", bgcolor = sectionColor)
+
+    for bucketValue = 0 to 4
+        int row = startRow + 1 + bucketValue
+        table.cell(targetTable, 0, row, f_unclassBucketName(component, bucketValue), text_color = color.white, bgcolor = bodyColor, text_size = size.tiny)
+        table.cell(targetTable, 1, row, f_unclassCellText(component, bucketValue, BUCKET_A), text_color = color.white, bgcolor = bodyColor, text_size = size.tiny)
+        table.cell(targetTable, 2, row, f_unclassCellText(component, bucketValue, BUCKET_B), text_color = color.white, bgcolor = bodyColor, text_size = size.tiny)
+        table.cell(targetTable, 3, row, f_unclassCellText(component, bucketValue, BUCKET_C), text_color = color.white, bgcolor = bodyColor, text_size = size.tiny)
+        table.cell(targetTable, 4, row, f_unclassCellText(component, bucketValue, BUCKET_WEAK), text_color = color.white, bgcolor = bodyColor, text_size = size.tiny)
+        table.cell(targetTable, 5, row, f_unclassCellText(component, bucketValue, UNCLASS_GRADE_ALL), text_color = color.white, bgcolor = bodyColor, text_size = size.tiny)
+
+if barstate.islast
+    if enableHistoricalTracking and showUnclassifiedComponentAnalysis
+        table.clear(unclassLeftTable, 0, 0, 5, 19)
+        table.clear(unclassCenterTable, 0, 0, 5, 13)
+
+        f_unclassHeader(unclassLeftTable, "UNCLASSIFIED COMPONENT ANALYSIS 4A")
+        f_unclassSection(unclassLeftTable, 1, 0)
+        f_unclassSection(unclassLeftTable, 7, 1)
+        f_unclassSection(unclassLeftTable, 13, 2)
+
+        color footerColor = color.new(color.black, 15)
+        table.cell(unclassLeftTable, 0, 19, "Cell: N | F=.5 First | H=1% Hit", text_color = color.silver, bgcolor = footerColor, text_size = size.tiny)
+        table.cell(unclassLeftTable, 1, 19, "M=MFE | A=MAE", text_color = color.silver, bgcolor = footerColor, text_size = size.tiny)
+        table.cell(unclassLeftTable, 2, 19, "*=both same candle", text_color = color.silver, bgcolor = footerColor, text_size = size.tiny)
+        for col = 3 to 5
+            table.cell(unclassLeftTable, col, 19, "", bgcolor = footerColor)
+
+        f_unclassHeader(unclassCenterTable, "UNCLASSIFIED 4A - CLOSE / SPEED")
+        f_unclassSection(unclassCenterTable, 1, 3)
+        f_unclassSection(unclassCenterTable, 7, 4)
+
+        table.cell(unclassCenterTable, 0, 13, "Only PROFILE_UNCLASSIFIED", text_color = color.silver, bgcolor = footerColor, text_size = size.tiny)
+        table.cell(unclassCenterTable, 1, 13, "A/B/C/Weak + ALL", text_color = color.silver, bgcolor = footerColor, text_size = size.tiny)
+        for col = 2 to 5
+            table.cell(unclassCenterTable, col, 13, "", bgcolor = footerColor)
+
+    else
+        table.clear(unclassLeftTable, 0, 0, 5, 19)
+        table.clear(unclassCenterTable, 0, 0, 5, 13)
+
+//=============================================================================
+// HISTORICAL COVERAGE DIAGNOSTIC TABLE
+//=============================================================================
+
+var table coverageTable =
+     table.new(
+         position.top_center,
+         2,
+         14,
+         border_width = 1)
+
+f_diagDate(int t) =>
+    string result = "-"
+
+    if not na(t)
+        result :=
+             str.format_time(
+                 t,
+                 "yyyy-MM-dd HH:mm",
+                 tz)
+
+    result
+
+if barstate.islast
+
+    table.clear(
+         coverageTable,
+         0,
+         0,
+         1,
+         13)
+
+    color diagHeader =
+         color.new(
+             color.gray,
+             35)
+
+    color diagBody =
+         color.new(
+             color.black,
+             15)
+
+    int requestedStart = historicalRecentStart
+    int requestedEnd = timenow
+
+    if historicalWindow == "Custom Historical"
+        requestedStart := historicalCustomStart
+        requestedEnd := historicalEndDate
+
+    bool windowComplete = false
+
+    if not na(diagOldestLoadedBar)
+        windowComplete :=
+             diagOldestLoadedBar <= requestedStart
+
+    float requestedDays =
+         (requestedEnd - requestedStart) /
+         float(MS_PER_DAY)
+
+    float actualAvailableDays = na
+
+    if not na(diagOldestLoadedBar)
+        int effectiveStart =
+             math.max(
+                 diagOldestLoadedBar,
+                 requestedStart)
+
+        actualAvailableDays :=
+             math.max(
+                 0.0,
+                 (requestedEnd - effectiveStart) /
+                 float(MS_PER_DAY))
+
+    table.cell(
+         coverageTable,
+         0,
+         0,
+         "HISTORICAL COVERAGE",
+         text_color = color.white,
+         bgcolor = diagHeader,
+         text_size = size.small)
+
+    table.cell(
+         coverageTable,
+         1,
+         0,
+         windowComplete ? "COMPLETE" : "TRUNCATED",
+         text_color = windowComplete ? color.lime : color.orange,
+         bgcolor = diagHeader,
+         text_size = size.small)
+
+    table.cell(
+         coverageTable,
+         0,
+         1,
+         "Requested Start",
+         text_color = color.silver,
+         bgcolor = diagBody,
+         text_size = size.tiny)
+
+    table.cell(
+         coverageTable,
+         1,
+         1,
+         f_diagDate(requestedStart),
+         text_color = color.white,
+         bgcolor = diagBody,
+         text_size = size.tiny)
+
+    table.cell(
+         coverageTable,
+         0,
+         2,
+         "Requested End",
+         text_color = color.silver,
+         bgcolor = diagBody,
+         text_size = size.tiny)
+
+    table.cell(
+         coverageTable,
+         1,
+         2,
+         f_diagDate(requestedEnd),
+         text_color = color.white,
+         bgcolor = diagBody,
+         text_size = size.tiny)
+
+    table.cell(
+         coverageTable,
+         0,
+         3,
+         "Oldest Loaded Bar",
+         text_color = color.silver,
+         bgcolor = diagBody,
+         text_size = size.tiny)
+
+    table.cell(
+         coverageTable,
+         1,
+         3,
+         f_diagDate(diagOldestLoadedBar),
+         text_color = color.white,
+         bgcolor = diagBody,
+         text_size = size.tiny)
+
+    table.cell(
+         coverageTable,
+         0,
+         4,
+         "Bars In Window",
+         text_color = color.silver,
+         bgcolor = diagBody,
+         text_size = size.tiny)
+
+    table.cell(
+         coverageTable,
+         1,
+         4,
+         str.tostring(diagBarsInRequestedWindow),
+         text_color = color.white,
+         bgcolor = diagBody,
+         text_size = size.tiny)
+
+    table.cell(
+         coverageTable,
+         0,
+         5,
+         "Requested Days",
+         text_color = color.silver,
+         bgcolor = diagBody,
+         text_size = size.tiny)
+
+    table.cell(
+         coverageTable,
+         1,
+         5,
+         str.tostring(requestedDays, "#.0"),
+         text_color = color.white,
+         bgcolor = diagBody,
+         text_size = size.tiny)
+
+    table.cell(
+         coverageTable,
+         0,
+         6,
+         "Available Days",
+         text_color = color.silver,
+         bgcolor = diagBody,
+         text_size = size.tiny)
+
+    table.cell(
+         coverageTable,
+         1,
+         6,
+         na(actualAvailableDays) ?
+             "-" :
+             str.tostring(actualAvailableDays, "#.0"),
+         text_color = color.white,
+         bgcolor = diagBody,
+         text_size = size.tiny)
+
+    table.cell(
+         coverageTable,
+         0,
+         7,
+         "First Signal",
+         text_color = color.silver,
+         bgcolor = diagBody,
+         text_size = size.tiny)
+
+    table.cell(
+         coverageTable,
+         1,
+         7,
+         f_diagDate(diagFirstSignalTime),
+         text_color = color.white,
+         bgcolor = diagBody,
+         text_size = size.tiny)
+
+    table.cell(
+         coverageTable,
+         0,
+         8,
+         "Last Signal",
+         text_color = color.silver,
+         bgcolor = diagBody,
+         text_size = size.tiny)
+
+    table.cell(
+         coverageTable,
+         1,
+         8,
+         f_diagDate(diagLastSignalTime),
+         text_color = color.white,
+         bgcolor = diagBody,
+         text_size = size.tiny)
+
+    table.cell(
+         coverageTable,
+         0,
+         9,
+         "Bars With PMH",
+         text_color = color.silver,
+         bgcolor = diagBody,
+         text_size = size.tiny)
+
+    table.cell(
+         coverageTable,
+         1,
+         9,
+         str.tostring(diagBarsWithPMH),
+         text_color = color.white,
+         bgcolor = diagBody,
+         text_size = size.tiny)
+
+    table.cell(
+         coverageTable,
+         0,
+         10,
+         "Bars With PML",
+         text_color = color.silver,
+         bgcolor = diagBody,
+         text_size = size.tiny)
+
+    table.cell(
+         coverageTable,
+         1,
+         10,
+         str.tostring(diagBarsWithPML),
+         text_color = color.white,
+         bgcolor = diagBody,
+         text_size = size.tiny)
+
+    table.cell(
+         coverageTable,
+         0,
+         11,
+         "Bars With PDH",
+         text_color = color.silver,
+         bgcolor = diagBody,
+         text_size = size.tiny)
+
+    table.cell(
+         coverageTable,
+         1,
+         11,
+         str.tostring(diagBarsWithPDH),
+         text_color = color.white,
+         bgcolor = diagBody,
+         text_size = size.tiny)
+
+    table.cell(
+         coverageTable,
+         0,
+         12,
+         "Bars With PDL",
+         text_color = color.silver,
+         bgcolor = diagBody,
+         text_size = size.tiny)
+
+    table.cell(
+         coverageTable,
+         1,
+         12,
+         str.tostring(diagBarsWithPDL),
+         text_color = color.white,
+         bgcolor = diagBody,
+         text_size = size.tiny)
+
+    table.cell(
+         coverageTable,
+         0,
+         13,
+         "Levels Ready",
+         text_color = color.silver,
+         bgcolor = diagBody,
+         text_size = size.tiny)
+
+    table.cell(
+         coverageTable,
+         1,
+         13,
+         str.tostring(diagBarsLevelsReady),
+         text_color = color.white,
+         bgcolor = diagBody,
+         text_size = size.tiny)
+
+    if not showHistoricalCoverage
+        table.clear(coverageTable, 0, 0, 1, 13)

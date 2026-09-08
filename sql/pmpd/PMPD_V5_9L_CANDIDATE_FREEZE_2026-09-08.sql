@@ -1,0 +1,10 @@
+-- PM+PD V5 9L CANDIDATE FREEZE — 2026-09-08
+-- Candidate: PMPD_V5_CANDIDATE_DP4_UNSCORED_V1
+-- 9L COMPLETE; 9M ACTIVE.
+-- DP4_FULL_STACK_FIRST_CLEAR structural anchor.
+-- Bull: PMH/AHH/PDH. Bear: PML/AHL/PDL.
+-- No score, no inherited V4 weights, no VWAP entry gate, no DP5 retention requirement,
+-- no interaction rule, and no post-DP4 entry feature.
+-- 2025 PMPD_112_V1 evidence is development evidence and MUST NOT be reused as untouched 9M OOS.
+-- Candidate modification / threshold tuning / score fitting are prohibited during 9M.
+-- Production rule remains unauthorized.

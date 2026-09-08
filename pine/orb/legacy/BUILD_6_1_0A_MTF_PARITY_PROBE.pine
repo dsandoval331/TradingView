@@ -1,0 +1,110 @@
+//@version=6
+indicator("15M ORB Research - BUILD 6.1.0A — MTF Historical Parity Probe", overlay=true, max_labels_count=100)
+
+// PURPOSE
+// Before rewriting the full Build 6.0.2 state machine, test whether a 2m/5m host chart
+// can supply a chronologically complete 1m intrabar stream far enough back to extend history.
+// This probe does NOT replace Build 6.0.2 and must NOT be merged with Sets 1–4 research data.
+// Run on the same symbol on 1m, 2m, and 5m and export chart data.
+
+string TZ = "America/New_York"
+string LTF = "1"
+
+groupTest = "Parity Test"
+useStartDate = input.bool(false, "Use Start Date", group=groupTest)
+startDate = input.time(timestamp("01 Jan 2026 00:00 -0500"), "Start Date", group=groupTest)
+useEndDate = input.bool(false, "Use End Date", group=groupTest)
+endDate = input.time(timestamp("31 Dec 2026 23:59 -0500"), "End Date", group=groupTest)
+
+// Every lower-timeframe bar is returned in chronological order inside each host bar.
+[array<int> tA, array<float> oA, array<float> hA, array<float> lA, array<float> cA] =
+    request.security_lower_tf(syminfo.tickerid, LTF, [time, open, high, low, close])
+
+var float orbH = na
+var float orbL = na
+var bool signalTaken = false
+var int eventSeq = 0
+var int firstLtfTimeSeen = na
+var int lastLtfTimeSeen = na
+var int ltfBarsProcessed = 0
+
+// Export pulse/row values. Pulse occurs on the HOST bar containing the 1m breakout.
+var bool expPulse = false
+var int expEventId = na
+var int expDirection = na
+var int expSignalTime = na
+var float expSignalPrice = na
+var float expOrbHigh = na
+var float expOrbLow = na
+var int expHostSeconds = na
+var int expLtfBarsInHost = na
+
+expPulse := false
+
+int n = array.size(tA)
+if n > 0
+    for i = 0 to n - 1
+        int t = array.get(tA, i)
+        float o = array.get(oA, i)
+        float h = array.get(hA, i)
+        float l = array.get(lA, i)
+        float c = array.get(cA, i)
+
+        bool dateOK = (not useStartDate or t >= startDate) and (not useEndDate or t <= endDate)
+        if dateOK
+            if na(firstLtfTimeSeen)
+                firstLtfTimeSeen := t
+            lastLtfTimeSeen := t
+            ltfBarsProcessed += 1
+
+            int hh = hour(t, TZ)
+            int mm = minute(t, TZ)
+            int mins = hh * 60 + mm
+            bool is930 = mins == 570
+            bool isORB = mins >= 570 and mins < 585
+            bool canTrigger = mins >= 585 and mins < 960
+
+            if is930
+                orbH := h
+                orbL := l
+                signalTaken := false
+            else if isORB
+                orbH := na(orbH) ? h : math.max(orbH, h)
+                orbL := na(orbL) ? l : math.min(orbL, l)
+
+            bool validORB = not na(orbH) and not na(orbL)
+            bool bull = canTrigger and validORB and not signalTaken and c > orbH
+            bool bear = canTrigger and validORB and not signalTaken and c < orbL
+
+            if bull or bear
+                signalTaken := true
+                eventSeq += 1
+                expPulse := true
+                expEventId := eventSeq
+                expDirection := bull ? 1 : -1
+                expSignalTime := t
+                expSignalPrice := c
+                expOrbHigh := orbH
+                expOrbLow := orbL
+                expHostSeconds := timeframe.in_seconds(timeframe.period)
+                expLtfBarsInHost := n
+
+// Data-window/export fields.
+plot(expPulse ? 1 : na, "EXP_event_flag", display=display.data_window)
+plot(expPulse ? expEventId : na, "EXP_event_id", display=display.data_window)
+plot(expPulse ? expDirection : na, "EXP_direction", display=display.data_window)
+plot(expPulse ? expSignalTime : na, "EXP_signal_time", display=display.data_window)
+plot(expPulse ? expSignalPrice : na, "EXP_signal_price", display=display.data_window)
+plot(expPulse ? expOrbHigh : na, "EXP_orb_high", display=display.data_window)
+plot(expPulse ? expOrbLow : na, "EXP_orb_low", display=display.data_window)
+plot(expPulse ? expHostSeconds : na, "EXP_host_seconds", display=display.data_window)
+plot(expPulse ? expLtfBarsInHost : na, "EXP_ltf_bars_in_host", display=display.data_window)
+
+// Coverage diagnostics exported on every host bar so earliest available 1m coverage can be checked.
+plot(firstLtfTimeSeen, "DIAG_first_1m_time_seen", display=display.data_window)
+plot(lastLtfTimeSeen, "DIAG_last_1m_time_seen", display=display.data_window)
+plot(ltfBarsProcessed, "DIAG_1m_bars_processed", display=display.data_window)
+plot(n, "DIAG_1m_intrabar_count", display=display.data_window)
+
+// Minimal chart marker only; this probe is about exported parity, not visuals.
+plotshape(expPulse, title="1M breakout found", style=shape.circle, location=location.abovebar, size=size.tiny)

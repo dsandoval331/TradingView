@@ -1,0 +1,4 @@
+candidate_triage_state,total_n,binary_n,favorable_n,adverse_n,both_same_bar_n,unresolved_n,favorable_first_pct
+PREFERRED,28,28,12,16,0,0,42.857142857142854
+NEUTRAL,108,105,53,52,2,1,50.476190476190474
+AVOID,14,14,5,9,0,0,35.714285714285715

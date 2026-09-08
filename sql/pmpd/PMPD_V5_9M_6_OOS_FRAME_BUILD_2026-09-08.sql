@@ -1,0 +1,6 @@
+-- PM+PD V5 9M-6 OOS research-frame build — 2026-09-08
+-- Uses existing build_symbol_research_dataset for all 112 certified 2026 source files.
+-- Evaluation rows are frozen to 2026-01-05 through 2026-09-02 after preserving Jan 2 seed context in source bars.
+-- This step materializes structural/research frames and schemas but does not summarize performance.
+-- Frozen candidate: PMPD_V5_CANDIDATE_DP4_UNSCORED_V1.
+-- No candidate modification, threshold tuning, score fitting, validation refit, or production authorization.

@@ -1,0 +1,107 @@
+{
+  "protocol_id": "ALT_C2_PROSPECTIVE_VALIDATION_V1",
+  "candidate_model_id": "ALT_C2_CANDIDATE_MODEL_V1",
+  "trade_health_model_id": "ALTC2_TRADE_HEALTH_V1",
+  "status": "FROZEN_BEFORE_PROSPECTIVE_SCORING",
+  "historical_research_end_date": "2026-08-27",
+  "prospective_start_date": "2026-08-28",
+  "primary_outcome": {
+    "definition": "+0.50% favorable before -0.50% adverse",
+    "engine": "Use the exact existing AE2 outcome engine and horizon; do not alter during validation.",
+    "binary_population": [
+      "FAVORABLE_FIRST",
+      "ADVERSE_FIRST"
+    ],
+    "both_same_bar": "Track separately; exclude from primary binary FF denominator.",
+    "unresolved": "Track separately; exclude from primary binary FF denominator until resolved under the frozen existing outcome engine."
+  },
+  "model_states": {
+    "PREFERRED": {
+      "positive_family_P1": [
+        "session_level_clear_state == ALL_3_CLEARED",
+        "market_prior_5d_consensus == CONSENSUS_OPPOSING"
+      ],
+      "negative_family_required": "none"
+    },
+    "NEUTRAL": {
+      "definition": "Valid AE2 with neither promoted positive family nor any promoted negative family."
+    },
+    "AVOID": {
+      "negative_families": {
+        "N1_MARKET_RELATIVE_CONFLICT": [
+          "relative_multi_horizon_state == MIXED",
+          "market_3idx_prior_5d_state == ALL_3_ALIGNED"
+        ],
+        "N2_NO_CLEARANCE_WEAKNESS": [
+          "exhaustion_state == ONE AND session_level_clear_state == NONE_CLEARED",
+          "OR session_level_clear_state == NONE_CLEARED AND relative_multi_horizon_state == RELATIVE_ALIGNED"
+        ]
+      }
+    }
+  },
+  "overlap_rules": {
+    "H1B": "ALL_3_CLEARED + ALL_3_OPPOSING is supporting evidence nested inside P1; no second positive vote.",
+    "N2": "The two N2 child rules count as one negative family.",
+    "positive_negative_conflict": "Historical development set had none. If one appears prospectively, classify AVOID and flag MODEL_CONFLICT for audit; do not change the model."
+  },
+  "feature_source_policy": {
+    "session_levels": "Use exact existing feature-generation implementation for PMH/PML, prior AH high/low, and PDH/PDL; do not re-derive with changed session boundaries.",
+    "market_features": "Use exact existing frozen 5D consensus and 3-index state implementations.",
+    "relative_strength": "Use exact existing frozen relative_multi_horizon_state implementation.",
+    "exhaustion": "Use exact existing frozen exhaustion_state implementation.",
+    "no_post_entry_leakage": "No C3+, MFE/MAE, Trade Health, recovery, or warning information may affect entry-state classification."
+  },
+  "prospective_sample_plan": {
+    "checkpoints_preferred_binary_n": [
+      50,
+      100,
+      200
+    ],
+    "graduation_minimums": {
+      "PREFERRED_binary_n": 200,
+      "AVOID_binary_n": 300,
+      "NEUTRAL_binary_n": 500,
+      "PREFERRED_BULL_binary_n": 60,
+      "PREFERRED_BEAR_binary_n": 60,
+      "AVOID_BULL_binary_n": 80,
+      "AVOID_BEAR_binary_n": 80
+    },
+    "stop_rule": "Do not stop early because results look favorable. Formal graduation review begins only when all minimums are met."
+  },
+  "success_criteria": {
+    "primary": [
+      "PREFERRED favorable-first pct > NEUTRAL favorable-first pct",
+      "NEUTRAL favorable-first pct > AVOID favorable-first pct",
+      "PREFERRED - AVOID spread >= 7.0 percentage points",
+      "PREFERRED favorable-first pct >= 53.0%",
+      "AVOID favorable-first pct <= 47.0%"
+    ],
+    "directional": [
+      "Within BULL, PREFERRED > AVOID by >= 3.0 pp once directional minimum N is met",
+      "Within BEAR, PREFERRED > AVOID by >= 3.0 pp once directional minimum N is met"
+    ],
+    "robustness": [
+      "No single symbol contributes > 5% of PREFERRED prospective events at graduation",
+      "Top-10 symbols contribute <= 35% of PREFERRED prospective events at graduation",
+      "Report monthly and quarterly state ordering without changing rules in response"
+    ],
+    "interpretation": "Passing criteria supports continued validation/production candidacy; it does not guarantee profitability or justify untested execution rules."
+  },
+  "change_control": {
+    "rule": "No changes to AE2 definition, state logic, thresholds, sessions, outcome engine, or feature formulas during V1 prospective validation.",
+    "if_change_needed": "Freeze V1 results, create ALT_C2_CANDIDATE_MODEL_V2, document exact change and rationale, and start a new prospective validation cycle."
+  },
+  "reporting": {
+    "required": [
+      "overall state counts and binary counts",
+      "PREFERRED/NEUTRAL/AVOID FF%",
+      "PREFERRED-Avoid spread",
+      "BULL/BEAR state performance",
+      "monthly and quarterly performance",
+      "MFE/MAE diagnostics",
+      "both-same-bar and unresolved counts",
+      "symbol breadth and concentration",
+      "model-conflict count"
+    ]
+  }
+}

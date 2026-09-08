@@ -1,0 +1,38 @@
+﻿group_id,member_count,projects,phases,status,members
+1,1,orb,legacy,GROUP_MOVE_CANDIDATE,6_2.pine
+2,27,pmpd,9n | v4,HOLD_SENSITIVE_GROUP,PM + PD Breakout Monitor - V4 8H-7 Parity Capture.pine | PM + PD Breakout Monitor - V4 Forward Validation FINAL.pine | PM_PD_Breakout_V4_8H7_Parity_Capture.pine | PM_PD_Breakout_V4_8H7_Parity_Capture_FULL.pine | PM_PD_Breakout_V4_9N_3F3_COMPACT_CSV_Parity_Export.pine | PM_PD_Breakout_V4_9N_3F4_DATA_WINDOW_CSV_Parity_Export.pine | PM_PD_Breakout_V4_9N_3F5_FROZEN_DATE_LEVEL_CSV_Parity_Export.pine | PM_PD_Breakout_V4_9N_3F_CSV_Parity_Export.pine | certify_9n_v4_engine_semantics_v2.py | extract_9n_v4_source_semantics_utf8_v1.py | extract_9n_v4_source_semantics_v1.py | inspect_v4_parity_validation.py | patch_9n_3f2_compact_csv_parity.py | patch_9n_3f3_robust_compact_csv_parity.py | patch_9n_3f4_data_window_csv_export.py | patch_9n_3f5_frozen_date_level_export.py | patch_9n_3f_csv_parity_export.py | run_9n_3g2_vrtx_first_parity_case.py | run_9n_3g3_vrtx_first_parity_case.py | run_9n_3g4_vrtx_first_parity_case.py | run_9n_3g_vrtx_first_parity_case.py | run_9n_3m_24case_python_baseline.py | run_9n_3q_pine_pm_counterfactual.py | run_9n_3r_h2h_preflight.py | run_9n_3s2_final_h2h.py | run_9n_3s_final_h2h.py | v4_parity_engine_v2.py
+3,1,pmpd,v4,HOLD_SENSITIVE_GROUP,PM_PD_Breakout_V4_8H7_Parity_Capture_PRE_PATCH_BACKUP.pine
+4,1,utilities,misc,GROUP_MOVE_CANDIDATE,Test.py
+5,29,second1m,a37_a56 | ae2 | altc2 | ingestion | legacy,GROUP_MOVE_CANDIDATE,acquire_second1m_alt_entry_universe.py | extract_a51_a39_original_predictor_bucketing_scope_v1.py | find_altc2_latest_available_date_v1.py | report_a53_v2_prospective_checkpoint_v1.py | report_altc2_prospective_checkpoint_v1.py | research_second1m_ae2_c2_predictors_v1.py | research_second1m_ae2_daily_trend_v1.py | research_second1m_ae2_ma_context_v1.py | research_second1m_ae2_market_regime_v1.py | research_second1m_ae2_opening_volume_v1.py | research_second1m_ae2_relative_strength_robustness_v1.py | research_second1m_ae2_relative_strength_v1.py | research_second1m_ae2_session_levels_v1.py | research_second1m_ae2_short_ma_warning_v1.py | research_second1m_ae2_three_index_regime_v1.py | research_second1m_ae2_trend_exhaustion_robustness_v1.py | research_second1m_ae2_volume_robustness_v1.py | research_second1m_ae2_weekly_trend_v1.py | research_second1m_alt_entry_v1.py | run_altc2_prospective_validation_v1.py | run_altc2_prospective_validation_v1_1.py | run_altc2_prospective_validation_v1_2.py | run_altc2_prospective_validation_v1_3.py | run_altc2_prospective_validation_v1_4.py | run_altc2_prospective_validation_v1_5.py | run_altc2_prospective_validation_v1_6.py | score_a53_v2_prospective_events_v1.py | update_altc2_prospective_v1.py | update_altc2_prospective_v1_v2.py
+6,3,pmpd,9m,GROUP_MOVE_CANDIDATE,audit_9m_2026_local_inventory.py | audit_9m_2026_symbol_partitions.py | audit_9m_2026_symbol_partitions_v2.py
+7,2,pmpd,9n,GROUP_MOVE_CANDIDATE,audit_9n_preserved_tv_parity_evidence_v1.py | recover_9n_parity_reference_evidence_v1.py
+8,1,second1m,a37_a56,HOLD_SENSITIVE_GROUP,audit_a39_frozen_transition_buckets_v1.py
+9,1,second1m,a37_a56,HOLD_SENSITIVE_GROUP,build_a53_candidate_model_v2_prospective_protocol_v1.py
+10,2,pmpd,9n | v4,GROUP_MOVE_CANDIDATE,certify_9n_v4_reconstruction_static_v1.py | v4_parity_engine_v1.py
+11,2,pmpd,9j | legacy,GROUP_MOVE_CANDIDATE,certify_v2_full50.py | patch_certify_v2_full50_parity.py
+12,7,pmpd,9h | legacy,GROUP_MOVE_CANDIDATE,certify_v2_outcome_independence.py | derive_and_certify_dp4_structural_clearance.py | install_and_msft_preflight.ps1 | patch_dp4_derivation_duplicate_decision_id.py | patch_dp4_derivation_timezone.py | patch_outcome_independence_comment_filter.py | vwap_event_path_v2.py
+13,1,second1m,a37_a56,HOLD_SENSITIVE_GROUP,evaluate_a52_frozen_v2_architecture_outcomes_v1.py
+14,1,second1m,a37_a56,HOLD_SENSITIVE_GROUP,extract_a51_original_frozen_candidate_definitions_v1.py
+15,1,pmpd,9j,HOLD_SENSITIVE_GROUP,freeze_9j_vwap_v2_validation_protocol.py
+16,1,second1m,a37_a56,HOLD_SENSITIVE_GROUP,freeze_a52_candidate_model_v2_v1.py
+17,1,second1m,a37_a56,HOLD_SENSITIVE_GROUP,inventory_a39_a37_frozen_geometry_sources_v1.py
+18,1,second1m,a37_a56,HOLD_SENSITIVE_GROUP,inventory_a51_2_frozen_candidate_encodings_v1.py
+19,1,second1m,a37_a56,HOLD_SENSITIVE_GROUP,inventory_a51_a39_frozen_cutpoints_v1.py
+20,1,second1m,a37_a56,HOLD_SENSITIVE_GROUP,inventory_a51_a39_frozen_encoding_v1.py
+21,1,second1m,a37_a56,HOLD_SENSITIVE_GROUP,inventory_a51_frozen_quintile_assignments_v1.py
+22,3,pmpd,9h,HOLD_SENSITIVE_GROUP,join_and_audit_frozen_9h_outcomes.py | patch_outcome_join_ambiguous_same_bar.py | patch_outcome_join_prefer_canonical_label.py
+23,2,pmpd,9k,GROUP_MOVE_CANDIDATE,patch_9k_discovery_bool_cast.py | run_9k_classifier_discovery_v1.py
+24,2,pmpd,9j | legacy,GROUP_MOVE_CANDIDATE,patch_discovery_stage1_restrict_features.py | run_9j_vwap_v2_discovery_stage1.py
+25,4,pmpd,9j,GROUP_MOVE_CANDIDATE,patch_validation_robustness_block_repair_v3.py | patch_validation_robustness_corr_scope_v2.py | patch_validation_robustness_no_scipy.py | summarize_9j_validation_robustness.py
+26,1,second1m,a37_a56,HOLD_SENSITIVE_GROUP,research_a42_discovery_frozen_quintile_screen_v1.py
+27,1,second1m,a37_a56,HOLD_SENSITIVE_GROUP,research_a43_discovery_frozen_quintile_screen_v1.py
+28,1,second1m,a37_a56,HOLD_SENSITIVE_GROUP,research_a44_discovery_frozen_quintile_screen_v1.py
+29,1,second1m,a37_a56,HOLD_SENSITIVE_GROUP,research_a47_discovery_frozen_confluence_quintile_screen_v1.py
+30,1,second1m,a37_a56,HOLD_SENSITIVE_GROUP,research_a49_discovery_frozen_opening_liquidity_quintile_screen_v1.py
+31,1,second1m,ae2,HOLD_SENSITIVE_GROUP,research_second1m_ae2_candidate_models_v1.py
+32,1,second1m,ae2,HOLD_SENSITIVE_GROUP,research_second1m_ae2_final_temporal_audit_v1.py
+33,1,pmpd,9j,HOLD_SENSITIVE_GROUP,run_9j_vwap_v2_frozen_validation.py
+34,1,pmpd,9k,HOLD_SENSITIVE_GROUP,run_9k_frozen_ablation_v1.py
+35,1,pmpd,9k,HOLD_SENSITIVE_GROUP,run_9k_frozen_validation_v1.py
+36,1,pmpd,9m,HOLD_SENSITIVE_GROUP,run_9m_frozen_oos_evaluation_v1.py
+37,1,market_data,utilities,GROUP_MOVE_CANDIDATE,run_controlled_batch.py

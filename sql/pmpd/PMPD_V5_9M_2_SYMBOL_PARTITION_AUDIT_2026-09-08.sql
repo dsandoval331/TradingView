@@ -1,0 +1,7 @@
+-- PM+PD V5 9M-2 local symbol/partition audit — 2026-09-08
+-- Inventory gate found 2,037 candidate 2026 files and 113 ticker-like tokens.
+-- Heuristic token count is NOT coverage certification.
+-- This next audit maps files against the authoritative PMPD_112_V1 112-symbol membership
+-- and inspects file formats / parquet metadata without characterizing candidate outcomes.
+-- Frozen candidate remains PMPD_V5_CANDIDATE_DP4_UNSCORED_V1.
+-- No candidate modification, threshold tuning, score fitting, or production authorization.
