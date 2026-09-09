@@ -19,6 +19,12 @@ JOBS = [
         "module": "research_runner.jobs.pmpd_post9n_batch1",
         "description": "V5 contextual edge search: gap, time, geometry, RVOL, SPY/QQQ alignment",
     },
+    {
+        "id": "PMPD-EDGE-E1-B2",
+        "project": "pmpd",
+        "module": "research_runner.jobs.pmpd_edge_e1_batch2",
+        "description": "Causal opening-RVOL availability audit and robustness decomposition of Batch-1 primary hypothesis",
+    },
 ]
 
 
