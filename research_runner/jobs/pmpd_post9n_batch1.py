@@ -343,7 +343,12 @@ def run(root: Path) -> dict:
     if not cdf.empty:
         cdf = cdf.sort_values(["ci95_lower", "lift_vs_all"], ascending=False)
     cdf.to_csv(out / "combo_results.csv", index=False)
-    v.to_parquet(out / "context_enriched.parquet", index=False)
+
+    parquet_v = v.copy()
+    for c in ["gap_abs_quartile", "six_level_scale_ratio_quartile", "stack_width_pct_geometry_quartile"]:
+        if c in parquet_v.columns:
+            parquet_v[c] = parquet_v[c].astype("string")
+    parquet_v.to_parquet(out / "context_enriched.parquet", index=False)
 
     rvol_coverage = {
         c: {
