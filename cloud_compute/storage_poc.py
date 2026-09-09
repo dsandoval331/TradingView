@@ -29,10 +29,19 @@ def _storage_url(project_url: str, endpoint: str, bucket: str, object_path: str)
 
 
 def _headers(secret_key: str, *, content_type: str | None = None) -> dict[str, str]:
-    headers = {
-        "Authorization": f"Bearer {secret_key}",
-        "apikey": secret_key,
-    }
+    """Build Storage headers for both modern and legacy elevated Supabase keys.
+
+    Modern sb_secret_* keys are opaque API keys, not JWTs. Sending them as a
+    Bearer token makes Storage try to parse them as JWTs and can fail with
+    "Invalid Compact JWS". For modern secret keys, send only the apikey header
+    and let Supabase's platform gateway apply the service-role identity.
+
+    Legacy service_role keys are JWTs, so retain the Authorization header for
+    backwards compatibility.
+    """
+    headers = {"apikey": secret_key}
+    if not secret_key.startswith("sb_secret_"):
+        headers["Authorization"] = f"Bearer {secret_key}"
     if content_type:
         headers["Content-Type"] = content_type
     return headers
