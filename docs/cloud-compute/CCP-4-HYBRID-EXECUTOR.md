@@ -35,25 +35,43 @@ Every executor must preserve the same:
 
 Executor choice is infrastructure metadata, not research methodology.
 
+The executor-neutral CLI entrypoint is:
+
+```text
+python -m research_runner.runner run-id <JOB_ID>
+```
+
+GitHub Actions, Cloud Run, and the local fallback worker all target this same job-id contract.
+
 ## CCP-4 proof sequence
 
-### CCP-4A — Routing policy
+### CCP-4A — Routing policy — COMPLETE
 
-Implement and test deterministic routing:
+Implemented and GitHub-certified deterministic routing:
 
 `GitHub Actions -> Cloud Run (approved) -> Local Windows`
 
-### CCP-4B — GitHub representative cloud job
+### CCP-4B — GitHub representative cloud job — COMPLETE
 
-Run one representative TradingResearch job in GitHub Actions using the certified CCP-3 container. The job must obtain its input data remotely rather than from the local Windows market cache, write deterministic evidence/artifacts, and retain Git SHA provenance.
+Certified on GitHub Actions using the CCP-3 container and a remotely checked-out representative market-data fixture. The run completed without the user's Windows machine, retained Git SHA provenance, validated deterministic results, and uploaded evidence artifacts.
 
-### CCP-4C — Cloud Run adapter
+Certification run: `34396382642`.
 
-Prepare the Cloud Run execution adapter and deployment contract without provisioning paid infrastructure. Provisioning/execution remains a separate explicit cost/account gate.
+### CCP-4C — Cloud Run adapter — IMPLEMENTED / PROVISIONING GATED
 
-### CCP-4D — Local fallback worker
+`cloud_compute.cloud_run_adapter` now defines the Cloud Run deployment/execution contract. It does not provision infrastructure itself. Both deploy and execute command generation fail closed unless explicit spend approval is present.
 
-Expose a local worker path using the same job contract so overflow jobs can be executed locally with minimal manual interaction.
+The adapter invokes the same `research_runner ... run-id <JOB_ID>` contract used by other executors. First live Cloud Run deployment remains a separate explicit account/cost gate.
+
+### CCP-4D — Local fallback worker — IMPLEMENTED
+
+`cloud_compute.local_worker` exposes a minimal local fallback path that executes one job by exact job ID, or the next eligible project job, through the same `research_runner` functions. This avoids maintaining separate local research logic.
+
+Example future fallback invocation:
+
+```powershell
+python -m cloud_compute.local_worker --job-id <JOB_ID>
+```
 
 ## Success criteria
 
@@ -65,4 +83,4 @@ CCP-4 is complete when:
 4. Cloud Run is represented as a controlled secondary executor without bypassing spend approval;
 5. the same job contract can fall back to local execution.
 
-Google Cloud provisioning is not required merely to complete the GitHub-first portion of CCP-4; it remains an explicit infrastructure gate before first Cloud Run execution.
+Google Cloud provisioning is not required for the software-contract portion of CCP-4; first live Cloud Run deployment remains an explicit infrastructure/cost gate.
