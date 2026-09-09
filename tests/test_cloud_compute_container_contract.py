@@ -13,6 +13,7 @@ def test_contract_reports_separate_workspace(tmp_path: Path, monkeypatch) -> Non
     monkeypatch.setenv("TR_GIT_SHA", "abc123")
     record = inspect_contract(root)
     assert record["workspace_separated"] is True
+    assert record["provenance_injected"] is True
     assert record["git_sha"] == "abc123"
     assert record["requirements_present"] is True
     assert record["runner_present"] is True
