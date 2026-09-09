@@ -11,6 +11,7 @@ Package the existing `research_runner` execution contract for local Docker and f
 - Default command is `python -m research_runner.runner status`.
 - A job can be selected by overriding command arguments, for example `run-next --project pmpd`.
 - Container builds inject the source revision with `--build-arg TR_GIT_SHA=<sha>` so provenance does not depend on copying `.git` into the image.
+- Image construction runs `python -m cloud_compute.container_contract`; a broken code/workspace contract therefore fails the build.
 
 ## Local certification
 From the repository root:
