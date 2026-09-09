@@ -16,6 +16,7 @@ STATE_FILE = STATE_DIR / "state.json"
 
 JOBS = [
     {"id": "CCP3-PARITY-FIXTURE", "project": "ccp", "module": "research_runner.jobs.ccp3_parity_fixture", "description": "Deterministic native/container research_runner parity fixture"},
+    {"id": "CCP4-REMOTE-FIXTURE", "project": "ccp4", "module": "research_runner.jobs.ccp4_remote_fixture", "description": "Representative remote-input cloud execution certification fixture"},
     {"id": "PMPD-POST9N-B1", "project": "pmpd", "module": "research_runner.jobs.pmpd_post9n_batch1", "description": "V5 contextual edge search: gap, time, geometry, RVOL, SPY/QQQ alignment"},
     {"id": "PMPD-EDGE-E1-B2", "project": "pmpd", "module": "research_runner.jobs.pmpd_edge_e1_batch2", "description": "Causal opening-RVOL availability audit and robustness decomposition of Batch-1 primary hypothesis"},
     {"id": "PMPD-EDGE-E1-B3", "project": "pmpd", "module": "research_runner.jobs.pmpd_edge_e1_batch3", "description": "RVOL incremental-edge, concentration, timing, direction, and prior-completed-bar audit"},
@@ -105,9 +106,9 @@ def main() -> int:
     sub = p.add_subparsers(dest="command", required=True)
     sub.add_parser("status")
     nxt = sub.add_parser("run-next")
-    nxt.add_argument("--project", choices=["ccp", "pmpd"])
+    nxt.add_argument("--project", choices=["ccp", "ccp4", "pmpd"])
     allp = sub.add_parser("run-all")
-    allp.add_argument("--project", choices=["ccp", "pmpd"])
+    allp.add_argument("--project", choices=["ccp", "ccp4", "pmpd"])
     args = p.parse_args()
     if args.command == "status": return status()
     if args.command == "run-next": return run_next(args.project)
