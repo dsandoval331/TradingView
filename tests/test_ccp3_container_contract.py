@@ -6,7 +6,8 @@ def test_research_dockerfile_preserves_runner_contract():
     assert 'FROM python:3.12-slim' in text
     assert 'TR_WORK_ROOT=/workspace' in text
     assert 'TR_GIT_SHA=${TR_GIT_SHA}' in text
-    assert 'research_runner.runner' in text
+    assert 'ENTRYPOINT ["python", "-m", "research_runner.runner"]' in text
+    assert 'CMD ["status"]' in text
 
 def test_dockerignore_excludes_runtime_data_and_secrets():
     lines = Path('.dockerignore').read_text(encoding='utf-8').splitlines()
