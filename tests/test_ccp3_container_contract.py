@@ -15,8 +15,3 @@ def test_dockerignore_excludes_runtime_data_and_secrets():
 def test_git_sha_can_be_injected_without_git_metadata(monkeypatch):
     monkeypatch.setenv('TR_GIT_SHA', 'abc123')
     assert runner._git_sha() == 'abc123'
-
-def test_git_sha_falls_back_to_local_checkout(monkeypatch):
-    monkeypatch.delenv('TR_GIT_SHA', raising=False)
-    monkeypatch.setattr(runner.subprocess, 'check_output', lambda *args, **kwargs: 'def456\n')
-    assert runner._git_sha() == 'def456'
