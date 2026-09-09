@@ -1,0 +1,45 @@
+name: CCP-3 Container Certification
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'Dockerfile.research'
+      - '.dockerignore'
+      - 'cloud_compute/**'
+      - 'research_runner/**'
+      - 'requirements.txt'
+      - 'tests/test_ccp3_container_contract.py'
+      - 'tests/test_cloud_compute_container_contract.py'
+      - '.github/workflows/ccp3-container-certify.yml'
+
+jobs:
+  certify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest
+
+      - name: Run CCP-3 tests
+        run: pytest -q tests/test_ccp3_container_contract.py tests/test_cloud_compute_container_contract.py tests/test_research_runner_work_root.py
+
+      - name: Build research image
+        run: docker build --build-arg TR_GIT_SHA="$GITHUB_SHA" -f Dockerfile.research -t trading-research-runner:ccp3 .
+
+      - name: Run research image smoke test
+        run: |
+          docker run --rm trading-research-runner:ccp3 | tee /tmp/ccp3-status.txt
+          grep -F 'CODE_ROOT=/app' /tmp/ccp3-status.txt
+          grep -F 'WORK_ROOT=/workspace' /tmp/ccp3-status.txt
+          grep -F "GIT_SHA=$GITHUB_SHA" /tmp/ccp3-status.txt
