@@ -4,6 +4,7 @@ from research_runner import runner
 def test_research_dockerfile_preserves_runner_contract():
     text = Path('Dockerfile.research').read_text(encoding='utf-8')
     assert 'FROM python:3.12-slim' in text
+    assert 'ARG TR_GIT_SHA' in text
     assert 'TR_WORK_ROOT=/workspace' in text
     assert 'TR_GIT_SHA=${TR_GIT_SHA}' in text
     assert 'python -m cloud_compute.container_contract' in text
