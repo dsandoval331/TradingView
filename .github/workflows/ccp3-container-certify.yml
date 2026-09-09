@@ -43,3 +43,28 @@ jobs:
           grep -F 'CODE_ROOT=/app' /tmp/ccp3-status.txt
           grep -F 'WORK_ROOT=/workspace' /tmp/ccp3-status.txt
           grep -F "GIT_SHA=$GITHUB_SHA" /tmp/ccp3-status.txt
+
+      - name: Run native parity fixture
+        run: |
+          rm -rf /tmp/ccp3-native /tmp/ccp3-container
+          mkdir -p /tmp/ccp3-native /tmp/ccp3-container
+          TR_WORK_ROOT=/tmp/ccp3-native TR_GIT_SHA="$GITHUB_SHA" python -m research_runner.runner run-next --project ccp
+          test -f /tmp/ccp3-native/research_outputs/cloud_compute/ccp3/runner_parity_fixture.json
+
+      - name: Run container parity fixture
+        run: |
+          docker run --rm \
+            -v /tmp/ccp3-container:/workspace \
+            trading-research-runner:ccp3 run-next --project ccp
+          test -f /tmp/ccp3-container/research_outputs/cloud_compute/ccp3/runner_parity_fixture.json
+
+      - name: Certify native-container artifact parity
+        run: |
+          cmp \
+            /tmp/ccp3-native/research_outputs/cloud_compute/ccp3/runner_parity_fixture.json \
+            /tmp/ccp3-container/research_outputs/cloud_compute/ccp3/runner_parity_fixture.json
+          native_sha=$(sha256sum /tmp/ccp3-native/research_outputs/cloud_compute/ccp3/runner_parity_fixture.json | awk '{print $1}')
+          container_sha=$(sha256sum /tmp/ccp3-container/research_outputs/cloud_compute/ccp3/runner_parity_fixture.json | awk '{print $1}')
+          test "$native_sha" = "$container_sha"
+          echo "CCP3_PARITY=PASS"
+          echo "CCP3_PARITY_SHA256=$native_sha"
