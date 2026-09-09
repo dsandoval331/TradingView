@@ -31,6 +31,12 @@ JOBS = [
         "module": "research_runner.jobs.pmpd_edge_e1_batch3",
         "description": "RVOL incremental-edge, concentration, timing, direction, and prior-completed-bar audit",
     },
+    {
+        "id": "PMPD-EDGE-E1-B4",
+        "project": "pmpd",
+        "module": "research_runner.jobs.pmpd_edge_e1_batch4",
+        "description": "Matched-control and incremental-information audit of frozen opening-RVOL hypothesis",
+    },
 ]
 
 
