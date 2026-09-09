@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 type Strategy = { strategy_id:string; strategy_code:string; strategy_name:string; strategy_type:string; status:string; baseline_model:string|null; description:string|null; };
 type ProjectState = { strategy_id:string; active_phase_code:string|null; active_phase_name:string|null; next_phase_code:string|null; next_phase_name:string|null; blocker_count:number|null; baseline_model:string|null; baseline_status:string|null; forward_validation_status:string|null; historical_dataset_status:string|null; last_decision:string|null; roadmap_version:string|null; updated_at:string|null; };
 type Dataset = { strategy_id:string; is_frozen:boolean|null; };
-type Phase = { strategy_id:string; phase_code:string; phase_name:string; phase_order:number|null; status:string|null; };
+type Phase = { strategy_id:string; phase_code:string; phase_name:string; sequence_order:number|null; status:string|null; };
 function prettyStatus(v:string|null|undefined){ if(!v)return "Not tracked"; return v.replaceAll("_"," ").toLowerCase().replace(/\b\w/g,c=>c.toUpperCase()); }
 function formatUpdated(v:string|null|undefined){ if(!v)return "No state timestamp"; return new Intl.DateTimeFormat("en-US",{month:"short",day:"numeric",year:"numeric",hour:"numeric",minute:"2-digit",timeZone:"America/Chicago",timeZoneName:"short"}).format(new Date(v)); }
 
@@ -17,7 +17,7 @@ export default async function DashboardPage(){
   supabase.from("strategies").select("strategy_id,strategy_code,strategy_name,strategy_type,status,baseline_model,description").order("strategy_name"),
   supabase.from("project_state").select("strategy_id,active_phase_code,active_phase_name,next_phase_code,next_phase_name,blocker_count,baseline_model,baseline_status,forward_validation_status,historical_dataset_status,last_decision,roadmap_version,updated_at"),
   supabase.from("datasets").select("strategy_id,is_frozen"),
-  supabase.from("program_phases").select("strategy_id,phase_code,phase_name,phase_order,status").order("phase_order")]);
+  supabase.from("program_phases").select("strategy_id,phase_code,phase_name,sequence_order,status").order("sequence_order")]);
  const queryError=strategiesResult.error||statesResult.error||datasetsResult.error||phasesResult.error; const strategies=(strategiesResult.data??[]) as Strategy[]; const states=(statesResult.data??[]) as ProjectState[]; const datasets=(datasetsResult.data??[]) as Dataset[]; const phases=(phasesResult.data??[]) as Phase[];
  const stateByStrategy=new Map(states.map(s=>[s.strategy_id,s])); const datasetStats=new Map<string,{total:number;frozen:number}>(); for(const d of datasets){const x=datasetStats.get(d.strategy_id)??{total:0,frozen:0};x.total++;if(d.is_frozen)x.frozen++;datasetStats.set(d.strategy_id,x);}
  const phasesByStrategy=new Map<string,Phase[]>(); for(const p of phases){const x=phasesByStrategy.get(p.strategy_id)??[];x.push(p);phasesByStrategy.set(p.strategy_id,x);}
