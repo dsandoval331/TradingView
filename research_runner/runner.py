@@ -3,13 +3,15 @@ from __future__ import annotations
 import argparse
 import importlib
 import json
+import os
 import subprocess
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-STATE_DIR = ROOT / "research_outputs" / "runner"
+CODE_ROOT = Path(__file__).resolve().parents[1]
+WORK_ROOT = Path(os.environ.get("TR_WORK_ROOT", str(CODE_ROOT))).expanduser().resolve()
+STATE_DIR = WORK_ROOT / "research_outputs" / "runner"
 STATE_FILE = STATE_DIR / "state.json"
 
 JOBS = [
@@ -59,7 +61,7 @@ def _save_state(state: dict) -> None:
 
 def _git_sha() -> str | None:
     try:
-        return subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
+        return subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=CODE_ROOT, text=True).strip()
     except Exception:
         return None
 
@@ -67,7 +69,8 @@ def _git_sha() -> str | None:
 def status() -> int:
     state = _load_state()
     print("=== TRADING RESEARCH RUNNER ===")
-    print(f"ROOT={ROOT}")
+    print(f"CODE_ROOT={CODE_ROOT}")
+    print(f"WORK_ROOT={WORK_ROOT}")
     print(f"GIT_SHA={_git_sha()}")
     for job in JOBS:
         rec = state["jobs"].get(job["id"], {})
@@ -83,7 +86,7 @@ def run_job(job: dict) -> int:
     print(f"\n>>> RUNNING {job['id']}: {job['description']}")
     try:
         mod = importlib.import_module(job["module"])
-        result = mod.run(ROOT)
+        result = mod.run(WORK_ROOT)
         rec.update({"status": "PASS", "completed_at": datetime.now(timezone.utc).isoformat(), "result": result})
         _save_state(state)
         print(f">>> {job['id']} PASS")
@@ -119,7 +122,7 @@ def run_all(project: str | None = None) -> int:
 
 
 def main() -> int:
-    p = argparse.ArgumentParser(description="Persistent TradingResearch local research runner")
+    p = argparse.ArgumentParser(description="Persistent TradingResearch local/cloud-compatible research runner")
     sub = p.add_subparsers(dest="command", required=True)
     sub.add_parser("status")
     nxt = sub.add_parser("run-next")
