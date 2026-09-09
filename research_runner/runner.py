@@ -37,6 +37,12 @@ JOBS = [
         "module": "research_runner.jobs.pmpd_edge_e1_batch4",
         "description": "Matched-control and incremental-information audit of frozen opening-RVOL hypothesis",
     },
+    {
+        "id": "PMPD-EDGE-E1-B5",
+        "project": "pmpd",
+        "module": "research_runner.jobs.pmpd_edge_e1_batch5",
+        "description": "Breakout-volume anomaly and opening-momentum contextual edge research",
+    },
 ]
 
 
