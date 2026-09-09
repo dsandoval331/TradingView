@@ -51,15 +51,9 @@ def _cem(
     strata_cols: list[str],
     name: str,
 ) -> tuple[dict, pd.DataFrame]:
-    """Coarsened exact matching using only pre-outcome covariates.
-
-    Within every overlapping stratum, control resolved observations receive a
-    weight that makes their resolved denominator equal the treated resolved
-    denominator.  All reported favorable-first effects therefore remain on
-    the program's resolved-outcome estimand.  Matching itself is performed on
-    all eligible events and never uses the outcome.
-    """
-    x = df.loc[eligible_mask.fillna(False), ["symbol", "outcome", *strata_cols]].copy()
+    """Coarsened exact matching using only pre-outcome covariates."""
+    select_cols = list(dict.fromkeys(["symbol", "outcome", *strata_cols]))
+    x = df.loc[eligible_mask.fillna(False), select_cols].copy()
     x["treated"] = treated_mask.loc[x.index].fillna(False).astype(bool)
     x["outcome"] = _outcome(x["outcome"])
     x["fav"] = (x["outcome"] == "FAVORABLE_FIRST").astype(np.int64)
@@ -82,9 +76,6 @@ def _cem(
         aggfunc="sum",
         fill_value=0,
     )
-
-    # Flatten pivot columns and retain strata with both treated/control events
-    # and at least one resolved outcome on each side.
     piv.columns = [f"{metric}_{'treated' if bool(side) else 'control'}" for metric, side in piv.columns]
     piv = piv.reset_index()
     for c in [
@@ -105,11 +96,18 @@ def _cem(
         result = {
             "test": name,
             "classification": "NO_OVERLAP",
-            "strata": strata_cols,
+            "strata": "+".join(strata_cols),
             "eligible_events": int(len(x)),
-            "treated_events": treated_all["events"],
-            "treated_resolved": treated_all["resolved"],
+            "eligible_treated_events": treated_all["events"],
+            "eligible_treated_resolved": treated_all["resolved"],
+            "eligible_treated_rate": treated_all["resolved_rate"],
+            "eligible_control_events": control_all["events"],
+            "eligible_control_resolved": control_all["resolved"],
+            "eligible_control_rate": control_all["resolved_rate"],
+            "overlap_strata": 0,
+            "matched_treated_events": 0,
             "matched_treated_resolved": 0,
+            "treated_event_coverage": 0.0,
             "treated_resolved_coverage": 0.0,
             "treated_rate": np.nan,
             "matched_control_rate": np.nan,
@@ -134,8 +132,6 @@ def _cem(
     control_rate = cf / cr if cr else np.nan
     lift = treat_rate - control_rate if np.isfinite(treat_rate) and np.isfinite(control_rate) else np.nan
 
-    # Primary/strict specs contain symbol in the exact-match strata.  Collapse
-    # to symbol-level sufficient statistics and resample symbols as clusters.
     if "symbol" not in strata_cols:
         raise ValueError("CEM bootstrap requires symbol in strata_cols")
     sy = (
@@ -226,8 +222,6 @@ def run(root: Path) -> dict:
     v["time30"] = ((v["event_minute"] - SAFE_OPEN_MINUTE) // 30).clip(lower=0).astype("Int64")
     v["time60"] = ((v["event_minute"] - SAFE_OPEN_MINUTE) // 60).clip(lower=0).astype("Int64")
 
-    # Frozen, descriptive coarsening only.  These are matching controls, not
-    # candidate trading thresholds.
     safe_for_gap = (v["event_minute"] >= SAFE_OPEN_MINUTE) & v["gap_abs"].notna()
     try:
         v["gap_q"] = pd.qcut(v.loc[safe_for_gap, "gap_abs"], 4, labels=False, duplicates="drop").reindex(v.index)
@@ -244,9 +238,6 @@ def run(root: Path) -> dict:
     high_rvol = v["opening_rvol14_mean_5m"] >= RVOL_THRESHOLD
     gap = v["gap_aligned"].fillna(False).astype(bool)
 
-    # PRIMARY: isolate opening-RVOL information among already gap-aligned
-    # events.  Exact-match on symbol, event direction, 30m clock bin and gap
-    # magnitude quartile.  No outcome information enters matching.
     primary_eligible = safe & gap
     primary_treated = primary_eligible & high_rvol
     primary, primary_overlap = _cem(
@@ -257,8 +248,6 @@ def run(root: Path) -> dict:
         "opening_rvol>=1.5 incremental within gap_aligned (primary CEM)",
     )
 
-    # STRICT sensitivity adds calendar month while slightly coarsening time to
-    # 60m bins to preserve overlap.  The threshold remains frozen at 1.5.
     strict, strict_overlap = _cem(
         v,
         primary_eligible,
@@ -267,8 +256,6 @@ def run(root: Path) -> dict:
         "opening_rvol>=1.5 incremental within gap_aligned (strict month CEM)",
     )
 
-    # SECONDARY: isolate the incremental contribution of aligned gap among
-    # already-high-RVOL events.  This is not a new threshold search.
     gap_eligible = safe & high_rvol
     gap_treated = gap_eligible & gap
     gap_incremental, gap_overlap = _cem(
@@ -285,8 +272,6 @@ def run(root: Path) -> dict:
     strict_overlap.to_csv(out / "strict_overlap_strata.csv", index=False)
     gap_overlap.to_csv(out / "gap_overlap_strata.csv", index=False)
 
-    # Month-by-month primary matched effect.  This is robustness description;
-    # no month is selected or excluded based on performance.
     month_rows = []
     for month in sorted(v.loc[safe, "month"].dropna().unique()):
         mm = v["month"].eq(month)
@@ -301,7 +286,6 @@ def run(root: Path) -> dict:
     monthly = pd.DataFrame(month_rows)
     monthly.to_csv(out / "monthly_matched_robustness.csv", index=False)
 
-    # Directional matched effects with the exact same frozen specification.
     direction_rows = []
     for direction in ["BULL", "BEAR"]:
         dm = v["direction"].astype(str).str.upper().eq(direction)
@@ -330,17 +314,16 @@ def run(root: Path) -> dict:
         "strict_month_sensitivity": strict,
         "gap_incremental_secondary": gap_incremental,
         "robustness": {
-            "months_with_estimable_matched_effect": int(len(valid_months)),
-            "months_positive_matched_lift": int((valid_months["lift"].astype(float) > 0).sum()) if len(valid_months) else 0,
-            "directions_with_estimable_matched_effect": int(len(valid_dirs)),
-            "directions_positive_matched_lift": int((valid_dirs["lift"].astype(float) > 0).sum()) if len(valid_dirs) else 0,
+            "months_with_positive_matched_lift": int((valid_months["lift"] > 0).sum()) if len(valid_months) else 0,
+            "months_tested": int(len(valid_months)),
+            "directions_with_positive_matched_lift": int((valid_dirs["lift"] > 0).sum()) if len(valid_dirs) else 0,
+            "directions_tested": int(len(valid_dirs)),
         },
         "governance": {
             "research_only": True,
             "2026_is_development_evidence": True,
             "v5_modified": False,
             "threshold_retuned": False,
-            "matching_uses_outcome": False,
             "production_rule_authorized": False,
         },
     }
@@ -353,18 +336,15 @@ def run(root: Path) -> dict:
     print("PRIMARY_MATCHED_LIFT=", primary["lift"])
     print("PRIMARY_MATCHED_LIFT_CI=", [primary["ci95_lower"], primary["ci95_upper"]])
     print("PRIMARY_TREATED_RESOLVED_COVERAGE=", primary["treated_resolved_coverage"])
-    print("STRICT_CLASSIFICATION=", strict["classification"])
-    print("STRICT_MATCHED_LIFT=", strict["lift"])
-    print("STRICT_MATCHED_LIFT_CI=", [strict["ci95_lower"], strict["ci95_upper"]])
+    print("STRICT_MONTH_CLASSIFICATION=", strict["classification"])
     print("GAP_INCREMENTAL_CLASSIFICATION=", gap_incremental["classification"])
-    print("GAP_INCREMENTAL_LIFT=", gap_incremental["lift"])
-    print("MONTHS_POSITIVE_MATCHED_LIFT=", summary["robustness"]["months_positive_matched_lift"], "/", summary["robustness"]["months_with_estimable_matched_effect"])
-    print("DIRECTIONS_POSITIVE_MATCHED_LIFT=", summary["robustness"]["directions_positive_matched_lift"], "/", summary["robustness"]["directions_with_estimable_matched_effect"])
+    print("MONTHS_POSITIVE_MATCHED_LIFT=", summary["robustness"]["months_with_positive_matched_lift"], "/", summary["robustness"]["months_tested"])
+    print("DIRECTIONS_POSITIVE_MATCHED_LIFT=", summary["robustness"]["directions_with_positive_matched_lift"], "/", summary["robustness"]["directions_tested"])
 
     return {
         "output_dir": str(out),
         "summary": str(out / "summary.json"),
-        "matched_incremental_tests": str(out / "matched_incremental_tests.csv"),
-        "monthly_matched_robustness": str(out / "monthly_matched_robustness.csv"),
-        "direction_matched_robustness": str(out / "direction_matched_robustness.csv"),
+        "matched_tests": str(out / "matched_incremental_tests.csv"),
+        "monthly": str(out / "monthly_matched_robustness.csv"),
+        "directions": str(out / "direction_matched_robustness.csv"),
     }
