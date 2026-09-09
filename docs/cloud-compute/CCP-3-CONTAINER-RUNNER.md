@@ -10,14 +10,24 @@ Package the existing `research_runner` execution contract for local Docker and f
 - Market data, research outputs, secrets, credentials, and local virtual environments are excluded from the image build context.
 - Default command is `python -m research_runner.runner status`.
 - A job can be selected by overriding command arguments, for example `run-next --project pmpd`.
+- Container builds inject the source revision with `--build-arg TR_GIT_SHA=<sha>` so provenance does not depend on copying `.git` into the image.
 
-## Local smoke test
+## Local certification
+From the repository root:
+
 ```powershell
-docker build -f Dockerfile.research -t trading-research-runner:ccp3 .
+$sha = git rev-parse HEAD
+docker build --build-arg TR_GIT_SHA=$sha -f Dockerfile.research -t trading-research-runner:ccp3 .
 docker run --rm trading-research-runner:ccp3 status
 ```
 
-To exercise a job against an explicitly mounted workspace, mount only the required runtime data and outputs. Do not bake credentials or market data into the image.
+Expected smoke-test invariants:
+- `CODE_ROOT=/app`
+- `WORK_ROOT=/workspace`
+- `GIT_SHA` equals the build argument
+- registered jobs report READY in a clean workspace
+
+The container intentionally does not contain market data or credentials. Later job execution will receive required runtime datasets and outputs through the cloud data/artifact layer rather than image contents.
 
 ## Cloud migration
 The same image is intended for CCP-4 Cloud Run Jobs. CCP-4 will add cloud-side dataset acquisition/mounting and artifact publication around this unchanged runner contract.
