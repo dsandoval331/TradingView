@@ -25,6 +25,12 @@ JOBS = [
         "module": "research_runner.jobs.pmpd_edge_e1_batch2",
         "description": "Causal opening-RVOL availability audit and robustness decomposition of Batch-1 primary hypothesis",
     },
+    {
+        "id": "PMPD-EDGE-E1-B3",
+        "project": "pmpd",
+        "module": "research_runner.jobs.pmpd_edge_e1_batch3",
+        "description": "RVOL incremental-edge, concentration, timing, direction, and prior-completed-bar audit",
+    },
 ]
 
 
