@@ -18,7 +18,7 @@ From the repository root:
 ```powershell
 $sha = git rev-parse HEAD
 docker build --build-arg TR_GIT_SHA=$sha -f Dockerfile.research -t trading-research-runner:ccp3 .
-docker run --rm trading-research-runner:ccp3 status
+docker run --rm trading-research-runner:ccp3
 ```
 
 Expected smoke-test invariants:
