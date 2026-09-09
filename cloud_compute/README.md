@@ -12,13 +12,17 @@ Cloud migration is an execution-environment change. It must not alter frozen str
 
 Initial implementation reuses services already in the TradingResearch stack wherever possible:
 
-- GitHub for source/version control.
-- Existing Supabase Pro project for the research/control-plane database and the initial object-storage proof of concept.
+- GitHub for source/version control and GitHub Actions as the primary remote research executor while included/free capacity is available.
+- Existing Supabase Pro project for the research/control-plane database and initial object storage.
 - Existing Vercel application for UI/control surfaces only, not heavy batch compute.
-- Google Cloud Run Jobs remains the preferred batch-compute target, subject to a later explicit account/billing/credential gate and free-tier benchmark.
-- Local Windows execution remains supported.
+- Google Cloud Run Jobs as the secondary overflow/scale executor, only after explicit spend/account approval.
+- Local Windows execution as the tertiary fallback plus development/validation/archive path.
 
-No paid add-on, additional Supabase project, spend-cap change, or intentional quota overage is part of this baseline.
+Executor priority is:
+
+`github_actions -> cloud_run -> local_windows`
+
+No paid add-on, additional Supabase project, spend-cap change, or intentional quota overage is part of this baseline. Cloud Run remains protected by `NO_INCREMENTAL_SPEND_WITHOUT_EXPLICIT_APPROVAL`.
 
 ## Local/cloud path contract
 
@@ -42,6 +46,12 @@ Expected work-root layout:
 ```
 
 The Git SHA is always resolved from `CODE_ROOT`; job modules receive `WORK_ROOT`.
+
+All executors converge on the explicit job contract:
+
+```text
+python -m research_runner.runner run-id <JOB_ID>
+```
 
 ## Initial cloud storage layout
 
@@ -76,12 +86,6 @@ python -m cloud_compute.storage_poc --dry-run
 
 A live run requires `SUPABASE_URL` and a server-side `SUPABASE_SECRET_KEY` in the process environment. Never commit or print the secret key. The POC uploads without overwrite, downloads each private object back to a temporary directory, recomputes size and SHA-256, and fails if byte/hash parity differs.
 
-```powershell
-$env:SUPABASE_URL = "https://<project-ref>.supabase.co"
-$env:SUPABASE_SECRET_KEY = "<server-side-secret>"
-python -m cloud_compute.storage_poc
-```
-
 For a repeat verification of already-uploaded immutable objects:
 
 ```powershell
@@ -108,9 +112,9 @@ At this size, the canonical cache consumes roughly 1% of Supabase Pro's 100 GB i
 ## Migration sequence
 
 1. CCP-1 — architecture, inventory, zero-cost baseline.
-2. CCP-2 — private cloud-data POC; upload a small representative subset first, create a manifest, download it, and prove byte/hash parity.
-3. CCP-3 — containerize the existing runner and prove local native vs local-container parity.
-4. CCP-4 — execute one real research job on the selected cloud batch executor.
+2. CCP-2 — private cloud-data POC and byte/hash parity.
+3. CCP-3 — containerized runner and native/container parity.
+4. CCP-4 — hybrid executor proof: GitHub primary, cost-gated Cloud Run secondary, local tertiary fallback.
 5. CCP-5 onward — durable Supabase job control plane, artifacts, automation, web UI, lane migration, reliability/cost certification.
 
 The platform does not authorize automatic changes to research hypotheses, frozen models, or production trading logic.
