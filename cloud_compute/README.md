@@ -56,9 +56,43 @@ MARKET_CACHE_V1/
     ...
 ```
 
-Storage should be private. Dataset versions are treated as immutable logical releases. Supabase Storage does not provide S3 object versioning, so changed canonical datasets must use a new cache/dataset version rather than silently replacing a certified version.
+Storage is private. Dataset versions are treated as immutable logical releases. Supabase Storage does not provide S3 object versioning, so changed canonical datasets must use a new cache/dataset version rather than silently replacing a certified version.
 
 A manifest records every object's relative path, size, and SHA-256. Cloud/local parity is certified by comparing manifests/hashes, not by trusting filenames alone.
+
+### CCP-2 representative parity POC
+
+The first live POC uses only:
+
+- `1m/SPY/2025.parquet`
+- `1m/SPY/2026.parquet`
+- `1m/AAPL/2025.parquet`
+
+Validate the local selection without credentials:
+
+```powershell
+python -m cloud_compute.storage_poc --dry-run
+```
+
+A live run requires `SUPABASE_URL` and a server-side `SUPABASE_SECRET_KEY` in the process environment. Never commit or print the secret key. The POC uploads without overwrite, downloads each private object back to a temporary directory, recomputes size and SHA-256, and fails if byte/hash parity differs.
+
+```powershell
+$env:SUPABASE_URL = "https://<project-ref>.supabase.co"
+$env:SUPABASE_SECRET_KEY = "<server-side-secret>"
+python -m cloud_compute.storage_poc
+```
+
+For a repeat verification of already-uploaded immutable objects:
+
+```powershell
+python -m cloud_compute.storage_poc --allow-existing
+```
+
+The default evidence record is written to:
+
+`research_outputs/cloud_compute/ccp2/storage_poc.json`
+
+The script never writes credentials into the evidence file.
 
 ## CCP-1 measured baseline — 2026-09-09
 
