@@ -46,6 +46,10 @@ def _git_sha() -> str | None:
         return injected or None
 
 
+def _find_job(job_id: str) -> dict | None:
+    return next((job for job in JOBS if job["id"] == job_id), None)
+
+
 def status() -> int:
     state = _load_state()
     print("=== TRADING RESEARCH RUNNER ===")
@@ -78,6 +82,14 @@ def run_job(job: dict) -> int:
         return 1
 
 
+def run_id(job_id: str) -> int:
+    job = _find_job(job_id)
+    if job is None:
+        print(f"UNKNOWN_JOB_ID={job_id}", file=sys.stderr)
+        return 2
+    return run_job(job)
+
+
 def run_next(project: str | None = None) -> int:
     state = _load_state()
     candidates = [j for j in JOBS if project is None or j["project"] == project]
@@ -105,12 +117,15 @@ def main() -> int:
     p = argparse.ArgumentParser(description="Persistent TradingResearch local/cloud-compatible research runner")
     sub = p.add_subparsers(dest="command", required=True)
     sub.add_parser("status")
+    one = sub.add_parser("run-id")
+    one.add_argument("job_id")
     nxt = sub.add_parser("run-next")
     nxt.add_argument("--project", choices=["ccp", "ccp4", "pmpd"])
     allp = sub.add_parser("run-all")
     allp.add_argument("--project", choices=["ccp", "ccp4", "pmpd"])
     args = p.parse_args()
     if args.command == "status": return status()
+    if args.command == "run-id": return run_id(args.job_id)
     if args.command == "run-next": return run_next(args.project)
     if args.command == "run-all": return run_all(args.project)
     return 2
