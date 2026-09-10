@@ -17,16 +17,19 @@ A request manifest under `.github/cloud-job-requests/*.json` defines the runner 
 - The worker only executes queued jobs whose declared `git_sha` exactly matches the checked-out runner SHA.
 - Supabase remains the control plane; research artifacts and structured logs continue to be persisted by the CCP-6 worker contract.
 
-## Certification target
+## Live certification
 
-The live CCP-7 certification request uses `CCP3-PARITY-FIXTURE` and `CCP7-SUBMISSION-CERT-1`. PASS requires one GitHub push to a request manifest to produce, without manual Supabase job creation:
+CCP-7 passed live certification on GitHub Actions run `34433355788` from request commit `fca36758d279875bbf46e85b8079b7249eed24d8`.
 
-1. a new queued control-plane job,
-2. exact SHA provenance equal to the workflow checkout,
-3. GitHub execution of the requested runner job,
-4. successful attempt lifecycle,
-5. persisted structured logs,
-6. checksum-verified primary artifact registration.
+The request manifest automatically created Supabase job `90d3e856-4302-4d9d-a0a4-8b9a401679ef` with dataset version `CCP7-SUBMISSION-CERT-1`. The job and attempt both recorded the same exact Git SHA as the workflow checkout and completed successfully with exit code `0`.
+
+Attempt: `e178783f-5215-4d6c-ada7-5ccaa888bba1`.
+
+Primary artifact: `41c33291-e8d5-489a-b9d5-28575d4277db`, 82 bytes, SHA-256 `b0626ac4532a467dad8076fdee7a0e197c2d00d8afa2b075bea671941d1c10f6`.
+
+Structured runner logs were persisted with ordered sequence numbers and the deterministic parity fixture passed.
+
+Disposition: **COMPLETE → CCP-8 Governed Autonomous Research Loop**.
 
 ## Remaining hardening before autonomous research
 
