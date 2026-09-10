@@ -1,0 +1,13 @@
+{
+  "strategy_id": "98f761bf-c6f1-4399-b10e-e299cb332141",
+  "runner_job_id": "CCP3-PARITY-FIXTURE",
+  "project_code": "CLOUD_COMPUTE",
+  "phase_code": "CCP-7",
+  "dataset_version": "CCP7-SUBMISSION-CERT-1",
+  "preferred_executor": "github_actions",
+  "cloud_run_spend_approved": false,
+  "priority": 10,
+  "parameters_json": {
+    "purpose": "CCP-7 live GitHub-to-Supabase submission automation certification"
+  }
+}
