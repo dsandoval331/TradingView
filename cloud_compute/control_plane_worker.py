@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any
 
+from cloud_compute.artifact_contract import validate_declared_outputs
 from cloud_compute.control_plane import (
     ControlPlaneConfig,
     claim_job,
@@ -58,39 +59,39 @@ def _record_stream_logs(config: ControlPlaneConfig, *, job_id: str, attempt_id: 
             sequence += 1
 
 
-def _persist_runner_artifact(config: ControlPlaneConfig, *, job_id: str, attempt_id: str, runner_job_id: str, bucket: str) -> dict | None:
+def _persist_runner_artifacts(config: ControlPlaneConfig, *, job_id: str, attempt_id: str, runner_job_id: str, bucket: str) -> list[dict]:
     state = runner._load_state()
     result = state.get("jobs", {}).get(runner_job_id, {}).get("result") or {}
-    rel = result.get("artifact")
-    if not rel:
-        return None
+    paths = validate_declared_outputs(result, work_root=runner.WORK_ROOT)
+    if not paths:
+        return []
+
     root = runner.WORK_ROOT.resolve()
-    path = (root / rel).resolve()
-    try:
-        path.relative_to(root)
-    except ValueError as exc:
-        raise RuntimeError(f"artifact path escapes work root: {rel}") from exc
-    if not path.is_file():
-        raise RuntimeError(f"declared artifact does not exist: {rel}")
-    digest = sha256_file(path)
-    expected = result.get("sha256")
-    if expected and expected != digest:
-        raise RuntimeError(f"artifact checksum mismatch for {rel}")
-    object_path = f"artifacts/{job_id}/{attempt_id}/{path.name}"
-    _upload_object(config.supabase_url, config.secret_key, bucket, object_path, path, allow_existing=False)
-    return create_artifact(config, {
-        "job_id": job_id,
-        "attempt_id": attempt_id,
-        "artifact_type": "research_output",
-        "storage_backend": "supabase_storage",
-        "bucket_name": bucket,
-        "object_path": object_path,
-        "media_type": mimetypes.guess_type(path.name)[0] or "application/octet-stream",
-        "size_bytes": path.stat().st_size,
-        "sha256": digest,
-        "is_primary": True,
-        "metadata_json": {"runner_job_id": runner_job_id, "runner_relative_path": rel},
-    })
+    primary_rel = result.get("artifact")
+    persisted: list[dict] = []
+    for path in paths:
+        rel = str(path.relative_to(root)).replace("\\", "/")
+        digest = sha256_file(path)
+        if primary_rel and rel == str(primary_rel).replace("\\", "/"):
+            expected = result.get("sha256")
+            if expected and expected != digest:
+                raise RuntimeError(f"artifact checksum mismatch for {rel}")
+        object_path = f"artifacts/{job_id}/{attempt_id}/{path.name}"
+        _upload_object(config.supabase_url, config.secret_key, bucket, object_path, path, allow_existing=False)
+        persisted.append(create_artifact(config, {
+            "job_id": job_id,
+            "attempt_id": attempt_id,
+            "artifact_type": "research_output",
+            "storage_backend": "supabase_storage",
+            "bucket_name": bucket,
+            "object_path": object_path,
+            "media_type": mimetypes.guess_type(path.name)[0] or "application/octet-stream",
+            "size_bytes": path.stat().st_size,
+            "sha256": digest,
+            "is_primary": bool(primary_rel and rel == str(primary_rel).replace("\\", "/")),
+            "metadata_json": {"runner_job_id": runner_job_id, "runner_relative_path": rel},
+        }))
+    return persisted
 
 
 def run_one_outcome(
@@ -106,20 +107,9 @@ def run_one_outcome(
         raise RuntimeError("worker Git SHA is unavailable")
 
     if exact_job_id:
-        claim = claim_job_by_id(
-            config,
-            job_id=exact_job_id,
-            executor=executor,
-            git_sha=actual_git_sha,
-            external_execution_id=external_execution_id,
-        )
+        claim = claim_job_by_id(config, job_id=exact_job_id, executor=executor, git_sha=actual_git_sha, external_execution_id=external_execution_id)
     else:
-        claim = claim_job(
-            config,
-            executor=executor,
-            git_sha=actual_git_sha,
-            external_execution_id=external_execution_id,
-        )
+        claim = claim_job(config, executor=executor, git_sha=actual_git_sha, external_execution_id=external_execution_id)
     if claim is None:
         print("NO_ELIGIBLE_CONTROL_PLANE_JOBS")
         return RunOutcome(exit_code=0)
@@ -133,31 +123,19 @@ def run_one_outcome(
     stdout_buffer = io.StringIO()
     stderr_buffer = io.StringIO()
     try:
-        materialized = materialize_job_inputs(
-            config,
-            job_id=job_id,
-            work_root=runner.WORK_ROOT,
-        )
+        materialized = materialize_job_inputs(config, job_id=job_id, work_root=runner.WORK_ROOT)
         if materialized:
             create_log(config, {
-                "job_id": job_id,
-                "attempt_id": attempt_id,
-                "sequence_no": 0,
-                "level": "INFO",
-                "source": "input_materializer",
+                "job_id": job_id, "attempt_id": attempt_id, "sequence_no": 0,
+                "level": "INFO", "source": "input_materializer",
                 "message": f"materialized {len(materialized)} governed input(s)",
-                "metadata_json": {
-                    "inputs": [
-                        {
-                            "input_id": item.input_id,
-                            "object_path": item.object_path,
-                            "local_path": str(item.local_path.relative_to(runner.WORK_ROOT.resolve())),
-                            "size_bytes": item.size_bytes,
-                            "sha256": item.sha256,
-                        }
-                        for item in materialized
-                    ]
-                },
+                "metadata_json": {"inputs": [{
+                    "input_id": item.input_id,
+                    "object_path": item.object_path,
+                    "local_path": str(item.local_path.relative_to(runner.WORK_ROOT.resolve())),
+                    "size_bytes": item.size_bytes,
+                    "sha256": item.sha256,
+                } for item in materialized]},
             })
 
         with redirect_stdout(stdout_buffer), redirect_stderr(stderr_buffer):
@@ -165,12 +143,19 @@ def run_one_outcome(
         _record_stream_logs(config, job_id=job_id, attempt_id=attempt_id, stdout_text=stdout_buffer.getvalue(), stderr_text=stderr_buffer.getvalue())
         completed = _now()
         if rc == 0:
-            artifact = _persist_runner_artifact(config, job_id=job_id, attempt_id=attempt_id, runner_job_id=runner_job_id, bucket=artifact_bucket)
-            artifact_id = artifact.get("artifact_id") if artifact else None
+            artifacts = _persist_runner_artifacts(config, job_id=job_id, attempt_id=attempt_id, runner_job_id=runner_job_id, bucket=artifact_bucket)
+            primary = next((row for row in artifacts if row.get("is_primary")), None)
+            artifact_id = primary.get("artifact_id") if primary else None
             update_job(config, job_id, {"status": "succeeded", "completed_at": completed})
             update_attempt(config, attempt_id, {
                 "status": "succeeded", "completed_at": completed, "exit_code": 0,
-                "metadata_json": {"runner_job_id": runner_job_id, "artifact_id": artifact_id, "atomic_claim": True, "materialized_input_count": len(materialized)},
+                "metadata_json": {
+                    "runner_job_id": runner_job_id,
+                    "artifact_id": artifact_id,
+                    "artifact_count": len(artifacts),
+                    "atomic_claim": True,
+                    "materialized_input_count": len(materialized),
+                },
             })
             print(f"CONTROL_PLANE_JOB_SUCCEEDED={job_id}")
             return RunOutcome(0, job, attempt_id, attempt_no, artifact_id)
@@ -179,7 +164,8 @@ def run_one_outcome(
         update_job(config, job_id, {"status": "failed", "completed_at": completed, "last_error": error})
         update_attempt(config, attempt_id, {
             "status": "failed", "completed_at": completed, "exit_code": rc,
-            "error_summary": error, "metadata_json": {"runner_job_id": runner_job_id, "atomic_claim": True, "materialized_input_count": len(materialized)},
+            "error_summary": error,
+            "metadata_json": {"runner_job_id": runner_job_id, "atomic_claim": True, "materialized_input_count": len(materialized)},
         })
         print(f"CONTROL_PLANE_JOB_FAILED={job_id}")
         return RunOutcome(rc, job, attempt_id, attempt_no)
@@ -189,7 +175,8 @@ def run_one_outcome(
         update_job(config, job_id, {"status": "failed", "completed_at": completed, "last_error": error})
         update_attempt(config, attempt_id, {
             "status": "failed", "completed_at": completed, "exit_code": 1,
-            "error_summary": error, "metadata_json": {"runner_job_id": runner_job_id, "atomic_claim": True},
+            "error_summary": error,
+            "metadata_json": {"runner_job_id": runner_job_id, "atomic_claim": True},
         })
         print(f"CONTROL_PLANE_JOB_FAILED={job_id}")
         return RunOutcome(1, job, attempt_id, attempt_no)
