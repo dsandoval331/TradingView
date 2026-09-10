@@ -1,0 +1,97 @@
+name: CCP-10 PMPD B2 Proof of Concept
+
+on:
+  push:
+    branches:
+      - cloud-compute/ccp10-research-lane-migration
+    paths:
+      - '.github/workflows/ccp10-live-pmpd-b2-poc.yml'
+  workflow_dispatch:
+
+jobs:
+  certify-real-lane:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_URL: ${{ secrets.TR_SUPABASE_URL }}
+      SUPABASE_SECRET_KEY: ${{ secrets.TR_SUPABASE_SECRET_KEY }}
+      TR_GIT_SHA: ${{ github.sha }}
+      TR_WORK_ROOT: ${{ github.workspace }}/.ccp10-work
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Verify proof wrapper preserves PMPD ownership boundary
+        run: |
+          python - <<'PY'
+          from research_runner import runner
+          job = runner._find_job('CCP10-PMPD-EDGE-E1-B2-POC')
+          assert job is not None
+          assert job['project'] == 'ccp'
+          assert job['module'] == 'research_runner.jobs.ccp10_pmpd_edge_e1_batch2_poc'
+          print('CCP10_PMPD_BOUNDARY=PASS')
+          PY
+
+      - name: Create governed proof job and upstream-artifact dependency
+        id: submit
+        shell: bash
+        run: |
+          python - <<'PY'
+          import os
+          from cloud_compute.control_plane import ControlPlaneConfig, create_job
+          from cloud_compute.dependency_manifest import attach_dependency_manifest
+
+          cfg = ControlPlaneConfig(os.environ['SUPABASE_URL'], os.environ['SUPABASE_SECRET_KEY'])
+          job = create_job(cfg, {
+              'strategy_id': '98f761bf-c6f1-4399-b10e-e299cb332141',
+              'runner_job_id': 'CCP10-PMPD-EDGE-E1-B2-POC',
+              'project_code': 'CLOUD_COMPUTE',
+              'phase_code': 'CCP-10',
+              'status': 'queued',
+              'preferred_executor': 'github_actions',
+              'cloud_run_spend_approved': False,
+              'priority': 10,
+              'git_sha': os.environ['GITHUB_SHA'],
+              'dataset_version': 'CCP10-PMPD-B2-POC-1',
+              'parameters_json': {
+                  'submission_source': 'ccp10_live_pmpd_b2_poc',
+                  'purpose': 'CCP-10 real-lane cloud execution proof using unchanged PMPD EDGE-E1 Batch-2 logic',
+                  'proof_of_concept_only': True,
+                  'pmpd_research_interpretation_authorized': False,
+                  'pmpd_model_change_authorized': False,
+              },
+          })
+          attach_dependency_manifest(
+              cfg,
+              job_id=job['job_id'],
+              dataset_version='PMPD-POST9N-B1-CANONICAL-CONTEXT',
+              dependencies=[{
+                  'type': 'upstream_artifact',
+                  'artifact_id': '81254126-7f71-4940-8a00-c67633415908',
+                  'local_relative_path': 'research_outputs/pmpd/post9n_batch1/context_enriched.parquet',
+                  'required': True,
+              }],
+          )
+          print(f"JOB_ID={job['job_id']}")
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as handle:
+              handle.write(f"job_id={job['job_id']}\n")
+          PY
+
+      - name: Execute exact governed PMPD B2 proof job
+        run: >-
+          python -m cloud_compute.autonomous_loop
+          --executor github_actions
+          --external-execution-id "$GITHUB_RUN_ID"
+          --job-id "${{ steps.submit.outputs.job_id }}"
+          --max-jobs 1
