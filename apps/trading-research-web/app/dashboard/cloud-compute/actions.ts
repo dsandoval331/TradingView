@@ -7,6 +7,7 @@ import { createAdminClient } from "../../../lib/supabase/admin";
 
 const CLOUD_COMPUTE_STRATEGY_ID = "98f761bf-c6f1-4399-b10e-e299cb332141";
 const ALLOWED_RUNNERS = new Set(["CCP3-PARITY-FIXTURE", "CCP4-REMOTE-FIXTURE"]);
+const STABLE_DISPATCH_WORKFLOW = "trading-research-dispatch.yml";
 
 async function requireAuthorizedUser() {
   const supabase = await createClient();
@@ -44,13 +45,15 @@ export async function submitCloudJob(formData: FormData) {
     parameters_json: {
       submission_source: "vercel_web_app",
       purpose: "CCP-9 authenticated web submission",
+      git_ref: gitRef,
+      dispatch_workflow: STABLE_DISPATCH_WORKFLOW,
       retry_policy: { enabled: true, max_attempts: 2, retry_exit_codes: [1, 2] },
     },
   }).select("job_id").single();
 
   if (jobError || !job) redirect("/dashboard/cloud-compute?error=job_create_failed");
 
-  const response = await fetch(`https://api.github.com/repos/${repository}/actions/workflows/ccp9-web-job.yml/dispatches`, {
+  const response = await fetch(`https://api.github.com/repos/${repository}/actions/workflows/${STABLE_DISPATCH_WORKFLOW}/dispatches`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${githubToken}`,
@@ -58,7 +61,10 @@ export async function submitCloudJob(formData: FormData) {
       "X-GitHub-Api-Version": "2022-11-28",
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ ref: gitRef, inputs: { job_id: job.job_id, git_sha: gitSha } }),
+    body: JSON.stringify({
+      ref: "main",
+      inputs: { job_id: job.job_id, git_sha: gitSha, target_ref: gitRef },
+    }),
     cache: "no-store",
   });
 
