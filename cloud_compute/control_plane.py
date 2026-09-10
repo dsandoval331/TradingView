@@ -60,6 +60,10 @@ def create_job(config: ControlPlaneConfig, payload: dict[str, Any]) -> dict[str,
     return _insert_one(config, 'research_jobs', payload)
 
 
+def create_job_input(config: ControlPlaneConfig, payload: dict[str, Any]) -> dict[str, Any]:
+    return _insert_one(config, 'research_job_inputs', payload)
+
+
 def fetch_queued_jobs(config: ControlPlaneConfig, *, limit: int = 20) -> list[dict[str, Any]]:
     params = {
         'status': 'in.(queued,local_pending)',
