@@ -9,6 +9,8 @@ from cloud_compute.control_plane import (
     claim_job_by_id,
     create_attempt,
     create_job,
+    create_job_input,
+    fetch_job_inputs,
     fetch_queued_jobs,
     update_job,
 )
@@ -30,6 +32,16 @@ def test_create_job_posts_and_returns_single_row() -> None:
     assert post.call_args.kwargs['headers']['Prefer'] == 'return=representation'
 
 
+def test_create_job_input_targets_input_table() -> None:
+    config = ControlPlaneConfig('https://example.supabase.co', 'sb_secret_example')
+    response = Mock(ok=True)
+    response.json.return_value = [{'input_id': 'input-1'}]
+    with patch('cloud_compute.control_plane.requests.post', return_value=response) as post:
+        row = create_job_input(config, {'job_id': 'job-1', 'object_path': '1m/SPY/2025.parquet'})
+    assert row['input_id'] == 'input-1'
+    assert post.call_args.args[0].endswith('/research_job_inputs')
+
+
 def test_fetch_queued_jobs_orders_priority_then_time() -> None:
     config = ControlPlaneConfig('https://example.supabase.co', 'legacy.jwt')
     response = Mock(ok=True)
@@ -41,6 +53,20 @@ def test_fetch_queued_jobs_orders_priority_then_time() -> None:
     assert params['status'] == 'in.(queued,local_pending)'
     assert params['order'] == 'priority.asc,queued_at.asc'
     assert params['limit'] == '7'
+
+
+def test_fetch_job_inputs_filters_job_and_orders_deterministically() -> None:
+    config = ControlPlaneConfig('https://example.supabase.co', 'sb_secret_example')
+    response = Mock(ok=True)
+    response.json.return_value = [{'input_id': 'input-1'}]
+    with patch('cloud_compute.control_plane.requests.get', return_value=response) as get:
+        rows = fetch_job_inputs(config, 'job-1')
+    assert rows == [{'input_id': 'input-1'}]
+    assert get.call_args.args[0].endswith('/research_job_inputs')
+    assert get.call_args.kwargs['params'] == {
+        'job_id': 'eq.job-1',
+        'order': 'created_at.asc,input_id.asc',
+    }
 
 
 def test_claim_job_calls_atomic_rpc() -> None:
