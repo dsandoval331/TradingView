@@ -18,6 +18,7 @@ from cloud_compute.control_plane import (
     update_attempt,
     update_job,
 )
+from cloud_compute.input_materializer import materialize_job_inputs
 from cloud_compute.manifest import sha256_file
 from cloud_compute.storage_poc import _upload_object
 from research_runner import runner
@@ -132,6 +133,33 @@ def run_one_outcome(
     stdout_buffer = io.StringIO()
     stderr_buffer = io.StringIO()
     try:
+        materialized = materialize_job_inputs(
+            config,
+            job_id=job_id,
+            work_root=runner.WORK_ROOT,
+        )
+        if materialized:
+            create_log(config, {
+                "job_id": job_id,
+                "attempt_id": attempt_id,
+                "sequence_no": 0,
+                "level": "INFO",
+                "source": "input_materializer",
+                "message": f"materialized {len(materialized)} governed input(s)",
+                "metadata_json": {
+                    "inputs": [
+                        {
+                            "input_id": item.input_id,
+                            "object_path": item.object_path,
+                            "local_path": str(item.local_path.relative_to(runner.WORK_ROOT.resolve())),
+                            "size_bytes": item.size_bytes,
+                            "sha256": item.sha256,
+                        }
+                        for item in materialized
+                    ]
+                },
+            })
+
         with redirect_stdout(stdout_buffer), redirect_stderr(stderr_buffer):
             rc = runner.run_id(runner_job_id)
         _record_stream_logs(config, job_id=job_id, attempt_id=attempt_id, stdout_text=stdout_buffer.getvalue(), stderr_text=stderr_buffer.getvalue())
@@ -142,7 +170,7 @@ def run_one_outcome(
             update_job(config, job_id, {"status": "succeeded", "completed_at": completed})
             update_attempt(config, attempt_id, {
                 "status": "succeeded", "completed_at": completed, "exit_code": 0,
-                "metadata_json": {"runner_job_id": runner_job_id, "artifact_id": artifact_id, "atomic_claim": True},
+                "metadata_json": {"runner_job_id": runner_job_id, "artifact_id": artifact_id, "atomic_claim": True, "materialized_input_count": len(materialized)},
             })
             print(f"CONTROL_PLANE_JOB_SUCCEEDED={job_id}")
             return RunOutcome(0, job, attempt_id, attempt_no, artifact_id)
@@ -151,7 +179,7 @@ def run_one_outcome(
         update_job(config, job_id, {"status": "failed", "completed_at": completed, "last_error": error})
         update_attempt(config, attempt_id, {
             "status": "failed", "completed_at": completed, "exit_code": rc,
-            "error_summary": error, "metadata_json": {"runner_job_id": runner_job_id, "atomic_claim": True},
+            "error_summary": error, "metadata_json": {"runner_job_id": runner_job_id, "atomic_claim": True, "materialized_input_count": len(materialized)},
         })
         print(f"CONTROL_PLANE_JOB_FAILED={job_id}")
         return RunOutcome(rc, job, attempt_id, attempt_no)
