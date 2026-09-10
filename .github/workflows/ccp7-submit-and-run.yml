@@ -35,8 +35,8 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pytest
-      - name: Certify submission contract
-        run: pytest -q tests/test_ccp7_submit_job.py tests/test_ccp5_control_plane.py tests/test_ccp5_control_plane_worker.py
+      - name: Certify cloud control-plane contracts
+        run: pytest -q tests/test_ccp7_submit_job.py tests/test_ccp5_control_plane.py tests/test_ccp5_control_plane_worker.py tests/test_ccp8_autonomous_loop.py
       - name: Resolve request manifest
         id: request
         shell: bash
@@ -54,5 +54,5 @@ jobs:
           echo "REQUEST_PATH=$REQUEST_PATH"
       - name: Submit governed control-plane job
         run: python -m cloud_compute.submit_job "${{ steps.request.outputs.path }}"
-      - name: Execute submitted job
-        run: python -m cloud_compute.control_plane_worker --executor github_actions --external-execution-id "$GITHUB_RUN_ID"
+      - name: Execute governed autonomous loop
+        run: python -m cloud_compute.autonomous_loop --executor github_actions --external-execution-id "$GITHUB_RUN_ID" --max-jobs 10
