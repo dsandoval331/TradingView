@@ -7,9 +7,12 @@ on:
       - 'cloud-compute/ccp1-foundation'
     paths:
       - '.github/ccp5-live-trigger.txt'
+      - '.github/ccp6-live-trigger.txt'
   pull_request:
     paths:
+      - 'cloud_compute/control_plane.py'
       - 'cloud_compute/control_plane_worker.py'
+      - 'tests/test_ccp5_control_plane.py'
       - 'tests/test_ccp5_control_plane_worker.py'
       - '.github/workflows/ccp5-control-plane-worker.yml'
 
