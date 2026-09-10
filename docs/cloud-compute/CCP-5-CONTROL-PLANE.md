@@ -26,14 +26,11 @@ Cloud Run remains ineligible unless `cloud_run_spend_approved = true` for the jo
 
 The CCP-5 tables have RLS enabled and intentionally have no client-facing policies during the initial service-side phase. Elevated server-side workers may access them through a private Supabase secret/service role. Browser clients must not receive that credential. Web-app access will be introduced later through deliberately scoped server-side APIs or explicit RLS policies.
 
-## Initial API contract
+## API contract
 
-`cloud_compute.control_plane` provides a small REST client for:
+`cloud_compute.control_plane` provides the executor-neutral REST client for creating jobs, fetching queued/local-pending jobs in deterministic priority order, updating job state, and creating execution-attempt records.
 
-- creating a job;
-- fetching queued/local-pending jobs in deterministic priority order;
-- updating job state;
-- creating execution-attempt records.
+`cloud_compute.control_plane_worker` adds the worker lifecycle: select an eligible queued job, mark it running, create an attempt, call the common `research_runner run-id` contract, and report success or failure back to Supabase.
 
 The client preserves the CCP-2 authentication fix: modern `sb_secret_*` keys are sent as `apikey` and are not incorrectly treated as JWT Bearer tokens.
 
@@ -53,10 +50,20 @@ Attempt statuses:
 
 `queued -> running -> succeeded|failed|cancelled`
 
-## Current certification gates
+## Certification
 
-1. Database schema exists with RLS and indexes.
-2. Security/performance advisors are reviewed after DDL.
-3. Client unit tests certify auth headers and deterministic REST semantics.
-4. A real service-side CCP-5 proof job is inserted, assigned, attempted, and completed in Supabase.
-5. Next step: connect GitHub Actions to consume/complete a real control-plane job without exposing long-lived secrets in repository code.
+CCP-5 is certified.
+
+1. Database schema exists with RLS and supporting indexes.
+2. Security/performance advisors were reviewed after DDL.
+3. Control-plane client tests passed in GitHub Actions.
+4. A real service-side lifecycle proof was created and completed in Supabase.
+5. A real GitHub Actions worker consumed a queued Supabase job, created an attempt, executed `CCP3-PARITY-FIXTURE`, and reported success back to Supabase.
+6. Live certification GitHub Actions run: `34425290629`.
+7. Certified Supabase job: `638f33a0-4012-4119-aa72-68ffa08d5390`.
+8. Certified attempt: `64ec8ca2-cd2e-4263-b4a8-ffc2611bb60c`.
+9. Executor: `github_actions`; exit code: `0`; no error recorded.
+
+## Disposition
+
+**COMPLETE — advance to CCP-6 Artifact & Log Management.**
