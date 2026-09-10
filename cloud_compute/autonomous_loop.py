@@ -207,7 +207,7 @@ def main() -> int:
         artifact_bucket=args.artifact_bucket,
         max_jobs=args.max_jobs,
     )
-    return 0 if summary.failed == 0 else 1
+    return 1 if summary.stopped_reason in {"failure_gate", "run_job_limit"} else 0
 
 
 if __name__ == "__main__":
