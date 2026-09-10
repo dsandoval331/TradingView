@@ -80,6 +80,24 @@ def fetch_queued_jobs(config: ControlPlaneConfig, *, limit: int = 20) -> list[di
     return rows
 
 
+def fetch_job_inputs(config: ControlPlaneConfig, job_id: str) -> list[dict[str, Any]]:
+    response = requests.get(
+        f'{config.rest_url}/research_job_inputs',
+        headers=_request_headers(config.secret_key),
+        params={
+            'job_id': f'eq.{job_id}',
+            'order': 'created_at.asc,input_id.asc',
+        },
+        timeout=30,
+    )
+    if not response.ok:
+        raise RuntimeError(f'fetch_job_inputs failed: HTTP {response.status_code} {response.text[:500]}')
+    rows = response.json()
+    if not isinstance(rows, list):
+        raise RuntimeError('fetch_job_inputs expected a list response')
+    return rows
+
+
 def _claim_rpc(
     config: ControlPlaneConfig,
     *,
