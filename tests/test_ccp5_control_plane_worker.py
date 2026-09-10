@@ -10,6 +10,25 @@ def test_no_eligible_job_is_clean_noop() -> None:
         assert run_one(config) == 0
 
 
+def test_git_sha_mismatch_is_not_executed() -> None:
+    config = ControlPlaneConfig("https://example.supabase.co", "sb_secret_example")
+    job = {
+        "job_id": "job-mismatch",
+        "runner_job_id": "CCP3-PARITY-FIXTURE",
+        "preferred_executor": "github_actions",
+        "assigned_executor": None,
+        "git_sha": "queued-sha",
+        "parameters_json": {},
+    }
+    with (
+        patch("cloud_compute.control_plane_worker.fetch_queued_jobs", return_value=[job]),
+        patch("cloud_compute.control_plane_worker.runner._git_sha", return_value="actual-sha"),
+        patch("cloud_compute.control_plane_worker.runner.run_id") as run_id,
+    ):
+        assert run_one(config) == 0
+    run_id.assert_not_called()
+
+
 def test_worker_claims_runs_persists_and_completes_job() -> None:
     config = ControlPlaneConfig("https://example.supabase.co", "sb_secret_example")
     job = {
@@ -25,6 +44,7 @@ def test_worker_claims_runs_persists_and_completes_job() -> None:
     artifact = {"artifact_id": "artifact-1"}
     with (
         patch("cloud_compute.control_plane_worker.fetch_queued_jobs", return_value=[job]),
+        patch("cloud_compute.control_plane_worker.runner._git_sha", return_value="abc123"),
         patch("cloud_compute.control_plane_worker.update_job", return_value=job) as update_job,
         patch("cloud_compute.control_plane_worker.create_attempt", return_value=attempt),
         patch("cloud_compute.control_plane_worker.runner.run_id", return_value=0) as run_id,
@@ -55,6 +75,7 @@ def test_worker_records_runner_failure() -> None:
     attempt = {"attempt_id": "attempt-2"}
     with (
         patch("cloud_compute.control_plane_worker.fetch_queued_jobs", return_value=[job]),
+        patch("cloud_compute.control_plane_worker.runner._git_sha", return_value="abc123"),
         patch("cloud_compute.control_plane_worker.update_job", return_value=job) as update_job,
         patch("cloud_compute.control_plane_worker.create_attempt", return_value=attempt),
         patch("cloud_compute.control_plane_worker.runner.run_id", return_value=2),
