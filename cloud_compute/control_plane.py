@@ -80,6 +80,28 @@ def fetch_queued_jobs(config: ControlPlaneConfig, *, limit: int = 20) -> list[di
     return rows
 
 
+def _claim_rpc(
+    config: ControlPlaneConfig,
+    *,
+    rpc_name: str,
+    payload: dict[str, Any],
+) -> dict[str, Any] | None:
+    response = requests.post(
+        f'{config.rest_url}/rpc/{rpc_name}',
+        headers=_request_headers(config.secret_key),
+        json=payload,
+        timeout=30,
+    )
+    if not response.ok:
+        raise RuntimeError(f'{rpc_name} failed: HTTP {response.status_code} {response.text[:500]}')
+    body = response.json()
+    if body is None:
+        return None
+    if not isinstance(body, dict) or not isinstance(body.get('job'), dict) or not body.get('attempt_id'):
+        raise RuntimeError(f'{rpc_name} returned an invalid payload')
+    return body
+
+
 def claim_job(
     config: ControlPlaneConfig,
     *,
@@ -87,24 +109,35 @@ def claim_job(
     git_sha: str,
     external_execution_id: str | None = None,
 ) -> dict[str, Any] | None:
-    response = requests.post(
-        f'{config.rest_url}/rpc/claim_research_job_v1',
-        headers=_request_headers(config.secret_key),
-        json={
+    return _claim_rpc(
+        config,
+        rpc_name='claim_research_job_v1',
+        payload={
             'p_executor': executor,
             'p_git_sha': git_sha,
             'p_external_execution_id': external_execution_id,
         },
-        timeout=30,
     )
-    if not response.ok:
-        raise RuntimeError(f'claim_job failed: HTTP {response.status_code} {response.text[:500]}')
-    payload = response.json()
-    if payload is None:
-        return None
-    if not isinstance(payload, dict) or not isinstance(payload.get('job'), dict) or not payload.get('attempt_id'):
-        raise RuntimeError('claim_job returned an invalid payload')
-    return payload
+
+
+def claim_job_by_id(
+    config: ControlPlaneConfig,
+    *,
+    job_id: str,
+    executor: str,
+    git_sha: str,
+    external_execution_id: str | None = None,
+) -> dict[str, Any] | None:
+    return _claim_rpc(
+        config,
+        rpc_name='claim_research_job_by_id_v1',
+        payload={
+            'p_job_id': job_id,
+            'p_executor': executor,
+            'p_git_sha': git_sha,
+            'p_external_execution_id': external_execution_id,
+        },
+    )
 
 
 def update_job(config: ControlPlaneConfig, job_id: str, patch: dict[str, Any]) -> dict[str, Any]:
