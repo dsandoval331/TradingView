@@ -37,6 +37,31 @@ def test_worker_claims_runs_persists_and_completes_job() -> None:
     assert update_attempt.call_args.args[2]["metadata_json"]["atomic_claim"] is True
 
 
+def test_worker_exact_job_uses_exact_claim_only() -> None:
+    config = ControlPlaneConfig("https://example.supabase.co", "sb_secret_example")
+    job = {"job_id": "job-web", "runner_job_id": "CCP3-PARITY-FIXTURE", "git_sha": "abc123"}
+    claim = {"job": job, "attempt_id": "attempt-web", "attempt_no": 1}
+    with (
+        patch("cloud_compute.control_plane_worker.runner._git_sha", return_value="abc123"),
+        patch("cloud_compute.control_plane_worker.claim_job_by_id", return_value=claim) as exact_claim,
+        patch("cloud_compute.control_plane_worker.claim_job") as generic_claim,
+        patch("cloud_compute.control_plane_worker.runner.run_id", return_value=0),
+        patch("cloud_compute.control_plane_worker._record_stream_logs"),
+        patch("cloud_compute.control_plane_worker._persist_runner_artifact", return_value={"artifact_id": "artifact-web"}),
+        patch("cloud_compute.control_plane_worker.update_job", return_value=job),
+        patch("cloud_compute.control_plane_worker.update_attempt", return_value={}),
+    ):
+        assert run_one(config, external_execution_id="run-web", exact_job_id="job-web") == 0
+    exact_claim.assert_called_once_with(
+        config,
+        job_id="job-web",
+        executor="github_actions",
+        git_sha="abc123",
+        external_execution_id="run-web",
+    )
+    generic_claim.assert_not_called()
+
+
 def test_worker_records_runner_failure() -> None:
     config = ControlPlaneConfig("https://example.supabase.co", "sb_secret_example")
     job = {"job_id": "job-2", "runner_job_id": "UNKNOWN", "git_sha": "abc123"}
