@@ -19,6 +19,7 @@ JOBS = [
     {"id": "CCP4-REMOTE-FIXTURE", "project": "ccp4", "module": "research_runner.jobs.ccp4_remote_fixture", "description": "Representative remote-input cloud execution certification fixture"},
     {"id": "CCP8-RETRY-ONCE-FIXTURE", "project": "ccp", "module": "research_runner.jobs.ccp8_retry_once_fixture", "description": "Deterministic autonomous-loop fail-once then succeed retry fixture"},
     {"id": "CCP10-MARKET-DATA-INPUT", "project": "ccp", "module": "research_runner.jobs.ccp10_market_data_input_fixture", "description": "Checksum-verified Supabase Storage market-data materialization smoke fixture"},
+    {"id": "CCP10-PMPD-EDGE-E1-B2-POC", "project": "ccp", "module": "research_runner.jobs.ccp10_pmpd_edge_e1_batch2_poc", "description": "CCP-10 proof wrapper around unchanged PMPD EDGE-E1 Batch-2 research logic"},
     {"id": "PMPD-POST9N-B1", "project": "pmpd", "module": "research_runner.jobs.pmpd_post9n_batch1", "description": "V5 contextual edge search: gap, time, geometry, RVOL, SPY/QQQ alignment"},
     {"id": "PMPD-EDGE-E1-B2", "project": "pmpd", "module": "research_runner.jobs.pmpd_edge_e1_batch2", "description": "Causal opening-RVOL availability audit and robustness decomposition of Batch-1 primary hypothesis"},
     {"id": "PMPD-EDGE-E1-B3", "project": "pmpd", "module": "research_runner.jobs.pmpd_edge_e1_batch3", "description": "RVOL incremental-edge, concentration, timing, direction, and prior-completed-bar audit"},
