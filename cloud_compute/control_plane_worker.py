@@ -5,7 +5,9 @@ import io
 import mimetypes
 import os
 from contextlib import redirect_stderr, redirect_stdout
+from dataclasses import dataclass
 from datetime import datetime, timezone
+from typing import Any
 
 from cloud_compute.control_plane import (
     ControlPlaneConfig,
@@ -20,6 +22,15 @@ from cloud_compute.storage_poc import _upload_object
 from research_runner import runner
 
 DEFAULT_ARTIFACT_BUCKET = "trading-research-market-data"
+
+
+@dataclass(frozen=True)
+class RunOutcome:
+    exit_code: int
+    job: dict[str, Any] | None = None
+    attempt_id: str | None = None
+    attempt_no: int = 0
+    artifact_id: str | None = None
 
 
 def _now() -> str:
@@ -110,13 +121,13 @@ def _persist_runner_artifact(
     })
 
 
-def run_one(
+def run_one_outcome(
     config: ControlPlaneConfig,
     *,
     executor: str = "github_actions",
     external_execution_id: str | None = None,
     artifact_bucket: str = DEFAULT_ARTIFACT_BUCKET,
-) -> int:
+) -> RunOutcome:
     actual_git_sha = runner._git_sha()
     if not actual_git_sha:
         raise RuntimeError("worker Git SHA is unavailable")
@@ -129,12 +140,13 @@ def run_one(
     )
     if claim is None:
         print("NO_ELIGIBLE_CONTROL_PLANE_JOBS")
-        return 0
+        return RunOutcome(exit_code=0)
 
     job = claim["job"]
     job_id = job["job_id"]
     runner_job_id = job["runner_job_id"]
     attempt_id = claim["attempt_id"]
+    attempt_no = int(claim.get("attempt_no") or 1)
 
     stdout_buffer = io.StringIO()
     stderr_buffer = io.StringIO()
@@ -158,6 +170,7 @@ def run_one(
                 runner_job_id=runner_job_id,
                 bucket=artifact_bucket,
             )
+            artifact_id = artifact.get("artifact_id") if artifact else None
             update_job(config, job_id, {"status": "succeeded", "completed_at": completed})
             update_attempt(config, attempt_id, {
                 "status": "succeeded",
@@ -165,12 +178,12 @@ def run_one(
                 "exit_code": 0,
                 "metadata_json": {
                     "runner_job_id": runner_job_id,
-                    "artifact_id": artifact.get("artifact_id") if artifact else None,
+                    "artifact_id": artifact_id,
                     "atomic_claim": True,
                 },
             })
             print(f"CONTROL_PLANE_JOB_SUCCEEDED={job_id}")
-            return 0
+            return RunOutcome(0, job, attempt_id, attempt_no, artifact_id)
 
         error = f"research_runner returned exit code {rc}"
         update_job(config, job_id, {"status": "failed", "completed_at": completed, "last_error": error})
@@ -182,7 +195,7 @@ def run_one(
             "metadata_json": {"runner_job_id": runner_job_id, "atomic_claim": True},
         })
         print(f"CONTROL_PLANE_JOB_FAILED={job_id}")
-        return rc
+        return RunOutcome(rc, job, attempt_id, attempt_no)
     except Exception as exc:
         completed = _now()
         error = f"worker persistence failure: {exc}"
@@ -195,7 +208,22 @@ def run_one(
             "metadata_json": {"runner_job_id": runner_job_id, "atomic_claim": True},
         })
         print(f"CONTROL_PLANE_JOB_FAILED={job_id}")
-        return 1
+        return RunOutcome(1, job, attempt_id, attempt_no)
+
+
+def run_one(
+    config: ControlPlaneConfig,
+    *,
+    executor: str = "github_actions",
+    external_execution_id: str | None = None,
+    artifact_bucket: str = DEFAULT_ARTIFACT_BUCKET,
+) -> int:
+    return run_one_outcome(
+        config,
+        executor=executor,
+        external_execution_id=external_execution_id,
+        artifact_bucket=artifact_bucket,
+    ).exit_code
 
 
 def main() -> int:
