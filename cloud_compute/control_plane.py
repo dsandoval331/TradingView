@@ -80,6 +80,33 @@ def fetch_queued_jobs(config: ControlPlaneConfig, *, limit: int = 20) -> list[di
     return rows
 
 
+def claim_job(
+    config: ControlPlaneConfig,
+    *,
+    executor: str,
+    git_sha: str,
+    external_execution_id: str | None = None,
+) -> dict[str, Any] | None:
+    response = requests.post(
+        f'{config.rest_url}/rpc/claim_research_job_v1',
+        headers=_request_headers(config.secret_key),
+        json={
+            'p_executor': executor,
+            'p_git_sha': git_sha,
+            'p_external_execution_id': external_execution_id,
+        },
+        timeout=30,
+    )
+    if not response.ok:
+        raise RuntimeError(f'claim_job failed: HTTP {response.status_code} {response.text[:500]}')
+    payload = response.json()
+    if payload is None:
+        return None
+    if not isinstance(payload, dict) or not isinstance(payload.get('job'), dict) or not payload.get('attempt_id'):
+        raise RuntimeError('claim_job returned an invalid payload')
+    return payload
+
+
 def update_job(config: ControlPlaneConfig, job_id: str, patch: dict[str, Any]) -> dict[str, Any]:
     return _update_one(config, 'research_jobs', 'job_id', job_id, patch)
 
