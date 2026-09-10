@@ -21,6 +21,7 @@ def test_worker_claims_runs_persists_and_completes_job() -> None:
     with (
         patch("cloud_compute.control_plane_worker.runner._git_sha", return_value="abc123"),
         patch("cloud_compute.control_plane_worker.claim_job", return_value=claim) as claim_job,
+        patch("cloud_compute.control_plane_worker.materialize_job_inputs", return_value=[]),
         patch("cloud_compute.control_plane_worker.runner.run_id", return_value=0) as run_id,
         patch("cloud_compute.control_plane_worker._record_stream_logs") as record_logs,
         patch("cloud_compute.control_plane_worker._persist_runner_artifact", return_value=artifact) as persist_artifact,
@@ -35,6 +36,7 @@ def test_worker_claims_runs_persists_and_completes_job() -> None:
     assert update_job.call_args.args[2]["status"] == "succeeded"
     assert update_attempt.call_args.args[2]["status"] == "succeeded"
     assert update_attempt.call_args.args[2]["metadata_json"]["atomic_claim"] is True
+    assert update_attempt.call_args.args[2]["metadata_json"]["materialized_input_count"] == 0
 
 
 def test_worker_exact_job_uses_exact_claim_only() -> None:
@@ -45,6 +47,7 @@ def test_worker_exact_job_uses_exact_claim_only() -> None:
         patch("cloud_compute.control_plane_worker.runner._git_sha", return_value="abc123"),
         patch("cloud_compute.control_plane_worker.claim_job_by_id", return_value=claim) as exact_claim,
         patch("cloud_compute.control_plane_worker.claim_job") as generic_claim,
+        patch("cloud_compute.control_plane_worker.materialize_job_inputs", return_value=[]),
         patch("cloud_compute.control_plane_worker.runner.run_id", return_value=0),
         patch("cloud_compute.control_plane_worker._record_stream_logs"),
         patch("cloud_compute.control_plane_worker._persist_runner_artifact", return_value={"artifact_id": "artifact-web"}),
@@ -69,6 +72,7 @@ def test_worker_records_runner_failure() -> None:
     with (
         patch("cloud_compute.control_plane_worker.runner._git_sha", return_value="abc123"),
         patch("cloud_compute.control_plane_worker.claim_job", return_value=claim),
+        patch("cloud_compute.control_plane_worker.materialize_job_inputs", return_value=[]),
         patch("cloud_compute.control_plane_worker.runner.run_id", return_value=2),
         patch("cloud_compute.control_plane_worker._record_stream_logs"),
         patch("cloud_compute.control_plane_worker.update_job", return_value=job) as update_job,
