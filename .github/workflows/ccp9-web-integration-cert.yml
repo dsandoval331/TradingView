@@ -7,6 +7,7 @@ on:
     paths:
       - 'cloud_compute/**'
       - 'apps/trading-research-web/**'
+      - 'tests/test_ccp9_exact_claim.py'
       - '.github/workflows/ccp9-run-job.yml'
       - '.github/workflows/ccp9-web-integration-cert.yml'
   workflow_dispatch:
@@ -27,7 +28,7 @@ jobs:
           pip install -r requirements.txt
           pip install pytest
       - name: Run cloud control-plane tests
-        run: pytest -q tests/test_ccp5_control_plane.py tests/test_ccp5_control_plane_worker.py tests/test_ccp8_autonomous_loop.py
+        run: pytest -q tests/test_ccp5_control_plane.py tests/test_ccp5_control_plane_worker.py tests/test_ccp8_autonomous_loop.py tests/test_ccp9_exact_claim.py
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
