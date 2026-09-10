@@ -12,6 +12,7 @@ on:
       - 'tests/test_ccp9_exact_claim.py'
       - 'tests/test_ccp10_input_materializer.py'
       - 'tests/test_ccp10_dependency_manifest.py'
+      - 'tests/test_ccp10_promote_canonical_artifact.py'
       - '.github/workflows/ccp10-input-materialization-cert.yml'
   workflow_dispatch:
 
@@ -30,7 +31,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pytest
-      - name: Run CCP-10 control-plane, input, and dependency tests
+      - name: Run CCP-10 control-plane, input, dependency, and promotion tests
         run: >-
           pytest -q
           tests/test_ccp5_control_plane.py
@@ -39,3 +40,4 @@ jobs:
           tests/test_ccp9_exact_claim.py
           tests/test_ccp10_input_materializer.py
           tests/test_ccp10_dependency_manifest.py
+          tests/test_ccp10_promote_canonical_artifact.py
