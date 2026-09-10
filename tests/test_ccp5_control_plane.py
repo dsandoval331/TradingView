@@ -5,6 +5,7 @@ from unittest.mock import Mock, patch
 from cloud_compute.control_plane import (
     ControlPlaneConfig,
     _request_headers,
+    claim_job,
     create_attempt,
     create_job,
     fetch_queued_jobs,
@@ -39,6 +40,33 @@ def test_fetch_queued_jobs_orders_priority_then_time() -> None:
     assert params['status'] == 'in.(queued,local_pending)'
     assert params['order'] == 'priority.asc,queued_at.asc'
     assert params['limit'] == '7'
+
+
+def test_claim_job_calls_atomic_rpc() -> None:
+    config = ControlPlaneConfig('https://example.supabase.co', 'sb_secret_example')
+    response = Mock(ok=True)
+    response.json.return_value = {
+        'job': {'job_id': 'job-8', 'runner_job_id': 'CCP3-PARITY-FIXTURE'},
+        'attempt_id': 'attempt-8',
+        'attempt_no': 1,
+    }
+    with patch('cloud_compute.control_plane.requests.post', return_value=response) as post:
+        claim = claim_job(config, executor='github_actions', git_sha='sha-8', external_execution_id='run-8')
+    assert claim['attempt_id'] == 'attempt-8'
+    assert post.call_args.args[0].endswith('/rpc/claim_research_job_v1')
+    assert post.call_args.kwargs['json'] == {
+        'p_executor': 'github_actions',
+        'p_git_sha': 'sha-8',
+        'p_external_execution_id': 'run-8',
+    }
+
+
+def test_claim_job_allows_empty_queue() -> None:
+    config = ControlPlaneConfig('https://example.supabase.co', 'sb_secret_example')
+    response = Mock(ok=True)
+    response.json.return_value = None
+    with patch('cloud_compute.control_plane.requests.post', return_value=response):
+        assert claim_job(config, executor='github_actions', git_sha='sha-8') is None
 
 
 def test_update_job_uses_job_id_filter() -> None:
