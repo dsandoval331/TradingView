@@ -1,0 +1,58 @@
+name: CCP-7 Submit and Run Cloud Job
+
+on:
+  workflow_dispatch:
+    inputs:
+      request_path:
+        description: Request manifest path
+        required: true
+        default: .github/cloud-job-requests/ccp7-cert.json
+  push:
+    branches:
+      - main
+      - cloud-compute/ccp7-submission-automation
+    paths:
+      - '.github/cloud-job-requests/*.json'
+
+jobs:
+  submit-and-run:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_URL: ${{ secrets.TR_SUPABASE_URL }}
+      SUPABASE_SECRET_KEY: ${{ secrets.TR_SUPABASE_SECRET_KEY }}
+      TR_GIT_SHA: ${{ github.sha }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest
+      - name: Certify cloud control-plane contracts
+        run: pytest -q tests/test_ccp7_submit_job.py tests/test_ccp5_control_plane.py tests/test_ccp5_control_plane_worker.py tests/test_ccp8_autonomous_loop.py
+      - name: Resolve request manifest
+        id: request
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            REQUEST_PATH="${{ inputs.request_path }}"
+          else
+            REQUEST_PATH=$(git diff --name-only HEAD^ HEAD | grep '^.github/cloud-job-requests/.*\.json$' | head -n 1)
+          fi
+          if [ -z "$REQUEST_PATH" ]; then
+            echo "No cloud job request manifest found in triggering commit" >&2
+            exit 1
+          fi
+          echo "path=$REQUEST_PATH" >> "$GITHUB_OUTPUT"
+          echo "REQUEST_PATH=$REQUEST_PATH"
+      - name: Submit governed control-plane job
+        run: python -m cloud_compute.submit_job "${{ steps.request.outputs.path }}"
+      - name: Execute governed autonomous loop
+        run: python -m cloud_compute.autonomous_loop --executor github_actions --external-execution-id "$GITHUB_RUN_ID" --max-jobs 10

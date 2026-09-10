@@ -1,0 +1,75 @@
+name: CCP-4 Remote Execution Certification
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'Dockerfile.research'
+      - '.dockerignore'
+      - 'research_runner/**'
+      - 'tests/fixtures/ccp4_remote_market_fixture.csv'
+      - '.github/workflows/ccp4-remote-execution-certify.yml'
+
+jobs:
+  certify-remote-execution:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout remote source and fixture
+        uses: actions/checkout@v4
+
+      - name: Record remote input identity
+        run: |
+          sha256sum tests/fixtures/ccp4_remote_market_fixture.csv
+          git rev-parse HEAD
+
+      - name: Build certified research image
+        run: docker build --build-arg TR_GIT_SHA="$GITHUB_SHA" -f Dockerfile.research -t trading-research-runner:ccp4 .
+
+      - name: Execute representative research job fully remotely
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/.ccp4-work"
+          docker run --rm \
+            -e CCP4_INPUT_PATH=/input/market.csv \
+            -v "$GITHUB_WORKSPACE/tests/fixtures/ccp4_remote_market_fixture.csv:/input/market.csv:ro" \
+            -v "$GITHUB_WORKSPACE/.ccp4-work:/workspace" \
+            trading-research-runner:ccp4 \
+            run-next --project ccp4
+
+      - name: Certify output and provenance
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          result_path = Path('.ccp4-work/research_outputs/cloud_compute/ccp4/remote_job.json')
+          state_path = Path('.ccp4-work/research_outputs/runner/state.json')
+          assert result_path.exists(), result_path
+          assert state_path.exists(), state_path
+
+          result = json.loads(result_path.read_text())
+          state = json.loads(state_path.read_text())
+          rec = state['jobs']['CCP4-REMOTE-FIXTURE']
+
+          assert result['classification'] == 'INFRASTRUCTURE_CERTIFICATION_ONLY'
+          assert result['rows'] == 10
+          assert result['first_open'] == 100.0
+          assert result['last_close'] == 100.5
+          assert result['total_volume'] == 1350000
+          assert rec['status'] == 'PASS'
+          assert rec['git_sha'] == __import__('os').environ['GITHUB_SHA']
+          print('CCP4_REMOTE_EXECUTION=PASS')
+          print('EXECUTOR=github_actions')
+          print(f"GIT_SHA={rec['git_sha']}")
+          print(f"INPUT_SHA256={result['input_sha256']}")
+          print(f"ROWS={result['rows']}")
+          PY
+
+      - name: Upload certification evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: ccp4-remote-execution-evidence
+          path: |
+            .ccp4-work/research_outputs/cloud_compute/ccp4/remote_job.json
+            .ccp4-work/research_outputs/runner/state.json
+          if-no-files-found: error
+          retention-days: 14
