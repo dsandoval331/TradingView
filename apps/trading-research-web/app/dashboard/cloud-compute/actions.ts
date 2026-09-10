@@ -20,17 +20,13 @@ export async function submitCloudJob(formData: FormData) {
   await requireAuthorizedUser();
 
   const runnerJobId = String(formData.get("runner_job_id") ?? "").trim();
-  if (!ALLOWED_RUNNERS.has(runnerJobId)) {
-    redirect("/dashboard/cloud-compute?error=runner_not_allowed");
-  }
+  if (!ALLOWED_RUNNERS.has(runnerJobId)) redirect("/dashboard/cloud-compute?error=runner_not_allowed");
 
   const gitSha = process.env.VERCEL_GIT_COMMIT_SHA || process.env.TR_GIT_SHA;
   const gitRef = process.env.VERCEL_GIT_COMMIT_REF || process.env.TR_GIT_REF || "main";
   const githubToken = process.env.TR_GITHUB_ACTIONS_TOKEN;
   const repository = process.env.TR_GITHUB_REPOSITORY || "dsandoval331/TradingView";
-  if (!gitSha || !githubToken) {
-    redirect("/dashboard/cloud-compute?error=server_execution_not_configured");
-  }
+  if (!gitSha || !githubToken) redirect("/dashboard/cloud-compute?error=server_execution_not_configured");
 
   const admin = createAdminClient();
   const datasetVersion = `CCP9-WEB-${new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14)}`;
@@ -52,11 +48,9 @@ export async function submitCloudJob(formData: FormData) {
     },
   }).select("job_id").single();
 
-  if (jobError || !job) {
-    redirect("/dashboard/cloud-compute?error=job_create_failed");
-  }
+  if (jobError || !job) redirect("/dashboard/cloud-compute?error=job_create_failed");
 
-  const response = await fetch(`https://api.github.com/repos/${repository}/actions/workflows/ccp9-run-job.yml/dispatches`, {
+  const response = await fetch(`https://api.github.com/repos/${repository}/actions/workflows/ccp9-web-job.yml/dispatches`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${githubToken}`,
