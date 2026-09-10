@@ -1,1 +1,1 @@
-CCP-5 live control-plane worker certification trigger.
+CCP-6 live artifact and log certification trigger.
