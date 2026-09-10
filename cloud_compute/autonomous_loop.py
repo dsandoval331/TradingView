@@ -39,7 +39,6 @@ def _validate_autonomy(job: dict[str, Any]) -> tuple[bool, str]:
     autonomy = _autonomy(job)
     if not autonomy.get("enabled", False):
         return False, "autonomy_disabled"
-
     max_steps = int(autonomy.get("max_steps", 1))
     current_step = int(autonomy.get("current_step", 0))
     steps = autonomy.get("steps") or []
@@ -60,7 +59,6 @@ def _schedule_retry(config: ControlPlaneConfig, outcome: RunOutcome) -> bool:
     policy = _retry_policy(outcome.job)
     if not policy.get("enabled", False):
         return False
-
     max_attempts = int(policy.get("max_attempts", 1))
     if max_attempts < 1 or max_attempts > HARD_MAX_ATTEMPTS:
         raise RuntimeError(f"retry max_attempts must be between 1 and {HARD_MAX_ATTEMPTS}")
@@ -70,12 +68,8 @@ def _schedule_retry(config: ControlPlaneConfig, outcome: RunOutcome) -> bool:
             return False
     if outcome.attempt_no >= max_attempts:
         return False
-
     update_job(config, outcome.job["job_id"], {
-        "status": "queued",
-        "assigned_executor": None,
-        "started_at": None,
-        "completed_at": None,
+        "status": "queued", "assigned_executor": None, "started_at": None, "completed_at": None,
     })
     return True
 
@@ -86,25 +80,21 @@ def _create_successor(config: ControlPlaneConfig, outcome: RunOutcome) -> dict[s
     enabled, _ = _validate_autonomy(outcome.job)
     if not enabled:
         return None
-
     autonomy = _autonomy(outcome.job)
     if autonomy.get("require_primary_artifact", True) and not outcome.artifact_id:
         raise RuntimeError("autonomous continuation blocked: successful job has no primary artifact")
-
     current_step = int(autonomy.get("current_step", 0))
     max_steps = int(autonomy.get("max_steps", 1))
     steps = autonomy.get("steps") or []
     next_index = current_step
     if current_step + 1 >= max_steps or next_index >= len(steps):
         return None
-
     spec = steps[next_index]
     if not isinstance(spec, dict):
         raise RuntimeError("autonomy successor step must be an object")
     runner_job_id = spec.get("runner_job_id")
     if not isinstance(runner_job_id, str) or not runner_job_id.strip():
         raise RuntimeError("autonomy successor step requires runner_job_id")
-
     parent_params = dict(outcome.job.get("parameters_json") or {})
     next_autonomy = dict(autonomy)
     next_autonomy["current_step"] = current_step + 1
@@ -113,12 +103,10 @@ def _create_successor(config: ControlPlaneConfig, outcome: RunOutcome) -> dict[s
     if "retry_policy" in parent_params and "retry_policy" not in next_params:
         next_params["retry_policy"] = parent_params["retry_policy"]
     next_params["autonomous_parent_job_id"] = outcome.job["job_id"]
-
     preferred_executor = spec.get("preferred_executor", outcome.job.get("preferred_executor", "github_actions"))
     spend_approved = bool(spec.get("cloud_run_spend_approved", False))
     if preferred_executor == "cloud_run" and not spend_approved:
         raise RuntimeError("autonomous Cloud Run continuation blocked without explicit spend approval")
-
     payload = {
         "strategy_id": outcome.job.get("strategy_id"),
         "runner_job_id": runner_job_id,
@@ -142,48 +130,49 @@ def run_loop(
     external_execution_id: str | None = None,
     artifact_bucket: str = "trading-research-market-data",
     max_jobs: int = 10,
+    first_job_id: str | None = None,
 ) -> LoopSummary:
     if max_jobs < 1 or max_jobs > HARD_MAX_JOBS_PER_RUN:
         raise ValueError(f"max_jobs must be between 1 and {HARD_MAX_JOBS_PER_RUN}")
-
     processed = succeeded = failed = retries = successors = 0
     stopped_reason = "queue_empty"
-
+    exact_job_id = first_job_id
     for _ in range(max_jobs):
         outcome = run_one_outcome(
             config,
             executor=executor,
             external_execution_id=external_execution_id,
             artifact_bucket=artifact_bucket,
+            exact_job_id=exact_job_id,
         )
+        exact_job_id = None
         if outcome.job is None:
             stopped_reason = "queue_empty"
             break
-
         processed += 1
         if outcome.exit_code == 0:
             succeeded += 1
             successor = _create_successor(config, outcome)
             if successor is not None:
                 successors += 1
+                exact_job_id = successor["job_id"]
                 continue
             stopped_reason = "governed_chain_complete"
             break
-
         failed += 1
         if _schedule_retry(config, outcome):
             retries += 1
+            exact_job_id = outcome.job["job_id"]
             continue
         stopped_reason = "failure_gate"
         break
     else:
         stopped_reason = "run_job_limit"
-
     summary = LoopSummary(processed, succeeded, failed, retries, successors, stopped_reason)
     print(
         "AUTONOMOUS_LOOP_SUMMARY "
-        f"processed={processed} succeeded={succeeded} failed={failed} "
-        f"retries={retries} successors={successors} stopped={stopped_reason}"
+        f"processed={processed} succeeded={succeeded} failed={failed} retries={retries} "
+        f"successors={successors} stopped={stopped_reason}"
     )
     return summary
 
@@ -194,18 +183,16 @@ def main() -> int:
     parser.add_argument("--external-execution-id", default=os.environ.get("GITHUB_RUN_ID"))
     parser.add_argument("--artifact-bucket", default=os.environ.get("TR_ARTIFACT_BUCKET", "trading-research-market-data"))
     parser.add_argument("--max-jobs", type=int, default=10)
+    parser.add_argument("--job-id", default=None, help="Exact first job to claim; successors/retries remain governed")
     args = parser.parse_args()
-
     url = os.environ.get("SUPABASE_URL")
     key = os.environ.get("SUPABASE_SECRET_KEY")
     if not url or not key:
         raise RuntimeError("SUPABASE_URL and SUPABASE_SECRET_KEY are required")
     summary = run_loop(
-        ControlPlaneConfig(url, key),
-        executor=args.executor,
-        external_execution_id=args.external_execution_id,
-        artifact_bucket=args.artifact_bucket,
-        max_jobs=args.max_jobs,
+        ControlPlaneConfig(url, key), executor=args.executor,
+        external_execution_id=args.external_execution_id, artifact_bucket=args.artifact_bucket,
+        max_jobs=args.max_jobs, first_job_id=args.job_id,
     )
     return 1 if summary.stopped_reason in {"failure_gate", "run_job_limit"} else 0
 
