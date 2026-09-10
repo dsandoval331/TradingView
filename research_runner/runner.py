@@ -17,6 +17,7 @@ STATE_FILE = STATE_DIR / "state.json"
 JOBS = [
     {"id": "CCP3-PARITY-FIXTURE", "project": "ccp", "module": "research_runner.jobs.ccp3_parity_fixture", "description": "Deterministic native/container research_runner parity fixture"},
     {"id": "CCP4-REMOTE-FIXTURE", "project": "ccp4", "module": "research_runner.jobs.ccp4_remote_fixture", "description": "Representative remote-input cloud execution certification fixture"},
+    {"id": "CCP8-RETRY-ONCE-FIXTURE", "project": "ccp", "module": "research_runner.jobs.ccp8_retry_once_fixture", "description": "Deterministic autonomous-loop fail-once then succeed retry fixture"},
     {"id": "PMPD-POST9N-B1", "project": "pmpd", "module": "research_runner.jobs.pmpd_post9n_batch1", "description": "V5 contextual edge search: gap, time, geometry, RVOL, SPY/QQQ alignment"},
     {"id": "PMPD-EDGE-E1-B2", "project": "pmpd", "module": "research_runner.jobs.pmpd_edge_e1_batch2", "description": "Causal opening-RVOL availability audit and robustness decomposition of Batch-1 primary hypothesis"},
     {"id": "PMPD-EDGE-E1-B3", "project": "pmpd", "module": "research_runner.jobs.pmpd_edge_e1_batch3", "description": "RVOL incremental-edge, concentration, timing, direction, and prior-completed-bar audit"},
