@@ -12,6 +12,7 @@ from typing import Any
 from cloud_compute.control_plane import (
     ControlPlaneConfig,
     claim_job,
+    claim_job_by_id,
     create_artifact,
     create_log,
     update_attempt,
@@ -37,19 +38,9 @@ def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
-def _record_stream_logs(
-    config: ControlPlaneConfig,
-    *,
-    job_id: str,
-    attempt_id: str,
-    stdout_text: str,
-    stderr_text: str,
-) -> None:
+def _record_stream_logs(config: ControlPlaneConfig, *, job_id: str, attempt_id: str, stdout_text: str, stderr_text: str) -> None:
     sequence = 1
-    for level, source, text in (
-        ("INFO", "runner_stdout", stdout_text),
-        ("ERROR", "runner_stderr", stderr_text),
-    ):
+    for level, source, text in (("INFO", "runner_stdout", stdout_text), ("ERROR", "runner_stderr", stderr_text)):
         for line in text.splitlines():
             message = line.strip()
             if not message:
@@ -66,20 +57,12 @@ def _record_stream_logs(
             sequence += 1
 
 
-def _persist_runner_artifact(
-    config: ControlPlaneConfig,
-    *,
-    job_id: str,
-    attempt_id: str,
-    runner_job_id: str,
-    bucket: str,
-) -> dict | None:
+def _persist_runner_artifact(config: ControlPlaneConfig, *, job_id: str, attempt_id: str, runner_job_id: str, bucket: str) -> dict | None:
     state = runner._load_state()
     result = state.get("jobs", {}).get(runner_job_id, {}).get("result") or {}
     rel = result.get("artifact")
     if not rel:
         return None
-
     root = runner.WORK_ROOT.resolve()
     path = (root / rel).resolve()
     try:
@@ -88,21 +71,12 @@ def _persist_runner_artifact(
         raise RuntimeError(f"artifact path escapes work root: {rel}") from exc
     if not path.is_file():
         raise RuntimeError(f"declared artifact does not exist: {rel}")
-
     digest = sha256_file(path)
     expected = result.get("sha256")
     if expected and expected != digest:
         raise RuntimeError(f"artifact checksum mismatch for {rel}")
-
     object_path = f"artifacts/{job_id}/{attempt_id}/{path.name}"
-    _upload_object(
-        config.supabase_url,
-        config.secret_key,
-        bucket,
-        object_path,
-        path,
-        allow_existing=False,
-    )
+    _upload_object(config.supabase_url, config.secret_key, bucket, object_path, path, allow_existing=False)
     return create_artifact(config, {
         "job_id": job_id,
         "attempt_id": attempt_id,
@@ -114,10 +88,7 @@ def _persist_runner_artifact(
         "size_bytes": path.stat().st_size,
         "sha256": digest,
         "is_primary": True,
-        "metadata_json": {
-            "runner_job_id": runner_job_id,
-            "runner_relative_path": rel,
-        },
+        "metadata_json": {"runner_job_id": runner_job_id, "runner_relative_path": rel},
     })
 
 
@@ -127,17 +98,27 @@ def run_one_outcome(
     executor: str = "github_actions",
     external_execution_id: str | None = None,
     artifact_bucket: str = DEFAULT_ARTIFACT_BUCKET,
+    exact_job_id: str | None = None,
 ) -> RunOutcome:
     actual_git_sha = runner._git_sha()
     if not actual_git_sha:
         raise RuntimeError("worker Git SHA is unavailable")
 
-    claim = claim_job(
-        config,
-        executor=executor,
-        git_sha=actual_git_sha,
-        external_execution_id=external_execution_id,
-    )
+    if exact_job_id:
+        claim = claim_job_by_id(
+            config,
+            job_id=exact_job_id,
+            executor=executor,
+            git_sha=actual_git_sha,
+            external_execution_id=external_execution_id,
+        )
+    else:
+        claim = claim_job(
+            config,
+            executor=executor,
+            git_sha=actual_git_sha,
+            external_execution_id=external_execution_id,
+        )
     if claim is None:
         print("NO_ELIGIBLE_CONTROL_PLANE_JOBS")
         return RunOutcome(exit_code=0)
@@ -153,34 +134,15 @@ def run_one_outcome(
     try:
         with redirect_stdout(stdout_buffer), redirect_stderr(stderr_buffer):
             rc = runner.run_id(runner_job_id)
-        _record_stream_logs(
-            config,
-            job_id=job_id,
-            attempt_id=attempt_id,
-            stdout_text=stdout_buffer.getvalue(),
-            stderr_text=stderr_buffer.getvalue(),
-        )
-
+        _record_stream_logs(config, job_id=job_id, attempt_id=attempt_id, stdout_text=stdout_buffer.getvalue(), stderr_text=stderr_buffer.getvalue())
         completed = _now()
         if rc == 0:
-            artifact = _persist_runner_artifact(
-                config,
-                job_id=job_id,
-                attempt_id=attempt_id,
-                runner_job_id=runner_job_id,
-                bucket=artifact_bucket,
-            )
+            artifact = _persist_runner_artifact(config, job_id=job_id, attempt_id=attempt_id, runner_job_id=runner_job_id, bucket=artifact_bucket)
             artifact_id = artifact.get("artifact_id") if artifact else None
             update_job(config, job_id, {"status": "succeeded", "completed_at": completed})
             update_attempt(config, attempt_id, {
-                "status": "succeeded",
-                "completed_at": completed,
-                "exit_code": 0,
-                "metadata_json": {
-                    "runner_job_id": runner_job_id,
-                    "artifact_id": artifact_id,
-                    "atomic_claim": True,
-                },
+                "status": "succeeded", "completed_at": completed, "exit_code": 0,
+                "metadata_json": {"runner_job_id": runner_job_id, "artifact_id": artifact_id, "atomic_claim": True},
             })
             print(f"CONTROL_PLANE_JOB_SUCCEEDED={job_id}")
             return RunOutcome(0, job, attempt_id, attempt_no, artifact_id)
@@ -188,11 +150,8 @@ def run_one_outcome(
         error = f"research_runner returned exit code {rc}"
         update_job(config, job_id, {"status": "failed", "completed_at": completed, "last_error": error})
         update_attempt(config, attempt_id, {
-            "status": "failed",
-            "completed_at": completed,
-            "exit_code": rc,
-            "error_summary": error,
-            "metadata_json": {"runner_job_id": runner_job_id, "atomic_claim": True},
+            "status": "failed", "completed_at": completed, "exit_code": rc,
+            "error_summary": error, "metadata_json": {"runner_job_id": runner_job_id, "atomic_claim": True},
         })
         print(f"CONTROL_PLANE_JOB_FAILED={job_id}")
         return RunOutcome(rc, job, attempt_id, attempt_no)
@@ -201,29 +160,15 @@ def run_one_outcome(
         error = f"worker persistence failure: {exc}"
         update_job(config, job_id, {"status": "failed", "completed_at": completed, "last_error": error})
         update_attempt(config, attempt_id, {
-            "status": "failed",
-            "completed_at": completed,
-            "exit_code": 1,
-            "error_summary": error,
-            "metadata_json": {"runner_job_id": runner_job_id, "atomic_claim": True},
+            "status": "failed", "completed_at": completed, "exit_code": 1,
+            "error_summary": error, "metadata_json": {"runner_job_id": runner_job_id, "atomic_claim": True},
         })
         print(f"CONTROL_PLANE_JOB_FAILED={job_id}")
         return RunOutcome(1, job, attempt_id, attempt_no)
 
 
-def run_one(
-    config: ControlPlaneConfig,
-    *,
-    executor: str = "github_actions",
-    external_execution_id: str | None = None,
-    artifact_bucket: str = DEFAULT_ARTIFACT_BUCKET,
-) -> int:
-    return run_one_outcome(
-        config,
-        executor=executor,
-        external_execution_id=external_execution_id,
-        artifact_bucket=artifact_bucket,
-    ).exit_code
+def run_one(config: ControlPlaneConfig, *, executor: str = "github_actions", external_execution_id: str | None = None, artifact_bucket: str = DEFAULT_ARTIFACT_BUCKET, exact_job_id: str | None = None) -> int:
+    return run_one_outcome(config, executor=executor, external_execution_id=external_execution_id, artifact_bucket=artifact_bucket, exact_job_id=exact_job_id).exit_code
 
 
 def main() -> int:
@@ -231,18 +176,13 @@ def main() -> int:
     parser.add_argument("--executor", default="github_actions")
     parser.add_argument("--external-execution-id", default=os.environ.get("GITHUB_RUN_ID"))
     parser.add_argument("--artifact-bucket", default=os.environ.get("TR_ARTIFACT_BUCKET", DEFAULT_ARTIFACT_BUCKET))
+    parser.add_argument("--job-id", default=None)
     args = parser.parse_args()
-
     url = os.environ.get("SUPABASE_URL")
     key = os.environ.get("SUPABASE_SECRET_KEY")
     if not url or not key:
         raise RuntimeError("SUPABASE_URL and SUPABASE_SECRET_KEY are required")
-    return run_one(
-        ControlPlaneConfig(url, key),
-        executor=args.executor,
-        external_execution_id=args.external_execution_id,
-        artifact_bucket=args.artifact_bucket,
-    )
+    return run_one(ControlPlaneConfig(url, key), executor=args.executor, external_execution_id=args.external_execution_id, artifact_bucket=args.artifact_bucket, exact_job_id=args.job_id)
 
 
 if __name__ == "__main__":
