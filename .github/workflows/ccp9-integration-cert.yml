@@ -1,0 +1,50 @@
+name: CCP-9 Integration Certification
+
+on:
+  push:
+    branches:
+      - cloud-compute/ccp9-vercel-integration
+    paths:
+      - 'cloud_compute/**'
+      - 'tests/test_ccp5_control_plane.py'
+      - 'tests/test_ccp5_control_plane_worker.py'
+      - 'tests/test_ccp8_autonomous_loop.py'
+      - 'apps/trading-research-web/**'
+      - '.github/workflows/ccp9-*.yml'
+  workflow_dispatch:
+
+jobs:
+  certify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest
+      - name: Run cloud control-plane tests
+        run: pytest -q tests/test_ccp5_control_plane.py tests/test_ccp5_control_plane_worker.py tests/test_ccp8_autonomous_loop.py
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install web dependencies
+        working-directory: apps/trading-research-web
+        run: npm install --no-audit --no-fund
+      - name: Build TradingResearch web app
+        working-directory: apps/trading-research-web
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: test-publishable-key
+          SUPABASE_SECRET_KEY: test-server-secret-key
+          TR_GITHUB_ACTIONS_TOKEN: test-actions-token
+          TR_GITHUB_REPOSITORY: dsandoval331/TradingView
+          TR_GIT_SHA: ${{ github.sha }}
+          TR_GIT_REF: cloud-compute/ccp9-vercel-integration
+        run: npm run build
