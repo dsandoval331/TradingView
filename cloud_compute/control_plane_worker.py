@@ -120,13 +120,24 @@ def run_one(
     artifact_bucket: str = DEFAULT_ARTIFACT_BUCKET,
 ) -> int:
     jobs = fetch_queued_jobs(config, limit=20)
+    actual_git_sha = runner._git_sha()
     eligible = [
         job for job in jobs
         if job.get("preferred_executor") == executor
         and (job.get("assigned_executor") in {None, executor})
+        and job.get("git_sha") == actual_git_sha
     ]
     if not eligible:
-        print("NO_ELIGIBLE_CONTROL_PLANE_JOBS")
+        mismatched = [
+            job for job in jobs
+            if job.get("preferred_executor") == executor
+            and (job.get("assigned_executor") in {None, executor})
+            and job.get("git_sha") != actual_git_sha
+        ]
+        if mismatched:
+            print(f"NO_MATCHING_GIT_SHA queued={mismatched[0].get('git_sha')} actual={actual_git_sha}")
+        else:
+            print("NO_ELIGIBLE_CONTROL_PLANE_JOBS")
         return 0
 
     job = eligible[0]
