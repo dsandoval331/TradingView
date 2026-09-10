@@ -57,7 +57,7 @@ jobs:
             # lost by deleting the ref.
             if git merge-base --is-ancestor "origin/$branch" "origin/$DEFAULT_BRANCH"; then
               echo "DELETE (fully merged): $branch"
-              encoded_ref="$(python -c 'import os, urllib.parse; print(urllib.parse.quote("heads/" + os.environ["BRANCH"], safe=""))' BRANCH="$branch")"
+              encoded_ref="$(python -c 'import urllib.parse,sys; print(urllib.parse.quote("heads/" + sys.argv[1], safe=""))' "$branch")"
               gh api --method DELETE "repos/$GITHUB_REPOSITORY/git/refs/$encoded_ref"
               deleted=$((deleted + 1))
             else
