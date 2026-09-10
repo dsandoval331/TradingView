@@ -56,6 +56,21 @@ def _update_one(config: ControlPlaneConfig, table: str, key: str, value: str, pa
     return rows[0]
 
 
+def _fetch_rows(config: ControlPlaneConfig, table: str, params: dict[str, str]) -> list[dict[str, Any]]:
+    response = requests.get(
+        f'{config.rest_url}/{table}',
+        headers=_request_headers(config.secret_key),
+        params=params,
+        timeout=30,
+    )
+    if not response.ok:
+        raise RuntimeError(f'{table} fetch failed: HTTP {response.status_code} {response.text[:500]}')
+    rows = response.json()
+    if not isinstance(rows, list):
+        raise RuntimeError(f'{table} fetch expected a list response')
+    return rows
+
+
 def create_job(config: ControlPlaneConfig, payload: dict[str, Any]) -> dict[str, Any]:
     return _insert_one(config, 'research_jobs', payload)
 
@@ -65,41 +80,30 @@ def create_job_input(config: ControlPlaneConfig, payload: dict[str, Any]) -> dic
 
 
 def fetch_queued_jobs(config: ControlPlaneConfig, *, limit: int = 20) -> list[dict[str, Any]]:
-    params = {
+    return _fetch_rows(config, 'research_jobs', {
         'status': 'in.(queued,local_pending)',
         'order': 'priority.asc,queued_at.asc',
         'limit': str(limit),
-    }
-    response = requests.get(
-        f'{config.rest_url}/research_jobs',
-        headers=_request_headers(config.secret_key),
-        params=params,
-        timeout=30,
-    )
-    if not response.ok:
-        raise RuntimeError(f'fetch_queued_jobs failed: HTTP {response.status_code} {response.text[:500]}')
-    rows = response.json()
-    if not isinstance(rows, list):
-        raise RuntimeError('fetch_queued_jobs expected a list response')
-    return rows
+    })
 
 
 def fetch_job_inputs(config: ControlPlaneConfig, job_id: str) -> list[dict[str, Any]]:
-    response = requests.get(
-        f'{config.rest_url}/research_job_inputs',
-        headers=_request_headers(config.secret_key),
-        params={
-            'job_id': f'eq.{job_id}',
-            'order': 'created_at.asc,input_id.asc',
-        },
-        timeout=30,
-    )
-    if not response.ok:
-        raise RuntimeError(f'fetch_job_inputs failed: HTTP {response.status_code} {response.text[:500]}')
-    rows = response.json()
-    if not isinstance(rows, list):
-        raise RuntimeError('fetch_job_inputs expected a list response')
-    return rows
+    return _fetch_rows(config, 'research_job_inputs', {
+        'job_id': f'eq.{job_id}',
+        'order': 'created_at.asc,input_id.asc',
+    })
+
+
+def fetch_artifact(config: ControlPlaneConfig, artifact_id: str) -> dict[str, Any] | None:
+    rows = _fetch_rows(config, 'research_job_artifacts', {
+        'artifact_id': f'eq.{artifact_id}',
+        'limit': '2',
+    })
+    if not rows:
+        return None
+    if len(rows) != 1:
+        raise RuntimeError(f'artifact lookup expected exactly one row for {artifact_id}')
+    return rows[0]
 
 
 def _claim_rpc(
