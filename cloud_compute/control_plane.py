@@ -25,19 +25,39 @@ def _request_headers(secret_key: str, *, prefer: str | None = None) -> dict[str,
     return headers
 
 
-def create_job(config: ControlPlaneConfig, payload: dict[str, Any]) -> dict[str, Any]:
+def _insert_one(config: ControlPlaneConfig, table: str, payload: dict[str, Any]) -> dict[str, Any]:
     response = requests.post(
-        f'{config.rest_url}/research_jobs',
+        f'{config.rest_url}/{table}',
         headers=_request_headers(config.secret_key, prefer='return=representation'),
         json=payload,
         timeout=30,
     )
     if not response.ok:
-        raise RuntimeError(f'create_job failed: HTTP {response.status_code} {response.text[:500]}')
+        raise RuntimeError(f'{table} insert failed: HTTP {response.status_code} {response.text[:500]}')
     rows = response.json()
     if not isinstance(rows, list) or len(rows) != 1:
-        raise RuntimeError('create_job expected exactly one returned row')
+        raise RuntimeError(f'{table} insert expected exactly one returned row')
     return rows[0]
+
+
+def _update_one(config: ControlPlaneConfig, table: str, key: str, value: str, patch: dict[str, Any]) -> dict[str, Any]:
+    response = requests.patch(
+        f'{config.rest_url}/{table}',
+        headers=_request_headers(config.secret_key, prefer='return=representation'),
+        params={key: f'eq.{value}'},
+        json=patch,
+        timeout=30,
+    )
+    if not response.ok:
+        raise RuntimeError(f'{table} update failed: HTTP {response.status_code} {response.text[:500]}')
+    rows = response.json()
+    if not isinstance(rows, list) or len(rows) != 1:
+        raise RuntimeError(f'{table} update expected exactly one returned row')
+    return rows[0]
+
+
+def create_job(config: ControlPlaneConfig, payload: dict[str, Any]) -> dict[str, Any]:
+    return _insert_one(config, 'research_jobs', payload)
 
 
 def fetch_queued_jobs(config: ControlPlaneConfig, *, limit: int = 20) -> list[dict[str, Any]]:
@@ -61,31 +81,20 @@ def fetch_queued_jobs(config: ControlPlaneConfig, *, limit: int = 20) -> list[di
 
 
 def update_job(config: ControlPlaneConfig, job_id: str, patch: dict[str, Any]) -> dict[str, Any]:
-    response = requests.patch(
-        f'{config.rest_url}/research_jobs',
-        headers=_request_headers(config.secret_key, prefer='return=representation'),
-        params={'job_id': f'eq.{job_id}'},
-        json=patch,
-        timeout=30,
-    )
-    if not response.ok:
-        raise RuntimeError(f'update_job failed: HTTP {response.status_code} {response.text[:500]}')
-    rows = response.json()
-    if not isinstance(rows, list) or len(rows) != 1:
-        raise RuntimeError('update_job expected exactly one returned row')
-    return rows[0]
+    return _update_one(config, 'research_jobs', 'job_id', job_id, patch)
 
 
 def create_attempt(config: ControlPlaneConfig, payload: dict[str, Any]) -> dict[str, Any]:
-    response = requests.post(
-        f'{config.rest_url}/research_job_attempts',
-        headers=_request_headers(config.secret_key, prefer='return=representation'),
-        json=payload,
-        timeout=30,
-    )
-    if not response.ok:
-        raise RuntimeError(f'create_attempt failed: HTTP {response.status_code} {response.text[:500]}')
-    rows = response.json()
-    if not isinstance(rows, list) or len(rows) != 1:
-        raise RuntimeError('create_attempt expected exactly one returned row')
-    return rows[0]
+    return _insert_one(config, 'research_job_attempts', payload)
+
+
+def update_attempt(config: ControlPlaneConfig, attempt_id: str, patch: dict[str, Any]) -> dict[str, Any]:
+    return _update_one(config, 'research_job_attempts', 'attempt_id', attempt_id, patch)
+
+
+def create_log(config: ControlPlaneConfig, payload: dict[str, Any]) -> dict[str, Any]:
+    return _insert_one(config, 'research_job_logs', payload)
+
+
+def create_artifact(config: ControlPlaneConfig, payload: dict[str, Any]) -> dict[str, Any]:
+    return _insert_one(config, 'research_job_artifacts', payload)
