@@ -6,14 +6,12 @@ import mimetypes
 import os
 from contextlib import redirect_stderr, redirect_stdout
 from datetime import datetime, timezone
-from pathlib import Path
 
 from cloud_compute.control_plane import (
     ControlPlaneConfig,
+    claim_job,
     create_artifact,
-    create_attempt,
     create_log,
-    fetch_queued_jobs,
     update_attempt,
     update_job,
 )
@@ -119,50 +117,24 @@ def run_one(
     external_execution_id: str | None = None,
     artifact_bucket: str = DEFAULT_ARTIFACT_BUCKET,
 ) -> int:
-    jobs = fetch_queued_jobs(config, limit=20)
     actual_git_sha = runner._git_sha()
-    eligible = [
-        job for job in jobs
-        if job.get("preferred_executor") == executor
-        and (job.get("assigned_executor") in {None, executor})
-        and job.get("git_sha") == actual_git_sha
-    ]
-    if not eligible:
-        mismatched = [
-            job for job in jobs
-            if job.get("preferred_executor") == executor
-            and (job.get("assigned_executor") in {None, executor})
-            and job.get("git_sha") != actual_git_sha
-        ]
-        if mismatched:
-            print(f"NO_MATCHING_GIT_SHA queued={mismatched[0].get('git_sha')} actual={actual_git_sha}")
-        else:
-            print("NO_ELIGIBLE_CONTROL_PLANE_JOBS")
+    if not actual_git_sha:
+        raise RuntimeError("worker Git SHA is unavailable")
+
+    claim = claim_job(
+        config,
+        executor=executor,
+        git_sha=actual_git_sha,
+        external_execution_id=external_execution_id,
+    )
+    if claim is None:
+        print("NO_ELIGIBLE_CONTROL_PLANE_JOBS")
         return 0
 
-    job = eligible[0]
+    job = claim["job"]
     job_id = job["job_id"]
     runner_job_id = job["runner_job_id"]
-    attempts = int(job.get("parameters_json", {}).get("attempt_count", 0)) + 1
-
-    update_job(config, job_id, {
-        "status": "running",
-        "assigned_executor": executor,
-        "assigned_at": job.get("assigned_at") or _now(),
-        "started_at": _now(),
-        "last_error": None,
-        "parameters_json": {**job.get("parameters_json", {}), "attempt_count": attempts},
-    })
-    attempt = create_attempt(config, {
-        "job_id": job_id,
-        "attempt_no": attempts,
-        "executor": executor,
-        "external_execution_id": external_execution_id,
-        "status": "running",
-        "git_sha": job["git_sha"],
-        "metadata_json": {"runner_job_id": runner_job_id},
-    })
-    attempt_id = attempt["attempt_id"]
+    attempt_id = claim["attempt_id"]
 
     stdout_buffer = io.StringIO()
     stderr_buffer = io.StringIO()
@@ -194,6 +166,7 @@ def run_one(
                 "metadata_json": {
                     "runner_job_id": runner_job_id,
                     "artifact_id": artifact.get("artifact_id") if artifact else None,
+                    "atomic_claim": True,
                 },
             })
             print(f"CONTROL_PLANE_JOB_SUCCEEDED={job_id}")
@@ -206,6 +179,7 @@ def run_one(
             "completed_at": completed,
             "exit_code": rc,
             "error_summary": error,
+            "metadata_json": {"runner_job_id": runner_job_id, "atomic_claim": True},
         })
         print(f"CONTROL_PLANE_JOB_FAILED={job_id}")
         return rc
@@ -218,6 +192,7 @@ def run_one(
             "completed_at": completed,
             "exit_code": 1,
             "error_summary": error,
+            "metadata_json": {"runner_job_id": runner_job_id, "atomic_claim": True},
         })
         print(f"CONTROL_PLANE_JOB_FAILED={job_id}")
         return 1
