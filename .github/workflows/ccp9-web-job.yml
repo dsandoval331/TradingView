@@ -1,0 +1,42 @@
+name: CCP-9 Web Job Executor
+
+on:
+  workflow_dispatch:
+    inputs:
+      job_id:
+        description: Supabase research_jobs.job_id to execute
+        required: true
+      git_sha:
+        description: Exact Git SHA recorded on the job
+        required: true
+
+jobs:
+  run-web-job:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_URL: ${{ secrets.TR_SUPABASE_URL }}
+      SUPABASE_SECRET_KEY: ${{ secrets.TR_SUPABASE_SECRET_KEY }}
+      TR_GIT_SHA: ${{ inputs.git_sha }}
+    steps:
+      - name: Checkout exact research revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.git_sha }}
+          fetch-depth: 1
+      - name: Verify checkout SHA
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "${{ inputs.git_sha }}"
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest
+      - name: Certify cloud control-plane contracts
+        run: pytest -q tests/test_ccp5_control_plane.py tests/test_ccp5_control_plane_worker.py tests/test_ccp8_autonomous_loop.py
+      - name: Execute exact governed job
+        run: python -m cloud_compute.autonomous_loop --executor github_actions --external-execution-id "$GITHUB_RUN_ID" --job-id "${{ inputs.job_id }}" --max-jobs 10
