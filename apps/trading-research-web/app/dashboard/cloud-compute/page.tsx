@@ -9,7 +9,8 @@ export const dynamic = "force-dynamic";
 type Props = { searchParams: Promise<{ submitted?: string; error?: string; job?: string }> };
 type Job = {
   job_id: string; runner_job_id: string; phase_code: string | null; status: string; git_sha: string;
-  dataset_version: string | null; assigned_executor: string | null; queued_at: string; started_at: string | null;
+  dataset_version: string | null; preferred_executor?: string | null; assigned_executor: string | null;
+  cloud_run_spend_approved?: boolean; queued_at: string; started_at: string | null;
   completed_at: string | null; last_error: string | null; parameters_json: Record<string, unknown> | null;
 };
 
@@ -18,6 +19,11 @@ function fmt(value: string | null) {
   return new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit", second: "2-digit", timeZone: "America/Chicago", timeZoneName: "short" }).format(new Date(value));
 }
 function pretty(value: string) { return value.replaceAll("_", " ").toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()); }
+function formatDuration(seconds: number) {
+  if (seconds < 60) return `${seconds.toFixed(0)} sec`;
+  if (seconds < 3600) return `${(seconds / 60).toFixed(1)} min`;
+  return `${(seconds / 3600).toFixed(2)} hr`;
+}
 
 export default async function CloudComputePage({ searchParams }: Props) {
   const query = await searchParams;
@@ -28,22 +34,33 @@ export default async function CloudComputePage({ searchParams }: Props) {
   if (accessError || allowed !== true) redirect("/unauthorized");
 
   const admin = createAdminClient();
-  const [{ data: jobsData, error: jobsError }, { data: stateData, error: stateError }] = await Promise.all([
-    admin.from("research_jobs").select("job_id,runner_job_id,phase_code,status,git_sha,dataset_version,assigned_executor,queued_at,started_at,completed_at,last_error,parameters_json").eq("project_code", "CLOUD_COMPUTE").order("queued_at", { ascending: false }).limit(20),
+  const now = new Date();
+  const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)).toISOString();
+  const [{ data: jobsData, error: jobsError }, { data: stateData, error: stateError }, { data: monthJobsData, error: monthJobsError }] = await Promise.all([
+    admin.from("research_jobs").select("job_id,runner_job_id,phase_code,status,git_sha,dataset_version,preferred_executor,assigned_executor,cloud_run_spend_approved,queued_at,started_at,completed_at,last_error,parameters_json").eq("project_code", "CLOUD_COMPUTE").order("queued_at", { ascending: false }).limit(20),
     admin.from("project_state").select("active_phase_code,active_phase_name,next_phase_code,next_phase_name,last_decision,updated_at").eq("strategy_id", "98f761bf-c6f1-4399-b10e-e299cb332141").maybeSingle(),
+    admin.from("research_jobs").select("job_id,status,preferred_executor,assigned_executor,cloud_run_spend_approved,started_at,completed_at").eq("project_code", "CLOUD_COMPUTE").gte("queued_at", monthStart).limit(1000),
   ]);
   const jobs = (jobsData ?? []) as Job[];
-  const queryError = jobsError || stateError;
+  const monthJobs = (monthJobsData ?? []) as Pick<Job, "job_id" | "status" | "preferred_executor" | "assigned_executor" | "cloud_run_spend_approved" | "started_at" | "completed_at">[];
+  const queryError = jobsError || stateError || monthJobsError;
   const queued = jobs.filter((j) => ["queued", "local_pending"].includes(j.status)).length;
   const running = jobs.filter((j) => j.status === "running").length;
   const failed = jobs.filter((j) => j.status === "failed").length;
   const succeeded = jobs.filter((j) => j.status === "succeeded").length;
 
+  const githubMonthJobs = monthJobs.filter((j) => (j.assigned_executor ?? j.preferred_executor) === "github_actions");
+  const cloudRunApproved = monthJobs.filter((j) => j.cloud_run_spend_approved === true).length;
+  const governedRuntimeSeconds = githubMonthJobs.reduce((total, job) => {
+    if (!job.started_at || !job.completed_at) return total;
+    return total + Math.max(0, (new Date(job.completed_at).getTime() - new Date(job.started_at).getTime()) / 1000);
+  }, 0);
+
   return <main>
     <section className="projectHero">
       <div>
         <Link className="backLink" href="/dashboard">← Research control center</Link>
-        <p className="eyebrow">CLOUD COMPUTE · CCP-9</p>
+        <p className="eyebrow">CLOUD COMPUTE · {stateData?.active_phase_code ?? "—"}</p>
         <h1>Cloud job control</h1>
         <p className="lede">Authenticated server-side submission and live execution status for the governed TradingResearch cloud control plane.</p>
       </div>
@@ -69,9 +86,9 @@ export default async function CloudComputePage({ searchParams }: Props) {
         <small>Updated {fmt(stateData?.updated_at ?? null)}</small>
       </article>
       <article className="detailPanel">
-        <span className="fieldLabel">Zero-spend web certification</span>
-        <h3>Submit a governed fixture</h3>
-        <p>CCP-9 initially exposes only deterministic platform fixtures. Research-lane jobs are enabled in CCP-10 after migration certification.</p>
+        <span className="fieldLabel">Governed submission</span>
+        <h3>Submit a certified fixture</h3>
+        <p>Only allowlisted platform fixtures are exposed here while CCP-10 certifies real research-lane migration.</p>
         <form action={submitCloudJob} className="authForm">
           <label htmlFor="runner_job_id">Runner job</label>
           <select id="runner_job_id" name="runner_job_id" defaultValue="CCP3-PARITY-FIXTURE">
@@ -81,6 +98,21 @@ export default async function CloudComputePage({ searchParams }: Props) {
           <button type="submit">Submit to GitHub Actions</button>
         </form>
         <small>Cloud Run remains blocked unless separately and explicitly approved.</small>
+      </article>
+    </section>
+
+    <section className="projectSection">
+      <div className="sectionHeader"><div><p className="eyebrow">COST & COMPUTE GUARDRAILS</p><h2>Zero-spend status</h2></div><span className="statusPill status-succeeded">Protected</span></div>
+      <div className="metricGrid">
+        <article className="metricCard"><span>GitHub compute billing</span><strong>$0</strong><small>Public repo · standard ubuntu runner</small></article>
+        <article className="metricCard"><span>CCP jobs this month</span><strong>{githubMonthJobs.length}</strong><small>GitHub Actions governed jobs</small></article>
+        <article className="metricCard"><span>Research runtime</span><strong>{formatDuration(governedRuntimeSeconds)}</strong><small>Job execution time observed this month</small></article>
+        <article className="metricCard"><span>Cloud Run spend approvals</span><strong>{cloudRunApproved}</strong><small>Must remain 0 without explicit approval</small></article>
+      </div>
+      <article className="detailPanel">
+        <div className="listTop"><strong>NO_INCREMENTAL_SPEND_WITHOUT_EXPLICIT_APPROVAL</strong><span className="statusPill status-succeeded">Enforced</span></div>
+        <p>CCP dispatch is configured for standard GitHub-hosted runners in a public repository. GitHub does not bill Actions compute minutes for this configuration. Before Vercel creates a new cloud job, it now checks repository visibility and fails closed if the repository is no longer public. Larger runners and Cloud Run are not enabled by this control path.</p>
+        <small>Runtime above is operational telemetry, not a billing quota. Public-repository standard GitHub Actions runner minutes currently have no monthly compute-minute allowance to exhaust.</small>
       </article>
     </section>
 
