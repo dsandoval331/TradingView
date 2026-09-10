@@ -3,11 +3,36 @@
   "runner_job_id": "CCP3-PARITY-FIXTURE",
   "project_code": "CLOUD_COMPUTE",
   "phase_code": "CCP-8",
-  "dataset_version": "CCP8-ATOMIC-CLAIM-CERT-1",
+  "dataset_version": "CCP8-AUTONOMOUS-LOOP-CERT-1",
   "preferred_executor": "github_actions",
   "cloud_run_spend_approved": false,
   "priority": 10,
   "parameters_json": {
-    "purpose": "CCP-8 live atomic claim certification"
+    "purpose": "CCP-8 live governed autonomous continuation certification",
+    "retry_policy": {
+      "enabled": true,
+      "max_attempts": 2,
+      "retry_exit_codes": [1, 2]
+    },
+    "autonomy": {
+      "enabled": true,
+      "max_steps": 2,
+      "current_step": 0,
+      "require_primary_artifact": true,
+      "steps": [
+        {
+          "runner_job_id": "CCP3-PARITY-FIXTURE",
+          "project_code": "CLOUD_COMPUTE",
+          "phase_code": "CCP-8",
+          "dataset_version": "CCP8-AUTONOMOUS-LOOP-CERT-2",
+          "preferred_executor": "github_actions",
+          "cloud_run_spend_approved": false,
+          "priority": 10,
+          "parameters_json": {
+            "purpose": "CCP-8 autonomously enqueued successor certification step"
+          }
+        }
+      ]
+    }
   }
 }
