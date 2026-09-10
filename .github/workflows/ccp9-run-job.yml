@@ -1,0 +1,48 @@
+name: CCP-9 Run Web-Submitted Cloud Job
+
+on:
+  workflow_dispatch:
+    inputs:
+      job_id:
+        description: Supabase research_jobs.job_id to execute
+        required: true
+        type: string
+      git_sha:
+        description: Exact repository commit to execute
+        required: true
+        type: string
+
+jobs:
+  run-web-job:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_URL: ${{ secrets.TR_SUPABASE_URL }}
+      SUPABASE_SECRET_KEY: ${{ secrets.TR_SUPABASE_SECRET_KEY }}
+      TR_GIT_SHA: ${{ inputs.git_sha }}
+    steps:
+      - name: Checkout exact governed commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.git_sha }}
+          fetch-depth: 1
+      - name: Verify exact Git SHA
+        shell: bash
+        run: |
+          ACTUAL=$(git rev-parse HEAD)
+          test "$ACTUAL" = "${{ inputs.git_sha }}"
+          echo "VERIFIED_GIT_SHA=$ACTUAL"
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Execute exact governed job
+        run: >-
+          python -m cloud_compute.autonomous_loop
+          --executor github_actions
+          --external-execution-id "$GITHUB_RUN_ID"
+          --job-id "${{ inputs.job_id }}"
+          --max-jobs 10
