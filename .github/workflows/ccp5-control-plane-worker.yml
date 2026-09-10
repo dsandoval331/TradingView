@@ -2,6 +2,11 @@ name: CCP-5 Control Plane Worker
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - 'cloud-compute/ccp1-foundation'
+    paths:
+      - '.github/ccp5-live-trigger.txt'
   pull_request:
     paths:
       - 'cloud_compute/control_plane_worker.py'
@@ -27,7 +32,7 @@ jobs:
         run: pytest -q tests/test_ccp5_control_plane_worker.py tests/test_ccp5_control_plane.py
 
   execute-control-plane-job:
-    if: github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'push'
     runs-on: ubuntu-latest
     env:
       SUPABASE_URL: ${{ secrets.TR_SUPABASE_URL }}
