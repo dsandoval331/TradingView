@@ -3,6 +3,7 @@ from pathlib import Path
 from cloud_compute.executor_policy import Executor, ExecutorAvailability, choose_executor
 
 DOC = Path('docs/cloud_compute/ccp12_operating_model.md')
+QUICKSTART = Path('docs/cloud_compute/operator_quickstart.md')
 
 
 def test_operating_model_document_exists_and_declares_version() -> None:
@@ -49,5 +50,17 @@ def test_operating_model_defines_reliability_and_artifact_controls() -> None:
         'persist all declared output files',
         'SHA-256',
         'executor liveness is unknown: leave the job alone',
+    ]:
+        assert phrase in text
+
+
+def test_operator_quickstart_documents_cloud_first_and_local_fallback() -> None:
+    text = QUICKSTART.read_text(encoding='utf-8')
+    for phrase in [
+        'Routine operation should not require a local `git pull` or manual PowerShell execution loop.',
+        'python -m cloud_compute.local_worker --job-id <JOB_ID>',
+        'GitHub Actions -> Local Windows',
+        'NO_INCREMENTAL_SPEND_WITHOUT_EXPLICIT_APPROVAL',
+        'Infrastructure can execute research, but it does not own the interpretation.',
     ]:
         assert phrase in text
