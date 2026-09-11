@@ -1,0 +1,29 @@
+name: CCP-12 Operating Model Certification
+
+on:
+  push:
+    branches:
+      - cloud-compute/ccp12-operating-model
+    paths:
+      - 'docs/cloud_compute/ccp12_operating_model.md'
+      - 'tests/test_ccp12_operating_model.py'
+      - 'cloud_compute/executor_policy.py'
+      - '.github/workflows/ccp12-operating-model-cert.yml'
+  workflow_dispatch:
+
+jobs:
+  certify-operating-model:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install test dependency
+        run: pip install pytest
+      - name: Certify documented operating model against runtime policy
+        run: pytest -q tests/test_ccp12_operating_model.py
