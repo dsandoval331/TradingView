@@ -17,14 +17,14 @@ def test_worker_claims_runs_persists_and_completes_job() -> None:
     config = ControlPlaneConfig("https://example.supabase.co", "sb_secret_example")
     job = {"job_id": "job-1", "runner_job_id": "CCP3-PARITY-FIXTURE", "git_sha": "abc123"}
     claim = {"job": job, "attempt_id": "attempt-1", "attempt_no": 1}
-    artifact = {"artifact_id": "artifact-1"}
+    artifacts = [{"artifact_id": "artifact-1", "is_primary": True}]
     with (
         patch("cloud_compute.control_plane_worker.runner._git_sha", return_value="abc123"),
         patch("cloud_compute.control_plane_worker.claim_job", return_value=claim) as claim_job,
         patch("cloud_compute.control_plane_worker.materialize_job_inputs", return_value=[]),
         patch("cloud_compute.control_plane_worker.runner.run_id", return_value=0) as run_id,
         patch("cloud_compute.control_plane_worker._record_stream_logs") as record_logs,
-        patch("cloud_compute.control_plane_worker._persist_runner_artifact", return_value=artifact) as persist_artifact,
+        patch("cloud_compute.control_plane_worker._persist_runner_artifacts", return_value=artifacts) as persist_artifacts,
         patch("cloud_compute.control_plane_worker.update_job", return_value=job) as update_job,
         patch("cloud_compute.control_plane_worker.update_attempt", return_value={}) as update_attempt,
     ):
@@ -32,9 +32,11 @@ def test_worker_claims_runs_persists_and_completes_job() -> None:
     claim_job.assert_called_once_with(config, executor="github_actions", git_sha="abc123", external_execution_id="run-99")
     run_id.assert_called_once_with("CCP3-PARITY-FIXTURE")
     record_logs.assert_called_once()
-    persist_artifact.assert_called_once()
+    persist_artifacts.assert_called_once()
     assert update_job.call_args.args[2]["status"] == "succeeded"
     assert update_attempt.call_args.args[2]["status"] == "succeeded"
+    assert update_attempt.call_args.args[2]["metadata_json"]["artifact_id"] == "artifact-1"
+    assert update_attempt.call_args.args[2]["metadata_json"]["artifact_count"] == 1
     assert update_attempt.call_args.args[2]["metadata_json"]["atomic_claim"] is True
     assert update_attempt.call_args.args[2]["metadata_json"]["materialized_input_count"] == 0
 
@@ -50,7 +52,7 @@ def test_worker_exact_job_uses_exact_claim_only() -> None:
         patch("cloud_compute.control_plane_worker.materialize_job_inputs", return_value=[]),
         patch("cloud_compute.control_plane_worker.runner.run_id", return_value=0),
         patch("cloud_compute.control_plane_worker._record_stream_logs"),
-        patch("cloud_compute.control_plane_worker._persist_runner_artifact", return_value={"artifact_id": "artifact-web"}),
+        patch("cloud_compute.control_plane_worker._persist_runner_artifacts", return_value=[{"artifact_id": "artifact-web", "is_primary": True}]),
         patch("cloud_compute.control_plane_worker.update_job", return_value=job),
         patch("cloud_compute.control_plane_worker.update_attempt", return_value={}),
     ):
