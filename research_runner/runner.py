@@ -25,6 +25,7 @@ JOBS = [
     {"id": "PMPD-EDGE-E1-B3", "project": "pmpd", "module": "research_runner.jobs.pmpd_edge_e1_batch3", "description": "RVOL incremental-edge, concentration, timing, direction, and prior-completed-bar audit"},
     {"id": "PMPD-EDGE-E1-B4", "project": "pmpd", "module": "research_runner.jobs.pmpd_edge_e1_batch4", "description": "Matched-control and incremental-information audit of frozen opening-RVOL hypothesis"},
     {"id": "PMPD-EDGE-E1-B5", "project": "pmpd", "module": "research_runner.jobs.pmpd_edge_e1_batch5", "description": "Breakout-volume anomaly and opening-momentum contextual edge research"},
+    {"id": "PMPD-EDGE-E2-B1", "project": "pmpd", "module": "research_runner.jobs.pmpd_edge_e2_batch1", "description": "Outcome-blind penetration-versus-acceptance taxonomy and measurement protocol freeze"},
 ]
 
 
