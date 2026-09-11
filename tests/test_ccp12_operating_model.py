@@ -32,7 +32,7 @@ def test_documented_executor_order_matches_runtime_policy() -> None:
 def test_operating_model_preserves_research_governance_boundary() -> None:
     text = DOC.read_text(encoding='utf-8')
     required = [
-        'research interpretation remains in the owning research thread/project',
+        'Research interpretation remains in the owning research thread/project',
         'must not independently change',
         'frozen model thresholds',
         'evidence classifications',
