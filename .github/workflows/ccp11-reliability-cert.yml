@@ -8,8 +8,10 @@ on:
       - 'cloud_compute/reliability_audit.py'
       - 'cloud_compute/artifact_contract.py'
       - 'cloud_compute/control_plane_worker.py'
+      - 'cloud_compute/stale_recovery.py'
       - 'tests/test_ccp11_reliability_audit.py'
       - 'tests/test_ccp11_artifact_contract.py'
+      - 'tests/test_ccp11_stale_recovery.py'
       - '.github/workflows/ccp11-reliability-cert.yml'
   workflow_dispatch:
 
@@ -27,5 +29,5 @@ jobs:
           python-version: '3.12'
       - name: Install test dependency
         run: pip install pytest
-      - name: Run CCP-11 reliability and artifact contract tests
-        run: pytest -q tests/test_ccp11_reliability_audit.py tests/test_ccp11_artifact_contract.py
+      - name: Run CCP-11 reliability, artifact, and stale recovery tests
+        run: pytest -q tests/test_ccp11_reliability_audit.py tests/test_ccp11_artifact_contract.py tests/test_ccp11_stale_recovery.py
