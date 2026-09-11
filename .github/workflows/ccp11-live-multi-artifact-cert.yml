@@ -5,6 +5,8 @@ on:
     branches:
       - cloud-compute/ccp11-reliability-certification
     paths:
+      - 'cloud_compute/control_plane_worker.py'
+      - 'cloud_compute/artifact_contract.py'
       - '.github/workflows/ccp11-live-multi-artifact-cert.yml'
   workflow_dispatch:
 
@@ -48,7 +50,7 @@ jobs:
               'cloud_run_spend_approved': False,
               'priority': 10,
               'git_sha': os.environ['GITHUB_SHA'],
-              'dataset_version': 'CCP11-MULTI-ARTIFACT-PMPD-B2-1',
+              'dataset_version': 'CCP11-MULTI-ARTIFACT-PMPD-B2-2',
               'parameters_json': {
                   'submission_source': 'ccp11_live_multi_artifact_cert',
                   'purpose': 'CCP-11 live artifact completeness certification using unchanged CCP-10 PMPD proof workload',
