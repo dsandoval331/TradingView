@@ -67,12 +67,14 @@ def _persist_runner_artifacts(config: ControlPlaneConfig, *, job_id: str, attemp
         return []
 
     root = runner.WORK_ROOT.resolve()
-    primary_rel = result.get("artifact")
+    primary_value = result.get("artifact")
+    primary_path = (root / primary_value).resolve() if isinstance(primary_value, str) and primary_value else None
     persisted: list[dict] = []
     for path in paths:
         rel = str(path.relative_to(root)).replace("\\", "/")
         digest = sha256_file(path)
-        if primary_rel and rel == str(primary_rel).replace("\\", "/"):
+        is_primary = bool(primary_path is not None and path == primary_path)
+        if is_primary:
             expected = result.get("sha256")
             if expected and expected != digest:
                 raise RuntimeError(f"artifact checksum mismatch for {rel}")
@@ -88,7 +90,7 @@ def _persist_runner_artifacts(config: ControlPlaneConfig, *, job_id: str, attemp
             "media_type": mimetypes.guess_type(path.name)[0] or "application/octet-stream",
             "size_bytes": path.stat().st_size,
             "sha256": digest,
-            "is_primary": bool(primary_rel and rel == str(primary_rel).replace("\\", "/")),
+            "is_primary": is_primary,
             "metadata_json": {"runner_job_id": runner_job_id, "runner_relative_path": rel},
         }))
     return persisted
