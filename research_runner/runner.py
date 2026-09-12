@@ -27,6 +27,7 @@ JOBS = [
     {"id": "PMPD-EDGE-E1-B5", "project": "pmpd", "module": "research_runner.jobs.pmpd_edge_e1_batch5", "description": "Breakout-volume anomaly and opening-momentum contextual edge research"},
     {"id": "PMPD-EDGE-E2-B1", "project": "pmpd", "module": "research_runner.jobs.pmpd_edge_e2_batch1", "description": "Outcome-blind penetration-versus-acceptance taxonomy and measurement protocol freeze"},
     {"id": "PMPD-EDGE-E2-B2", "project": "pmpd", "module": "research_runner.jobs.pmpd_edge_e2_batch2", "description": "Causal acceptance-state path construction and availability/coverage certification"},
+    {"id": "PMPD-EDGE-E2-B2-AUDIT", "project": "pmpd", "module": "research_runner.jobs.pmpd_edge_e2_batch2_audit", "description": "Mechanical audit and concise extraction of persisted E2-B2 outputs"},
 ]
 
 
