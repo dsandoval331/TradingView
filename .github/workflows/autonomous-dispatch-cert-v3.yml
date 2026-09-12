@@ -1,0 +1,76 @@
+name: Autonomous Dispatch Certification V3
+
+on:
+  push:
+    branches:
+      - cloud-compute/autonomous-dispatch
+    paths:
+      - 'cloud_compute/autonomous_dispatch_cert_trigger.txt'
+
+permissions:
+  contents: read
+
+jobs:
+  certify:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_URL: ${{ secrets.TR_SUPABASE_URL }}
+      SUPABASE_SECRET_KEY: ${{ secrets.TR_SUPABASE_SECRET_KEY }}
+      TR_GIT_SHA: ${{ github.sha }}
+      TR_GIT_REF: cloud-compute/autonomous-dispatch
+    steps:
+      - name: Checkout exact certification revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+
+      - name: Verify exact checkout SHA
+        run: test "$(git rev-parse HEAD)" = "$TR_GIT_SHA"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Create harmless governed fixture job
+        id: fixture
+        run: |
+          python - <<'PY'
+          import os
+          from cloud_compute.control_plane import ControlPlaneConfig, create_job
+
+          cfg = ControlPlaneConfig(os.environ['SUPABASE_URL'], os.environ['SUPABASE_SECRET_KEY'])
+          job = create_job(cfg, {
+              'strategy_id': '98f761bf-c6f1-4399-b10e-e299cb332141',
+              'runner_job_id': 'CCP3-PARITY-FIXTURE',
+              'project_code': 'CLOUD_COMPUTE',
+              'phase_code': 'OPERATING',
+              'status': 'queued',
+              'preferred_executor': 'github_actions',
+              'cloud_run_spend_approved': False,
+              'priority': 5,
+              'git_sha': os.environ['TR_GIT_SHA'],
+              'dataset_version': 'CCP-AUTONOMOUS-DISPATCH-FIXTURE-2',
+              'parameters_json': {
+                  'submission_source': 'cloud_compute_autonomous_dispatch_cert_v3',
+                  'purpose': 'Harmless governed autonomous-dispatch fixture',
+                  'research_only': True,
+                  'cost_policy': 'ZERO_INCREMENTAL_COST_FIRST',
+                  'retry_policy': {'enabled': False},
+              },
+          })
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as handle:
+              handle.write(f"job_id={job['job_id']}\n")
+          PY
+
+      - name: Execute harmless governed fixture
+        run: >-
+          python -m cloud_compute.autonomous_loop
+          --executor github_actions
+          --external-execution-id "$GITHUB_RUN_ID"
+          --job-id "${{ steps.fixture.outputs.job_id }}"
+          --max-jobs 1
