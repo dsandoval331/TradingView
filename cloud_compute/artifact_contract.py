@@ -1,24 +1,36 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any
 
-PRIMARY_RESULT_KEYS = {"artifact", "output_dir"}
+
+def _looks_like_artifact_path(key: str, value: str) -> bool:
+    if key == "artifact":
+        return True
+    if key in {"output_dir", "sha256"}:
+        return False
+    candidate = value.strip()
+    if not candidate:
+        return False
+    # Secondary research outputs are legacy named result fields whose values are
+    # file paths (for example summary.json or robustness.csv). Plain metadata
+    # strings such as fixture identifiers are not artifacts.
+    return bool(Path(candidate).suffix)
 
 
 def declared_output_paths(result: dict[str, Any]) -> list[str]:
     """Return unique declared output files from a runner result.
 
-    The runner contract historically used `artifact` for the primary output.
-    Research jobs may also return named secondary files. `output_dir` is not an
-    artifact; it is only a directory locator.
+    Backward compatibility:
+    - `artifact` is always the primary output path.
+    - legacy named secondary outputs are accepted when their string values look
+      like file paths (have a filename suffix).
+    - plain string metadata is ignored.
     """
     paths: list[str] = []
     seen: set[str] = set()
     for key, value in result.items():
-        if key == "output_dir" or not isinstance(value, str) or not value.strip():
-            continue
-        if key == "sha256":
+        if not isinstance(value, str) or not _looks_like_artifact_path(key, value):
             continue
         rel = value.strip()
         if rel not in seen:
