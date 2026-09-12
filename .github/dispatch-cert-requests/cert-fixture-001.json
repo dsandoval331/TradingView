@@ -1,0 +1,5 @@
+{
+  "git_sha": "688d1880eddcf68e163584141efeb5d48381a1f9",
+  "target_ref": "cloud-compute/autonomous-dispatch",
+  "purpose": "CCP autonomous dispatch certification fixture"
+}
