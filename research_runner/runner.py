@@ -29,6 +29,7 @@ JOBS = [
     {"id": "PMPD-EDGE-E2-B2", "project": "pmpd", "module": "research_runner.jobs.pmpd_edge_e2_batch2", "description": "Causal acceptance-state path construction and availability/coverage certification"},
     {"id": "PMPD-EDGE-E2-B2-AUDIT", "project": "pmpd", "module": "research_runner.jobs.pmpd_edge_e2_batch2_audit", "description": "Mechanical audit and concise extraction of persisted E2-B2 outputs"},
     {"id": "PMPD-EDGE-E2-B2-R2", "project": "pmpd", "module": "research_runner.jobs.pmpd_edge_e2_batch2_r2", "description": "Boundary-integrity rerun deriving frozen six-level stack from governed raw cache"},
+    {"id": "PMPD-EDGE-E2-B3-R2", "project": "pmpd", "module": "research_runner.jobs.pmpd_edge_e2_batch3_r2", "description": "State-anchored +/-0.50% acceptance outcome comparison from certified E2-B2-R2 paths"},
 ]
 
 
