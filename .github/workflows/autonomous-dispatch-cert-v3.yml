@@ -5,6 +5,7 @@ on:
     branches:
       - cloud-compute/autonomous-dispatch
     paths:
+      - '.github/workflows/autonomous-dispatch-cert-v3.yml'
       - 'cloud_compute/autonomous_dispatch_cert_trigger.txt'
 
 permissions:
