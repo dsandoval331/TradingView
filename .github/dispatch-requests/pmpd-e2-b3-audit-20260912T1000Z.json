@@ -1,0 +1,7 @@
+{
+  "job_id": "1d198307-1d25-47dd-a524-a3b2f5975c0d",
+  "git_sha": "7747a165f62f8110d20fb3e5551273aec31e9b8f",
+  "target_ref": "pmpd-edge/e1-b5-cloud",
+  "requested_by": "PMPD",
+  "purpose": "Mechanical audit of persisted E2-B3 state-anchored outcome evidence"
+}
