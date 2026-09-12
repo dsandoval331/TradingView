@@ -1,0 +1,28 @@
+name: CCP-4 Executor Policy Certification
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'cloud_compute/executor_policy.py'
+      - 'tests/test_ccp4_executor_policy.py'
+      - 'docs/cloud-compute/CCP-4-HYBRID-EXECUTOR.md'
+      - '.github/workflows/ccp4-executor-policy.yml'
+
+jobs:
+  certify-routing:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install pytest
+        run: python -m pip install pytest
+
+      - name: Run CCP-4 routing tests
+        run: pytest -q tests/test_ccp4_executor_policy.py

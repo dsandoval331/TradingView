@@ -3,46 +3,26 @@ from __future__ import annotations
 import argparse
 import importlib
 import json
+import os
 import subprocess
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-STATE_DIR = ROOT / "research_outputs" / "runner"
+CODE_ROOT = Path(__file__).resolve().parents[1]
+WORK_ROOT = Path(os.environ.get("TR_WORK_ROOT", str(CODE_ROOT))).expanduser().resolve()
+STATE_DIR = WORK_ROOT / "research_outputs" / "runner"
 STATE_FILE = STATE_DIR / "state.json"
 
 JOBS = [
-    {
-        "id": "PMPD-POST9N-B1",
-        "project": "pmpd",
-        "module": "research_runner.jobs.pmpd_post9n_batch1",
-        "description": "V5 contextual edge search: gap, time, geometry, RVOL, SPY/QQQ alignment",
-    },
-    {
-        "id": "PMPD-EDGE-E1-B2",
-        "project": "pmpd",
-        "module": "research_runner.jobs.pmpd_edge_e1_batch2",
-        "description": "Causal opening-RVOL availability audit and robustness decomposition of Batch-1 primary hypothesis",
-    },
-    {
-        "id": "PMPD-EDGE-E1-B3",
-        "project": "pmpd",
-        "module": "research_runner.jobs.pmpd_edge_e1_batch3",
-        "description": "RVOL incremental-edge, concentration, timing, direction, and prior-completed-bar audit",
-    },
-    {
-        "id": "PMPD-EDGE-E1-B4",
-        "project": "pmpd",
-        "module": "research_runner.jobs.pmpd_edge_e1_batch4",
-        "description": "Matched-control and incremental-information audit of frozen opening-RVOL hypothesis",
-    },
-    {
-        "id": "PMPD-EDGE-E1-B5",
-        "project": "pmpd",
-        "module": "research_runner.jobs.pmpd_edge_e1_batch5",
-        "description": "Breakout-volume anomaly and opening-momentum contextual edge research",
-    },
+    {"id": "CCP3-PARITY-FIXTURE", "project": "ccp", "module": "research_runner.jobs.ccp3_parity_fixture", "description": "Deterministic native/container research_runner parity fixture"},
+    {"id": "CCP4-REMOTE-FIXTURE", "project": "ccp4", "module": "research_runner.jobs.ccp4_remote_fixture", "description": "Representative remote-input cloud execution certification fixture"},
+    {"id": "CCP8-RETRY-ONCE-FIXTURE", "project": "ccp", "module": "research_runner.jobs.ccp8_retry_once_fixture", "description": "Deterministic autonomous-loop fail-once then succeed retry fixture"},
+    {"id": "PMPD-POST9N-B1", "project": "pmpd", "module": "research_runner.jobs.pmpd_post9n_batch1", "description": "V5 contextual edge search: gap, time, geometry, RVOL, SPY/QQQ alignment"},
+    {"id": "PMPD-EDGE-E1-B2", "project": "pmpd", "module": "research_runner.jobs.pmpd_edge_e1_batch2", "description": "Causal opening-RVOL availability audit and robustness decomposition of Batch-1 primary hypothesis"},
+    {"id": "PMPD-EDGE-E1-B3", "project": "pmpd", "module": "research_runner.jobs.pmpd_edge_e1_batch3", "description": "RVOL incremental-edge, concentration, timing, direction, and prior-completed-bar audit"},
+    {"id": "PMPD-EDGE-E1-B4", "project": "pmpd", "module": "research_runner.jobs.pmpd_edge_e1_batch4", "description": "Matched-control and incremental-information audit of frozen opening-RVOL hypothesis"},
+    {"id": "PMPD-EDGE-E1-B5", "project": "pmpd", "module": "research_runner.jobs.pmpd_edge_e1_batch5", "description": "Breakout-volume anomaly and opening-momentum contextual edge research"},
 ]
 
 
@@ -58,16 +38,24 @@ def _save_state(state: dict) -> None:
 
 
 def _git_sha() -> str | None:
+    injected = os.environ.get("TR_GIT_SHA")
+    if injected and injected != "unknown":
+        return injected
     try:
-        return subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
+        return subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=CODE_ROOT, text=True).strip()
     except Exception:
-        return None
+        return injected or None
+
+
+def _find_job(job_id: str) -> dict | None:
+    return next((job for job in JOBS if job["id"] == job_id), None)
 
 
 def status() -> int:
     state = _load_state()
     print("=== TRADING RESEARCH RUNNER ===")
-    print(f"ROOT={ROOT}")
+    print(f"CODE_ROOT={CODE_ROOT}")
+    print(f"WORK_ROOT={WORK_ROOT}")
     print(f"GIT_SHA={_git_sha()}")
     for job in JOBS:
         rec = state["jobs"].get(job["id"], {})
@@ -83,7 +71,7 @@ def run_job(job: dict) -> int:
     print(f"\n>>> RUNNING {job['id']}: {job['description']}")
     try:
         mod = importlib.import_module(job["module"])
-        result = mod.run(ROOT)
+        result = mod.run(WORK_ROOT)
         rec.update({"status": "PASS", "completed_at": datetime.now(timezone.utc).isoformat(), "result": result})
         _save_state(state)
         print(f">>> {job['id']} PASS")
@@ -93,6 +81,14 @@ def run_job(job: dict) -> int:
         _save_state(state)
         print(f">>> {job['id']} FAIL: {exc}", file=sys.stderr)
         return 1
+
+
+def run_id(job_id: str) -> int:
+    job = _find_job(job_id)
+    if job is None:
+        print(f"UNKNOWN_JOB_ID={job_id}", file=sys.stderr)
+        return 2
+    return run_job(job)
 
 
 def run_next(project: str | None = None) -> int:
@@ -119,15 +115,18 @@ def run_all(project: str | None = None) -> int:
 
 
 def main() -> int:
-    p = argparse.ArgumentParser(description="Persistent TradingResearch local research runner")
+    p = argparse.ArgumentParser(description="Persistent TradingResearch local/cloud-compatible research runner")
     sub = p.add_subparsers(dest="command", required=True)
     sub.add_parser("status")
+    one = sub.add_parser("run-id")
+    one.add_argument("job_id")
     nxt = sub.add_parser("run-next")
-    nxt.add_argument("--project", choices=["pmpd"])
+    nxt.add_argument("--project", choices=["ccp", "ccp4", "pmpd"])
     allp = sub.add_parser("run-all")
-    allp.add_argument("--project", choices=["pmpd"])
+    allp.add_argument("--project", choices=["ccp", "ccp4", "pmpd"])
     args = p.parse_args()
     if args.command == "status": return status()
+    if args.command == "run-id": return run_id(args.job_id)
     if args.command == "run-next": return run_next(args.project)
     if args.command == "run-all": return run_all(args.project)
     return 2
