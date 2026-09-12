@@ -1,0 +1,103 @@
+name: TradingResearch Autonomous Governed Dispatcher
+
+on:
+  push:
+    branches:
+      - cloud-compute/autonomous-dispatch
+    paths:
+      - '.github/dispatch-requests/*.json'
+
+permissions:
+  contents: read
+
+jobs:
+  dispatch-governed-job:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_URL: ${{ secrets.TR_SUPABASE_URL }}
+      SUPABASE_SECRET_KEY: ${{ secrets.TR_SUPABASE_SECRET_KEY }}
+    steps:
+      - name: Checkout dispatch control branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 2
+
+      - name: Resolve and validate dispatch request
+        id: request
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          BEFORE='${{ github.event.before }}'
+          AFTER='${{ github.sha }}'
+          REQUEST_PATH="$(git diff --name-only "$BEFORE" "$AFTER" -- '.github/dispatch-requests/*.json' | tail -n 1)"
+          test -n "$REQUEST_PATH"
+          test -f "$REQUEST_PATH"
+
+          JOB_ID="$(jq -r '.job_id' "$REQUEST_PATH")"
+          GIT_SHA="$(jq -r '.git_sha' "$REQUEST_PATH")"
+          TARGET_REF="$(jq -r '.target_ref' "$REQUEST_PATH")"
+
+          [[ "$JOB_ID" =~ ^[0-9a-fA-F-]{36}$ ]]
+          [[ "$GIT_SHA" =~ ^[0-9a-fA-F]{40}$ ]]
+          test -n "$TARGET_REF"
+
+          RESPONSE="$(curl --fail-with-body --silent --show-error \
+            -H "apikey: $SUPABASE_SECRET_KEY" \
+            -H 'Accept: application/json' \
+            "$SUPABASE_URL/rest/v1/research_jobs?job_id=eq.$JOB_ID&select=job_id,status,preferred_executor,cloud_run_spend_approved,git_sha,runner_job_id,project_code,phase_code,dataset_version,parameters_json")"
+
+          test "$(jq 'length' <<<"$RESPONSE")" = "1"
+          ROW="$(jq '.[0]' <<<"$RESPONSE")"
+
+          DB_STATUS="$(jq -r '.status' <<<"$ROW")"
+          DB_EXECUTOR="$(jq -r '.preferred_executor' <<<"$ROW")"
+          DB_SPEND="$(jq -r '.cloud_run_spend_approved' <<<"$ROW")"
+          DB_SHA="$(jq -r '.git_sha' <<<"$ROW")"
+
+          [[ "$DB_STATUS" == "queued" || "$DB_STATUS" == "local_pending" ]]
+          test "$DB_EXECUTOR" = "github_actions"
+          test "$DB_SPEND" = "false"
+          test "$DB_SHA" = "$GIT_SHA"
+
+          echo "job_id=$JOB_ID" >> "$GITHUB_OUTPUT"
+          echo "git_sha=$GIT_SHA" >> "$GITHUB_OUTPUT"
+          echo "target_ref=$TARGET_REF" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout exact governed revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.request.outputs.git_sha }}
+          fetch-depth: 1
+
+      - name: Verify exact checkout SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${{ steps.request.outputs.git_sha }}"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest
+
+      - name: Certify cloud control-plane contracts
+        run: pytest -q tests/test_ccp5_control_plane.py tests/test_ccp5_control_plane_worker.py tests/test_ccp8_autonomous_loop.py tests/test_ccp9_exact_claim.py
+
+      - name: Execute exact governed job
+        env:
+          TR_GIT_SHA: ${{ steps.request.outputs.git_sha }}
+          TR_GIT_REF: ${{ steps.request.outputs.target_ref }}
+        run: >-
+          python -m cloud_compute.autonomous_loop
+          --executor github_actions
+          --external-execution-id "$GITHUB_RUN_ID"
+          --job-id "${{ steps.request.outputs.job_id }}"
+          --max-jobs 10
