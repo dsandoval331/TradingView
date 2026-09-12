@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any
 
-from cloud_compute.artifact_contract import validate_declared_outputs
+from cloud_compute.artifact_contract import primary_output_path, validate_declared_outputs
 from cloud_compute.control_plane import (
     ControlPlaneConfig,
     claim_job,
@@ -67,8 +67,8 @@ def _persist_runner_artifacts(config: ControlPlaneConfig, *, job_id: str, attemp
         return []
 
     root = runner.WORK_ROOT.resolve()
-    primary_value = result.get("artifact")
-    primary_path = (root / primary_value).resolve() if isinstance(primary_value, str) and primary_value else None
+    primary_value = primary_output_path(result)
+    primary_path = (root / primary_value).resolve() if primary_value else None
     persisted: list[dict] = []
     for path in paths:
         rel = str(path.relative_to(root)).replace("\\", "/")
