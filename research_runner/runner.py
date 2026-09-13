@@ -32,36 +32,31 @@ JOBS = [
     {"id": "PMPD-EDGE-E2-B3-R2", "project": "pmpd", "module": "research_runner.jobs.pmpd_edge_e2_batch3_r2", "description": "State-anchored +/-0.50% acceptance outcome comparison from certified E2-B2-R2 paths"},
     {"id": "PMPD-EDGE-E2-B3-AUDIT", "project": "pmpd", "module": "research_runner.jobs.pmpd_edge_e2_batch3_audit", "description": "Mechanical audit and concise extraction of E2-B3 state-anchored outcome evidence"},
     {"id": "PMPD-EDGE-E2-B4", "project": "pmpd", "module": "research_runner.jobs.pmpd_edge_e2_batch4", "description": "Focused reclaim-after-failure robustness, temporal, directional, symbol-concentration, and frozen RVOL context audit"},
+    {"id": "PMPD-EDGE-E2-B4-AUDIT", "project": "pmpd", "module": "research_runner.jobs.pmpd_edge_e2_batch4_audit", "description": "Mechanical extraction of E2-B4 reclaim-after-failure robustness evidence"},
 ]
-
 
 def _load_state() -> dict:
     if not STATE_FILE.exists(): return {"version": 1, "jobs": {}}
     return json.loads(STATE_FILE.read_text(encoding="utf-8"))
-
 def _save_state(state: dict) -> None:
     STATE_DIR.mkdir(parents=True, exist_ok=True); STATE_FILE.write_text(json.dumps(state, indent=2), encoding="utf-8")
-
 def _git_sha() -> str | None:
     injected=os.environ.get("TR_GIT_SHA")
     if injected and injected != "unknown": return injected
     try: return subprocess.check_output(["git","rev-parse","HEAD"],cwd=CODE_ROOT,text=True).strip()
     except Exception: return injected or None
-
 def _find_job(job_id: str) -> dict | None: return next((job for job in JOBS if job["id"] == job_id), None)
 def status() -> int:
     state=_load_state(); print("=== TRADING RESEARCH RUNNER ==="); print(f"CODE_ROOT={CODE_ROOT}"); print(f"WORK_ROOT={WORK_ROOT}"); print(f"GIT_SHA={_git_sha()}")
     for job in JOBS:
         rec=state["jobs"].get(job["id"],{}); print(f"{job['id']}: {rec.get('status','READY')} - {job['description']}")
     return 0
-
 def run_job(job: dict) -> int:
     state=_load_state(); rec=state["jobs"].setdefault(job["id"],{}); rec.update({"status":"RUNNING","started_at":datetime.now(timezone.utc).isoformat(),"git_sha":_git_sha()}); _save_state(state); print(f"\n>>> RUNNING {job['id']}: {job['description']}")
     try:
         result=importlib.import_module(job["module"]).run(WORK_ROOT); rec.update({"status":"PASS","completed_at":datetime.now(timezone.utc).isoformat(),"result":result}); _save_state(state); print(f">>> {job['id']} PASS"); return 0
     except Exception as exc:
         rec.update({"status":"FAIL","completed_at":datetime.now(timezone.utc).isoformat(),"error":repr(exc)}); _save_state(state); print(f">>> {job['id']} FAIL: {exc}",file=sys.stderr); return 1
-
 def run_id(job_id: str) -> int:
     job=_find_job(job_id)
     if job is None: print(f"UNKNOWN_JOB_ID={job_id}",file=sys.stderr); return 2
