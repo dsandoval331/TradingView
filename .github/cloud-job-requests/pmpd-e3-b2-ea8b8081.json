@@ -1,0 +1,11 @@
+{
+  "job_id": "ea8b8081-d37e-49cc-939b-812049c33623",
+  "git_sha": "cc75702e4468960a2130845be13ac16202abdb9b",
+  "target_ref": "pmpd-edge/e1-b5-cloud",
+  "runner_job_id": "PMPD-EDGE-E3-B2",
+  "preferred_executor": "github_actions",
+  "cloud_run_spend_approved": false,
+  "cost_policy": "ZERO_INCREMENTAL_COST_FIRST",
+  "requested_by": "PMPD",
+  "research_only": true
+}
