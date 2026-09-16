@@ -34,6 +34,7 @@ JOBS = [
     {"id": "PMPD-EDGE-E2-B4", "project": "pmpd", "module": "research_runner.jobs.pmpd_edge_e2_batch4", "description": "Focused reclaim-after-failure robustness, temporal, directional, symbol-concentration, and frozen RVOL context audit"},
     {"id": "PMPD-EDGE-E2-B4-AUDIT", "project": "pmpd", "module": "research_runner.jobs.pmpd_edge_e2_batch4_audit", "description": "Mechanical extraction of E2-B4 reclaim-after-failure robustness evidence"},
     {"id": "PMPD-EDGE-E3-B1", "project": "pmpd", "module": "research_runner.jobs.pmpd_edge_e3_batch1", "description": "Outcome-blind causal Trade Health event taxonomy and measurement protocol freeze"},
+    {"id": "PMPD-EDGE-E3-B2", "project": "pmpd", "module": "research_runner.jobs.pmpd_edge_e3_batch2", "description": "Timestamped causal Trade Health event-path construction and availability/coverage certification"},
 ]
 
 def _load_state() -> dict:
