@@ -12,6 +12,12 @@ def _looks_like_artifact_path(key: str, value: str) -> bool:
     candidate = value.strip()
     if not candidate:
         return False
+    # Legacy named secondary outputs are path-like values, not merely dotted
+    # metadata strings (for example Python module identifiers). Explicit
+    # `artifact` / `output_paths` declarations remain authoritative and may
+    # still contain bare filenames.
+    if "/" not in candidate and "\\" not in candidate:
+        return False
     return bool(Path(candidate).suffix)
 
 
