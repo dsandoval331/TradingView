@@ -25,113 +25,61 @@ JOBS = [
     {"id": "PMPD-EDGE-E1-B3", "project": "pmpd", "module": "research_runner.jobs.pmpd_edge_e1_batch3", "description": "RVOL incremental-edge, concentration, timing, direction, and prior-completed-bar audit"},
     {"id": "PMPD-EDGE-E1-B4", "project": "pmpd", "module": "research_runner.jobs.pmpd_edge_e1_batch4", "description": "Matched-control and incremental-information audit of frozen opening-RVOL hypothesis"},
     {"id": "PMPD-EDGE-E1-B5", "project": "pmpd", "module": "research_runner.jobs.pmpd_edge_e1_batch5", "description": "Breakout-volume anomaly and opening-momentum contextual edge research"},
+    {"id": "IR11-P2-B2", "project": "ir11", "module": "research_runner.jobs.ir11_p2_batch2_decomposition_qa", "description": "IR-11 P2 Batch 2 frozen decomposition, controls, concentration, staleness and extreme-displacement QA"},
 ]
 
-
 def _load_state() -> dict:
-    if not STATE_FILE.exists():
-        return {"version": 1, "jobs": {}}
+    if not STATE_FILE.exists(): return {"version": 1, "jobs": {}}
     return json.loads(STATE_FILE.read_text(encoding="utf-8"))
 
-
 def _save_state(state: dict) -> None:
-    STATE_DIR.mkdir(parents=True, exist_ok=True)
-    STATE_FILE.write_text(json.dumps(state, indent=2), encoding="utf-8")
-
+    STATE_DIR.mkdir(parents=True, exist_ok=True); STATE_FILE.write_text(json.dumps(state, indent=2), encoding="utf-8")
 
 def _git_sha() -> str | None:
-    injected = os.environ.get("TR_GIT_SHA")
-    if injected and injected != "unknown":
-        return injected
-    try:
-        return subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=CODE_ROOT, text=True).strip()
-    except Exception:
-        return injected or None
+    injected=os.environ.get("TR_GIT_SHA")
+    if injected and injected!="unknown": return injected
+    try: return subprocess.check_output(["git","rev-parse","HEAD"],cwd=CODE_ROOT,text=True).strip()
+    except Exception: return injected or None
 
+def _find_job(job_id:str)->dict|None: return next((j for j in JOBS if j["id"]==job_id),None)
 
-def _find_job(job_id: str) -> dict | None:
-    return next((job for job in JOBS if job["id"] == job_id), None)
-
-
-def status() -> int:
-    state = _load_state()
-    print("=== TRADING RESEARCH RUNNER ===")
-    print(f"CODE_ROOT={CODE_ROOT}")
-    print(f"WORK_ROOT={WORK_ROOT}")
-    print(f"GIT_SHA={_git_sha()}")
-    for job in JOBS:
-        rec = state["jobs"].get(job["id"], {})
-        print(f"{job['id']}: {rec.get('status', 'READY')} - {job['description']}")
+def status()->int:
+    state=_load_state(); print("=== TRADING RESEARCH RUNNER ==="); print(f"CODE_ROOT={CODE_ROOT}"); print(f"WORK_ROOT={WORK_ROOT}"); print(f"GIT_SHA={_git_sha()}")
+    for job in JOBS: print(f"{job['id']}: {state['jobs'].get(job['id'],{}).get('status','READY')} - {job['description']}")
     return 0
 
-
-def run_job(job: dict) -> int:
-    state = _load_state()
-    rec = state["jobs"].setdefault(job["id"], {})
-    rec.update({"status": "RUNNING", "started_at": datetime.now(timezone.utc).isoformat(), "git_sha": _git_sha()})
-    _save_state(state)
-    print(f"\n>>> RUNNING {job['id']}: {job['description']}")
+def run_job(job:dict)->int:
+    state=_load_state(); rec=state['jobs'].setdefault(job['id'],{}); rec.update({'status':'RUNNING','started_at':datetime.now(timezone.utc).isoformat(),'git_sha':_git_sha()}); _save_state(state); print(f"\n>>> RUNNING {job['id']}: {job['description']}")
     try:
-        mod = importlib.import_module(job["module"])
-        result = mod.run(WORK_ROOT)
-        rec.update({"status": "PASS", "completed_at": datetime.now(timezone.utc).isoformat(), "result": result})
-        _save_state(state)
-        print(f">>> {job['id']} PASS")
-        return 0
+        result=importlib.import_module(job['module']).run(WORK_ROOT); rec.update({'status':'PASS','completed_at':datetime.now(timezone.utc).isoformat(),'result':result}); _save_state(state); print(f">>> {job['id']} PASS"); return 0
     except Exception as exc:
-        rec.update({"status": "FAIL", "completed_at": datetime.now(timezone.utc).isoformat(), "error": repr(exc)})
-        _save_state(state)
-        print(f">>> {job['id']} FAIL: {exc}", file=sys.stderr)
-        return 1
+        rec.update({'status':'FAIL','completed_at':datetime.now(timezone.utc).isoformat(),'error':repr(exc)}); _save_state(state); print(f">>> {job['id']} FAIL: {exc}",file=sys.stderr); return 1
 
-
-def run_id(job_id: str) -> int:
-    job = _find_job(job_id)
-    if job is None:
-        print(f"UNKNOWN_JOB_ID={job_id}", file=sys.stderr)
-        return 2
+def run_id(job_id:str)->int:
+    job=_find_job(job_id)
+    if job is None: print(f"UNKNOWN_JOB_ID={job_id}",file=sys.stderr); return 2
     return run_job(job)
 
-
-def run_next(project: str | None = None) -> int:
-    state = _load_state()
-    candidates = [j for j in JOBS if project is None or j["project"] == project]
+def run_next(project:str|None=None)->int:
+    state=_load_state(); candidates=[j for j in JOBS if project is None or j['project']==project]
     for job in candidates:
-        if state["jobs"].get(job["id"], {}).get("status") != "PASS":
-            return run_job(job)
-    print("NO_PENDING_JOBS")
-    return 0
+        if state['jobs'].get(job['id'],{}).get('status')!='PASS': return run_job(job)
+    print('NO_PENDING_JOBS'); return 0
 
-
-def run_all(project: str | None = None) -> int:
-    state = _load_state()
-    candidates = [j for j in JOBS if project is None or j["project"] == project]
+def run_all(project:str|None=None)->int:
+    state=_load_state(); candidates=[j for j in JOBS if project is None or j['project']==project]
     for job in candidates:
-        if state["jobs"].get(job["id"], {}).get("status") == "PASS":
-            continue
-        rc = run_job(job)
-        if rc:
-            return rc
-    print("ALL_PENDING_JOBS_COMPLETE")
-    return 0
+        if state['jobs'].get(job['id'],{}).get('status')=='PASS': continue
+        rc=run_job(job)
+        if rc: return rc
+    print('ALL_PENDING_JOBS_COMPLETE'); return 0
 
-
-def main() -> int:
-    p = argparse.ArgumentParser(description="Persistent TradingResearch local/cloud-compatible research runner")
-    sub = p.add_subparsers(dest="command", required=True)
-    sub.add_parser("status")
-    one = sub.add_parser("run-id")
-    one.add_argument("job_id")
-    nxt = sub.add_parser("run-next")
-    nxt.add_argument("--project", choices=["ccp", "ccp4", "pmpd"])
-    allp = sub.add_parser("run-all")
-    allp.add_argument("--project", choices=["ccp", "ccp4", "pmpd"])
-    args = p.parse_args()
-    if args.command == "status": return status()
-    if args.command == "run-id": return run_id(args.job_id)
-    if args.command == "run-next": return run_next(args.project)
-    if args.command == "run-all": return run_all(args.project)
+def main()->int:
+    p=argparse.ArgumentParser(description='Persistent TradingResearch local/cloud-compatible research runner'); sub=p.add_subparsers(dest='command',required=True); sub.add_parser('status'); one=sub.add_parser('run-id'); one.add_argument('job_id'); nxt=sub.add_parser('run-next'); nxt.add_argument('--project',choices=['ccp','ccp4','pmpd','ir11']); allp=sub.add_parser('run-all'); allp.add_argument('--project',choices=['ccp','ccp4','pmpd','ir11']); args=p.parse_args()
+    if args.command=='status': return status()
+    if args.command=='run-id': return run_id(args.job_id)
+    if args.command=='run-next': return run_next(args.project)
+    if args.command=='run-all': return run_all(args.project)
     return 2
 
-if __name__ == "__main__":
-    raise SystemExit(main())
+if __name__=='__main__': raise SystemExit(main())
