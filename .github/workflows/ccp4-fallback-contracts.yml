@@ -1,0 +1,32 @@
+name: CCP-4 Fallback Contract Certification
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'cloud_compute/cloud_run_adapter.py'
+      - 'cloud_compute/local_worker.py'
+      - 'research_runner/runner.py'
+      - 'tests/test_ccp4_executor_contracts.py'
+      - '.github/workflows/ccp4-fallback-contracts.yml'
+
+jobs:
+  certify-fallback-contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install pytest
+        run: python -m pip install pytest
+
+      - name: Run CCP-4 fallback contract tests
+        run: pytest -q tests/test_ccp4_executor_contracts.py
+
+      - name: Prove explicit run-id contract
+        run: python -m research_runner.runner run-id CCP3-PARITY-FIXTURE
