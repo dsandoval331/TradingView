@@ -20,6 +20,19 @@ def test_declared_output_paths_include_primary_and_named_secondaries() -> None:
     ]
 
 
+def test_declared_output_paths_ignore_dotted_metadata() -> None:
+    result = {
+        "artifact": "research_outputs/demo/summary.json",
+        "output_paths": ["research_outputs/demo/summary.json", "research_outputs/demo/table.csv"],
+        "historical_source_module": "research_runner.jobs.ir11_p2_unconditional_paths",
+        "research_logic_modified": False,
+    }
+    assert declared_output_paths(result) == [
+        "research_outputs/demo/summary.json",
+        "research_outputs/demo/table.csv",
+    ]
+
+
 def test_validate_and_summarize_multiple_outputs(tmp_path: Path) -> None:
     out = tmp_path / "research_outputs" / "demo"
     out.mkdir(parents=True)
