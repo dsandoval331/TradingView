@@ -10,12 +10,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     if (pathname !== "/dashboard") return;
 
     const eyebrow = document.querySelector<HTMLElement>(".dashboardHero .eyebrow");
-    if (!eyebrow || eyebrow.dataset.platformBrand === "multiply-tip-accent") return;
+    if (!eyebrow || eyebrow.dataset.platformBrand === "multiply-tip-amber") return;
 
     const accentTip = () => {
       const span = document.createElement("span");
       span.textContent = "tip";
-      span.style.color = "#7ee2b8";
+      span.style.color = "#f2b84b";
       return span;
     };
 
@@ -27,7 +27,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       accentTip(),
       document.createTextNode(": trading intelligence platform"),
     );
-    eyebrow.dataset.platformBrand = "multiply-tip-accent";
+    eyebrow.dataset.platformBrand = "multiply-tip-amber";
   }, [pathname]);
 
   return children;
