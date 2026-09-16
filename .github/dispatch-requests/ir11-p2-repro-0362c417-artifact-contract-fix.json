@@ -1,0 +1,7 @@
+{
+  "job_id": "0362c417-6541-4362-afd0-62204644cf6c",
+  "git_sha": "0b1fd716970206312510b34c9520b09585633b0b",
+  "target_ref": "cloud-compute/ir11-promotion-20260915",
+  "runner_job_id": "IR11-P2-REPRO",
+  "purpose": "Governed IR-11 P2 historical parity reproduction after artifact contract metadata-path classification fix"
+}
