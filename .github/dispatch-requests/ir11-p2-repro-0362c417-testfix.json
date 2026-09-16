@@ -1,0 +1,7 @@
+{
+  "job_id": "0362c417-6541-4362-afd0-62204644cf6c",
+  "git_sha": "24a0ff12e00174295216c9a4151136c810e15c96",
+  "target_ref": "cloud-compute/ir11-promotion-20260915",
+  "runner_job_id": "IR11-P2-REPRO",
+  "purpose": "Governed IR-11 P2 historical parity reproduction after multi-artifact contract test alignment"
+}
