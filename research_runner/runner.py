@@ -25,6 +25,7 @@ JOBS = [
     {"id": "PMPD-EDGE-E1-B3", "project": "pmpd", "module": "research_runner.jobs.pmpd_edge_e1_batch3", "description": "RVOL incremental-edge, concentration, timing, direction, and prior-completed-bar audit"},
     {"id": "PMPD-EDGE-E1-B4", "project": "pmpd", "module": "research_runner.jobs.pmpd_edge_e1_batch4", "description": "Matched-control and incremental-information audit of frozen opening-RVOL hypothesis"},
     {"id": "PMPD-EDGE-E1-B5", "project": "pmpd", "module": "research_runner.jobs.pmpd_edge_e1_batch5", "description": "Breakout-volume anomaly and opening-momentum contextual edge research"},
+    {"id": "IR11-P2-REPRO", "project": "ir11", "module": "research_runner.jobs.ir11_p2_cloud_reproduction", "description": "Governed cloud reproduction of frozen IR-11 P2 unconditional forward paths"},
 ]
 
 
@@ -123,9 +124,9 @@ def main() -> int:
     one = sub.add_parser("run-id")
     one.add_argument("job_id")
     nxt = sub.add_parser("run-next")
-    nxt.add_argument("--project", choices=["ccp", "ccp4", "pmpd"])
+    nxt.add_argument("--project", choices=["ccp", "ccp4", "pmpd", "ir11"])
     allp = sub.add_parser("run-all")
-    allp.add_argument("--project", choices=["ccp", "ccp4", "pmpd"])
+    allp.add_argument("--project", choices=["ccp", "ccp4", "pmpd", "ir11"])
     args = p.parse_args()
     if args.command == "status": return status()
     if args.command == "run-id": return run_id(args.job_id)
