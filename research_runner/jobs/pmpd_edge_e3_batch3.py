@@ -12,14 +12,14 @@ ADV = 0.005
 
 
 def _load_events(root: Path) -> pd.DataFrame:
-    shard_dir = root / "research_outputs/pmpd/edge/e3_batch2_r2"
+    shard_dir = root / "research_outputs/pmpd/edge/e3_batch2"
     parts = sorted(shard_dir.glob("trade_health_events_part_*.parquet"))
-    if not parts:
-        legacy = root / "research_outputs/pmpd/edge/e3_batch2/trade_health_events.parquet"
-        if legacy.exists():
-            return pd.read_parquet(legacy)
-        raise FileNotFoundError("E3-B2-R2 Trade Health event shards not found")
-    return pd.concat([pd.read_parquet(p) for p in parts], ignore_index=True)
+    if parts:
+        return pd.concat([pd.read_parquet(p) for p in parts], ignore_index=True)
+    legacy = shard_dir / "trade_health_events.parquet"
+    if legacy.exists():
+        return pd.read_parquet(legacy)
+    raise FileNotFoundError("E3-B2-R2 Trade Health event shards not found")
 
 
 def _future_outcome(minutes: pd.DataFrame, trade_date, t: pd.Timestamp, direction: str, price: float) -> dict:
@@ -65,10 +65,8 @@ def run(root: Path) -> dict:
             out=_future_outcome(minutes,r.trade_date,t,str(r.direction).upper(),float(r.price_at_decision))
             rows.append({**r.to_dict(),**out})
     assoc=pd.DataFrame(rows)
-    if len(assoc):
-        assoc=assoc.sort_values(["symbol","trade_date","decision_timestamp_et","event_type"])
+    if len(assoc): assoc=assoc.sort_values(["symbol","trade_date","decision_timestamp_et","event_type"])
     outdir=root/"research_outputs/pmpd/edge/e3_batch3"; outdir.mkdir(parents=True,exist_ok=True)
-    # Shard by symbol groups to remain below governed artifact-size limits.
     syms=sorted(assoc.symbol.astype(str).unique()) if len(assoc) else []
     shard_paths=[]
     for i,group in enumerate(np.array_split(syms,16)):
@@ -76,24 +74,21 @@ def run(root: Path) -> dict:
         p=outdir/f"trade_health_associations_part_{i:02d}.parquet"
         assoc[assoc.symbol.astype(str).isin(list(group))].to_parquet(p,index=False)
         shard_paths.append(p)
-    valid=assoc[assoc.first_passage.isin(["FAVORABLE_FIRST","ADVERSE_FIRST"])] if len(assoc) else assoc
     def summarize(df):
         if df.empty:return pd.DataFrame()
         g=df.groupby(["event_family","event_type"],dropna=False)
         z=g.agg(events=("event_key","size"),unique_trades=("event_key","nunique"),symbols=("symbol","nunique"),resolved=("resolved","sum"),median_subsequent_mfe_pct=("subsequent_mfe_pct","median"),median_subsequent_mae_pct=("subsequent_mae_pct","median"),median_minutes_to_first_passage=("minutes_to_first_passage","median")).reset_index()
-        fav=(df[df.first_passage=="FAVORABLE_FIRST"].groupby(["event_family","event_type"]).size().rename("favorable_first").reset_index())
-        adv=(df[df.first_passage=="ADVERSE_FIRST"].groupby(["event_family","event_type"]).size().rename("adverse_first").reset_index())
+        fav=df[df.first_passage=="FAVORABLE_FIRST"].groupby(["event_family","event_type"]).size().rename("favorable_first").reset_index()
+        adv=df[df.first_passage=="ADVERSE_FIRST"].groupby(["event_family","event_type"]).size().rename("adverse_first").reset_index()
         z=z.merge(fav,how="left").merge(adv,how="left").fillna({"favorable_first":0,"adverse_first":0})
         den=z.favorable_first+z.adverse_first
         z["favorable_first_rate_resolved"]=np.where(den>0,z.favorable_first/den,np.nan)
         return z
-    summary_table=summarize(assoc)
-    summary_table.to_csv(outdir/"event_association_summary.csv",index=False)
-    # Pre-specified supportive/warning grouping from frozen B1 protocol; no fitting or ranking.
+    summarize(assoc).to_csv(outdir/"event_association_summary.csv",index=False)
     supportive=set(proto["trade_health_role"]["supportive_events"]); warning=set(proto["trade_health_role"]["warning_events"])
     assoc["hypothesis_role"]=np.where(assoc.event_type.isin(supportive),"SUPPORTIVE",np.where(assoc.event_type.isin(warning),"WARNING","DESCRIPTIVE"))
-    role=summarize(assoc.assign(event_family=assoc.hypothesis_role,event_type=assoc.hypothesis_role))
-    role.to_csv(outdir/"hypothesis_role_summary.csv",index=False)
+    role_input=assoc.copy(); role_input["event_family"]=role_input.hypothesis_role; role_input["event_type"]=role_input.hypothesis_role
+    summarize(role_input).to_csv(outdir/"hypothesis_role_summary.csv",index=False)
     summary={"step":"PMPD-EDGE-E3-B3","protocol":PROTOCOL,"purpose":"Pre-specified association of causal Trade Health events with subsequent path/outcomes from each event decision timestamp.","source_event_rows":int(len(ev)),"association_rows":int(len(assoc)),"unique_trades":int(assoc.event_key.nunique()) if len(assoc) else 0,"symbols":int(assoc.symbol.nunique()) if len(assoc) else 0,"missing_cache_symbols":missing,"symbol_errors":errors,"outcome_definition":{"favorable_first_pct":FAV,"adverse_first_pct":ADV,"anchor":"event decision_timestamp_et / price_at_decision","same_minute":"reported separately, excluded from directional first-passage rate"},"guardrails":{"research_only":True,"2026_development_evidence":True,"v4_modified":False,"v5_modified":False,"production_rule_authorized":False,"trade_health_score_fit":False,"threshold_search_performed":False,"event_taxonomy_retuned":False,"signal_quality_separate":True},"next_batch_if_integrity_passes":"E3-B4 robustness and concentration audit of pre-specified E3-B3 associations; no threshold mining or score fitting."}
     (outdir/"summary.json").write_text(json.dumps(summary,indent=2,default=str))
     outputs=[str(p.relative_to(root)) for p in shard_paths]+[str((outdir/"event_association_summary.csv").relative_to(root)),str((outdir/"hypothesis_role_summary.csv").relative_to(root)),str((outdir/"summary.json").relative_to(root))]
