@@ -36,6 +36,7 @@ JOBS = [
     {"id":"PMPD-EDGE-E3-B1","project":"pmpd","module":"research_runner.jobs.pmpd_edge_e3_batch1","description":"Outcome-blind causal Trade Health event taxonomy and measurement protocol freeze"},
     {"id":"PMPD-EDGE-E3-B2","project":"pmpd","module":"research_runner.jobs.pmpd_edge_e3_batch2","description":"Timestamped causal Trade Health event-path construction and availability/coverage certification"},
     {"id":"PMPD-EDGE-E3-B2-R2","project":"pmpd","module":"research_runner.jobs.pmpd_edge_e3_batch2_r2","description":"Persistence-compatible rerun of unchanged E3-B2 logic with deterministic sharded event artifact"},
+    {"id":"PMPD-EDGE-E3-B3","project":"pmpd","module":"research_runner.jobs.pmpd_edge_e3_batch3","description":"Pre-specified association of causal Trade Health events with subsequent path/outcomes from each event decision timestamp"},
 ]
 
 def _load_state()->dict:
