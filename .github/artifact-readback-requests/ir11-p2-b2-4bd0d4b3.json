@@ -1,0 +1,15 @@
+{
+  "job_id": "4bd0d4b3-a253-4594-b6d0-3859b12c3fd0",
+  "artifact_names": [
+    "ir11_p2_b2_primary_controls.csv",
+    "ir11_p2_b2_primary_rawbin.csv",
+    "ir11_p2_b2_primary_session_decomposition.csv",
+    "ir11_p2_b2_staleness.csv",
+    "ir11_p2_b2_top5_symbol_concentration.csv",
+    "ir11_p2_b2_top5_date_concentration.csv",
+    "ir11_p2_b2_target_completion_session.csv",
+    "ir11_p2_b2_top500_abs_displacement_outliers.csv",
+    "ir11_p2_b2_qa.csv"
+  ],
+  "purpose": "Infrastructure-only checksum-verified private artifact readback for IR-11 synthesis"
+}
