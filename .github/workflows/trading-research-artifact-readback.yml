@@ -1,0 +1,44 @@
+name: TradingResearch Governed Artifact Readback
+on:
+  push:
+    branches: [cloud-compute/artifact-readback-20260917]
+    paths: ['.github/artifact-readback-requests/*.json']
+permissions:
+  contents: read
+jobs:
+  readback:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - id: request
+        name: Resolve request
+        shell: bash
+        run: |
+          set -euo pipefail
+          REQUEST_PATH="$(git diff --name-only "${{ github.event.before }}" "${{ github.sha }}" -- '.github/artifact-readback-requests/*.json' | tail -n 1)"
+          test -n "$REQUEST_PATH"
+          JOB_ID="$(jq -r '.job_id' "$REQUEST_PATH")"
+          [[ "$JOB_ID" =~ ^[0-9a-fA-F-]{36}$ ]]
+          echo "job_id=$JOB_ID" >> "$GITHUB_OUTPUT"
+          jq -r '.artifact_names[]?' "$REQUEST_PATH" > /tmp/artifact_names.txt
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt pytest
+      - name: Certify infrastructure contracts
+        run: pytest -q tests/test_ccp5_control_plane.py tests/test_ccp5_control_plane_worker.py tests/test_ccp8_autonomous_loop.py tests/test_ccp9_exact_claim.py
+      - name: Read back governed artifacts
+        shell: bash
+        env:
+          SUPABASE_URL: ${{ secrets.TR_SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.TR_SUPABASE_SECRET_KEY }}
+          TR_GIT_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          ARGS=(--job-id "${{ steps.request.outputs.job_id }}")
+          while IFS= read -r name; do
+            if [ -n "$name" ]; then ARGS+=(--name "$name"); fi
+          done < /tmp/artifact_names.txt
+          python -m cloud_compute.artifact_readback "${ARGS[@]}"
