@@ -1,0 +1,8 @@
+{
+  "job_id": "5f73672b-3897-4553-9ad1-4730776f1f07",
+  "artifact_names": [
+    "ir11_p2_finalqa_sensitivity.csv",
+    "ir11_p2_finalqa_rel_top5_050_050.csv",
+    "ir11_p2_finalqa_manifest.csv"
+  ]
+}
