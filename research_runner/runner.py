@@ -37,7 +37,8 @@ JOBS = [
     {"id":"PMPD-EDGE-E3-B2","project":"pmpd","module":"research_runner.jobs.pmpd_edge_e3_batch2","description":"Timestamped causal Trade Health event-path construction and availability/coverage certification"},
     {"id":"PMPD-EDGE-E3-B2-R2","project":"pmpd","module":"research_runner.jobs.pmpd_edge_e3_batch2_r2","description":"Persistence-compatible rerun of unchanged E3-B2 logic with deterministic sharded event artifact"},
     {"id":"PMPD-EDGE-E3-B3","project":"pmpd","module":"research_runner.jobs.pmpd_edge_e3_batch3","description":"Pre-specified association of causal Trade Health events with subsequent path/outcomes from each event decision timestamp"},
-    {"id":"PMPD-EDGE-E3-B4","project":"pmpd","module":"research_runner.jobs.pmpd_edge_e3_batch4","description":"Pre-specified robustness and concentration audit of E3-B3 Trade Health associations"},\n    {"id":"PMPD-EDGE-E3-B5","project":"pmpd","module":"research_runner.jobs.pmpd_edge_e3_batch5","description":"Synthesis and untouched-replication design freeze for E3 Trade Health evidence"},
+    {"id":"PMPD-EDGE-E3-B4","project":"pmpd","module":"research_runner.jobs.pmpd_edge_e3_batch4","description":"Pre-specified robustness and concentration audit of E3-B3 Trade Health associations"},
+    {"id":"PMPD-EDGE-E3-B5","project":"pmpd","module":"research_runner.jobs.pmpd_edge_e3_batch5","description":"Synthesis and untouched-replication design freeze for E3 Trade Health evidence"},
 ]
 
 def _load_state()->dict:
