@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from tr_platform.pmpd_v5.certification import run_full_universe_structural_baseline
+from tr_platform.pmpd_v5.alpha import run_symbol_alpha\nfrom tr_platform.universe.pmpd_universe import load_validated_universe
 
 PROTOCOL = "PMPD_EDGE_E3_TRADE_HEALTH_PROTOCOL_V1"
 DATASET = "PMPD-EDGE-E3-REPLICATION-2025-HOLDOUT-V1"
@@ -34,13 +34,58 @@ def run(root: Path) -> dict:
     out = root / "research_outputs" / "pmpd" / "edge" / "e3_2025_replication" / "r1"
     out.mkdir(parents=True, exist_ok=True)
 
-    summary_df, outputs, payload = run_full_universe_structural_baseline(
-        repo_root=root, year=2025, verify_hash=True
-    )
-    if int(payload.get("symbol_count", 0)) != 112:
-        raise RuntimeError(f"expected exact 112-symbol universe, got {payload.get('symbol_count')}")
+    # The governed worker checksum-verifies all 112 registered inputs before
+    # invoking this runner.  Reconstruct directly from those materialized files
+    # rather than depending on the local-only MARKET_CACHE manifest/cert CSV.
+    members = load_validated_universe(root)
+    symbols = [m.symbol for m in members]
+    if len(symbols) != 112 or len(set(symbols)) != 112:
+        raise RuntimeError(f"authoritative universe is not exact 112: {len(symbols)}")
 
-    decisions = outputs["decision_points"].copy()
+    decision_parts = []
+    summary_rows = []
+    structural_events = 0
+    structural_transitions = 0
+    structural_decisions = 0
+    for n, symbol in enumerate(symbols, 1):
+        print(f"[{n}/112] E3_REPLICATION_STRUCTURAL {symbol}")
+        p = root / "market_cache" / "MARKET_CACHE_V1" / "1m" / symbol / "2025.parquet"
+        if not p.is_file():
+            raise FileNotFoundError(p)
+        bars = pd.read_parquet(p)
+        required_bar_cols = {"symbol","timestamp_utc","timestamp_et","trade_date","open","high","low","close","volume","session","cache_version"}
+        miss = sorted(required_bar_cols.difference(bars.columns))
+        if miss:
+            raise RuntimeError(f"{symbol}: missing canonical columns {miss}")
+        if bars.empty or bars["timestamp_utc"].duplicated().any():
+            raise RuntimeError(f"{symbol}: empty or duplicate timestamp partition")
+        if not bars["symbol"].astype(str).eq(symbol).all():
+            raise RuntimeError(f"{symbol}: symbol mismatch")
+        if not bars["cache_version"].astype(str).eq("MARKET_CACHE_V1").all():
+            raise RuntimeError(f"{symbol}: cache version mismatch")
+        if int((bars["session"].astype(str) == "RTH").groupby(pd.to_datetime(bars["trade_date"]).dt.date).any().sum()) != 250:
+            raise RuntimeError(f"{symbol}: expected 250 RTH trade days")
+
+        outputs = run_symbol_alpha(bars, symbol=symbol)
+        d = outputs["decision_points"].copy()
+        if not d.empty:
+            if "symbol" not in d.columns:
+                d.insert(0, "symbol", symbol)
+            decision_parts.append(d)
+        structural_events += int(len(outputs["events"]))
+        structural_transitions += int(len(outputs["transitions"]))
+        structural_decisions += int(len(d))
+        summary_rows.append({"symbol":symbol,"rows":int(len(bars)),"events":int(len(outputs["events"])),"transitions":int(len(outputs["transitions"])),"decision_points":int(len(d))})
+
+    decisions = pd.concat(decision_parts, ignore_index=True) if decision_parts else pd.DataFrame()
+    summary_df = pd.DataFrame(summary_rows)
+    payload = {
+        "symbol_count": len(symbols),
+        "total_events": structural_events,
+        "total_transitions": structural_transitions,
+        "total_decision_points": structural_decisions,
+    }
+    payload["run_fingerprint"] = hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()
     if decisions.empty:
         raise RuntimeError("structural engine produced zero decision points")
     required = {"symbol", "event_id", "trade_date", "decision_type", "direction", "timestamp_utc"}
