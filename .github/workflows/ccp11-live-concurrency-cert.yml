@@ -1,0 +1,33 @@
+name: CCP-11 Live Atomic Claim Certification
+
+on:
+  push:
+    branches:
+      - cloud-compute/ccp11-reliability-certification
+    paths:
+      - 'cloud_compute/ccp11_concurrency_cert.py'
+      - '.github/workflows/ccp11-live-concurrency-cert.yml'
+  workflow_dispatch:
+
+jobs:
+  certify-atomic-claim:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_URL: ${{ secrets.TR_SUPABASE_URL }}
+      SUPABASE_SECRET_KEY: ${{ secrets.TR_SUPABASE_SECRET_KEY }}
+      TR_GIT_SHA: ${{ github.sha }}
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Run eight-way exact-job claim race
+        run: python -m cloud_compute.ccp11_concurrency_cert --workers 8

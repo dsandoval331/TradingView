@@ -1,0 +1,1 @@
+CCP-6 live artifact and log certification trigger.
