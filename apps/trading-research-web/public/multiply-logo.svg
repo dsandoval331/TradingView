@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 180" role="img" aria-labelledby="title desc">
+<title id="title">MULtipLY</title><desc id="desc">MULtipLY trading intelligence platform</desc>
+<g transform="translate(8 12)">
+<path d="M8 118V28h28l42 43 42-43h28v90h-27V67L78 109 35 67v51z" fill="#7ee2b8"/>
+<path d="M78 82 142 18h-25l44-18-18 44V22L94 71z" fill="#f2b84b"/>
+</g>
+<text x="182" y="83" fill="#f4f7fb" font-family="Arial,Helvetica,sans-serif" font-size="55" font-weight="800">MUL<tspan fill="#f2b84b">tip</tspan>LY</text>
+<text x="184" y="116" fill="#f2b84b" font-family="Arial,Helvetica,sans-serif" font-size="18" font-weight="700">tip: trading intelligence platform</text>
+</svg>
