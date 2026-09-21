@@ -34,7 +34,11 @@ h2 { margin: 0; font-size: 20px; }
 button { cursor: pointer; border: 0; border-radius: 10px; padding: 12px 16px; background: var(--accent); color: #07100c; font-weight: 800; }
 .secondaryButton { background: var(--panel-2); color: var(--text); border: 1px solid var(--line); }
 .dashboardHero, .projectHero { display: flex; align-items: flex-start; justify-content: space-between; gap: 28px; padding: 32px 0 38px; }
-.dashboardHero h1, .projectHero h1 { margin-bottom: 18px; }\n.multiplyLogo { display:block; width:min(520px,100%); height:auto; margin:0 0 12px; }\n.topLevelTitle { display:flex; align-items:center; gap:12px; margin-top:8px; }\n.topLevelTitle h2 { margin:0; }\n.topLevelTitle img { width:34px; height:34px; flex:0 0 34px; }
+.dashboardHero h1, .projectHero h1 { margin-bottom: 18px; }
+.multiplyLogo { display:block; width:min(260px,100%); height:auto; margin:0 0 12px; }
+.topLevelTitle { display:flex; align-items:center; gap:12px; margin-top:8px; }
+.topLevelTitle h2 { margin:0; }
+.topLevelTitle img { width:34px; height:34px; flex:0 0 34px; }
 .dashboardHero form { padding-top: 22px; flex: 0 0 auto; }
 .projectNav { display: flex; flex-wrap: wrap; gap: 8px; margin: -12px 0 26px; }
 .projectNav a { text-decoration: none; border: 1px solid var(--line); background: var(--panel); color: #c8d2df; border-radius: 999px; padding: 8px 12px; font-size: 12px; font-weight: 800; }
@@ -128,5 +132,5 @@ summary { cursor: pointer; color: #cbd5e1; font-size: 12px; font-weight: 700; }
 .blockingPanel { border-color: #6b5331; background: #17130d; }
 .emptyState { color: var(--muted); }
 @media (max-width: 900px) { .metricGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .strategyGrid, .statusPlanGrid, .twoColumnSection, .datasetList { grid-template-columns: 1fr; } }
-@media (max-width: 760px) { .topLevelTitle img { display:none; } .topLevelTitle { display:block; } .multiplyLogo { width:min(430px,100%); } main { width: min(100% - 28px, 1240px); padding-top: 28px; } .authTitle { font-size: 34px; } .dashboardHero, .projectHero { display: block; } .dashboardHero form { padding-top: 0; } .projectHero .securityBadge { display: inline-block; margin-top: 18px; } .sectionHeader { align-items: flex-start; flex-direction: column; } .securityBadge { white-space: normal; } .trackingHealth > div { align-items: flex-start; flex-direction: column; gap: 5px; } .portfolioSection { padding: 20px; } }
+@media (max-width: 760px) { .topLevelTitle img { display:none; } .topLevelTitle { display:block; } .multiplyLogo { width:min(215px,100%); } main { width: min(100% - 28px, 1240px); padding-top: 28px; } .authTitle { font-size: 34px; } .dashboardHero, .projectHero { display: block; } .dashboardHero form { padding-top: 0; } .projectHero .securityBadge { display: inline-block; margin-top: 18px; } .sectionHeader { align-items: flex-start; flex-direction: column; } .securityBadge { white-space: normal; } .trackingHealth > div { align-items: flex-start; flex-direction: column; gap: 5px; } .portfolioSection { padding: 20px; } }
 @media (max-width: 520px) { .metricGrid { grid-template-columns: 1fr; } .detailGrid { grid-template-columns: 1fr; } .cardFooter { flex-direction: column; } .cardFooter span { max-width: none; } .timelineTop, .listTop { align-items: flex-start; flex-direction: column; } .timelineBadges { flex-wrap: wrap; } .portfolioSection { padding: 16px; border-radius: 18px; } .roadmapStep { min-width: 96px; flex-basis: 96px; } }
