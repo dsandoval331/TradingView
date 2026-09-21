@@ -28,6 +28,7 @@ JOBS = [
     {"id": "IR11-P2-B2", "project": "ir11", "module": "research_runner.jobs.ir11_p2_batch2_decomposition_qa", "description": "IR-11 P2 Batch 2 frozen decomposition, controls, concentration, staleness and extreme-displacement QA"},
     {"id": "IR11-P2-FINAL-QA", "project": "ir11", "module": "research_runner.jobs.ir11_p2_final_qa", "description": "IR-11 P2 final sensitivity QA for known mechanical corporate actions and extreme displacement tails"},
     {"id": "IR11-P3-B1", "project": "ir11", "module": "research_runner.jobs.ir11_p3_normalization_b1", "description": "IR-11 P3 Batch 1 broad pre-specified normalization comparison"},
+    {"id": "PMOD-P2-B2", "project": "pmod", "module": "research_runner.jobs.pmod_p2_b2_certification", "description": "PMOD P2-B governed 1-minute cache and required-context certification"},
 ]
 
 def _load_state() -> dict:
