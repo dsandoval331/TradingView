@@ -1,0 +1,25 @@
+{
+  "strategy_id": "98f761bf-c6f1-4399-b10e-e299cb332141",
+  "runner_job_id": "CCP8-RETRY-ONCE-FIXTURE",
+  "project_code": "CLOUD_COMPUTE",
+  "phase_code": "CCP-8",
+  "dataset_version": "CCP8-RETRY-GOVERNANCE-CERT-2",
+  "preferred_executor": "github_actions",
+  "cloud_run_spend_approved": false,
+  "priority": 10,
+  "parameters_json": {
+    "purpose": "CCP-8 live bounded retry and recovered-failure certification",
+    "retry_policy": {
+      "enabled": true,
+      "max_attempts": 2,
+      "retry_exit_codes": [1]
+    },
+    "autonomy": {
+      "enabled": true,
+      "max_steps": 1,
+      "current_step": 0,
+      "require_primary_artifact": true,
+      "steps": []
+    }
+  }
+}
