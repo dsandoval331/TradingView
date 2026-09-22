@@ -1,0 +1,42 @@
+name: Queue Watcher Branch Certification
+
+on:
+  push:
+    branches: [infra/queue-watcher-20260922]
+    paths:
+      - '.github/queue-watcher-cert-trigger.txt'
+
+permissions:
+  contents: read
+
+jobs:
+  select:
+    runs-on: ubuntu-latest
+    outputs:
+      jobs: ${{ steps.select.outputs.jobs }}
+    env:
+      SUPABASE_URL: ${{ secrets.TR_SUPABASE_URL }}
+      SUPABASE_SECRET_KEY: ${{ secrets.TR_SUPABASE_SECRET_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - id: select
+        run: python -m cloud_compute.queue_watcher --limit 1
+
+  dispatch:
+    needs: select
+    if: ${{ needs.select.outputs.jobs != '[]' }}
+    strategy:
+      matrix:
+        job: ${{ fromJson(needs.select.outputs.jobs) }}
+    uses: ./.github/workflows/trading-research-dispatch.yml
+    with:
+      job_id: ${{ matrix.job.job_id }}
+      git_sha: ${{ matrix.job.git_sha }}
+      target_ref: ${{ matrix.job.target_ref }}
+    secrets: inherit
