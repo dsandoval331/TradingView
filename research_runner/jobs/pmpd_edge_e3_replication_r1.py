@@ -72,6 +72,13 @@ def run(root: Path) -> dict:
         if not d.empty:
             if "symbol" not in d.columns:
                 d.insert(0, "symbol", symbol)
+            # Frozen V5 decision points encode trade_date canonically in event_id.
+            # Mirror the existing V5 research-dataset adapter; do not alter alpha/state-engine semantics.
+            if "trade_date" not in d.columns:
+                event_parts = d["event_id"].astype(str).str.split("_")
+                if event_parts.map(len).lt(4).any():
+                    raise RuntimeError(f"{symbol}: cannot derive trade_date from canonical V5 event_id")
+                d["trade_date"] = pd.to_datetime(event_parts.str[1], errors="raise").dt.strftime("%Y-%m-%d")
             decision_parts.append(d)
         structural_events += int(len(outputs["events"]))
         structural_transitions += int(len(outputs["transitions"]))
