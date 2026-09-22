@@ -6,7 +6,8 @@ from pathlib import Path
 
 import pandas as pd
 
-from tr_platform.pmpd_v5.alpha import run_symbol_alpha\nfrom tr_platform.universe.pmpd_universe import load_validated_universe
+from tr_platform.pmpd_v5.alpha import run_symbol_alpha
+from tr_platform.universe.pmpd_universe import load_validated_universe
 
 PROTOCOL = "PMPD_EDGE_E3_TRADE_HEALTH_PROTOCOL_V1"
 DATASET = "PMPD-EDGE-E3-REPLICATION-2025-HOLDOUT-V1"
