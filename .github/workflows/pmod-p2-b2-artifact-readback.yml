@@ -1,0 +1,32 @@
+name: PMOD P2 B2 Artifact Readback
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  readback:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+      TR_GIT_SHA: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r requirements.txt
+      - name: Checksum-verified governed readback
+        run: |
+          python -m cloud_compute.artifact_readback \
+            --job-id 0a0444d4-f264-4825-94da-7ce0414b27d1 \
+            --name pmod_p2_b2_partition_certification.csv \
+            --name pmod_p2_b2_eight_symbol_audit.csv \
+            --name pmod_p2_b2_context_audit.csv \
+            --name pmod_p2_b2_summary.json
