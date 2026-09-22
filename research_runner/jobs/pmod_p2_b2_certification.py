@@ -12,10 +12,7 @@ SNAPS = ["09:00","09:15","09:20","09:25","09:27","09:28","09:29"]
 def _read(path: Path) -> pd.DataFrame:
     df = pd.read_parquet(path)
     cols = {str(c).lower(): c for c in df.columns}
-    tscol = next((cols[k] for k in ("timestamp","datetime","time","ts") if k in cols), None)
-    if tscol is None: raise RuntimeError(f"no timestamp column: {path}")
-    df = df.rename(columns={tscol:"timestamp"})
-    df["timestamp"] = pd.to_datetime(df["timestamp"], utc=True, errors="coerce")
+    # MARKET_CACHE_V1 canonical files use timestamp_utc; retain legacy aliases only\n    # for compatibility with previously governed cache materializations.\n    tscol = next((cols[k] for k in ("timestamp_utc","timestamp","datetime","time","ts") if k in cols), None)\n    if tscol is None:\n        raise RuntimeError(f"no canonical/compatible timestamp column: {path}")\n    df = df.rename(columns={tscol:"timestamp"})\n    df["timestamp"] = pd.to_datetime(df["timestamp"], utc=True, errors="coerce")\n    if df["timestamp"].isna().any():\n        raise RuntimeError(f"unparseable timestamp value(s): {path}")
     return df
 
 def _audit(path: Path, symbol: str, year: int) -> dict:
