@@ -1,6 +1,17 @@
 name: TradingResearch Governed Dispatcher
 
 on:
+  workflow_call:
+    inputs:
+      job_id:
+        required: true
+        type: string
+      git_sha:
+        required: true
+        type: string
+      target_ref:
+        required: true
+        type: string
   workflow_dispatch:
     inputs:
       job_id:
