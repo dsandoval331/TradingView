@@ -24,7 +24,7 @@ def _audit(path: Path, symbol: str, year: int) -> dict:
     conflict=0
     if dup:
         valuecols=[cols[k] for k in ("open","high","low","close","volume") if k in cols]
-        conflict=int(df[df["timestamp"].duplicated(False)].groupby("timestamp")[valuecols].nunique().max(axis=1).gt(1).sum())
+        dup_frame=df[df["timestamp"].duplicated(False)]\n        if valuecols:\n            conflict=int(dup_frame.groupby("timestamp")[valuecols].nunique().max(axis=1).gt(1).sum())
     invalid=0
     if all(k in cols for k in ("open","high","low","close")):
         o,h,l,c=(pd.to_numeric(df[cols[k]],errors="coerce") for k in ("open","high","low","close"))
