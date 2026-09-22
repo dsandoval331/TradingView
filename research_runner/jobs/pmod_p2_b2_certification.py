@@ -12,7 +12,15 @@ SNAPS = ["09:00","09:15","09:20","09:25","09:27","09:28","09:29"]
 def _read(path: Path) -> pd.DataFrame:
     df = pd.read_parquet(path)
     cols = {str(c).lower(): c for c in df.columns}
-    # MARKET_CACHE_V1 canonical files use timestamp_utc; retain legacy aliases only\n    # for compatibility with previously governed cache materializations.\n    tscol = next((cols[k] for k in ("timestamp_utc","timestamp","datetime","time","ts") if k in cols), None)\n    if tscol is None:\n        raise RuntimeError(f"no canonical/compatible timestamp column: {path}")\n    df = df.rename(columns={tscol:"timestamp"})\n    df["timestamp"] = pd.to_datetime(df["timestamp"], utc=True, errors="coerce")\n    if df["timestamp"].isna().any():\n        raise RuntimeError(f"unparseable timestamp value(s): {path}")
+    # MARKET_CACHE_V1 canonical files use timestamp_utc; retain legacy aliases only
+    # for compatibility with previously governed cache materializations.
+    tscol = next((cols[k] for k in ("timestamp_utc","timestamp","datetime","time","ts") if k in cols), None)
+    if tscol is None:
+        raise RuntimeError(f"no canonical/compatible timestamp column: {path}")
+    df = df.rename(columns={tscol:"timestamp"})
+    df["timestamp"] = pd.to_datetime(df["timestamp"], utc=True, errors="coerce")
+    if df["timestamp"].isna().any():
+        raise RuntimeError(f"unparseable timestamp value(s): {path}")
     return df
 
 def _audit(path: Path, symbol: str, year: int) -> dict:
@@ -24,7 +32,9 @@ def _audit(path: Path, symbol: str, year: int) -> dict:
     conflict=0
     if dup:
         valuecols=[cols[k] for k in ("open","high","low","close","volume") if k in cols]
-        conflict=int(df[df["timestamp"].duplicated(False)].groupby("timestamp")[valuecols].nunique().max(axis=1).gt(1).sum())
+        dup_frame=df[df["timestamp"].duplicated(False)]
+        if valuecols:
+            conflict=int(dup_frame.groupby("timestamp")[valuecols].nunique().max(axis=1).gt(1).sum())
     invalid=0
     if all(k in cols for k in ("open","high","low","close")):
         o,h,l,c=(pd.to_numeric(df[cols[k]],errors="coerce") for k in ("open","high","low","close"))
