@@ -60,7 +60,7 @@ jobs:
           pip install pytest
 
       - name: Certify cloud control-plane contracts
-        run: pytest -q tests/test_ccp5_control_plane.py tests/test_ccp5_control_plane_worker.py tests/test_ccp8_autonomous_loop.py tests/test_ccp9_exact_claim.py
+        run: pytest -q tests/test_ccp5_control_plane.py tests/test_ccp5_control_plane_worker.py tests/test_ccp8_autonomous_loop.py tests/test_ccp9_exact_claim.py tests/test_ccp10_input_materializer.py tests/test_ccp11_artifact_contract.py
 
       - name: Execute exact governed job
         run: python -m cloud_compute.autonomous_loop --executor github_actions --external-execution-id "$GITHUB_RUN_ID" --job-id "${{ inputs.job_id }}" --max-jobs 10
