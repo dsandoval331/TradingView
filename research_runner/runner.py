@@ -27,7 +27,7 @@ JOBS = [
     {"id": "PMPD-EDGE-E1-B5", "project": "pmpd", "module": "research_runner.jobs.pmpd_edge_e1_batch5", "description": "Breakout-volume anomaly and opening-momentum contextual edge research"},
     {"id": "IR11-P2-B2", "project": "ir11", "module": "research_runner.jobs.ir11_p2_batch2_decomposition_qa", "description": "IR-11 P2 Batch 2 frozen decomposition, controls, concentration, staleness and extreme-displacement QA"},
     {"id": "IR11-P2-FINAL-QA", "project": "ir11", "module": "research_runner.jobs.ir11_p2_final_qa", "description": "IR-11 P2 final sensitivity QA for known mechanical corporate actions and extreme displacement tails"},
-    {"id": "IR11-P3-B1", "project": "ir11", "module": "research_runner.jobs.ir11_p3_normalization_b1", "description": "IR-11 P3 Batch 1 broad pre-specified normalization comparison"},
+    {"id": "IR11-P3-B1", "project": "ir11", "module": "research_runner.jobs.ir11_p3_normalization_b1", "description": "IR-11 P3 Batch 1 broad pre-specified normalization comparison"},\n    {"id": "IR11-P3-B2", "project": "ir11", "module": "research_runner.jobs.ir11_p3_normalization_b2", "description": "IR-11 P3 Batch 2 prior-60 normalization across primary first-passage matrices"},
 ]
 
 def _load_state() -> dict:
