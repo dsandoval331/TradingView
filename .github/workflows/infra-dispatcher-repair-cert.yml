@@ -1,0 +1,21 @@
+name: Infra Dispatcher Repair Certification
+on:
+  push:
+    branches: [infra/dispatcher-certification-repair-20260921]
+permissions:
+  contents: read
+jobs:
+  certify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: |
+          pip install -r requirements.txt
+          pip install pytest
+      - name: Shared dispatcher certification suite
+        run: pytest -q tests/test_ccp5_control_plane.py tests/test_ccp5_control_plane_worker.py tests/test_ccp8_autonomous_loop.py tests/test_ccp9_exact_claim.py tests/test_ccp10_input_materializer.py tests/test_ccp11_artifact_contract.py
+      - name: PMOD runner registration smoke
+        run: python -m research_runner.runner status
