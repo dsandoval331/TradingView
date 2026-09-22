@@ -6,6 +6,7 @@ CODE_ROOT=Path(__file__).resolve().parents[1]
 WORK_ROOT=Path(os.environ.get("TR_WORK_ROOT",str(CODE_ROOT))).expanduser().resolve()
 STATE_DIR=WORK_ROOT/"research_outputs"/"runner"; STATE_FILE=STATE_DIR/"state.json"
 JOBS=[
+{"id":"CCP-QUEUE-WATCHER-FIXTURE","project":"pmpd","module":"research_runner.jobs.ccp_queue_watcher_fixture","description":"Harmless governed queue-watcher end-to-end certification fixture"},
 {"id":"PMPD-POST9N-B1","project":"pmpd","module":"research_runner.jobs.pmpd_post9n_batch1","description":"V5 contextual edge search: gap, time, geometry, RVOL, SPY/QQQ alignment"},
 {"id":"PMPD-EDGE-E1-B2","project":"pmpd","module":"research_runner.jobs.pmpd_edge_e1_batch2","description":"Causal opening-RVOL availability audit and robustness decomposition of Batch-1 primary hypothesis"},
 {"id":"PMPD-EDGE-E1-B3","project":"pmpd","module":"research_runner.jobs.pmpd_edge_e1_batch3","description":"RVOL incremental-edge, concentration, timing, direction, and prior-completed-bar audit"},
