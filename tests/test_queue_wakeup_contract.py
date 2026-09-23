@@ -30,7 +30,7 @@ def test_edge_function_is_wakeup_only_and_secret_backed():
 def test_edge_function_records_delivery_observability():
     src = EDGE.read_text(encoding="utf-8")
     assert 'const eventId = payload?.record?.event_id' in src
-    assert 'dispatch_status: "dispatching"' in src
+    assert 'dispatch_status: "requested"' in src
     assert 'dispatch_status: "acknowledged"' in src
     assert 'dispatch_status: "failed"' in src
     assert "dispatch_requested_at" in src
