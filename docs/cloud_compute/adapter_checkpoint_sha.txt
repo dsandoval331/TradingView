@@ -1,0 +1,1 @@
+Stage A checkpoint finalized on this branch. Use the PR head SHA as the certification identity.
