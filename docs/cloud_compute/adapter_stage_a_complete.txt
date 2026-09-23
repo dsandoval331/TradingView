@@ -1,0 +1,1 @@
+Stage A isolated adapter implementation complete. PR certification is the next gate.
