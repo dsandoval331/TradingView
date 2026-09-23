@@ -7,6 +7,7 @@ import os
 from contextlib import redirect_stderr, redirect_stdout
 from dataclasses import dataclass
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any
 
 from cloud_compute.artifact_contract import primary_output_path, validate_declared_outputs
@@ -21,6 +22,7 @@ from cloud_compute.control_plane import (
 )
 from cloud_compute.input_materializer import materialize_job_inputs
 from cloud_compute.manifest import sha256_file
+from cloud_compute.research_revision_adapter import GOVERNED_RESEARCH_TARGETS, run_governed_revision
 from cloud_compute.storage_poc import _upload_object
 from research_runner import runner
 
@@ -59,9 +61,15 @@ def _record_stream_logs(config: ControlPlaneConfig, *, job_id: str, attempt_id: 
             sequence += 1
 
 
-def _persist_runner_artifacts(config: ControlPlaneConfig, *, job_id: str, attempt_id: str, runner_job_id: str, bucket: str) -> list[dict]:
-    state = runner._load_state()
-    result = state.get("jobs", {}).get(runner_job_id, {}).get("result") or {}
+def _persist_result_artifacts(
+    config: ControlPlaneConfig,
+    *,
+    job_id: str,
+    attempt_id: str,
+    runner_job_id: str,
+    bucket: str,
+    result: dict[str, Any],
+) -> list[dict]:
     paths = validate_declared_outputs(result, work_root=runner.WORK_ROOT)
     if not paths:
         return []
@@ -96,6 +104,19 @@ def _persist_runner_artifacts(config: ControlPlaneConfig, *, job_id: str, attemp
     return persisted
 
 
+def _persist_runner_artifacts(config: ControlPlaneConfig, *, job_id: str, attempt_id: str, runner_job_id: str, bucket: str) -> list[dict]:
+    state = runner._load_state()
+    result = state.get("jobs", {}).get(runner_job_id, {}).get("result") or {}
+    return _persist_result_artifacts(
+        config,
+        job_id=job_id,
+        attempt_id=attempt_id,
+        runner_job_id=runner_job_id,
+        bucket=bucket,
+        result=result,
+    )
+
+
 def run_one_outcome(
     config: ControlPlaneConfig,
     *,
@@ -104,14 +125,19 @@ def run_one_outcome(
     artifact_bucket: str = DEFAULT_ARTIFACT_BUCKET,
     exact_job_id: str | None = None,
 ) -> RunOutcome:
-    actual_git_sha = runner._git_sha()
-    if not actual_git_sha:
+    infrastructure_sha = runner._git_sha()
+    if not infrastructure_sha:
         raise RuntimeError("worker Git SHA is unavailable")
 
+    # When the dispatcher runs from certified current infrastructure, the governed
+    # research SHA is supplied separately. The claim still uses the research SHA
+    # recorded on research_jobs, preserving the existing atomic RPC contract.
+    research_sha = os.environ.get("TR_RESEARCH_SHA") or infrastructure_sha
+
     if exact_job_id:
-        claim = claim_job_by_id(config, job_id=exact_job_id, executor=executor, git_sha=actual_git_sha, external_execution_id=external_execution_id)
+        claim = claim_job_by_id(config, job_id=exact_job_id, executor=executor, git_sha=research_sha, external_execution_id=external_execution_id)
     else:
-        claim = claim_job(config, executor=executor, git_sha=actual_git_sha, external_execution_id=external_execution_id)
+        claim = claim_job(config, executor=executor, git_sha=research_sha, external_execution_id=external_execution_id)
     if claim is None:
         print("NO_ELIGIBLE_CONTROL_PLANE_JOBS")
         return RunOutcome(exit_code=0)
@@ -121,9 +147,22 @@ def run_one_outcome(
     runner_job_id = job["runner_job_id"]
     attempt_id = claim["attempt_id"]
     attempt_no = int(claim.get("attempt_no") or 1)
+    governed_sha = str(job.get("git_sha") or research_sha)
+    if governed_sha != research_sha:
+        raise RuntimeError(f"claimed job research SHA mismatch: expected={research_sha} claimed={governed_sha}")
 
     stdout_buffer = io.StringIO()
     stderr_buffer = io.StringIO()
+    materialized: list[Any] = []
+    adapter_used = runner_job_id in GOVERNED_RESEARCH_TARGETS and research_sha != infrastructure_sha
+    provenance = {
+        "runner_job_id": runner_job_id,
+        "atomic_claim": True,
+        "research_sha": research_sha,
+        "infrastructure_sha": infrastructure_sha,
+        "exact_research_sha_verified": bool(adapter_used),
+        "research_revision_adapter": "v1" if adapter_used else None,
+    }
     try:
         materialized = materialize_job_inputs(config, job_id=job_id, work_root=runner.WORK_ROOT)
         if materialized:
@@ -140,22 +179,41 @@ def run_one_outcome(
                 } for item in materialized]},
             })
 
+        governed_result: dict[str, Any] | None = None
         with redirect_stdout(stdout_buffer), redirect_stderr(stderr_buffer):
-            rc = runner.run_id(runner_job_id)
+            if adapter_used:
+                governed_result = run_governed_revision(
+                    repo_root=Path.cwd(),
+                    work_root=runner.WORK_ROOT,
+                    runner_job_id=runner_job_id,
+                    research_sha=research_sha,
+                )
+                rc = 0
+            else:
+                rc = runner.run_id(runner_job_id)
         _record_stream_logs(config, job_id=job_id, attempt_id=attempt_id, stdout_text=stdout_buffer.getvalue(), stderr_text=stderr_buffer.getvalue())
         completed = _now()
         if rc == 0:
-            artifacts = _persist_runner_artifacts(config, job_id=job_id, attempt_id=attempt_id, runner_job_id=runner_job_id, bucket=artifact_bucket)
+            if governed_result is not None:
+                artifacts = _persist_result_artifacts(
+                    config,
+                    job_id=job_id,
+                    attempt_id=attempt_id,
+                    runner_job_id=runner_job_id,
+                    bucket=artifact_bucket,
+                    result=governed_result,
+                )
+            else:
+                artifacts = _persist_runner_artifacts(config, job_id=job_id, attempt_id=attempt_id, runner_job_id=runner_job_id, bucket=artifact_bucket)
             primary = next((row for row in artifacts if row.get("is_primary")), None)
             artifact_id = primary.get("artifact_id") if primary else None
             update_job(config, job_id, {"status": "succeeded", "completed_at": completed})
             update_attempt(config, attempt_id, {
                 "status": "succeeded", "completed_at": completed, "exit_code": 0,
                 "metadata_json": {
-                    "runner_job_id": runner_job_id,
+                    **provenance,
                     "artifact_id": artifact_id,
                     "artifact_count": len(artifacts),
-                    "atomic_claim": True,
                     "materialized_input_count": len(materialized),
                 },
             })
@@ -167,7 +225,7 @@ def run_one_outcome(
         update_attempt(config, attempt_id, {
             "status": "failed", "completed_at": completed, "exit_code": rc,
             "error_summary": error,
-            "metadata_json": {"runner_job_id": runner_job_id, "atomic_claim": True, "materialized_input_count": len(materialized)},
+            "metadata_json": {**provenance, "materialized_input_count": len(materialized)},
         })
         print(f"CONTROL_PLANE_JOB_FAILED={job_id}")
         return RunOutcome(rc, job, attempt_id, attempt_no)
@@ -178,7 +236,7 @@ def run_one_outcome(
         update_attempt(config, attempt_id, {
             "status": "failed", "completed_at": completed, "exit_code": 1,
             "error_summary": error,
-            "metadata_json": {"runner_job_id": runner_job_id, "atomic_claim": True},
+            "metadata_json": {**provenance, "materialized_input_count": len(materialized)},
         })
         print(f"CONTROL_PLANE_JOB_FAILED={job_id}")
         return RunOutcome(1, job, attempt_id, attempt_no)
