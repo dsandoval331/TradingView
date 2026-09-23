@@ -4,7 +4,10 @@ on:
   pull_request:
     paths:
       - 'cloud_compute/research_revision_adapter.py'
+      - 'cloud_compute/control_plane_worker.py'
       - 'tests/test_research_revision_adapter.py'
+      - 'tests/test_ccp5_control_plane_worker.py'
+      - '.github/workflows/trading-research-dispatch.yml'
       - '.github/workflows/research-revision-adapter-cert.yml'
   workflow_dispatch:
 
@@ -27,7 +30,7 @@ jobs:
           pip install pytest
       - name: Adapter regression tests
         run: pytest -q tests/test_research_revision_adapter.py
-      - name: Current CCP contracts
+      - name: Current CCP contracts and Stage B worker integration
         run: |
           pytest -q \
             tests/test_ccp5_control_plane.py \
