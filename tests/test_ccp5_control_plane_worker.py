@@ -4,9 +4,13 @@ from cloud_compute.control_plane import ControlPlaneConfig
 from cloud_compute.control_plane_worker import run_one
 
 
+LEGACY_TEST_ENV = {"TR_RESEARCH_SHA": "abc123"}
+
+
 def test_no_eligible_job_is_clean_noop() -> None:
     config = ControlPlaneConfig("https://example.supabase.co", "sb_secret_example")
     with (
+        patch.dict("os.environ", LEGACY_TEST_ENV),
         patch("cloud_compute.control_plane_worker.runner._git_sha", return_value="abc123"),
         patch("cloud_compute.control_plane_worker.claim_job", return_value=None),
     ):
@@ -19,6 +23,7 @@ def test_worker_claims_runs_persists_and_completes_job() -> None:
     claim = {"job": job, "attempt_id": "attempt-1", "attempt_no": 1}
     artifacts = [{"artifact_id": "artifact-1", "is_primary": True}]
     with (
+        patch.dict("os.environ", LEGACY_TEST_ENV),
         patch("cloud_compute.control_plane_worker.runner._git_sha", return_value="abc123"),
         patch("cloud_compute.control_plane_worker.claim_job", return_value=claim) as claim_job,
         patch("cloud_compute.control_plane_worker.materialize_job_inputs", return_value=[]),
@@ -46,6 +51,7 @@ def test_worker_exact_job_uses_exact_claim_only() -> None:
     job = {"job_id": "job-web", "runner_job_id": "CCP3-PARITY-FIXTURE", "git_sha": "abc123"}
     claim = {"job": job, "attempt_id": "attempt-web", "attempt_no": 1}
     with (
+        patch.dict("os.environ", LEGACY_TEST_ENV),
         patch("cloud_compute.control_plane_worker.runner._git_sha", return_value="abc123"),
         patch("cloud_compute.control_plane_worker.claim_job_by_id", return_value=claim) as exact_claim,
         patch("cloud_compute.control_plane_worker.claim_job") as generic_claim,
@@ -72,6 +78,7 @@ def test_worker_records_runner_failure() -> None:
     job = {"job_id": "job-2", "runner_job_id": "UNKNOWN", "git_sha": "abc123"}
     claim = {"job": job, "attempt_id": "attempt-2", "attempt_no": 2}
     with (
+        patch.dict("os.environ", LEGACY_TEST_ENV),
         patch("cloud_compute.control_plane_worker.runner._git_sha", return_value="abc123"),
         patch("cloud_compute.control_plane_worker.claim_job", return_value=claim),
         patch("cloud_compute.control_plane_worker.materialize_job_inputs", return_value=[]),
