@@ -1,0 +1,1 @@
+CI identity is the immutable PR head SHA observed by GitHub Actions.
