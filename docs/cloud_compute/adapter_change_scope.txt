@@ -1,0 +1,1 @@
+Stage A: new adapter modules, tests, documentation, and PR certification workflow only. No production dispatcher/worker modification.
