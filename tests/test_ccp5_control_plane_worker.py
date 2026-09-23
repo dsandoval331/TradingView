@@ -84,3 +84,37 @@ def test_worker_records_runner_failure() -> None:
     assert update_job.call_args.args[2]["status"] == "failed"
     assert update_attempt.call_args.args[2]["exit_code"] == 2
     assert update_attempt.call_args.args[2]["metadata_json"]["atomic_claim"] is True
+
+
+def test_worker_dual_sha_adapter_claims_research_sha_and_records_provenance() -> None:
+    config = ControlPlaneConfig("https://example.supabase.co", "sb_secret_example")
+    research_sha = "a" * 40
+    infrastructure_sha = "b" * 40
+    job = {"job_id": "job-pmod", "runner_job_id": "PMOD-P2-B2", "git_sha": research_sha}
+    claim = {"job": job, "attempt_id": "attempt-pmod", "attempt_no": 1}
+    governed_result = {"status": "PASS"}
+    with (
+        patch.dict("os.environ", {"TR_RESEARCH_SHA": research_sha}),
+        patch("cloud_compute.control_plane_worker.runner._git_sha", return_value=infrastructure_sha),
+        patch("cloud_compute.control_plane_worker.claim_job_by_id", return_value=claim) as exact_claim,
+        patch("cloud_compute.control_plane_worker.materialize_job_inputs", return_value=[]),
+        patch("cloud_compute.control_plane_worker.run_governed_revision", return_value=governed_result) as governed_run,
+        patch("cloud_compute.control_plane_worker._record_stream_logs"),
+        patch("cloud_compute.control_plane_worker._persist_result_artifacts", return_value=[]),
+        patch("cloud_compute.control_plane_worker.update_job", return_value=job),
+        patch("cloud_compute.control_plane_worker.update_attempt", return_value={}) as update_attempt,
+    ):
+        assert run_one(config, external_execution_id="run-pmod", exact_job_id="job-pmod") == 0
+    exact_claim.assert_called_once_with(
+        config,
+        job_id="job-pmod",
+        executor="github_actions",
+        git_sha=research_sha,
+        external_execution_id="run-pmod",
+    )
+    governed_run.assert_called_once()
+    metadata = update_attempt.call_args.args[2]["metadata_json"]
+    assert metadata["research_sha"] == research_sha
+    assert metadata["infrastructure_sha"] == infrastructure_sha
+    assert metadata["exact_research_sha_verified"] is True
+    assert metadata["research_revision_adapter"] == "v1"
