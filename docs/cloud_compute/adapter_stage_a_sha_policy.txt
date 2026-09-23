@@ -1,0 +1,1 @@
+Only full 40-character governed research SHAs are accepted by Stage A adapter.
