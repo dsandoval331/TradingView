@@ -1,0 +1,30 @@
+name: Queue Wakeup Certification
+
+on:
+  pull_request:
+    paths:
+      - 'supabase/migrations/20260923_add_research_queue_wakeup_outbox.sql'
+      - 'supabase/functions/tr-queue-wakeup-v1/**'
+      - 'tests/test_queue_wakeup_contract.py'
+      - '.github/workflows/queue-wakeup-cert.yml'
+      - '.github/workflows/trading-research-queue-watcher.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  certify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: |
+          python -m pip install --upgrade pip
+          pip install pytest
+      - name: Event wakeup contracts
+        run: pytest -q tests/test_queue_wakeup_contract.py
+      - name: Existing queue watcher contracts
+        run: pytest -q tests/test_queue_watcher.py
