@@ -1,0 +1,1 @@
+Do not merge or wire production execution until Research Revision Adapter Certification passes on the PR head SHA.
