@@ -12,12 +12,7 @@ async function updateOutbox(eventId: string, values: Record<string, unknown>) {
   if (!url || !serviceKey) throw new Error("missing_supabase_runtime_secret");
   const response = await fetch(`${url}/rest/v1/${OUTBOX}?event_id=eq.${encodeURIComponent(eventId)}`, {
     method: "PATCH",
-    headers: {
-      "apikey": serviceKey,
-      "authorization": `Bearer ${serviceKey}`,
-      "content-type": "application/json",
-      "prefer": "return=minimal"
-    },
+    headers: { "apikey": serviceKey, "authorization": `Bearer ${serviceKey}`, "content-type": "application/json", "prefer": "return=minimal" },
     body: JSON.stringify(values)
   });
   if (!response.ok) throw new Error(`outbox_update_failed_${response.status}`);
@@ -25,72 +20,26 @@ async function updateOutbox(eventId: string, values: Record<string, unknown>) {
 
 Deno.serve(async (req: Request) => {
   if (req.method !== "POST") return new Response("method not allowed", { status: 405 });
-
   const token = Deno.env.get("TR_GITHUB_DISPATCH_TOKEN");
   if (!token) return new Response(JSON.stringify({ ok: false, error: "missing_dispatch_secret" }), { status: 500, headers: { "content-type": "application/json" } });
-
   let payload: Record<string, any>;
-  try {
-    payload = await req.json();
-  } catch {
-    return new Response(JSON.stringify({ ok: false, error: "invalid_webhook_payload" }), { status: 400, headers: { "content-type": "application/json" } });
-  }
+  try { payload = await req.json(); } catch { return new Response(JSON.stringify({ ok: false, error: "invalid_webhook_payload" }), { status: 400, headers: { "content-type": "application/json" } }); }
   const eventId = payload?.record?.event_id;
-  if (typeof eventId !== "string" || !UUID_RE.test(eventId)) {
-    return new Response(JSON.stringify({ ok: false, error: "missing_event_id" }), { status: 400, headers: { "content-type": "application/json" } });
-  }
-
-  const now = new Date().toISOString();
+  if (typeof eventId !== "string" || !UUID_RE.test(eventId)) return new Response(JSON.stringify({ ok: false, error: "missing_event_id" }), { status: 400, headers: { "content-type": "application/json" } });
   try {
-    await updateOutbox(eventId, {
-      dispatch_requested_at: now,
-      dispatch_status: "dispatching",
-      attempt_count: Number(payload?.record?.attempt_count ?? 0) + 1,
-      last_error: null
-    });
+    await updateOutbox(eventId, { dispatch_requested_at: new Date().toISOString(), dispatch_status: "requested", attempt_count: Number(payload?.record?.attempt_count ?? 0) + 1, last_error: null });
   } catch (error) {
     console.error("unable to mark wakeup dispatch requested", error);
     return new Response(JSON.stringify({ ok: false, error: "outbox_request_tracking_failed" }), { status: 500, headers: { "content-type": "application/json" } });
   }
-
-  const gh = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/actions/workflows/${WORKFLOW}/dispatches`, {
-    method: "POST",
-    headers: {
-      "authorization": `Bearer ${token}`,
-      "accept": "application/vnd.github+json",
-      "x-github-api-version": "2022-11-28",
-      "user-agent": "trading-research-control-plane"
-    },
-    body: JSON.stringify({ ref: "main" })
-  });
+  const gh = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/actions/workflows/${WORKFLOW}/dispatches`, { method: "POST", headers: { "authorization": `Bearer ${token}`, "accept": "application/vnd.github+json", "x-github-api-version": "2022-11-28", "user-agent": "trading-research-control-plane" }, body: JSON.stringify({ ref: "main" }) });
   const requestId = gh.headers.get("x-github-request-id");
-
   if (!gh.ok) {
-    const detail = (await gh.text()).slice(0, 500);
-    console.error("github workflow dispatch failed", gh.status, detail);
-    try {
-      await updateOutbox(eventId, {
-        dispatch_status: "failed",
-        dispatch_request_id: requestId,
-        last_error: `github_dispatch_${gh.status}`
-      });
-    } catch (error) {
-      console.error("unable to record github dispatch failure", error);
-    }
+    const detail = (await gh.text()).slice(0, 500); console.error("github workflow dispatch failed", gh.status, detail);
+    try { await updateOutbox(eventId, { dispatch_status: "failed", dispatch_request_id: requestId, last_error: `github_dispatch_${gh.status}` }); } catch (error) { console.error("unable to record github dispatch failure", error); }
     return new Response(JSON.stringify({ ok: false, github_status: gh.status }), { status: 502, headers: { "content-type": "application/json" } });
   }
-
-  try {
-    await updateOutbox(eventId, {
-      dispatch_acknowledged_at: new Date().toISOString(),
-      dispatch_request_id: requestId,
-      dispatch_status: "acknowledged",
-      last_error: null
-    });
-  } catch (error) {
-    console.error("github dispatch succeeded but acknowledgement persistence failed", error);
-    return new Response(JSON.stringify({ ok: false, error: "acknowledgement_persistence_failed", github_status: gh.status }), { status: 500, headers: { "content-type": "application/json" } });
-  }
-
+  try { await updateOutbox(eventId, { dispatch_acknowledged_at: new Date().toISOString(), dispatch_request_id: requestId, dispatch_status: "acknowledged", last_error: null }); }
+  catch (error) { console.error("github dispatch succeeded but acknowledgement persistence failed", error); return new Response(JSON.stringify({ ok: false, error: "acknowledgement_persistence_failed", github_status: gh.status }), { status: 500, headers: { "content-type": "application/json" } }); }
   return new Response(JSON.stringify({ ok: true, github_status: gh.status }), { status: 202, headers: { "content-type": "application/json" } });
 });
