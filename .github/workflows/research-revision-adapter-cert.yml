@@ -32,7 +32,7 @@ jobs:
           pytest -q \
             tests/test_ccp5_control_plane.py \
             tests/test_ccp5_control_plane_worker.py \
-            tests/test_ccp6_control_plane_artifacts.py \
-            tests/test_ccp7_executor_routing.py \
             tests/test_ccp8_autonomous_loop.py \
-            tests/test_ccp9_cloud_run.py
+            tests/test_ccp9_exact_claim.py \
+            tests/test_ccp10_input_materializer.py \
+            tests/test_ccp11_artifact_contract.py
