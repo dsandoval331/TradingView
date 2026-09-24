@@ -2,12 +2,13 @@ from __future__ import annotations
 
 import json
 import os
+from datetime import datetime
 from typing import Any
 
 import requests
 
 from cloud_compute.control_plane import ControlPlaneConfig, _request_headers
-from cloud_compute.queue_resilience import reconcile_running_jobs, reconcile_wakeup_events
+from cloud_compute.queue_resilience import ResiliencePolicy, reconcile_running_jobs, reconcile_wakeup_events
 
 
 def wake_via_existing_function(config: ControlPlaneConfig, event: dict[str, Any]) -> None:
@@ -17,9 +18,17 @@ def wake_via_existing_function(config: ControlPlaneConfig, event: dict[str, Any]
         raise RuntimeError(f'wakeup function failed: HTTP {response.status_code} {response.text[:500]}')
 
 
-def run(config: ControlPlaneConfig, *, limit: int = 100) -> dict[str, Any]:
-    wakeup = reconcile_wakeup_events(config, wake=lambda event: wake_via_existing_function(config, event), limit=limit)
-    ownership = reconcile_running_jobs(config, limit=limit)
+def run(
+    config: ControlPlaneConfig,
+    *,
+    limit: int = 100,
+    now: datetime | None = None,
+    policy: ResiliencePolicy | None = None,
+) -> dict[str, Any]:
+    wakeup = reconcile_wakeup_events(
+        config, wake=lambda event: wake_via_existing_function(config, event), limit=limit, now=now, policy=policy
+    )
+    ownership = reconcile_running_jobs(config, limit=limit, now=now, policy=policy)
     return {'wakeup': wakeup, 'ownership': ownership}
 
 
