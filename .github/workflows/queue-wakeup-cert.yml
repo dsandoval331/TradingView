@@ -6,10 +6,13 @@ on:
       - 'supabase/migrations/20260923_add_research_queue_wakeup_outbox.sql'
       - 'supabase/functions/tr-queue-wakeup-v1/**'
       - 'cloud_compute/queue_resilience.py'
+      - 'cloud_compute/queue_resilience_runner.py'
       - 'tests/test_queue_resilience.py'
       - 'tests/test_queue_resilience_concurrency.py'
+      - 'tests/test_queue_resilience_runner.py'
       - 'tests/test_queue_wakeup_contract.py'
       - '.github/workflows/queue-wakeup-cert.yml'
+      - '.github/workflows/queue-resilience-reconciler.yml'
       - '.github/workflows/trading-research-queue-watcher.yml'
   workflow_dispatch:
 
@@ -32,6 +35,8 @@ jobs:
         run: pytest -q tests/test_queue_wakeup_contract.py
       - name: Queue resilience and ownership contracts
         run: pytest -q tests/test_queue_resilience.py
+      - name: Production resilience runner contracts
+        run: pytest -q tests/test_queue_resilience_runner.py
       - name: Concurrency and idempotency fixtures
         run: pytest -q tests/test_queue_resilience_concurrency.py
       - name: Existing queue watcher contracts
