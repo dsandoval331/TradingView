@@ -7,6 +7,7 @@ on:
       - 'supabase/functions/tr-queue-wakeup-v1/**'
       - 'cloud_compute/queue_resilience.py'
       - 'tests/test_queue_resilience.py'
+      - 'tests/test_queue_resilience_concurrency.py'
       - 'tests/test_queue_wakeup_contract.py'
       - '.github/workflows/queue-wakeup-cert.yml'
       - '.github/workflows/trading-research-queue-watcher.yml'
@@ -31,5 +32,7 @@ jobs:
         run: pytest -q tests/test_queue_wakeup_contract.py
       - name: Queue resilience and ownership contracts
         run: pytest -q tests/test_queue_resilience.py
+      - name: Concurrency and idempotency fixtures
+        run: pytest -q tests/test_queue_resilience_concurrency.py
       - name: Existing queue watcher contracts
         run: pytest -q tests/test_queue_watcher.py
