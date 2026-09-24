@@ -1,0 +1,52 @@
+name: TradingResearch Queue Operational Health
+
+on:
+  schedule:
+    - cron: '4,14,24,34,44,54 * * * *'
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'cloud_compute/queue_health.py'
+      - 'cloud_compute/queue_health_runner.py'
+      - 'tests/test_queue_health.py'
+      - '.github/workflows/queue-operational-health.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: trading-research-queue-operational-health-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest
+      - name: Queue health contracts
+        run: python -m pytest -q tests/test_queue_health.py tests/test_queue_resilience.py
+
+  live-readonly-health:
+    if: github.event_name != 'pull_request'
+    needs: contracts
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_URL: ${{ secrets.TR_SUPABASE_URL }}
+      SUPABASE_SECRET_KEY: ${{ secrets.TR_SUPABASE_SECRET_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Read-only operational health snapshot
+        run: python -m cloud_compute.queue_health_runner
