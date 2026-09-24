@@ -1,9 +1,19 @@
 from datetime import datetime, timedelta, timezone
+from unittest.mock import patch
 
-from cloud_compute.queue_resilience import ResiliencePolicy, classify_job, classify_wakeup_event
+from cloud_compute.control_plane import ControlPlaneConfig
+from cloud_compute.queue_resilience import (
+    ResiliencePolicy,
+    classify_job,
+    classify_wakeup_event,
+    evaluate_running_job_ownership,
+    reconcile_running_jobs,
+    reconcile_wakeup_events,
+)
 
 NOW = datetime(2026, 9, 23, 23, 0, tzinfo=timezone.utc)
 POLICY = ResiliencePolicy()
+CONFIG = ControlPlaneConfig("https://example.supabase.co", "secret")
 
 
 def test_acknowledged_event_is_complete() -> None:
@@ -42,3 +52,45 @@ def test_old_running_job_is_classified_stale_not_requeued() -> None:
 def test_recent_running_job_remains_running() -> None:
     row = {"status": "running", "started_at": (NOW - timedelta(minutes=5)).isoformat()}
     assert classify_job(row, now=NOW, policy=POLICY) == "running"
+
+
+def test_reconciler_retries_notification_without_updating_research_job() -> None:
+    event = {"event_id": "e1", "job_id": "j1", "dispatch_status": "pending", "attempt_count": 0, "created_at": (NOW - timedelta(minutes=3)).isoformat()}
+    wake_calls = []
+    with patch("cloud_compute.queue_resilience.fetch_wakeup_events", return_value=[event]):
+        result = reconcile_wakeup_events(CONFIG, wake=wake_calls.append, now=NOW, policy=POLICY)
+    assert result["retry"] == 1
+    assert wake_calls == [event]
+
+
+def test_concurrent_duplicate_wakeups_are_notifications_not_job_mutations() -> None:
+    event = {"event_id": "e1", "job_id": "j1", "dispatch_status": "pending", "attempt_count": 0, "created_at": (NOW - timedelta(minutes=3)).isoformat()}
+    calls = []
+    with patch("cloud_compute.queue_resilience.fetch_wakeup_events", return_value=[event]):
+        reconcile_wakeup_events(CONFIG, wake=calls.append, now=NOW, policy=POLICY)
+        reconcile_wakeup_events(CONFIG, wake=calls.append, now=NOW, policy=POLICY)
+    assert calls == [event, event]
+    # Multiple wake signals are safe because neither reconciler mutates/requeues the research job;
+    # the existing database atomic-claim RPC remains the execution idempotency boundary.
+
+
+def test_stale_running_with_running_attempt_escalates_without_requeue() -> None:
+    job = {"job_id": "j1", "status": "running", "started_at": (NOW - timedelta(minutes=31)).isoformat()}
+    attempts = [{"attempt_no": 1, "status": "running", "external_execution_id": "gh-1"}]
+    assert evaluate_running_job_ownership(job, attempts, now=NOW, policy=POLICY) == "stale_owned_escalate"
+
+
+def test_stale_running_without_attempt_escalates() -> None:
+    job = {"job_id": "j1", "status": "running", "started_at": (NOW - timedelta(minutes=31)).isoformat()}
+    assert evaluate_running_job_ownership(job, [], now=NOW, policy=POLICY) == "stale_no_attempt_escalate"
+
+
+def test_running_reconciler_is_read_only() -> None:
+    job = {"job_id": "j1", "status": "running", "started_at": (NOW - timedelta(minutes=31)).isoformat()}
+    attempt = {"attempt_no": 1, "status": "running"}
+    with (
+        patch("cloud_compute.queue_resilience.fetch_running_jobs", return_value=[job]),
+        patch("cloud_compute.queue_resilience.fetch_job_attempts", return_value=[attempt]),
+    ):
+        result = reconcile_running_jobs(CONFIG, now=NOW, policy=POLICY)
+    assert result == {"stale_owned_escalate": 1}
