@@ -38,10 +38,8 @@ def test_runner_retries_stale_event_and_only_observes_running_ownership() -> Non
         patch('cloud_compute.queue_resilience.fetch_running_jobs', return_value=[job]),
         patch('cloud_compute.queue_resilience.fetch_job_attempts', return_value=[attempt]),
         patch('cloud_compute.queue_resilience_runner.wake_via_existing_function') as wake,
-        patch('cloud_compute.queue_resilience.datetime') as clock,
     ):
-        clock.now.return_value = NOW
-        result = run(CONFIG)
+        result = run(CONFIG, now=NOW)
     wake.assert_called_once_with(CONFIG, stale)
     assert result['wakeup']['retry'] == 1
     assert result['ownership'] == {'stale_owned_escalate': 1}
