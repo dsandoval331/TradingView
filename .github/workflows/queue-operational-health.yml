@@ -2,7 +2,7 @@ name: TradingResearch Queue Operational Health
 
 on:
   schedule:
-    - cron: '6,16,26,36,46,56 * * * *'
+    - cron: '7,17,27,37,47,57 * * * *'
   workflow_dispatch:
   pull_request:
     paths:
