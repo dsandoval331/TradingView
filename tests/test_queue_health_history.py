@@ -48,7 +48,6 @@ def test_new_attention_observation_continues_incident(monkeypatch):
     monkeypatch.setattr(history, '_update_one', lambda c, table, key, value, patch: patches.append(patch) or patch)
     history.reconcile_incidents(object(), snap('2026-09-25T06:10:00+00:00', ['oldest_queued_age']), snapshot_id='s2')
     assert patches[0]['observation_count'] == 4
-    assert patches[0]['state'] if 'state' in patches[0] else 'open' == 'open'
 
 
 def test_healthy_snapshot_recovers_open_incident(monkeypatch):
@@ -59,6 +58,20 @@ def test_healthy_snapshot_recovers_open_incident(monkeypatch):
     history.reconcile_incidents(object(), snap('2026-09-25T06:20:00+00:00'), snapshot_id='s3')
     assert patches[0]['state'] == 'recovered'
     assert patches[0]['recovered_at'] == '2026-09-25T06:20:00+00:00'
+
+
+def test_recovered_incident_reopens_as_new_episode(monkeypatch):
+    patches = []
+    current = {'incident_id': 'i1', 'alert_code': 'oldest_queued_age', 'state': 'recovered', 'observation_count': 5, 'last_snapshot_id': 's3', 'recovered_at': '2026-09-25T06:20:00+00:00'}
+    monkeypatch.setattr(history, '_fetch_rows', lambda *a, **k: [current])
+    monkeypatch.setattr(history, '_update_one', lambda c, table, key, value, patch: patches.append(patch) or patch)
+    history.reconcile_incidents(object(), snap('2026-09-25T07:00:00+00:00', ['oldest_queued_age']), snapshot_id='s4')
+    patch = patches[0]
+    assert patch['state'] == 'open'
+    assert patch['first_observed_at'] == '2026-09-25T07:00:00+00:00'
+    assert patch['observation_count'] == 1
+    assert patch['recovered_at'] is None
+    assert patch['last_snapshot_id'] == 's4'
 
 
 def test_history_adapter_never_targets_research_state(monkeypatch):
