@@ -8,11 +8,14 @@ on:
       - 'cloud_compute/queue_health_observability.py'
       - 'cloud_compute/queue_health_observability_runner.py'
       - 'cloud_compute/queue_health_runner.py'
+      - 'cloud_compute/consolidated_resilience_cert.py'
       - 'tests/test_queue_health.py'
       - 'tests/test_queue_health_history.py'
       - 'tests/test_queue_health_observability.py'
       - 'tests/test_queue_health_observability_runner.py'
       - 'tests/test_queue_health_runner.py'
+      - 'tests/test_queue_resilience.py'
+      - 'tests/test_consolidated_resilience_cert.py'
       - 'supabase/migrations/20260925_add_queue_operational_health_history.sql'
       - '.github/workflows/queue-operational-health.yml'
       - '.github/workflows/queue-operational-health-scheduled.yml'
@@ -36,5 +39,5 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pytest
-      - name: Queue health contracts
-        run: python -m pytest -q tests/test_queue_health.py tests/test_queue_health_history.py tests/test_queue_health_observability.py tests/test_queue_health_observability_runner.py tests/test_queue_health_runner.py tests/test_queue_resilience.py
+      - name: Queue health and consolidated resilience contracts
+        run: python -m pytest -q tests/test_queue_health.py tests/test_queue_health_history.py tests/test_queue_health_observability.py tests/test_queue_health_observability_runner.py tests/test_queue_health_runner.py tests/test_queue_resilience.py tests/test_consolidated_resilience_cert.py
