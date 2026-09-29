@@ -1,0 +1,35 @@
+name: W3 Isolated Recovery Stress Certification
+on:
+  push:
+    branches:
+      - infra/w3-artifact-readback-20260929
+    paths:
+      - .github/workflows/w3-recovery-cert.yml
+permissions:
+  contents: read
+  actions: read
+jobs:
+  recovery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      SUPABASE_URL: ${{ secrets.TR_SUPABASE_URL }}
+      SUPABASE_SECRET_KEY: ${{ secrets.TR_SUPABASE_SECRET_KEY }}
+      TR_GIT_SHA: ${{ github.sha }}
+      GITHUB_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Existing recovery and cost gates
+        run: pytest -q tests/test_queue_resilience.py tests/test_queue_resilience_concurrency.py tests/test_queue_resilience_runner.py tests/test_ccp8_autonomous_loop.py tests/test_consolidated_resilience_cert.py tests/test_research_revision_adapter.py
+      - name: Eight-worker atomic claim fixture
+        run: python -m cloud_compute.ccp11_concurrency_cert --workers 8
+      - name: Confirmed-inactive stale recovery fixture
+        run: python -m cloud_compute.ccp11_stale_recovery_live_cert
