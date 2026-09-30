@@ -1,0 +1,82 @@
+name: MWE PMPD E3R2 Exact Revision Recovery
+on:
+  push:
+    branches: [infra/mwe-pmpd-e3r2-001]
+    paths: [.github/workflows/mwe-pmpd-e3r2-001.yml]
+permissions:
+  contents: read
+jobs:
+  execute:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      SUPABASE_URL: ${{ secrets.TR_SUPABASE_URL }}
+      SUPABASE_SECRET_KEY: ${{ secrets.TR_SUPABASE_SECRET_KEY }}
+      TR_GIT_SHA: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 879029dcab31f6cc3c7da8dea40747d5bfd17e03
+          path: frozen
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          path: infra
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: |
+          pip install -r frozen/requirements.txt
+          pip install pytest
+      - name: Verify execution revision and materializer contracts
+        working-directory: frozen
+        run: |
+          test "$(git rev-parse HEAD)" = "879029dcab31f6cc3c7da8dea40747d5bfd17e03"
+          echo "EXECUTED_SHA=$(git rev-parse HEAD)"
+          pytest -q tests/test_ccp10_input_materializer.py tests/test_ccp9_exact_claim.py tests/test_ccp11_artifact_contract.py
+      - name: Verify inputs and recover exact governed job
+        working-directory: frozen
+        run: |
+          python - <<'PY'
+          import os,hashlib
+          from cloud_compute.control_plane import ControlPlaneConfig,_fetch_rows,update_job
+          from cloud_compute.control_plane_worker import run_one_outcome
+          c=ControlPlaneConfig(os.environ['SUPABASE_URL'],os.environ['SUPABASE_SECRET_KEY'])
+          jid='adb08f13-3243-4d47-9f01-0be7eeb2c2f4'
+          jobs=_fetch_rows(c,'research_jobs',{'job_id':'eq.'+jid})
+          assert len(jobs)==1 and jobs[0]['git_sha']=='879029dcab31f6cc3c7da8dea40747d5bfd17e03'
+          inputs=_fetch_rows(c,'research_job_inputs',{'job_id':'eq.'+jid})
+          market=sorted((x for x in inputs if x['input_type']=='market_data'),key=lambda x:x['object_path'])
+          payload='\n'.join(x['object_path']+'|'+x['sha256']+'|'+str(x['object_size_bytes']) for x in market)
+          assert len(market)==112 and hashlib.sha256(payload.encode()).hexdigest()=='2d8f867546fda70bce45d3848268907035dc8c67a37f267bfc114120dbe0373c'
+          assert len([x for x in inputs if x['sha256']=='cfca634557d9e01b454a7ef66199ea10e92ab4c3a48c953bf3ca148a7ee94efd'])==1
+          if jobs[0]['status']=='succeeded':
+              print('ALREADY_SUCCEEDED_NO_DUPLICATE')
+          else:
+              assert jobs[0]['status']=='failed',jobs[0]['status']
+              update_job(c,jid,{'status':'queued','assigned_executor':None,'assigned_at':None,'started_at':None,'completed_at':None,'last_error':None})
+              result=run_one_outcome(c,executor='github_actions',external_execution_id=os.environ['GITHUB_RUN_ID'],exact_job_id=jid)
+              assert result.job is not None,'exact claim was acquired by another executor; inspect before retry'
+              assert result.exit_code==0,'governed R2 execution failed'
+          PY
+      - name: Byte-verify all persisted R2 artifacts and read outcome-blind summary
+        working-directory: infra
+        run: |
+          python - <<'PY'
+          import os,tempfile,hashlib,json
+          from pathlib import Path
+          from cloud_compute.control_plane import ControlPlaneConfig,_fetch_rows
+          from cloud_compute.storage_poc import _download_object
+          from cloud_compute.artifact_readback import run
+          c=ControlPlaneConfig(os.environ['SUPABASE_URL'],os.environ['SUPABASE_SECRET_KEY'])
+          jid='adb08f13-3243-4d47-9f01-0be7eeb2c2f4'
+          rows=_fetch_rows(c,'research_job_artifacts',{'job_id':'eq.'+jid})
+          assert len(rows)==5 and sum(bool(x['is_primary']) for x in rows)==1
+          for a in rows:
+              with tempfile.TemporaryDirectory() as td:
+                  p=Path(td)/'artifact'
+                  _download_object(c.supabase_url,c.secret_key,a['bucket_name'],a['object_path'],p)
+                  assert p.stat().st_size==a['size_bytes'] and hashlib.sha256(p.read_bytes()).hexdigest()==a['sha256']
+                  print('BYTE_PARITY_PASS='+json.dumps({'artifact_id':a['artifact_id'],'size':a['size_bytes'],'sha256':a['sha256']}))
+          print(json.dumps(run(jid,['summary.json','artifact_manifest.json','exclusion_summary.csv'])))
+          PY
