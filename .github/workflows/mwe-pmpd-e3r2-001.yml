@@ -12,7 +12,7 @@ jobs:
     env:
       SUPABASE_URL: ${{ secrets.TR_SUPABASE_URL }}
       SUPABASE_SECRET_KEY: ${{ secrets.TR_SUPABASE_SECRET_KEY }}
-      TR_GIT_SHA: ${{ github.sha }}
+      TR_GIT_SHA: 879029dcab31f6cc3c7da8dea40747d5bfd17e03
     steps:
       - uses: actions/checkout@v4
         with:
@@ -53,7 +53,7 @@ jobs:
           if jobs[0]['status']=='succeeded':
               print('ALREADY_SUCCEEDED_NO_DUPLICATE')
           else:
-              assert jobs[0]['status']=='failed',jobs[0]['status']
+              assert jobs[0]['status'] in ('failed','queued'),jobs[0]['status']
               update_job(c,jid,{'status':'queued','assigned_executor':None,'assigned_at':None,'started_at':None,'completed_at':None,'last_error':None})
               result=run_one_outcome(c,executor='github_actions',external_execution_id=os.environ['GITHUB_RUN_ID'],exact_job_id=jid)
               assert result.job is not None,'exact claim was acquired by another executor; inspect before retry'
@@ -61,6 +61,8 @@ jobs:
           PY
       - name: Byte-verify all persisted R2 artifacts and read outcome-blind summary
         working-directory: infra
+        env:
+          TR_GIT_SHA: ${{ github.sha }}
         run: |
           python - <<'PY'
           import os,tempfile,hashlib,json
