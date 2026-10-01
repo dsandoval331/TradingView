@@ -7,7 +7,7 @@ from typing import Any
 def _looks_like_artifact_path(key: str, value: str) -> bool:
     if key == "artifact":
         return True
-    if key in {"output_dir", "sha256"}:
+    if key in {"output_dir", "sha256", "governed_research_module"}:
         return False
     candidate = value.strip()
     if not candidate:
