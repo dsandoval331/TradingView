@@ -26,22 +26,17 @@ export default async function WorkEnvelopes({ strategyId }: Props) {
 
   const envelopeRows = envelopes ?? [];
   const envelopeIds = envelopeRows.map((row) => row.work_envelope_id);
-  const { data: links, error: linkError } = envelopeIds.length
-    ? await supabase.from("work_envelope_research_jobs").select("work_envelope_id,job_id,relationship_role").in("work_envelope_id", envelopeIds)
-    : { data: [], error: null };
-  const jobIds = [...new Set((links ?? []).map((row) => row.job_id))];
-  const { data: jobs, error: jobError } = jobIds.length
-    ? await supabase.from("research_jobs").select("job_id,runner_job_id,project_code,phase_code,status,git_sha,assigned_executor,preferred_executor,cloud_run_spend_approved,started_at,completed_at").in("job_id", jobIds)
+  const { data: linkedJobs, error: jobError } = envelopeIds.length
+    ? await supabase.rpc("trp_read_mwe_linked_research_jobs", { p_work_envelope_ids: envelopeIds })
     : { data: [], error: null };
   const { data: providers, error: providerError } = await supabase.from("compute_provider_status").select("*").order("routing_priority", { ascending: true });
 
-  const relatedError = linkError || jobError || providerError;
-  const jobsById = new Map((jobs ?? []).map((job) => [job.job_id, job]));
-  const linksByEnvelope = new Map<string, typeof links>();
-  for (const link of links ?? []) {
-    const existing = linksByEnvelope.get(link.work_envelope_id) ?? [];
-    existing.push(link);
-    linksByEnvelope.set(link.work_envelope_id, existing);
+  const relatedError = jobError || providerError;
+  const jobsByEnvelope = new Map<string, any[]>();
+  for (const job of linkedJobs ?? []) {
+    const existing = jobsByEnvelope.get(job.work_envelope_id) ?? [];
+    existing.push(job);
+    jobsByEnvelope.set(job.work_envelope_id, existing);
   }
 
   return <section className="projectSection" id="work-envelopes">
@@ -51,8 +46,7 @@ export default async function WorkEnvelopes({ strategyId }: Props) {
     {envelopeRows.some((row) => row.user_action_required) && <div className="alertPanel"><strong>USER ACTION REQUIRED</strong><span>At least one Work Envelope has reached an escalation boundary. Review the highlighted envelope below before execution continues.</span></div>}
     <div className="stackList">
       {envelopeRows.length ? envelopeRows.map((envelope) => {
-        const envelopeLinks = linksByEnvelope.get(envelope.work_envelope_id) ?? [];
-        const envelopeJobs = envelopeLinks.map((link) => jobsById.get(link.job_id)).filter(Boolean);
+        const envelopeJobs = jobsByEnvelope.get(envelope.work_envelope_id) ?? [];
         return <article className={`detailPanel${envelope.user_action_required ? " blockingPanel" : ""}`} key={envelope.work_envelope_id}>
           <div className="listTop"><strong>{envelope.mwe_id}</strong><div className="timelineBadges"><span className="statusPill">{prettyStatus(envelope.status)}</span><span className="statusPill">{envelope.authority_ceiling}</span></div></div>
           <p>{envelope.objective}</p>
@@ -67,7 +61,7 @@ export default async function WorkEnvelopes({ strategyId }: Props) {
           </dl>
           <span className="fieldLabel spacedLabel">Governed execution</span>
           {envelopeJobs.length ? envelopeJobs.map((job: any) => <div key={job.job_id}>
-            <p><strong>{job.runner_job_id ?? job.job_id}</strong> · {prettyStatus(job.status)} · {job.assigned_executor ?? job.preferred_executor ?? "Executor not assigned"}</p>
+            <p><strong>{job.runner_job_id ?? job.job_id}</strong> · {prettyStatus(job.job_status)} · {job.assigned_executor ?? job.preferred_executor ?? "Executor not assigned"}</p>
             <small>Job {job.job_id} · {job.project_code ?? "project not recorded"} / {job.phase_code ?? "phase not recorded"} · SHA {job.git_sha ?? "not recorded"} · Cloud Run spend approved: {job.cloud_run_spend_approved ? "YES" : "NO"}</small>
           </div>) : <p className="emptyState">No governed research job linked to this envelope.</p>}
           <small>Envelope updated: {formatDateTime(envelope.updated_at)}</small>
