@@ -31,7 +31,7 @@ export default async function WorkEnvelopes({ strategyId }: Props) {
     : { data: [], error: null };
   const jobIds = [...new Set((links ?? []).map((row) => row.job_id))];
   const { data: jobs, error: jobError } = jobIds.length
-    ? await supabase.from("research_jobs").select("job_id,runner_name,phase,status,git_sha,assigned_executor,preferred_executor,cloud_run_spend_approved,started_at,finished_at").in("job_id", jobIds)
+    ? await supabase.from("research_jobs").select("job_id,runner_job_id,project_code,phase_code,status,git_sha,assigned_executor,preferred_executor,cloud_run_spend_approved,started_at,completed_at").in("job_id", jobIds)
     : { data: [], error: null };
   const { data: providers, error: providerError } = await supabase.from("compute_provider_status").select("*").order("routing_priority", { ascending: true });
 
@@ -67,8 +67,8 @@ export default async function WorkEnvelopes({ strategyId }: Props) {
           </dl>
           <span className="fieldLabel spacedLabel">Governed execution</span>
           {envelopeJobs.length ? envelopeJobs.map((job: any) => <div key={job.job_id}>
-            <p><strong>{job.runner_name ?? job.job_id}</strong> · {prettyStatus(job.status)} · {job.assigned_executor ?? job.preferred_executor ?? "Executor not assigned"}</p>
-            <small>Job {job.job_id} · SHA {job.git_sha ?? "not recorded"} · Cloud Run spend approved: {job.cloud_run_spend_approved ? "YES" : "NO"}</small>
+            <p><strong>{job.runner_job_id ?? job.job_id}</strong> · {prettyStatus(job.status)} · {job.assigned_executor ?? job.preferred_executor ?? "Executor not assigned"}</p>
+            <small>Job {job.job_id} · {job.project_code ?? "project not recorded"} / {job.phase_code ?? "phase not recorded"} · SHA {job.git_sha ?? "not recorded"} · Cloud Run spend approved: {job.cloud_run_spend_approved ? "YES" : "NO"}</small>
           </div>) : <p className="emptyState">No governed research job linked to this envelope.</p>}
           <small>Envelope updated: {formatDateTime(envelope.updated_at)}</small>
         </article>;
