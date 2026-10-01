@@ -27,7 +27,7 @@ export default async function WorkEnvelopes({ strategyId }: Props) {
   const envelopeRows = envelopes ?? [];
   const envelopeIds = envelopeRows.map((row) => row.work_envelope_id);
   const { data: links, error: linkError } = envelopeIds.length
-    ? await supabase.from("work_envelope_research_jobs").select("work_envelope_id,job_id,relationship_role,is_primary").in("work_envelope_id", envelopeIds)
+    ? await supabase.from("work_envelope_research_jobs").select("work_envelope_id,job_id,relationship_role").in("work_envelope_id", envelopeIds)
     : { data: [], error: null };
   const jobIds = [...new Set((links ?? []).map((row) => row.job_id))];
   const { data: jobs, error: jobError } = jobIds.length
