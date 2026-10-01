@@ -7,7 +7,7 @@ def test_targets_are_explicit_and_narrow():
     assert set(adapter.GOVERNED_RESEARCH_TARGETS) == {"PMOD-P2-B2", "IR11-P3-B2", "SW10-S2-B1"}
     target = adapter.GOVERNED_RESEARCH_TARGETS["SW10-S2-B1"]
     assert target.module_path == "tr_platform/research/swing10_s2_b1.py"
-    assert target.execution_mode == "swing10_cli"
+    assert target.execution_mode == "swing10_snapshot_cli"
 
 
 def test_verify_commit_requires_full_sha(tmp_path):
@@ -46,14 +46,15 @@ def test_run_governed_revision_records_provenance(monkeypatch, tmp_path):
     assert result["exact_research_sha_verified"] is True
 
 
-def test_swing10_cli_requires_explicit_db_url(monkeypatch, tmp_path):
-    monkeypatch.delenv("TR_SWING10_DB_URL", raising=False)
-    with pytest.raises(RuntimeError, match="TR_SWING10_DB_URL"):
-        adapter._run_swing10_cli(tmp_path / "swing10.py", tmp_path)
+def test_swing10_snapshot_must_be_materialized(tmp_path):
+    with pytest.raises(RuntimeError, match="was not materialized"):
+        adapter._find_swing10_snapshot(tmp_path)
 
 
-def test_swing10_cli_preserves_cli_contract(monkeypatch, tmp_path):
-    monkeypatch.setenv("TR_SWING10_DB_URL", "postgresql://example")
+def test_swing10_snapshot_contract(monkeypatch, tmp_path):
+    snapshot = tmp_path / "job_inputs" / "swing10" / "market_daily_history.csv"
+    snapshot.parent.mkdir(parents=True)
+    snapshot.write_text("symbol,trade_date,open,high,low,close,volume\nAAPL,2026-01-02,1,2,0.5,1.5,100\n", encoding="utf-8")
     module = tmp_path / "swing10.py"
     module.write_text("# fixture\n", encoding="utf-8")
     calls = []
@@ -68,8 +69,9 @@ def test_swing10_cli_preserves_cli_contract(monkeypatch, tmp_path):
         (out / "factor_tail_summary.csv").write_text("factor,side_tail\n", encoding="utf-8")
         return Proc()
     monkeypatch.setattr(adapter.subprocess, "run", fake_run)
-    result = adapter._run_swing10_cli(module, tmp_path)
+    result = adapter._run_swing10_snapshot_cli(module, tmp_path)
     assert "--db-url" in calls[0]
-    assert "--out" in calls[0]
+    assert calls[0][calls[0].index("--db-url") + 1].startswith("sqlite:///")
     assert result["status"] == "PASS"
     assert result["factor_tail_summary"].endswith("factor_tail_summary.csv")
+    assert result["governed_input_snapshot"].endswith("market_daily_history.csv")
