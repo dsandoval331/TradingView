@@ -91,10 +91,9 @@ def _run_swing10_snapshot_cli(module_file: Path, work_root: Path) -> dict[str, A
         raise RuntimeError("SW10-S2-B1 completed without factor_tail_summary.csv")
     return {
         "status": "PASS",
-        "artifact_paths": [str(artifact.relative_to(work_root))],
-        "factor_tail_summary": str(artifact.relative_to(work_root)),
-        "primary_output": str(artifact.relative_to(work_root)),
-        "governed_input_snapshot": str(snapshot.relative_to(work_root)),
+        "artifact": str(artifact.relative_to(work_root)),
+        "output_paths": [str(artifact.relative_to(work_root))],
+        "input_provenance": {"local_relative_path": str(snapshot.relative_to(work_root))},
     }
 
 

@@ -73,7 +73,17 @@ jobs:
           pip install pytest
 
       - name: Certify cloud control-plane contracts
-        run: pytest -q tests/test_ccp5_control_plane.py tests/test_ccp5_control_plane_worker.py tests/test_ccp8_autonomous_loop.py tests/test_ccp9_exact_claim.py tests/test_ccp10_input_materializer.py tests/test_ccp11_artifact_contract.py tests/test_research_revision_adapter.py
+        run: pytest -q tests/test_ccp5_control_plane.py tests/test_ccp5_control_plane_worker.py tests/test_ccp8_autonomous_loop.py tests/test_ccp9_exact_claim.py tests/test_ccp10_input_materializer.py tests/test_ccp11_artifact_contract.py tests/test_research_revision_adapter.py tests/test_swing10_input_prepare.py
+
+      - name: Establish immutable SW10 input through online infrastructure
+        if: ${{ inputs.job_id == 'b355eadf-8cd3-417b-9508-b0d952e858ab' }}
+        run: python -m cloud_compute.swing10_input_prepare --job-id "${{ inputs.job_id }}"
 
       - name: Execute exact governed research job
         run: python -m cloud_compute.autonomous_loop --executor github_actions --external-execution-id "$GITHUB_RUN_ID" --job-id "${{ inputs.job_id }}" --max-jobs 10
+
+      - name: Independently read back SW10 output bytes into durable cache
+        if: ${{ inputs.job_id == 'b355eadf-8cd3-417b-9508-b0d952e858ab' }}
+        env:
+          TR_GIT_SHA: ${{ github.sha }}
+        run: python -m cloud_compute.artifact_readback --job-id "${{ inputs.job_id }}" --name factor_tail_summary.csv

@@ -73,5 +73,5 @@ def test_swing10_snapshot_contract(monkeypatch, tmp_path):
     assert "--db-url" in calls[0]
     assert calls[0][calls[0].index("--db-url") + 1].startswith("sqlite:///")
     assert result["status"] == "PASS"
-    assert result["factor_tail_summary"].endswith("factor_tail_summary.csv")
-    assert result["governed_input_snapshot"].endswith("market_daily_history.csv")
+    assert result["artifact"].endswith("factor_tail_summary.csv")
+    assert result["input_provenance"]["local_relative_path"].endswith("market_daily_history.csv")
