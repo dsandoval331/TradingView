@@ -1,0 +1,33 @@
+{
+  "defined_before_coverage_compute": true,
+  "primary_factor_tail_quantiles": [
+    0.2,
+    0.8
+  ],
+  "conditioner_schemes": {
+    "TAIL_20_80": [
+      0.2,
+      0.8
+    ],
+    "TERCILE_33_67": [
+      0.3333333333333333,
+      0.6666666666666666
+    ]
+  },
+  "sparse_cell_count_below": 5,
+  "joint_cells": [
+    "LOW_LOW",
+    "LOW_HIGH",
+    "HIGH_LOW",
+    "HIGH_HIGH"
+  ],
+  "required_eligible_dates": 100,
+  "required_all_four_cells_nonsparse_date_rate": 0.9,
+  "required_each_block_eligible_dates": 20,
+  "required_each_block_all_four_nonsparse_date_rate": 0.8,
+  "required_unique_symbols_per_cell": 20,
+  "max_overlap_observations": 0,
+  "block_basis": "four approximately equal chronological interaction-input-eligible date blocks; global panel coverage separately reported",
+  "selection": "TAIL_20_80 if all eight interactions feasible; else TERCILE_33_67 if all eight feasible; else NEITHER_FEASIBLE",
+  "scope": "operational coverage screen, not outcome power/effect/significance assurance or final B3 freeze"
+}

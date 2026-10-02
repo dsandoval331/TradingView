@@ -184,7 +184,7 @@ def run_one_outcome(
                 } for item in materialized]},
             })
 
-        if runner_job_id == "SW10-S2-B2":
+        if runner_job_id in {"SW10-S2-B2", "SW10-S2-B3-PREFLIGHT"}:
             context = {
                 "job_id": job_id, "attempt_id": attempt_id, "attempt_no": attempt_no,
                 "research_revision": research_sha, "infrastructure_revision": infrastructure_sha,

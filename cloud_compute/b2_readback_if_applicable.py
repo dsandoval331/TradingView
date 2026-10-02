@@ -14,13 +14,16 @@ def main():
     jobs = _fetch_rows(config, 'research_jobs', {'job_id': f'eq.{a.job_id}', 'limit': '2'})
     if len(jobs) != 1:
         raise RuntimeError('exact job not found')
-    if jobs[0]['runner_job_id'] != 'SW10-S2-B2':
+    if jobs[0]['runner_job_id'] not in {'SW10-S2-B2', 'SW10-S2-B3-PREFLIGHT'}:
         print('B2_READBACK_NOT_APPLICABLE')
         return
-    from tr_platform.research.swing10_s2_b2 import FILES
+    if jobs[0]['runner_job_id'] == 'SW10-S2-B3-PREFLIGHT':
+        from tr_platform.research.swing10_s2_b3_preflight import FILES
+    else:
+        from tr_platform.research.swing10_s2_b2 import FILES
     result = run(a.job_id, list(FILES))
-    if result['count'] != 7:
-        raise RuntimeError('B2 must register/read back exactly seven outputs')
+    if result['count'] != len(FILES):
+        raise RuntimeError('SW10 must register/read back every required output')
     print(json.dumps(result, sort_keys=True))
 
 

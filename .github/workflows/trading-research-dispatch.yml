@@ -73,7 +73,7 @@ jobs:
           pip install pytest
 
       - name: Certify cloud control-plane contracts
-        run: pytest -q tests/test_ccp5_control_plane.py tests/test_ccp5_control_plane_worker.py tests/test_ccp8_autonomous_loop.py tests/test_ccp9_exact_claim.py tests/test_ccp10_input_materializer.py tests/test_ccp11_artifact_contract.py tests/test_research_revision_adapter.py tests/test_swing10_input_prepare.py tests/test_swing10_s2_b2_core.py tests/test_swing10_s2_b2.py
+        run: python -m cloud_compute.certify_dispatch_contracts --job-id "${{ inputs.job_id }}"
 
       - name: Establish immutable SW10 input through online infrastructure
         if: ${{ inputs.job_id == 'b355eadf-8cd3-417b-9508-b0d952e858ab' }}
@@ -88,7 +88,7 @@ jobs:
           TR_GIT_SHA: ${{ github.sha }}
         run: python -m cloud_compute.artifact_readback --job-id "${{ inputs.job_id }}" --name factor_tail_summary.csv
 
-      - name: Independently verify and durably read back B2 artifacts
+      - name: Independently verify and durably read back SW10 artifacts
         if: ${{ success() }}
         env:
           TR_GIT_SHA: ${{ github.sha }}

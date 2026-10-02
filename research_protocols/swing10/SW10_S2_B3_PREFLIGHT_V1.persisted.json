@@ -1,0 +1,62 @@
+{
+  "title": "S2-B3 outcome-blind conditioning feasibility audit",
+  "status": "active",
+  "decision": "Authorize an outcome-blind feasibility audit before freezing SW10-S2-B3 conditioning-state thresholds. Compute factor values and eligibility/cross-sectional state membership only, quantify interaction cell sizes and coverage for candidate conditioning schemes, and recommend a statistically feasible scheme without reading or computing forward-return outcomes.",
+  "evidence": "MWE-SW10-S2B2-001 COMPLETE/VERIFIED; B2 primary family had no BH-FDR survivors. Existing certified 112-symbol, 394-date panel and frozen causal factor implementations provide sufficient inputs for an outcome-blind membership audit.",
+  "rationale": "B2 completed with no factor advanced. B3 is proposed to test factor roles and conditional structure, but exact conditioning thresholds must be selected prospectively. Coverage-only feasibility evidence can resolve this without outcome-driven threshold selection.",
+  "decision_id": "3a4231dc-647e-40bc-8315-65efd2b30c13",
+  "strategy_id": "09f30dc1-81ae-440f-aeca-18652df69896",
+  "decision_date": "2026-10-02T04:02:21.823797+00:00",
+  "metadata_json": {
+    "batch": "SW10-S2-B3-PREFLIGHT",
+    "phase": "S2",
+    "status": "FROZEN",
+    "purpose": "outcome-blind conditioning-state and interaction-cell feasibility audit",
+    "prohibited": [
+      "forward return computation or access",
+      "p-values or effect sizes",
+      "threshold selection using returns",
+      "protected holdout access",
+      "B3 scientific execution",
+      "S3 or S6 work",
+      "paid compute without authorization"
+    ],
+    "decision_code": "SW10_S2_B3_PREFLIGHT_V1",
+    "required_outputs": [
+      "per-date and aggregate state counts",
+      "interaction cell counts",
+      "eligible dates",
+      "median/minimum per-date cell counts",
+      "empty/sparse-date rates",
+      "symbol participation/concentration",
+      "temporal block coverage",
+      "tie/overlap rates",
+      "recommendation based only on coverage/feasibility"
+    ],
+    "candidate_schemes": [
+      {
+        "id": "TAIL_20_80",
+        "states": "<=p20 and >=p80 per date"
+      },
+      {
+        "id": "TERCILE_33_67",
+        "states": "<=p33.333 and >=p66.667 per date"
+      }
+    ],
+    "candidate_interactions": [
+      "RET_MOM x VOL_REGIME",
+      "SHORT_REV x VOL_REGIME",
+      "RET_MOM x VOL_TURN_V2_CAUSAL",
+      "SHORT_REV x VOL_TURN_V2_CAUSAL",
+      "RET_MOM x HIGH52",
+      "SHORT_REV x HIGH52",
+      "RET_MOM x GAP_OVN",
+      "SHORT_REV x GAP_OVN"
+    ],
+    "forward_returns_prohibited": true,
+    "b2_outcomes_used_only_as_motivation": true,
+    "protected_holdout_access_prohibited": true
+  },
+  "affects_model_version": "SWING10-RM-1.2",
+  "supersedes_decision_id": null
+}
