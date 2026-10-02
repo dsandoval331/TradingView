@@ -1,0 +1,67 @@
+{
+  "title": "S2-B4 protocol prospective identifiability supplement",
+  "status": "active",
+  "decision": "Freeze SW10_S2_B4_PROTOCOL_V1_SUPPLEMENT_1. For the six market-state interaction hypotheses replace the non-identifiable within-date four-column regression implementation with a two-stage date-level estimator: Stage 1, for each eligible date t and horizon h estimate cross-sectionally forward_return_i,t,h = a_t,h + b_t,h * primary_rank_i,t + error; Stage 2 estimate across dates b_t,h = alpha_h + gamma_h * Z_t + u_t,h. gamma_h is the primary market-conditioning estimand. Standardize each market state prospectively as Z_t=(X_t-mean(X_<t))/sd(X_<t), strictly excluding t, requiring at least 20 prior eligible finite observations, sample SD ddof=1, and treating missing/nonfinite mean or SD or SD<=1e-12 as ineligible. Preserve the six market hypotheses, four liquidity hypotheses, six horizons, 60-test BH family, q=0.05, and all other frozen B4 gates/dispositions. HAC for Stage 2 remains Newey-West Bartlett lag=horizon-1, two-sided 95%. Standardized market-interaction effect is gamma_h/sample_sd(b_t,h), ddof=1. Four chronological blocks recompute the complete two-stage estimator within each frozen block. Symbol concentration and leave-top-five diagnostics remove specified symbols from Stage 1 and recompute the complete Stage1-to-Stage2 estimator. No outcome-driven choices are authorized.",
+  "evidence": "Prospective clarification approved by canonical Indicator: Swing Trades thread before any B4 real outcome computation. Work preparation reported no B4 outcomes, effect sizes, p-values, profitability or protected holdout access before this supplement.",
+  "rationale": "The frozen within-date design is rank deficient because market_state is constant across symbols on a trading date: market_state is collinear with the intercept and primary_rank*market_state is collinear with primary_rank. The approved two-stage estimator identifies whether the date-level cross-sectional factor slope changes with the market state while retaining trading date as the inference unit and preserving the preregistered scientific family.",
+  "decision_id": "f3e81d1f-83e0-4c8d-a5be-6d48d85b9700",
+  "strategy_id": "09f30dc1-81ae-440f-aeca-18652df69896",
+  "decision_date": "2026-10-02T17:25:12.213531+00:00",
+  "metadata_json": {
+    "phase": "S2",
+    "scope": "market_interaction_identifiability_and_state_standardization_only",
+    "mwe_id": "MWE-SW10-S2B4-001",
+    "status": "FROZEN",
+    "inference": {
+      "ci": 0.95,
+      "kernel": "Bartlett",
+      "lag_rule": "horizon_days - 1",
+      "estimator": "Newey-West HAC",
+      "two_sided": true
+    },
+    "preserved": [
+      "10 primary hypotheses",
+      "6 horizons",
+      "60-test BH family",
+      "BH q=0.05",
+      "liquidity design",
+      "support rule",
+      "disposition mapping",
+      "diagnostic-only exclusions",
+      "unavailable exclusions",
+      "protected holdout prohibition",
+      "ZERO_INCREMENTAL_COST_FIRST"
+    ],
+    "prospective": true,
+    "decision_code": "SW10_S2_B4_PROTOCOL_V1_SUPPLEMENT_1",
+    "base_decision_uuid": "d573293a-1a84-42ee-b5ec-9a3173c7bed7",
+    "robustness_mapping": {
+      "leave_top5": "same full recomputation; sign reversal blocks support",
+      "temporal_blocks": "recompute complete two-stage estimator within each frozen block",
+      "symbol_concentration": "remove specified symbols from Stage 1 then recompute complete Stage1-to-Stage2 estimator"
+    },
+    "standardized_effect": {
+      "ddof": 1,
+      "formula": "gamma_h / sample_sd(b_t_h)",
+      "support_threshold_abs": 0.2
+    },
+    "two_stage_estimator": {
+      "stage1": "per-date cross-sectional OLS: forward_return ~ intercept + primary_rank",
+      "stage2": "date-series OLS/HAC: b_t_h ~ intercept + Z_t",
+      "inference_unit": "trading_date",
+      "stage1_quantity": "b_t_h",
+      "primary_quantity": "gamma_h"
+    },
+    "state_standardization": {
+      "ddof": 1,
+      "formula": "(X_t - mean(X_<t)) / sample_sd(X_<t)",
+      "sd_floor": 1e-12,
+      "invalid_handling": "date ineligible",
+      "current_date_included": false,
+      "minimum_prior_eligible_observations": 20
+    },
+    "outcomes_inspected_for_this_decision": false
+  },
+  "affects_model_version": "SWING10-RM-1.2",
+  "supersedes_decision_id": "d573293a-1a84-42ee-b5ec-9a3173c7bed7"
+}
