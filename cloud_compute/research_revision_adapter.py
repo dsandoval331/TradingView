@@ -23,6 +23,7 @@ class GovernedResearchTarget:
 
 
 GOVERNED_RESEARCH_TARGETS: dict[str, GovernedResearchTarget] = {
+    "SW10-S2-B3": GovernedResearchTarget("SW10-S2-B3", "tr_platform/research/swing10_s2_b3.py", execution_mode="swing10_b3_scientific_bundle"),
     "SW10-S2-B3-CONTINUOUS-PREFLIGHT": GovernedResearchTarget("SW10-S2-B3-CONTINUOUS-PREFLIGHT", "tr_platform/research/swing10_s2_b3_continuous_preflight.py", execution_mode="swing10_b3_continuous_bundle"),
     "SW10-S2-B3-PREFLIGHT": GovernedResearchTarget("SW10-S2-B3-PREFLIGHT", "tr_platform/research/swing10_s2_b3_preflight.py", execution_mode="swing10_b3_preflight_bundle"),
     "SW10-S2-B2": GovernedResearchTarget("SW10-S2-B2", "tr_platform/research/swing10_s2_b2.py", execution_mode="swing10_b2_bundle"),
@@ -102,7 +103,7 @@ def _run_swing10_snapshot_cli(module_file: Path, work_root: Path) -> dict[str, A
     }
 
 
-def _run_b2_bundle(repo_root: Path, sha: str, destination: Path, work_root: Path, *, preflight: bool = False, continuous: bool = False) -> dict:
+def _run_b2_bundle(repo_root: Path, sha: str, destination: Path, work_root: Path, *, preflight: bool = False, continuous: bool = False, scientific: bool = False) -> dict:
     # Both research files are loaded from the requested revision, never mixed
     # with an infrastructure revision's helper implementation.
     for path in ("tr_platform/__init__.py", "tr_platform/research/__init__.py"):
@@ -112,12 +113,16 @@ def _run_b2_bundle(repo_root: Path, sha: str, destination: Path, work_root: Path
     bundle = ("tr_platform/research/swing10_s2_b3_preflight.py", "tr_platform/research/swing10_causal_inputs.py") if preflight else ("tr_platform/research/swing10_s2_b2.py", "tr_platform/research/swing10_s2_b2_core.py")
     if continuous:
         bundle = ("tr_platform/research/swing10_s2_b3_continuous_preflight.py", "tr_platform/research/swing10_s2_b3_preflight.py", "tr_platform/research/swing10_causal_inputs.py")
+    if scientific:
+        bundle = ("tr_platform/research/swing10_s2_b3.py", "tr_platform/research/swing10_s2_b3_continuous_preflight.py", "tr_platform/research/swing10_s2_b3_preflight.py", "tr_platform/research/swing10_causal_inputs.py")
     for path in bundle:
         materialize_module(repo_root, sha, path, destination / path)
     result_path = destination / "result.json"
     module = "swing10_s2_b3_preflight" if preflight else "swing10_s2_b2"
     if continuous:
         module = "swing10_s2_b3_continuous_preflight"
+    if scientific:
+        module = "swing10_s2_b3"
     code = f"from pathlib import Path; import json,sys; from tr_platform.research.{module} import run; Path(sys.argv[2]).write_text(json.dumps(run(Path(sys.argv[1]))))"
     proc = subprocess.run([sys.executable, "-c", code, str(work_root.resolve()), str(result_path)],
                           cwd=destination, env={**os.environ, "PYTHONPATH": str(destination)}, capture_output=True, text=True)
@@ -133,7 +138,9 @@ def run_governed_revision(*, repo_root: Path, work_root: Path, runner_job_id: st
     verified_sha = verify_commit(repo_root, research_sha)
     with tempfile.TemporaryDirectory(prefix="governed-research-") as td:
         module_file = materialize_module(repo_root, verified_sha, target.module_path, Path(td) / Path(target.module_path).name)
-        if target.execution_mode == "swing10_b3_continuous_bundle":
+        if target.execution_mode == "swing10_b3_scientific_bundle":
+            result = _run_b2_bundle(repo_root, verified_sha, Path(td), Path(work_root), scientific=True)
+        elif target.execution_mode == "swing10_b3_continuous_bundle":
             result = _run_b2_bundle(repo_root, verified_sha, Path(td), Path(work_root), continuous=True)
         elif target.execution_mode == "swing10_b3_preflight_bundle":
             result = _run_b2_bundle(repo_root, verified_sha, Path(td), Path(work_root), preflight=True)

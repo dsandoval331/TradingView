@@ -1,0 +1,11 @@
+{
+  "forward_return": "close[t+h]/close[t]-1 within symbol sorted trading-date rows; h in frozen tuple only; no imputation",
+  "predictor_blocks": "parent-equivalent four approximately equal chronological predictor-eligible dates, fixed before constructing outcomes",
+  "temporal_concentration": "abs(sum beta_I in block)/sum across blocks abs(sum beta_I in block); no favorable repartitioning",
+  "symbol_contribution": "per date: residualize interaction on intercept and two main effects; w=residualized_interaction/sum(residualized_interaction^2); symbol contribution=w_i*y_i; aggregate each symbol sum/T; sums recover full mean beta_I",
+  "symbol_shares": "abs(symbol mean contribution)/sum abs(all symbol mean contributions); HHI sum shares squared; rank by absolute contribution descending then symbol ascending",
+  "leave_top5": "select five largest absolute additive full-sample contributions; retain original frozen rank/product values; refit same intercept and main-effects model after removing only those five; no reranking; report unavailable diagnostics and fail closed",
+  "hac": "same certified S2 intercept HAC convention; Bartlett lag h-1; no small-sample multiplier; two-sided asymptotic-normal erfc and 1.959963984540054 CI",
+  "nonfinite_primary_tests": "retain exactly 48 BH denominator; unavailable p contributes 1 conservatively but adjusted result remains unavailable, semantic/testable gate fails",
+  "semantic_testability": "certified input/semantics/parent numerical feasibility; finite date coefficients and HAC inference/ES; insufficient or rank-deficient fits excluded with reasons; unavailable robustness blocks ADVANCE/WEAK"
+}
