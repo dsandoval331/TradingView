@@ -6,6 +6,7 @@ CODE_ROOT=Path(__file__).resolve().parents[1]
 WORK_ROOT=Path(os.environ.get("TR_WORK_ROOT",str(CODE_ROOT))).expanduser().resolve()
 STATE_DIR=WORK_ROOT/"research_outputs"/"runner"; STATE_FILE=STATE_DIR/"state.json"
 JOBS=[
+{"id":"SW10-S2-B4-PREFLIGHT","project":"swing10","module":"tr_platform.research.swing10_s2_b4_preflight","description":"Outcome-blind remaining-factor semantic and source preflight"},
 {"id":"SW10-S2-B3","project":"swing10","module":"tr_platform.research.swing10_s2_b3","description":"Frozen continuous interaction scientific validation"},
 {"id":"SW10-S2-B3-CONTINUOUS-PREFLIGHT","project":"swing10","module":"tr_platform.research.swing10_s2_b3_continuous_preflight","description":"Outcome-blind continuous interaction identifiability preflight"},
 {"id":"SW10-S2-B3-PREFLIGHT","project":"swing10","module":"tr_platform.research.swing10_s2_b3_preflight","description":"Outcome-blind conditioning coverage preflight"},
