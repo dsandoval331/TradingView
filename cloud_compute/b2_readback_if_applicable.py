@@ -19,7 +19,11 @@ def main():
         return
     if jobs[0]['runner_job_id'] == 'SW10-S2-B5-ACQUISITION':
         from tr_platform.research.swing10_s2_b5_acquisition import FILES as BASE_FILES
-        artifacts = _fetch_rows(config, 'research_job_artifacts', {'job_id':f'eq.{a.job_id}', 'limit':'200'})
+        attempts = _fetch_rows(config, 'research_job_attempts', {'job_id':f'eq.{a.job_id}', 'order':'attempt_no.desc', 'limit':'1'})
+        if len(attempts) != 1 or attempts[0]['status'] != 'succeeded':
+            raise RuntimeError('B5A latest execution attempt must have succeeded')
+        attempt_id = attempts[0]['attempt_id']
+        artifacts = _fetch_rows(config, 'research_job_artifacts', {'job_id':f'eq.{a.job_id}', 'attempt_id':f'eq.{attempt_id}', 'limit':'200'})
         FILES = tuple(row['object_path'].split('/')[-1] for row in artifacts)
         extra = set(FILES) - set(BASE_FILES)
         if not set(BASE_FILES).issubset(FILES) or len(FILES)!=len(set(FILES)) or any(not (n.startswith('independent_adjusted_daily_panel_') and n.endswith('.csv')) and not (n.startswith('raw_') and n.endswith('.json')) for n in extra):
@@ -38,7 +42,7 @@ def main():
         from tr_platform.research.swing10_s2_b3_preflight import FILES
     else:
         from tr_platform.research.swing10_s2_b2 import FILES
-    result = run(a.job_id, list(FILES))
+    result = run(a.job_id, list(FILES), attempt_id=attempt_id) if jobs[0]['runner_job_id'] == 'SW10-S2-B5-ACQUISITION' else run(a.job_id, list(FILES))
     if result['count'] != len(FILES):
         raise RuntimeError('SW10 must register/read back every required output')
     print(json.dumps(result, sort_keys=True))

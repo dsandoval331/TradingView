@@ -42,7 +42,7 @@ def _upsert(config: ControlPlaneConfig, payload: dict) -> dict:
     return rows[0]
 
 
-def run(job_id: str, names: list[str] | None = None) -> dict:
+def run(job_id: str, names: list[str] | None = None, *, attempt_id: str | None = None) -> dict:
     url = os.environ["SUPABASE_URL"]
     key = os.environ["SUPABASE_SECRET_KEY"]
     readback_sha = os.environ.get("TR_GIT_SHA")
@@ -53,10 +53,18 @@ def run(job_id: str, names: list[str] | None = None) -> dict:
         raise RuntimeError("source research job must exist and be succeeded")
     source_sha = jobs[0].get("git_sha")
 
-    artifacts = _fetch_rows(config, "research_job_artifacts", {
+    filters = {
         "job_id": f"eq.{job_id}",
         "order": "created_at.asc,artifact_id.asc",
-    })
+    }
+    if attempt_id is not None:
+        attempts = _fetch_rows(config, "research_job_attempts", {
+            "job_id": f"eq.{job_id}", "attempt_id": f"eq.{attempt_id}", "limit": "2",
+        })
+        if len(attempts) != 1 or attempts[0].get("status") != "succeeded" or attempts[0].get("git_sha") != source_sha:
+            raise RuntimeError("readback attempt must belong to the succeeded exact-revision job")
+        filters["attempt_id"] = f"eq.{attempt_id}"
+    artifacts = _fetch_rows(config, "research_job_artifacts", filters)
     wanted = set(names or [])
     if wanted:
         artifacts = [a for a in artifacts if Path(a["object_path"]).name in wanted]
@@ -99,6 +107,7 @@ def run(job_id: str, names: list[str] | None = None) -> dict:
             "metadata_json": {
                 "mechanism": "governed_private_storage_text_readback_v1",
                 "source_job_status": "succeeded",
+                **({"source_attempt_id": attempt_id} if attempt_id is not None else {}),
             },
         }
         row = _upsert(config, payload)
