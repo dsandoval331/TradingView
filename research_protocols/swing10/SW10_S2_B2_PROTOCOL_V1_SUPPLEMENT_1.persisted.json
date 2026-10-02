@@ -1,0 +1,106 @@
+{
+  "decision_id": "cccfd976-1933-4d53-be9e-17b15377414e",
+  "strategy_id": "09f30dc1-81ae-440f-aeca-18652df69896",
+  "decision_date": "2026-10-02 03:10:05.851701+00",
+  "title": "S2-B2 supplemental scientific clarification freeze",
+  "decision": "Freeze the prospective supplemental clarification for SW10_S2_B2_PROTOCOL_V1 before any B2 outcomes are computed. Recover direction only where pre-B1 semantics support it; otherwise designate NON_DIRECTIONAL. Define the primary BH family, legacy-volume diagnostic role, standardized-effect calculation/threshold, and deterministic disposition mapping.",
+  "rationale": "The original B2 freeze omitted complete factor-direction, BH-family membership, and gate-to-disposition rules. Work stopped before scientific execution. This supplement resolves those omissions prospectively without editing the original frozen decision or using B1 outcome direction to manufacture hypotheses.",
+  "evidence": "Pre-B1 research_factors semantics support continuation for RET_MOM and reversal for SHORT_REV. VOL_TURN requires interaction, VOL_REGIME is context/risk, GAP_OVN includes acceptance/reversal, and HIGH52 includes extrema proximity/breakout state, so those four do not support a unique HIGH-minus-LOW directional hypothesis. PR55 prepared factor formulas were inspected only to align semantic direction with factor sign, not to inspect outcomes. No B2 scientific job/artifact exists.",
+  "affects_model_version": "SWING10-RM-1.2",
+  "supersedes_decision_id": null,
+  "status": "active",
+  "metadata_json": {
+    "batch": "SW10-S2-B2",
+    "phase": "S2",
+    "status": "FROZEN",
+    "legacy_rule": "VOL_TURN_B1_LEGACY remains diagnostic-only, excluded from primary BH family and cannot receive ADVANCE disposition.",
+    "prospective": true,
+    "decision_code": "SW10_S2_B2_PROTOCOL_V1_SUPPLEMENT_1",
+    "horizon_support": {
+      "adjacency": "1-2-3-5-7-10",
+      "fdr_support": "p_fdr <= 0.05",
+      "neighbor_coherence": "at least one immediately adjacent prespecified horizon has same spread sign as supported horizon; for directional factors that sign must equal hypothesized sign"
+    },
+    "stability_gates": {
+      "symbol": "leave-top-5-out does not reverse required sign",
+      "temporal": "at least 3 of 4 blocks match required sign; no block >50% absolute aggregate effect"
+    },
+    "primary_bh_family": {
+      "q": 0.05,
+      "tests": 36,
+      "method": "Benjamini-Hochberg",
+      "exclude": [
+        "VOL_TURN_B1_LEGACY"
+      ],
+      "members": [
+        "RET_MOM",
+        "SHORT_REV",
+        "VOL_TURN_V2_CAUSAL",
+        "HIGH52",
+        "VOL_REGIME",
+        "GAP_OVN"
+      ],
+      "p_values": "two-sided HAC p_raw",
+      "horizons_days": [
+        1,
+        2,
+        3,
+        5,
+        7,
+        10
+      ]
+    },
+    "direction_registry": {
+      "HIGH52": {
+        "basis": "pre-B1 proximity/breakout semantics do not uniquely specify continuation vs reversal",
+        "direction": "NON_DIRECTIONAL"
+      },
+      "GAP_OVN": {
+        "basis": "pre-B1 acceptance/reversal semantics",
+        "direction": "NON_DIRECTIONAL"
+      },
+      "RET_MOM": {
+        "basis": "pre-B1 continuation semantics",
+        "direction": "POSITIVE_HIGH_MINUS_LOW"
+      },
+      "SHORT_REV": {
+        "basis": "pre-B1 reversal semantics; factor value is prior-day return",
+        "direction": "NEGATIVE_HIGH_MINUS_LOW"
+      },
+      "VOL_REGIME": {
+        "basis": "pre-B1 context-and-risk role",
+        "direction": "NON_DIRECTIONAL"
+      },
+      "VOL_TURN_B1_LEGACY": {
+        "role": "DIAGNOSTIC_ONLY",
+        "direction": "NON_DIRECTIONAL"
+      },
+      "VOL_TURN_V2_CAUSAL": {
+        "basis": "pre-B1 interaction-required semantics do not specify standalone sign",
+        "direction": "NON_DIRECTIONAL"
+      }
+    },
+    "disposition_mapping": {
+      "priority_order": [
+        "INVALID_SEMANTICS_NOT_TESTABLE",
+        "ADVANCE_TO_S2_ROBUSTNESS",
+        "RETAIN_AS_WEAK_EVIDENCE",
+        "RETAIN_AS_COUNTEREVIDENCE"
+      ],
+      "RETAIN_AS_WEAK_EVIDENCE": "semantic/testable factor not ADVANCE; directional: at least one horizon has hypothesized-direction mean spread and either FDR support or abs(standardized_effect)>=0.20 but fails one or more advance robustness gates. non-directional: at least one horizon passes FDR + neighbor same-sign coherence + abs(standardized_effect)>=0.20 + temporal + symbol gates; observed sign is descriptive only and may seed a separately preregistered future hypothesis",
+      "ADVANCE_TO_S2_ROBUSTNESS": "directional factor only; at least one horizon passes hypothesized direction + FDR + neighbor coherence + abs(standardized_effect)>=0.20, and corresponding temporal and symbol-concentration gates pass; no unresolved semantic defect",
+      "RETAIN_AS_COUNTEREVIDENCE": "all remaining semantic/testable cases, including directional factors with no horizon meeting weak-evidence condition and non-directional factors lacking the full weak-evidence structure",
+      "INVALID_SEMANTICS_NOT_TESTABLE": "semantic_valid=false OR required inputs/testability fail"
+    },
+    "standardized_effect": {
+      "ddof": 1,
+      "formula": "mean(date_level_spread) / sample_sd(date_level_spread)",
+      "support_threshold_abs": 0.2,
+      "non_directional_uses_absolute_value": true,
+      "directional_factor_requires_hypothesized_sign": true
+    },
+    "non_directional_rule": "NON_DIRECTIONAL factors cannot receive ADVANCE_TO_S2_ROBUSTNESS in B2; B2 may only yield WEAK_EVIDENCE or COUNTEREVIDENCE for them. Any direction learned from B2 must be preregistered before an independent later validation test.",
+    "b2_outcomes_inspected": false,
+    "parent_protocol_decision_id": "d7b1e65f-28c6-4f13-b3fb-e77fbbd8afbe"
+  }
+}

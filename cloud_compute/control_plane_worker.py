@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import argparse
 import io
+import json
+import uuid
 import mimetypes
 import os
 from contextlib import redirect_stderr, redirect_stdout
@@ -88,7 +90,10 @@ def _persist_result_artifacts(
                 raise RuntimeError(f"artifact checksum mismatch for {rel}")
         object_path = f"artifacts/{job_id}/{attempt_id}/{path.name}"
         _upload_object(config.supabase_url, config.secret_key, bucket, object_path, path, allow_existing=False)
+        declared_ids = result.get("output_artifact_ids", {})
+        identity = {"artifact_id": str(uuid.UUID(declared_ids[rel]))} if rel in declared_ids else {}
         persisted.append(create_artifact(config, {
+            **identity,
             "job_id": job_id,
             "attempt_id": attempt_id,
             "artifact_type": "research_output",
@@ -178,6 +183,20 @@ def run_one_outcome(
                     "sha256": item.sha256,
                 } for item in materialized]},
             })
+
+        if runner_job_id == "SW10-S2-B2":
+            context = {
+                "job_id": job_id, "attempt_id": attempt_id, "attempt_no": attempt_no,
+                "research_revision": research_sha, "infrastructure_revision": infrastructure_sha,
+                "github_run_id": external_execution_id,
+                "github_job_name": os.environ.get("GITHUB_JOB"),
+                "github_run_attempt": os.environ.get("GITHUB_RUN_ATTEMPT"),
+                "materialized_inputs": [{"input_id": x.input_id, "object_path": x.object_path,
+                                         "size_bytes": x.size_bytes, "sha256": x.sha256} for x in materialized],
+            }
+            context_path = runner.WORK_ROOT / "job_inputs" / "swing10" / "execution_context.json"
+            context_path.parent.mkdir(parents=True, exist_ok=True)
+            context_path.write_text(json.dumps(context), encoding="utf-8")
 
         governed_result: dict[str, Any] | None = None
         with redirect_stdout(stdout_buffer), redirect_stderr(stderr_buffer):
