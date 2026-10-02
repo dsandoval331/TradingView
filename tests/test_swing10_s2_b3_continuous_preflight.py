@@ -52,7 +52,8 @@ def test_all_outcome_extra_columns_rejected(field):
     'import statsmodels.api', 'import requests',
     'pd.read_csv("factor_causal_summary.csv")',
     'Path("factor_date_spreads.csv").read_text()',
-    'pd.read_parquet("holdout.parquet")','pd.read_json("outcome.json")'])
+    'pd.read_parquet("holdout.parquet")','pd.read_json("outcome.json")',
+    'pd.read_csv("protected_holdout.csv")','x["forward_1"]','x["effect"]','x["p_value"]'])
 def test_fail_closed_future_scientific_and_protected_paths(source):
     with pytest.raises(ValueError):p.continuous_source_guard(source)
 

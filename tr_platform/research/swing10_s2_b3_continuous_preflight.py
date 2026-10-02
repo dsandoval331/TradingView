@@ -37,6 +37,9 @@ def continuous_source_guard(source):
     guard_source(source)
     tree=ast.parse(source)
     for node in ast.walk(tree):
+        if isinstance(node,ast.Subscript) and isinstance(node.slice,ast.Constant) and isinstance(node.slice.value,str):
+            if node.slice.value.lower().startswith(('forward','future','outcome','effect','p_value','p_raw','profit','protected')):
+                raise ValueError('outcome column access prohibited')
         if isinstance(node,ast.Call):
             fn=node.func.id if isinstance(node.func,ast.Name) else node.func.attr if isinstance(node.func,ast.Attribute) else ''
             if fn in {'read_excel','read_hdf','read_feather','read_json','urlopen'}:
@@ -44,7 +47,7 @@ def continuous_source_guard(source):
             if fn in {'read_csv','read_text','read_bytes','open','Path'}:
                 for arg in ast.walk(node):
                     if isinstance(arg,ast.Constant) and isinstance(arg.value,str):
-                        if any(x in arg.value.lower() for x in ('factor_causal_summary','factor_date_spreads','factor_b2_dispositions','factor_tail_summary')):
+                        if any(x in arg.value.lower() for x in ('factor_','holdout','protected','outcome')):
                             raise ValueError('scientific outcome artifact access prohibited')
 
 
