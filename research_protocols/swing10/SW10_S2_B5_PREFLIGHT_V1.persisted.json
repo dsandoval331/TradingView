@@ -1,0 +1,1870 @@
+{
+  "audit_policy": {
+    "candidate_scope": "all registered 2024 MARKET_CACHE_V1 partitions; no favorable date or symbol selection",
+    "coverage_only": true,
+    "daily_aggregation_authorized": false,
+    "decode_columns": [
+      "symbol",
+      "trade_date",
+      "timestamp_utc",
+      "session",
+      "source",
+      "adjusted",
+      "cache_version"
+    ],
+    "decode_prices": false,
+    "source_comparison": "daily adjusted=true vs cache adjusted=false; exact daily semantic equivalence not certified",
+    "universe": "contemporary frozen PMPD_112_V1, not historical constituents; survivorship unknown"
+  },
+  "authority": [
+    {
+      "kind": "decision",
+      "record": {
+        "affects_model_version": "SWING10-RM-1.2",
+        "decision": "Freeze SW10_S2_B5_PREFLIGHT_V1 before any independent validation outcomes are inspected. B5 preflight will inventory and certify genuinely independent, semantically compatible data for the nine B4 seed cases grouped into three hypothesis families; it will measure only data provenance, temporal/non-overlap independence, point-in-time semantic reproducibility, coverage, eligibility, and prospective validation feasibility. It must not compute or inspect forward outcomes, effect sizes, p-values, profitability, or protected holdout outcomes.",
+        "decision_date": "2026-10-02T19:24:37.933994+00:00",
+        "decision_id": "67f7cf88-dceb-47a3-8e1f-379ef19b6d08",
+        "evidence": "B4 completion and verified control-plane state; no independent validation outcomes inspected for this decision.",
+        "metadata_json": {
+          "cost_policy": "ZERO_INCREMENTAL_COST_FIRST",
+          "decision_code": "SW10_S2_B5_PREFLIGHT_V1",
+          "discovery_panel_end": "2026-08-27",
+          "discovery_panel_start": "2025-02-03",
+          "outcomes_inspected_for_this_decision": false,
+          "parent_mwe": "MWE-SW10-S2B4-001",
+          "phase": "S2",
+          "preflight_requirements": [
+            "inventory candidate independent datasets and exact provenance",
+            "prove no temporal overlap with B4 discovery outcomes for any proposed validation observation",
+            "certify frozen B4 factor/proxy semantics can be reproduced without drift",
+            "certify point-in-time availability and adjustment semantics",
+            "quantify symbol/date/horizon eligibility and missingness without outcomes",
+            "audit survivorship and universe-construction limitations",
+            "audit market benchmark availability for MARKET_SPY_TREND10",
+            "recommend feasible independent validation sample(s) based only on provenance and coverage"
+          ],
+          "prohibited": [
+            "forward return or path-outcome computation/access",
+            "effect sizes, p-values, win rates, profitability or outcome-based power tuning",
+            "sign or horizon reselection",
+            "factor/proxy semantic changes",
+            "threshold or parameter optimization",
+            "protected holdout outcome access",
+            "historical expected earnings dates treated prospectively",
+            "S3 transition",
+            "S6 indicator design",
+            "paid compute without explicit authorization"
+          ],
+          "prospective": true,
+          "purpose": "outcome-blind independent-validation data and semantic feasibility certification",
+          "required_outputs": [
+            "independent_source_inventory.csv",
+            "independent_temporal_independence_audit.csv",
+            "independent_semantic_reproducibility.csv",
+            "independent_coverage_eligibility.csv",
+            "independent_universe_survivorship_audit.csv",
+            "sw10_s2_b5_preflight_manifest.json"
+          ],
+          "seed_families": [
+            {
+              "direction": "NEGATIVE",
+              "factor": "LIQ_ADJUSTED_PRICE",
+              "horizons_days": [
+                5,
+                7,
+                10
+              ]
+            },
+            {
+              "direction": "POSITIVE",
+              "factor": "LIQ_REPORTED_VOLUME",
+              "horizons_days": [
+                3,
+                5,
+                7,
+                10
+              ]
+            },
+            {
+              "direction": "POSITIVE",
+              "factor": "RET_MOM x MARKET_SPY_TREND10",
+              "horizons_days": [
+                7,
+                10
+              ]
+            }
+          ],
+          "status": "FROZEN"
+        },
+        "rationale": "B4 produced nine mechanical independent-validation seed cases across LIQ_ADJUSTED_PRICE (negative 5/7/10d), LIQ_REPORTED_VOLUME (positive 3/5/7/10d), and RET_MOM x MARKET_SPY_TREND10 (positive 7/10d). Independent validation must be designed prospectively and must not select horizons or signs after viewing validation outcomes.",
+        "status": "active",
+        "strategy_id": "09f30dc1-81ae-440f-aeca-18652df69896",
+        "supersedes_decision_id": null,
+        "title": "S2-B5 independent-validation outcome-blind preflight freeze"
+      }
+    },
+    {
+      "kind": "mwe",
+      "record": {
+        "authority_ceiling": "E1",
+        "completed_at": null,
+        "cost_policy_code": "ZERO_INCREMENTAL_COST_FIRST",
+        "created_at": "2026-10-02T19:24:47.767745+00:00",
+        "escalation_class": null,
+        "frozen_contract_json": {
+          "authority_ceiling": "E1",
+          "completion_criteria": [
+            "exact frozen decision consumed",
+            "candidate independent sources inventoried",
+            "temporal non-overlap audited",
+            "B4 seed semantics reproducibility audited",
+            "point-in-time and adjustment semantics audited",
+            "coverage/eligibility quantified without outcomes",
+            "six required artifacts registered and byte-verified with durable readbacks",
+            "job/attempt/run provenance reconciled",
+            "completion handoff returned to Indicator: Swing Trades"
+          ],
+          "compute_policy": "ZERO_INCREMENTAL_COST_FIRST",
+          "decision_uuid": "67f7cf88-dceb-47a3-8e1f-379ef19b6d08",
+          "deterministic_compute": "governed GitHub Actions",
+          "parent_mwe": "MWE-SW10-S2B4-001",
+          "prohibited": [
+            "forward outcomes/effects/p-values/profitability",
+            "outcome-based sample selection or power tuning",
+            "sign/horizon reselection",
+            "methodology/factor semantic changes",
+            "protected holdout outcomes",
+            "S3/S6 work",
+            "paid compute",
+            "destructive/security-sensitive actions"
+          ],
+          "protocol": "SW10_S2_B5_PREFLIGHT_V1",
+          "roadmap": "SWING10-RM-1.2"
+        },
+        "handoff_json": {},
+        "metadata_json": {
+          "chat_does_not_launch_work": true,
+          "created_from_canonical_thread": true,
+          "outcomes_inspected": false,
+          "work_execution_required": true
+        },
+        "mwe_id": "MWE-SW10-S2B5P-001",
+        "objective": "Implement and execute SW10_S2_B5_PREFLIGHT_V1 outcome-blind preflight: inventory zero-incremental-cost independent data candidates, certify non-overlap and point-in-time provenance, reproduce frozen B4 seed semantics without drift, quantify coverage/eligibility without outcomes, persist verified artifacts/readbacks/provenance, and return a completion handoff for canonical validation-protocol design.",
+        "originating_thread": "Indicator: Swing Trades",
+        "phase_code": "S2",
+        "project_code": "SWING10",
+        "receiving_thread": "Indicator: Swing Trades",
+        "record_origin": "NATIVE",
+        "started_at": null,
+        "status": "ACTIVE",
+        "strategy_id": "09f30dc1-81ae-440f-aeca-18652df69896",
+        "updated_at": "2026-10-02T19:24:47.767745+00:00",
+        "user_action_required": false,
+        "user_action_summary": null,
+        "work_envelope_id": "d954ac3e-1a69-4bbb-a107-d8bb863c372a",
+        "workstream": "S2-B5 Independent Validation Outcome-Blind Preflight"
+      }
+    }
+  ],
+  "base_infrastructure_sha": "8a8c17d3ecc16a3ff1bc91bd07bf76a07be51fd2",
+  "candidate_cache_inputs": [
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/AAPL/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/AAPL/2024.parquet",
+      "object_size_bytes": 2763152,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/ABBV/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/ABBV/2024.parquet",
+      "object_size_bytes": 1564847,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/ABNB/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/ABNB/2024.parquet",
+      "object_size_bytes": 1545575,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/ADBE/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/ADBE/2024.parquet",
+      "object_size_bytes": 1781202,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/AMAT/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/AMAT/2024.parquet",
+      "object_size_bytes": 1738548,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/AMD/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/AMD/2024.parquet",
+      "object_size_bytes": 3073031,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/AMGN/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/AMGN/2024.parquet",
+      "object_size_bytes": 1516639,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/AMZN/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/AMZN/2024.parquet",
+      "object_size_bytes": 2838180,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/ANET/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/ANET/2024.parquet",
+      "object_size_bytes": 1632658,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/APP/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/APP/2024.parquet",
+      "object_size_bytes": 1962070,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/ARM/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/ARM/2024.parquet",
+      "object_size_bytes": 2164520,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/ASML/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/ASML/2024.parquet",
+      "object_size_bytes": 1793950,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/AVGO/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/AVGO/2024.parquet",
+      "object_size_bytes": 2537757,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/AXON/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/AXON/2024.parquet",
+      "object_size_bytes": 1218578,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/AXP/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/AXP/2024.parquet",
+      "object_size_bytes": 1518137,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/BA/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/BA/2024.parquet",
+      "object_size_bytes": 2285052,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/BAC/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/BAC/2024.parquet",
+      "object_size_bytes": 1859059,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/BKNG/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/BKNG/2024.parquet",
+      "object_size_bytes": 626581,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/BLK/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/BLK/2024.parquet",
+      "object_size_bytes": 1099563,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/BMY/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/BMY/2024.parquet",
+      "object_size_bytes": 1573825,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/C/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/C/2024.parquet",
+      "object_size_bytes": 1647511,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/CAT/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/CAT/2024.parquet",
+      "object_size_bytes": 1546650,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/CEG/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/CEG/2024.parquet",
+      "object_size_bytes": 1673466,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/CMCSA/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/CMCSA/2024.parquet",
+      "object_size_bytes": 1533248,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/CME/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/CME/2024.parquet",
+      "object_size_bytes": 1350595,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/CMG/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/CMG/2024.parquet",
+      "object_size_bytes": 1653834,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/COIN/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/COIN/2024.parquet",
+      "object_size_bytes": 2925943,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/COP/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/COP/2024.parquet",
+      "object_size_bytes": 1511872,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/COST/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/COST/2024.parquet",
+      "object_size_bytes": 1652287,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/CRM/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/CRM/2024.parquet",
+      "object_size_bytes": 1789678,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/CRWD/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/CRWD/2024.parquet",
+      "object_size_bytes": 1933178,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/CSCO/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/CSCO/2024.parquet",
+      "object_size_bytes": 1624267,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/CVS/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/CVS/2024.parquet",
+      "object_size_bytes": 1766098,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/CVX/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/CVX/2024.parquet",
+      "object_size_bytes": 1662514,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/DASH/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/DASH/2024.parquet",
+      "object_size_bytes": 1497364,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/DDOG/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/DDOG/2024.parquet",
+      "object_size_bytes": 1583948,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/DE/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/DE/2024.parquet",
+      "object_size_bytes": 1360236,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/DELL/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/DELL/2024.parquet",
+      "object_size_bytes": 2085559,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/DIS/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/DIS/2024.parquet",
+      "object_size_bytes": 1779291,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/EOG/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/EOG/2024.parquet",
+      "object_size_bytes": 1412099,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/ETN/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/ETN/2024.parquet",
+      "object_size_bytes": 1499844,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/FDX/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/FDX/2024.parquet",
+      "object_size_bytes": 1489872,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/GE/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/GE/2024.parquet",
+      "object_size_bytes": 1571272,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/GILD/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/GILD/2024.parquet",
+      "object_size_bytes": 1474300,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/GOOG/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/GOOG/2024.parquet",
+      "object_size_bytes": 2344628,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/GS/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/GS/2024.parquet",
+      "object_size_bytes": 1605532,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/HAL/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/HAL/2024.parquet",
+      "object_size_bytes": 1521926,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/HD/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/HD/2024.parquet",
+      "object_size_bytes": 1601626,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/HON/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/HON/2024.parquet",
+      "object_size_bytes": 1506752,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/HOOD/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/HOOD/2024.parquet",
+      "object_size_bytes": 2470947,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/IBM/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/IBM/2024.parquet",
+      "object_size_bytes": 1580938,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/INTC/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/INTC/2024.parquet",
+      "object_size_bytes": 2929939,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/ISRG/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/ISRG/2024.parquet",
+      "object_size_bytes": 1388660,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/IWM/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/IWM/2024.parquet",
+      "object_size_bytes": 2662114,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/JNJ/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/JNJ/2024.parquet",
+      "object_size_bytes": 1541590,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/JPM/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/JPM/2024.parquet",
+      "object_size_bytes": 1705772,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/KLAC/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/KLAC/2024.parquet",
+      "object_size_bytes": 1405372,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/LLY/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/LLY/2024.parquet",
+      "object_size_bytes": 1856116,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/LMT/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/LMT/2024.parquet",
+      "object_size_bytes": 1468142,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/LOW/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/LOW/2024.parquet",
+      "object_size_bytes": 1454774,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/LRCX/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/LRCX/2024.parquet",
+      "object_size_bytes": 1775779,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/LULU/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/LULU/2024.parquet",
+      "object_size_bytes": 1640965,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/MA/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/MA/2024.parquet",
+      "object_size_bytes": 1497054,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/MCD/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/MCD/2024.parquet",
+      "object_size_bytes": 1518235,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/META/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/META/2024.parquet",
+      "object_size_bytes": 2405004,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/MNDY/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/MNDY/2024.parquet",
+      "object_size_bytes": 1139368,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/MRK/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/MRK/2024.parquet",
+      "object_size_bytes": 1608003,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/MRNA/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/MRNA/2024.parquet",
+      "object_size_bytes": 1914234,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/MRVL/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/MRVL/2024.parquet",
+      "object_size_bytes": 1916704,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/MS/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/MS/2024.parquet",
+      "object_size_bytes": 1558504,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/MSFT/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/MSFT/2024.parquet",
+      "object_size_bytes": 2334350,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/MU/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/MU/2024.parquet",
+      "object_size_bytes": 2674581,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/NEE/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/NEE/2024.parquet",
+      "object_size_bytes": 1571635,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/NFLX/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/NFLX/2024.parquet",
+      "object_size_bytes": 1870559,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/NKE/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/NKE/2024.parquet",
+      "object_size_bytes": 1925548,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/NOW/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/NOW/2024.parquet",
+      "object_size_bytes": 1539655,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/NVDA/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/NVDA/2024.parquet",
+      "object_size_bytes": 3743274,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/ORCL/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/ORCL/2024.parquet",
+      "object_size_bytes": 1865901,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/OXY/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/OXY/2024.parquet",
+      "object_size_bytes": 2105039,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/PANW/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/PANW/2024.parquet",
+      "object_size_bytes": 1691265,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/PEP/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/PEP/2024.parquet",
+      "object_size_bytes": 1555868,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/PFE/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/PFE/2024.parquet",
+      "object_size_bytes": 2224954,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/PLTR/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/PLTR/2024.parquet",
+      "object_size_bytes": 3426159,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/PYPL/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/PYPL/2024.parquet",
+      "object_size_bytes": 1885362,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/QCOM/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/QCOM/2024.parquet",
+      "object_size_bytes": 1828829,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/QQQ/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/QQQ/2024.parquet",
+      "object_size_bytes": 3191708,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/RBLX/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/RBLX/2024.parquet",
+      "object_size_bytes": 1662958,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/REGN/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/REGN/2024.parquet",
+      "object_size_bytes": 1252580,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/RTX/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/RTX/2024.parquet",
+      "object_size_bytes": 1447109,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/SBUX/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/SBUX/2024.parquet",
+      "object_size_bytes": 1601515,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/SCHW/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/SCHW/2024.parquet",
+      "object_size_bytes": 1510277,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/SHOP/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/SHOP/2024.parquet",
+      "object_size_bytes": 1796081,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/SLB/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/SLB/2024.parquet",
+      "object_size_bytes": 1596262,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/SNOW/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/SNOW/2024.parquet",
+      "object_size_bytes": 1967051,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/SPY/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/SPY/2024.parquet",
+      "object_size_bytes": 3004678,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/T/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/T/2024.parquet",
+      "object_size_bytes": 1708005,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/TEAM/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/TEAM/2024.parquet",
+      "object_size_bytes": 1510857,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/TGT/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/TGT/2024.parquet",
+      "object_size_bytes": 1635960,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/TMO/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/TMO/2024.parquet",
+      "object_size_bytes": 1463960,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/TMUS/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/TMUS/2024.parquet",
+      "object_size_bytes": 1514127,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/TQQQ/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/TQQQ/2024.parquet",
+      "object_size_bytes": 3504993,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/TSLA/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/TSLA/2024.parquet",
+      "object_size_bytes": 3956829,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/TXN/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/TXN/2024.parquet",
+      "object_size_bytes": 1511095,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/UBER/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/UBER/2024.parquet",
+      "object_size_bytes": 2138917,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/UNH/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/UNH/2024.parquet",
+      "object_size_bytes": 1687840,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/UPS/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/UPS/2024.parquet",
+      "object_size_bytes": 1528035,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/URI/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/URI/2024.parquet",
+      "object_size_bytes": 1087242,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/V/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/V/2024.parquet",
+      "object_size_bytes": 1593761,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/VRTX/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/VRTX/2024.parquet",
+      "object_size_bytes": 1350804,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/VZ/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/VZ/2024.parquet",
+      "object_size_bytes": 1730968,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/WMT/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/WMT/2024.parquet",
+      "object_size_bytes": 1889936,
+      "sha256": null
+    },
+    {
+      "metadata": [
+        {
+          "bucket_name": "trading-research-market-data",
+          "local_relative_path": "market_cache/MARKET_CACHE_V1/1m/XOM/2024.parquet",
+          "provenance": "private governed market cache"
+        }
+      ],
+      "object_path": "1m/XOM/2024.parquet",
+      "object_size_bytes": 1788841,
+      "sha256": null
+    }
+  ],
+  "discovery_sha": "ea2908cd89123548404a0f48dca6633f6ef87491793f327705588b4e2ecefae2",
+  "parent": {
+    "infrastructure_sha": "8a8c17d3ecc16a3ff1bc91bd07bf76a07be51fd2",
+    "job_id": "c9bb2e45-1439-4f4c-8d12-63ed6e8109aa",
+    "mwe_id": "MWE-SW10-S2B4-001",
+    "research_sha": "7357fdfbe6f1531b2600b4e6fa5f9efbdbbcc1ed",
+    "run_id": "37042680586"
+  },
+  "source_inventory": {
+    "cache": [],
+    "coverage": [],
+    "daily": [
+      {
+        "adjusted": true,
+        "data_source": "massive",
+        "dates": 394,
+        "first_date": "2025-02-03",
+        "last_date": "2026-08-27",
+        "nonoverlap_rows": 0,
+        "rows": 44128,
+        "symbols": 112
+      }
+    ],
+    "datasets": [
+      {
+        "dataset_id": "31a4d18d-b89e-468a-8665-91761c8c00b1",
+        "dataset_key": "second1m_historical_intraday_v1",
+        "dataset_version": "1.0",
+        "end_date": "2026-08-27",
+        "is_frozen": true,
+        "metadata_json": {
+          "adjusted": true,
+          "data_source": "massive_1m",
+          "historical_signals": 2457,
+          "missing_0930_days": 0,
+          "missing_0931_days": 26,
+          "rows": 1075790,
+          "unique_symbol_days": 2457
+        },
+        "source": "Massive",
+        "source_detail": "Massive 1-minute aggregates, adjusted=true, 04:00-16:00 America/New_York session window",
+        "start_date": "2025-05-23",
+        "symbol_count": 112
+      },
+      {
+        "dataset_id": "61345b20-74e0-458a-8a1f-dec55cd3df1a",
+        "dataset_key": "second1m_market_reference_v1",
+        "dataset_version": "1.0",
+        "end_date": "2026-08-27",
+        "is_frozen": true,
+        "metadata_json": {
+          "adjusted": false,
+          "cache_version": "MARKET_CACHE_V1",
+          "data_source": "massive_1m",
+          "missing_0930_symbol_days": 0,
+          "missing_0931_symbol_days": 0,
+          "purpose": "Second 1M market-context and regime research",
+          "rows": 472550,
+          "signal_dates": 261,
+          "symbol_days": 522,
+          "symbols": [
+            "SPY",
+            "QQQ"
+          ]
+        },
+        "source": "Massive",
+        "source_detail": null,
+        "start_date": "2025-05-23",
+        "symbol_count": 2
+      },
+      {
+        "dataset_id": "da66f786-ddd4-4161-a796-a77fc2cb7f18",
+        "dataset_key": "PMPD_V4_REALTIME_TELEMETRY_V01",
+        "dataset_version": "0.1",
+        "end_date": null,
+        "is_frozen": false,
+        "metadata_json": {
+          "advisor_enabled": false,
+          "automatic_execution": false,
+          "initial_event_type": "PMPD_SIGNAL_CONFIRMED",
+          "research_platform_first": true
+        },
+        "source": "tradingview_webhook",
+        "source_detail": "TradingView Pine PM+PD V4 confirmed-signal telemetry",
+        "start_date": null,
+        "symbol_count": null
+      },
+      {
+        "dataset_id": "6f8e5cac-a715-4ecf-a1a6-3aeda32b3ef6",
+        "dataset_key": "PMPD_EDGE_E3_REPLICATION_2025_HOLDOUT_V1",
+        "dataset_version": "PMPD-EDGE-E3-REPLICATION-2025-HOLDOUT-V1",
+        "end_date": "2025-12-31",
+        "is_frozen": true,
+        "metadata_json": {
+          "cloud_run_spend_approved": false,
+          "coverage": "112/112",
+          "e3_development_year": 2026,
+          "holdout_freeze_status": "FROZEN",
+          "prior_v4_v5_2025_usage": true,
+          "promotion_registration_job": "0ff13f0a-4116-4903-b98e-5c12a30694fa",
+          "replication_design_source_job": "25794c51-1771-4a98-b1f3-01bd5c696e9d",
+          "size_parity": "112/112",
+          "storage_presence": "112/112",
+          "trade_health_outcomes_inspected_before_freeze": false,
+          "untouched_scope": "UNTOUCHED_RELATIVE_TO_E3_DEVELOPMENT_NOT_GLOBALLY_UNTOUCHED",
+          "v4_v5_modified": false
+        },
+        "source": "Supabase private Storage + research_job_inputs",
+        "source_detail": "trading-research-market-data / MARKET_CACHE_V1",
+        "start_date": "2025-01-01",
+        "symbol_count": 112
+      }
+    ],
+    "inputs": [
+      {
+        "dataset_version": "CCP4_REMOTE_FIXTURE_V1",
+        "example_path": "tests/fixtures/ccp4_remote_market_data.csv",
+        "input_type": "fixture",
+        "objects": 1,
+        "registrations": 1
+      },
+      {
+        "dataset_version": "IR11-P1-HISTORICAL-2025-V1",
+        "example_path": "upstream/ir11/historical/research_outputs/ir11/p1/ir11_p1_dense_clock_observations_2025_v1.parquet",
+        "input_type": "research_artifact",
+        "objects": 1,
+        "registrations": 1
+      },
+      {
+        "dataset_version": "IR11-P1-HISTORICAL-2025-V1",
+        "example_path": "upstream/ir11/historical/research_outputs/ir11/p1/ir11_p1_dense_clock_observations_2025_v1.parquet",
+        "input_type": "upstream_artifact",
+        "objects": 1,
+        "registrations": 4
+      },
+      {
+        "dataset_version": "IR11-P2-CERTIFIED-2025-V1",
+        "example_path": "artifacts/0362c417-6541-4362-afd0-62204644cf6c/7eddc369-73db-47c9-8d83-f285dd808a43/ir11_p2_pairwise_outcomes_2025_v1.parquet",
+        "input_type": "research_artifact",
+        "objects": 1,
+        "registrations": 1
+      },
+      {
+        "dataset_version": "IR11-P2-CERTIFIED-2025-V1",
+        "example_path": "artifacts/0362c417-6541-4362-afd0-62204644cf6c/7eddc369-73db-47c9-8d83-f285dd808a43/ir11_p2_pairwise_outcomes_2025_v1.parquet",
+        "input_type": "upstream_artifact",
+        "objects": 1,
+        "registrations": 2
+      },
+      {
+        "dataset_version": "IR11-P2-REPRO-2025-V1",
+        "example_path": "artifacts/0362c417-6541-4362-afd0-62204644cf6c/7eddc369-73db-47c9-8d83-f285dd808a43/ir11_p2_forward_paths_2025_v1.parquet",
+        "input_type": "upstream_artifact",
+        "objects": 2,
+        "registrations": 2
+      },
+      {
+        "dataset_version": "MARKET_CACHE_V1",
+        "example_path": "1m/AAPL/2024.parquet",
+        "input_type": "market_data",
+        "objects": 224,
+        "registrations": 1457
+      },
+      {
+        "dataset_version": "market_daily_history_2025-02-03_2026-08-27",
+        "example_path": "governed_inputs/swing10/s2_b1/market_daily_history_2025-02-03_2026-08-27/ea2908cd89123548404a0f48dca6633f6ef87491793f327705588b4e2ecefae2.csv",
+        "input_type": "market_data",
+        "objects": 1,
+        "registrations": 7
+      },
+      {
+        "dataset_version": "PMPD-EDGE-E1-B5-2026-DEV-V1",
+        "example_path": "upstream/pmpd/market_cache/1m/AAPL/2026.parquet",
+        "input_type": "market_data",
+        "objects": 112,
+        "registrations": 112
+      },
+      {
+        "dataset_version": "PMPD-EDGE-E1-B5-2026-DEV-V1",
+        "example_path": "upstream/pmpd/post9n_batch1/context_enriched.parquet",
+        "input_type": "upstream_artifact",
+        "objects": 1,
+        "registrations": 1
+      },
+      {
+        "dataset_version": "PMPD-EDGE-E2-B1-PROTOCOL-V1",
+        "example_path": "artifacts/ff8fe946-28da-427b-a4ef-98348cc7e581/61ea1d79-793f-4699-84d8-8975ea4ddb28/acceptance_protocol.json",
+        "input_type": "upstream_artifact",
+        "objects": 1,
+        "registrations": 1
+      },
+      {
+        "dataset_version": "PMPD-EDGE-E2-B2-2026-DEV-V1",
+        "example_path": "upstream/pmpd/market_cache/1m/AAPL/2026.parquet",
+        "input_type": "market_data",
+        "objects": 112,
+        "registrations": 112
+      },
+      {
+        "dataset_version": "PMPD-EDGE-E2-B2-2026-DEV-V1",
+        "example_path": "artifacts/ff8fe946-28da-427b-a4ef-98348cc7e581/61ea1d79-793f-4699-84d8-8975ea4ddb28/acceptance_protocol.json",
+        "input_type": "upstream_artifact",
+        "objects": 2,
+        "registrations": 2
+      },
+      {
+        "dataset_version": "PMPD-EDGE-E2-B2-AUDIT-V1",
+        "example_path": "artifacts/e2aa88ff-aaf2-4120-abca-7c8b56d2ece1/a613a660-cb49-4bb4-bbf5-4efcf022fa53/acceptance_state_paths.parquet",
+        "input_type": "upstream_artifact",
+        "objects": 5,
+        "registrations": 5
+      },
+      {
+        "dataset_version": "PMPD-EDGE-E2-B2-R2-2026-DEV-V1",
+        "example_path": "upstream/pmpd/market_cache/1m/AAPL/2026.parquet",
+        "input_type": "market_data",
+        "objects": 112,
+        "registrations": 112
+      },
+      {
+        "dataset_version": "PMPD-EDGE-E2-B2-R2-2026-DEV-V1",
+        "example_path": "artifacts/ff8fe946-28da-427b-a4ef-98348cc7e581/61ea1d79-793f-4699-84d8-8975ea4ddb28/acceptance_protocol.json",
+        "input_type": "upstream_artifact",
+        "objects": 2,
+        "registrations": 2
+      },
+      {
+        "dataset_version": "PMPD-EDGE-E2-B3-2026-DEV-V1",
+        "example_path": "upstream/pmpd/market_cache/1m/AAPL/2026.parquet",
+        "input_type": "market_data",
+        "objects": 112,
+        "registrations": 112
+      },
+      {
+        "dataset_version": "PMPD-EDGE-E2-B3-2026-DEV-V1",
+        "example_path": "artifacts/161a3b2b-7d92-4428-97cd-9e32f6b5e933/1bb5e325-069d-44d9-a482-4773075991ca/acceptance_state_paths.parquet",
+        "input_type": "upstream_artifact",
+        "objects": 7,
+        "registrations": 8
+      },
+      {
+        "dataset_version": "PMPD-EDGE-E2-B4-2026-DEV-V1",
+        "example_path": "artifacts/b0566bd5-a89b-4776-b882-e4cdf1eb050f/ca112002-1c45-4202-964e-adad8e5034f4/leave_one_symbol_out.csv",
+        "input_type": "research_output",
+        "objects": 5,
+        "registrations": 5
+      },
+      {
+        "dataset_version": "PMPD-EDGE-E3-B2-2026-DEV-V1",
+        "example_path": "upstream/pmpd/market_cache/1m/AAPL/2026.parquet",
+        "input_type": "market_data",
+        "objects": 112,
+        "registrations": 224
+      },
+      {
+        "dataset_version": "PMPD-EDGE-E3-B2-2026-DEV-V1",
+        "example_path": "artifacts/161a3b2b-7d92-4428-97cd-9e32f6b5e933/1bb5e325-069d-44d9-a482-4773075991ca/acceptance_state_paths.parquet",
+        "input_type": "upstream_artifact",
+        "objects": 2,
+        "registrations": 4
+      },
+      {
+        "dataset_version": "PMPD-EDGE-E3-B3-2026-DEV-V1",
+        "example_path": "upstream/pmpd/market_cache/1m/AAPL/2026.parquet",
+        "input_type": "market_data",
+        "objects": 112,
+        "registrations": 112
+      },
+      {
+        "dataset_version": "PMPD-EDGE-E3-B3-2026-DEV-V1",
+        "example_path": "artifacts/725d7a8a-e099-4df1-bbbd-feedd0c10f49/7a6ffeb7-2d16-4638-aa8f-26be14a414b1/trade_health_events_part_00.parquet",
+        "input_type": "upstream_artifact",
+        "objects": 17,
+        "registrations": 17
+      },
+      {
+        "dataset_version": "PMPD-EDGE-E3-B4-2026-DEV-V1",
+        "example_path": "artifacts/6c02b503-d2c3-46e7-96cd-a68e64d6d464/5ec3a0d6-bdf0-4535-8dd9-6a9080eacb43/trade_health_associations_part_00.parquet",
+        "input_type": "upstream_artifact",
+        "objects": 16,
+        "registrations": 16
+      },
+      {
+        "dataset_version": "PMPD-EDGE-E3-B5-2026-DEV-V1",
+        "example_path": "artifacts/d97c0343-5d66-46a3-8df6-9f5d4011da51/e3c58d95-e3d0-4e40-ae50-805690218912/event_type_by_direction.csv",
+        "input_type": "upstream_artifact",
+        "objects": 8,
+        "registrations": 8
+      },
+      {
+        "dataset_version": "PMPD-EDGE-E3-R1-STRUCTURAL",
+        "example_path": "artifacts/7792a15c-218f-40f9-befd-255450faceb3/416504c9-4c00-4334-aa0b-85d6ab368bb8/dp4_structural_population.parquet",
+        "input_type": "artifact",
+        "objects": 1,
+        "registrations": 1
+      },
+      {
+        "dataset_version": "PMPD-POST9N-B1-CANONICAL",
+        "example_path": "upstream/pmpd/post9n_batch1/context_enriched.parquet",
+        "input_type": "upstream_artifact",
+        "objects": 1,
+        "registrations": 2
+      },
+      {
+        "dataset_version": "PMPD-POST9N-B1-CANONICAL-CONTEXT",
+        "example_path": "upstream/pmpd/post9n_batch1/context_enriched.parquet",
+        "input_type": "upstream_artifact",
+        "objects": 1,
+        "registrations": 1
+      }
+    ],
+    "intraday": [
+      {
+        "adjusted": true,
+        "data_source": "massive_1m",
+        "dates": 267,
+        "first_date": "2025-05-23",
+        "last_date": "2026-08-27",
+        "rows": 1075790,
+        "symbols": 112,
+        "timeframe": "1m"
+      }
+    ],
+    "storage": [
+      {
+        "bucket_id": "trading-research-market-data",
+        "example": "governed_inputs/swing10/s2_b1/market_daily_history_2025-02-03_2026-08-27.csv",
+        "objects": 2,
+        "root": "governed_inputs"
+      },
+      {
+        "bucket_id": "trading-research-market-data",
+        "example": "1m/AAPL/2024.parquet",
+        "objects": 225,
+        "root": "1m"
+      },
+      {
+        "bucket_id": "trading-research-market-data",
+        "example": "artifacts/0362c417-6541-4362-afd0-62204644cf6c/7eddc369-73db-47c9-8d83-f285dd808a43/ir11_p2_clock_path_summary_2025_v1.csv",
+        "objects": 185,
+        "root": "artifacts"
+      },
+      {
+        "bucket_id": "trading-research-market-data",
+        "example": "upstream/ir11/historical/research_outputs/ir11/p1/ir11_p1_clock_summary_2025_v1.csv",
+        "objects": 124,
+        "root": "upstream"
+      }
+    ]
+  },
+  "storage_metadata_summary": {
+    "objects": 113,
+    "source": "storage.objects read-only metadata inventory"
+  }
+}

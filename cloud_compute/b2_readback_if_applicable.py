@@ -14,10 +14,12 @@ def main():
     jobs = _fetch_rows(config, 'research_jobs', {'job_id': f'eq.{a.job_id}', 'limit': '2'})
     if len(jobs) != 1:
         raise RuntimeError('exact job not found')
-    if jobs[0]['runner_job_id'] not in {'SW10-S2-B2', 'SW10-S2-B3-PREFLIGHT', 'SW10-S2-B3-CONTINUOUS-PREFLIGHT', 'SW10-S2-B3', 'SW10-S2-B4-PREFLIGHT', 'SW10-S2-B4'}:
+    if jobs[0]['runner_job_id'] not in {'SW10-S2-B2', 'SW10-S2-B3-PREFLIGHT', 'SW10-S2-B3-CONTINUOUS-PREFLIGHT', 'SW10-S2-B3', 'SW10-S2-B4-PREFLIGHT', 'SW10-S2-B4', 'SW10-S2-B5-PREFLIGHT'}:
         print('B2_READBACK_NOT_APPLICABLE')
         return
-    if jobs[0]['runner_job_id'] == 'SW10-S2-B4':
+    if jobs[0]['runner_job_id'] == 'SW10-S2-B5-PREFLIGHT':
+        from tr_platform.research.swing10_s2_b5_preflight import FILES
+    elif jobs[0]['runner_job_id'] == 'SW10-S2-B4':
         from tr_platform.research.swing10_s2_b4 import FILES
     elif jobs[0]['runner_job_id'] == 'SW10-S2-B4-PREFLIGHT':
         from tr_platform.research.swing10_s2_b4_preflight import FILES
