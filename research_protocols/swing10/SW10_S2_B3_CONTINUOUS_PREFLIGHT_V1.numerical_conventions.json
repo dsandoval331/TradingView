@@ -1,0 +1,20 @@
+{
+  "design_columns": [
+    "intercept",
+    "primary_centered_percentile_rank",
+    "conditioner_centered_percentile_rank",
+    "rank_product"
+  ],
+  "rank_method": "pandas same-date average rank pct=True; centered=2*rank/n-1; N<2 ineligible",
+  "rank_population": "each factor's finite same-date causal-eligible cross-section before joint intersection",
+  "insufficient_joint_cross_section": "fewer than 4 joint observations cannot identify four-column design; ineligible and reported",
+  "near_zero_variance": "sample variance ddof=1 <= 1e-12; zero/undefined product variation excluded from eligible compute but retained in pre-exclusion diagnostic denominators",
+  "matrix_rank": "SVD tolerance max(matrix.shape)*float64_eps*largest_singular_value",
+  "condition_number": "2-norm raw frozen rank-design [1,x,z,x*z], no standardization alternative",
+  "vif": "each of the three non-intercept columns regressed on intercept and the other two; 1/(1-R2); degenerate or exact collinearity => infinity",
+  "blocks": "four approximately equal chronological dates with at least 4 finite jointly eligible inputs, fixed before variance/design diagnostic exclusion; report excluded dates",
+  "rank_deficient_and_near_zero_fraction_denominator": "all dates with >=4 jointly finite causal inputs, before diagnostic exclusion; missing/insufficient input dates reported separately",
+  "leverage": "predictor-only projection diagonal from SVD; conventional descriptive flag h>2*rank/n; not a feasibility gate",
+  "gates": "unchanged frozen thresholds, independent eight verdicts",
+  "outcomes": "none permitted"
+}

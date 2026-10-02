@@ -1,0 +1,79 @@
+{
+  "title": "S2-B3 continuous-interaction outcome-blind feasibility protocol freeze",
+  "status": "active",
+  "decision": "Freeze SW10_S2_B3_CONTINUOUS_PREFLIGHT_V1. Do not adopt either failed discrete conditioning scheme. Before B3 outcome analysis, test continuous causal interaction specifications for coverage and identifiability without reading or computing forward returns.",
+  "evidence": "MWE-SW10-S2B3P-001: NEITHER_FEASIBLE for both audited discrete schemes; outcome-blind.",
+  "rationale": "Preserves the B3 question without relaxing the prospectively failed discrete-cell screen.",
+  "decision_id": "971aac8a-3a0e-4d5c-a1d9-609d4988a327",
+  "strategy_id": "09f30dc1-81ae-440f-aeca-18652df69896",
+  "decision_date": "2026-10-02T05:10:36.783995+00:00",
+  "metadata_json": {
+    "phase": "S2",
+    "status": "FROZEN",
+    "pass_rule": "CONTINUOUS_FEASIBLE iff all eight interactions pass every rule; otherwise CONTINUOUS_NOT_FEASIBLE; no alternate normalization/cutoff search.",
+    "prohibited": [
+      "forward returns/outcomes",
+      "B2 scientific outcome artifacts",
+      "effect sizes/p-values",
+      "outcome-driven normalization",
+      "protected holdout",
+      "B3 scientific execution",
+      "S3/S6",
+      "paid compute"
+    ],
+    "prospective": true,
+    "decision_code": "SW10_S2_B3_CONTINUOUS_PREFLIGHT_V1",
+    "normalization": {
+      "method": "per-date 1st/99th percentile winsorization then same-date cross-sectional z-score",
+      "fail_closed": "undefined/zero SD is ineligible and reported",
+      "interaction": "product of normalized primary and conditioner"
+    },
+    "factor_semantics": "Reuse certified B2 causal definitions exactly; legacy VOL_TURN excluded.",
+    "parent_preflight": "MWE-SW10-S2B3P-001",
+    "required_outputs": [
+      "continuous_interaction_coverage.csv",
+      "continuous_interaction_collinearity.csv",
+      "continuous_interaction_temporal_coverage.csv",
+      "continuous_interaction_symbol_participation.csv",
+      "continuous_interaction_preflight_summary.csv",
+      "sw10_s2_b3_continuous_preflight_manifest.json"
+    ],
+    "feasibility_rules": {
+      "vif_max": 10,
+      "all_eight_required": true,
+      "minimum_block_dates": 20,
+      "minimum_eligible_dates": 100,
+      "minimum_distinct_symbols": 80,
+      "max_top5_observation_share": 0.2,
+      "minimum_median_symbols_per_date": 50,
+      "max_rank_deficient_date_fraction": 0.05,
+      "aggregate_design_condition_number_max": 30,
+      "minimum_block_median_symbols_per_date": 50,
+      "max_near_zero_interaction_variance_date_fraction": 0.05
+    },
+    "required_diagnostics": [
+      "coverage/missingness",
+      "four fixed chronological blocks",
+      "cross-sectional and interaction variance",
+      "design rank",
+      "condition number",
+      "pairwise correlations/VIF",
+      "predictor-only leverage",
+      "symbol participation/concentration",
+      "future-data invariance"
+    ],
+    "candidate_interactions": [
+      "RET_MOM x VOL_REGIME",
+      "SHORT_REV x VOL_REGIME",
+      "RET_MOM x VOL_TURN_V2_CAUSAL",
+      "SHORT_REV x VOL_TURN_V2_CAUSAL",
+      "RET_MOM x HIGH52",
+      "SHORT_REV x HIGH52",
+      "RET_MOM x GAP_OVN",
+      "SHORT_REV x GAP_OVN"
+    ],
+    "outcomes_inspected_for_this_decision": false
+  },
+  "affects_model_version": "SWING10-RM-1.2",
+  "supersedes_decision_id": null
+}
