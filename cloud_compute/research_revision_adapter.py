@@ -23,6 +23,7 @@ class GovernedResearchTarget:
 
 
 GOVERNED_RESEARCH_TARGETS: dict[str, GovernedResearchTarget] = {
+    "SW10-S2-B4": GovernedResearchTarget("SW10-S2-B4", "tr_platform/research/swing10_s2_b4.py", execution_mode="swing10_b4_scientific_bundle"),
     "SW10-S2-B4-PREFLIGHT": GovernedResearchTarget("SW10-S2-B4-PREFLIGHT", "tr_platform/research/swing10_s2_b4_preflight.py", execution_mode="swing10_b4_preflight_bundle"),
     "SW10-S2-B3": GovernedResearchTarget("SW10-S2-B3", "tr_platform/research/swing10_s2_b3.py", execution_mode="swing10_b3_scientific_bundle"),
     "SW10-S2-B3-CONTINUOUS-PREFLIGHT": GovernedResearchTarget("SW10-S2-B3-CONTINUOUS-PREFLIGHT", "tr_platform/research/swing10_s2_b3_continuous_preflight.py", execution_mode="swing10_b3_continuous_bundle"),
@@ -132,17 +133,25 @@ def _run_b2_bundle(repo_root: Path, sha: str, destination: Path, work_root: Path
     return json.loads(result_path.read_text())
 
 
-def _run_b4_bundle(repo_root: Path, sha: str, destination: Path, work_root: Path) -> dict:
+def _run_b4_bundle(repo_root: Path, sha: str, destination: Path, work_root: Path, *, scientific: bool = False) -> dict:
     for path in ("tr_platform/__init__.py", "tr_platform/research/__init__.py"):
         target = destination / path
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text("", encoding="utf-8")
-    for name in ("swing10_s2_b4_preflight.py", "swing10_causal_inputs.py"):
+    names = ("swing10_s2_b4_preflight.py", "swing10_causal_inputs.py")
+    if scientific:
+        names += ("swing10_s2_b4.py", "swing10_s2_b4_contract.py")
+    for name in names:
         materialize_module(repo_root, sha, "tr_platform/research/" + name, destination / "tr_platform/research" / name)
     materialize_module(repo_root, sha, "research_protocols/swing10/SW10_S2_B4_PREFLIGHT_V1.persisted.json",
                        destination / "tr_platform/research/SW10_S2_B4_PREFLIGHT_V1.persisted.json")
+    if scientific:
+        for name in ("SW10_S2_B4_PROTOCOL_V1.persisted.json", "SW10_S2_B4_PROTOCOL_V1_SUPPLEMENT_1.persisted.json"):
+            materialize_module(repo_root, sha, "research_protocols/swing10/" + name,
+                               destination / "tr_platform/research" / name)
     result_path = destination / "result.json"
-    code = "from pathlib import Path; import json,sys; from tr_platform.research.swing10_s2_b4_preflight import run; Path(sys.argv[2]).write_text(json.dumps(run(Path(sys.argv[1]))))"
+    module = "swing10_s2_b4" if scientific else "swing10_s2_b4_preflight"
+    code = f"from pathlib import Path; import json,sys; from tr_platform.research.{module} import run; Path(sys.argv[2]).write_text(json.dumps(run(Path(sys.argv[1]))))"
     proc = subprocess.run([sys.executable, "-c", code, str(work_root.resolve()), str(result_path)],
                           cwd=destination, env={**os.environ, "PYTHONPATH": str(destination)}, capture_output=True, text=True)
     if proc.returncode:
@@ -157,7 +166,9 @@ def run_governed_revision(*, repo_root: Path, work_root: Path, runner_job_id: st
     verified_sha = verify_commit(repo_root, research_sha)
     with tempfile.TemporaryDirectory(prefix="governed-research-") as td:
         module_file = materialize_module(repo_root, verified_sha, target.module_path, Path(td) / Path(target.module_path).name)
-        if target.execution_mode == "swing10_b4_preflight_bundle":
+        if target.execution_mode == "swing10_b4_scientific_bundle":
+            result = _run_b4_bundle(repo_root, verified_sha, Path(td), Path(work_root), scientific=True)
+        elif target.execution_mode == "swing10_b4_preflight_bundle":
             result = _run_b4_bundle(repo_root, verified_sha, Path(td), Path(work_root))
         elif target.execution_mode == "swing10_b3_scientific_bundle":
             result = _run_b2_bundle(repo_root, verified_sha, Path(td), Path(work_root), scientific=True)

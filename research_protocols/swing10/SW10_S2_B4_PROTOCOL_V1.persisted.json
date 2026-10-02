@@ -1,0 +1,135 @@
+{
+  "title": "S2-B4 remaining-factor scientific protocol freeze",
+  "status": "active",
+  "decision": "Freeze SW10_S2_B4_PROTOCOL_V1 prospectively before any B4 outcome inspection. Primary B4 family contains four new liquidity proxy tests and six new market-regime interaction tests across the six frozen horizons. Three constructable but algebraically duplicate proxies remain diagnostic-only; six unavailable components remain excluded. All B4 hypotheses are non-directional discovery hypotheses and cannot directly receive ADVANCE from this same panel; supported results may seed separately preregistered independent validation.",
+  "evidence": "MWE-SW10-S2B4P-001 COMPLETE/VERIFIED; 10 CERTIFIED_PROXY and 6 UNAVAILABLE. Preflight established REL_MARKET_10 rank-equivalence to RET_MOM, LIQ_PRIOR20_ACTIVITY identity with VOL_TURN_V2_CAUSAL, and MARKET_SPY_VOL14 identity with existing VOL_REGIME semantics. No B4 scientific outcome was computed or inspected.",
+  "rationale": "Preserves the outcome-blind B4 preflight semantics and avoids relabeling existing RET_MOM, VOL_TURN_V2_CAUSAL, or VOL_REGIME information as new evidence. Date-level market states are tested only as conditioners/interactions, not broadcast as independent cross-sectional rows. No unavailable source is manufactured or backfilled.",
+  "decision_id": "d573293a-1a84-42ee-b5ec-9a3173c7bed7",
+  "strategy_id": "09f30dc1-81ae-440f-aeca-18652df69896",
+  "decision_date": "2026-10-02T16:53:14.244004+00:00",
+  "metadata_json": {
+    "phase": "S2",
+    "status": "FROZEN",
+    "inference": {
+      "ci": 0.95,
+      "kernel": "Bartlett",
+      "lag_rule": "horizon_days - 1",
+      "estimator": "Newey-West HAC",
+      "two_sided": true
+    },
+    "parent_mwe": "MWE-SW10-S2B4P-001",
+    "prohibited": [
+      "outcome-driven parameter/window/threshold/transformation changes",
+      "treating diagnostic duplicates as independent evidence",
+      "using unavailable components without separate source certification and new prospective freeze",
+      "broadcasting date-level market states as independent cross-sectional observations",
+      "protected holdout access",
+      "historical expected earnings dates treated as prospective",
+      "horizon selection",
+      "favorable symbol deletion",
+      "S3 transition before S2 exit criteria",
+      "S6 indicator design",
+      "paid compute without explicit authorization"
+    ],
+    "prospective": true,
+    "dispositions": [
+      "SEED_INDEPENDENT_VALIDATION_HYPOTHESIS",
+      "RETAIN_AS_WEAK_EVIDENCE",
+      "RETAIN_AS_COUNTEREVIDENCE",
+      "INVALID_SEMANTICS_NOT_TESTABLE"
+    ],
+    "support_rule": "A horizon is discovery-supported only if BH q<=0.05, abs standardized effect>=0.20, an immediately adjacent prespecified horizon has the same sign, at least 3/4 temporal blocks have that sign, no block exceeds 50% of absolute aggregate effect, concentration/sign robustness passes, and semantic/data-integrity gates pass.",
+    "decision_code": "SW10_S2_B4_PROTOCOL_V1",
+    "horizons_days": [
+      1,
+      2,
+      3,
+      5,
+      7,
+      10
+    ],
+    "primary_tests": [
+      "LIQ_CLOSE_DOLLAR_VOLUME",
+      "LIQ_ADJUSTED_PRICE",
+      "LIQ_REPORTED_VOLUME",
+      "LIQ_RANGE_SPREAD_PROXY",
+      "RET_MOM x MARKET_SPY_TREND10",
+      "SHORT_REV x MARKET_SPY_TREND10",
+      "RET_MOM x MARKET_PANEL_BREADTH10",
+      "SHORT_REV x MARKET_PANEL_BREADTH10",
+      "RET_MOM x MARKET_PANEL_DISPERSION10",
+      "SHORT_REV x MARKET_PANEL_DISPERSION10"
+    ],
+    "diagnostic_only": [
+      "REL_MARKET_10",
+      "LIQ_PRIOR20_ACTIVITY",
+      "MARKET_SPY_VOL14"
+    ],
+    "liquidity_design": {
+      "unit": "trading_date",
+      "tails": "date-specific inclusive p20/p80",
+      "quantity": "HIGH-minus-LOW forward-return spread",
+      "point_in_time": true
+    },
+    "multiple_testing": {
+      "q": 0.05,
+      "family": "10 primary hypotheses x 6 horizons; diagnostic-only and unavailable components excluded",
+      "method": "Benjamini-Hochberg",
+      "family_tests": 60
+    },
+    "artifact_contract": [
+      "b4_scientific_summary.csv",
+      "b4_date_primary_quantities.csv",
+      "b4_temporal_stability.csv",
+      "b4_symbol_concentration.csv",
+      "b4_model_diagnostics.csv",
+      "b4_dispositions.csv",
+      "sw10_s2_b4_manifest.json"
+    ],
+    "direction_registry": "ALL_PRIMARY_NON_DIRECTIONAL_DISCOVERY",
+    "temporal_stability": {
+      "blocks": 4,
+      "same_sign_blocks_required": 3,
+      "max_single_block_abs_effect_share": 0.5
+    },
+    "disposition_mapping": {
+      "RETAIN_AS_WEAK_EVIDENCE": "Valid/testable primary hypothesis fails exactly one of FDR or material-effect gates while passing semantic and robustness gates.",
+      "RETAIN_AS_COUNTEREVIDENCE": "All remaining valid/testable primary cases.",
+      "INVALID_SEMANTICS_NOT_TESTABLE": "Semantic validity or required testability fails.",
+      "SEED_INDEPENDENT_VALIDATION_HYPOTHESIS": "Non-directional primary hypothesis satisfies the full support rule; observed sign is frozen only as a hypothesis for a separate prospective validation and is not an ADVANCE decision."
+    },
+    "standardized_effect": {
+      "ddof": 1,
+      "formula": "mean(date-level primary quantity)/sample_sd(date-level primary quantity)",
+      "support_threshold_abs": 0.2
+    },
+    "excluded_unavailable": [
+      "REL_SECTOR_10",
+      "REL_INDUSTRY_10",
+      "LIQ_TRUE_BID_ASK",
+      "LIQ_SHARES_TURNOVER",
+      "LIQ_TRANSACTION_COUNT",
+      "LIQ_VWAP_DOLLAR_VOLUME"
+    ],
+    "symbol_concentration": {
+      "report_top": [
+        1,
+        5,
+        10
+      ],
+      "zero_is_sign_reversal": false,
+      "unavailable_fails_closed": true,
+      "leave_top5_sign_reversal_blocks_support": true
+    },
+    "market_interaction_design": {
+      "unit": "trading_date",
+      "model": "cross-sectional OLS forward_return ~ intercept + primary_rank + market_state + primary_rank*market_state",
+      "quantity": "interaction coefficient beta_I",
+      "market_state": "raw causal date-level proxy; standardized prospectively using expanding/past-only history, no future information",
+      "primary_rank": "same-date percentile rank with average ties mapped as 2*pct_rank-1"
+    },
+    "outcomes_inspected_for_this_decision": false
+  },
+  "affects_model_version": "SWING10-RM-1.2",
+  "supersedes_decision_id": null
+}
