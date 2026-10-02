@@ -1,0 +1,107 @@
+{
+  "title": "S2-B3 continuous interaction scientific protocol freeze",
+  "status": "active",
+  "decision": "Freeze SW10_S2_B3_PROTOCOL_V1 prospectively for the eight certified continuous interactions. Test interaction coefficients at horizons 1,2,3,5,7,10 trading days using date-level cross-sectional coefficients and Newey-West HAC with Bartlett lag horizon-1. Apply joint Benjamini-Hochberg FDR q=0.05 across 48 interaction hypotheses; require |standardized effect| >= 0.20 plus frozen temporal, concentration, semantic and integrity gates for ADVANCE.",
+  "evidence": "MWE-SW10-S2B3CP-001 COMPLETE/VERIFIED; 8/8 continuous interactions FEASIBLE; no B3 forward outcomes inspected in preflight.",
+  "rationale": "The outcome-blind continuous preflight found all eight preregistered designs feasible under the frozen representation. Canonical thread authorized the scientific contract before B3 outcomes are generated.",
+  "decision_id": "b60b0a56-75fb-4db1-b584-b6bf0eb819f0",
+  "strategy_id": "09f30dc1-81ae-440f-aeca-18652df69896",
+  "decision_date": "2026-10-02T07:03:10.59049+00:00",
+  "metadata_json": {
+    "model": "date-level cross-sectional OLS: forward_return ~ intercept + primary_rank + conditioner_rank + interaction_product",
+    "phase": "S2",
+    "status": "FROZEN",
+    "inference": {
+      "ci": 0.95,
+      "unit": "trading_date",
+      "kernel": "Bartlett",
+      "lag_rule": "horizon_days - 1",
+      "estimator": "Newey-West HAC",
+      "two_sided": true
+    },
+    "parent_mwe": "MWE-SW10-S2B3CP-001",
+    "prohibited": [
+      "methodology changes",
+      "parameter or threshold optimization",
+      "protected holdout access",
+      "historical expected earnings dates treated as prospective",
+      "interaction search beyond frozen eight",
+      "horizon selection",
+      "favorable symbol deletion",
+      "alternate rank transformations",
+      "BH family changes",
+      "HAC lag changes based on results",
+      "factor definition changes",
+      "S6 indicator design",
+      "paid compute without explicit authorization"
+    ],
+    "prospective": true,
+    "advance_rule": "BH q<=0.05 AND abs(ES)>=0.20 AND temporal sign coherence AND temporal concentration AND symbol concentration/sign robustness AND semantic/data-integrity gates",
+    "decision_code": "SW10_S2_B3_PROTOCOL_V1",
+    "horizons_days": [
+      1,
+      2,
+      3,
+      5,
+      7,
+      10
+    ],
+    "representation": "same-date cross-sectional percentile rank with average ties mapped as 2*pct_rank-1; interaction=primary*conditioner",
+    "multiple_testing": {
+      "q": 0.05,
+      "family": "8 interactions x 6 horizons",
+      "method": "Benjamini-Hochberg",
+      "family_tests": 48
+    },
+    "primary_quantity": "interaction coefficient beta_I",
+    "artifact_contract": [
+      "interaction_b3_summary.csv",
+      "interaction_date_coefficients.csv",
+      "interaction_temporal_stability.csv",
+      "interaction_symbol_concentration.csv",
+      "interaction_model_diagnostics.csv",
+      "interaction_b3_dispositions.csv",
+      "sw10_s2_b3_manifest.json"
+    ],
+    "temporal_stability": {
+      "blocks": 4,
+      "same_sign_blocks_required": 3,
+      "max_single_block_abs_effect_share": 0.5
+    },
+    "weak_evidence_rule": "valid/testable and fails exactly one of FDR or material-effect primary gates while passing robustness/semantic gates",
+    "standardized_effect": {
+      "ddof": 1,
+      "formula": "mean(date_level_beta_I) / sample_sd(date_level_beta_I)",
+      "support_threshold_abs": 0.2
+    },
+    "allowed_dispositions": [
+      "ADVANCE",
+      "WEAK_EVIDENCE",
+      "RETAIN_AS_COUNTEREVIDENCE",
+      "INVALID_SEMANTICS_NOT_TESTABLE"
+    ],
+    "symbol_concentration": {
+      "report_top": [
+        1,
+        5,
+        10
+      ],
+      "zero_is_sign_reversal": false,
+      "unavailable_fails_closed": true,
+      "leave_top5_sign_reversal_blocks_advance": true
+    },
+    "candidate_interactions": [
+      "RET_MOM x VOL_REGIME",
+      "SHORT_REV x VOL_REGIME",
+      "RET_MOM x VOL_TURN_V2_CAUSAL",
+      "SHORT_REV x VOL_TURN_V2_CAUSAL",
+      "RET_MOM x HIGH52",
+      "SHORT_REV x HIGH52",
+      "RET_MOM x GAP_OVN",
+      "SHORT_REV x GAP_OVN"
+    ],
+    "outcomes_inspected_for_this_decision": false
+  },
+  "affects_model_version": "SWING10-RM-1.2",
+  "supersedes_decision_id": null
+}

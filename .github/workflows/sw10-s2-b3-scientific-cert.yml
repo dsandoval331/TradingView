@@ -1,0 +1,31 @@
+name: SW10 S2 B3 Frozen Scientific Certification
+on:
+  pull_request:
+    paths:
+      - 'tr_platform/research/swing10_s2_b3.py'
+      - 'tr_platform/research/swing10_s2_b3_continuous_preflight.py'
+      - 'tr_platform/research/swing10_s2_b3_preflight.py'
+      - 'tr_platform/research/swing10_causal_inputs.py'
+      - 'tests/test_swing10_s2_b3.py'
+      - 'tests/test_swing10_s2_b3_continuous_preflight.py'
+      - 'tests/test_swing10_s2_b3_preflight.py'
+      - 'cloud_compute/**'
+      - 'research_runner/runner.py'
+      - '.github/workflows/sw10-s2-b3-scientific-cert.yml'
+permissions:
+  contents: read
+jobs:
+  certify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: |
+          pip install -r requirements.txt
+          pip install pytest==8.4.2
+      - name: Synthetic frozen scientific and governed contract checks
+        run: python -m pytest -q tests/test_swing10_s2_b3.py tests/test_swing10_s2_b3_continuous_preflight.py tests/test_swing10_s2_b3_preflight.py tests/test_research_revision_adapter.py tests/test_swing10_input_prepare.py tests/test_ccp5_control_plane.py tests/test_ccp5_control_plane_worker.py tests/test_ccp8_autonomous_loop.py tests/test_ccp9_exact_claim.py tests/test_ccp10_input_materializer.py tests/test_ccp11_artifact_contract.py
