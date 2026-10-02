@@ -1,0 +1,479 @@
+{
+  "authority": {
+    "mwe": {
+      "mwe_id": "MWE-SW10-S2B4P-001",
+      "status": "ACTIVE",
+      "objective": "Implement and execute SW10_S2_B4_PREFLIGHT_V1 for REL_STRENGTH, LIQUIDITY and MARKET_REG using predictor-side evidence only; certify semantic/data feasibility and return a prospective B4 representation recommendation without computing scientific outcomes.",
+      "created_at": "2026-10-02T16:03:16.886228+00:00",
+      "phase_code": "S2",
+      "started_at": "2026-10-02T16:03:16.886228+00:00",
+      "updated_at": "2026-10-02T16:03:16.886228+00:00",
+      "workstream": "S2-B4 Remaining-Factor Outcome-Blind Feasibility & Semantic Certification",
+      "strategy_id": "09f30dc1-81ae-440f-aeca-18652df69896",
+      "completed_at": null,
+      "handoff_json": {},
+      "project_code": "SWING10-RM-1.2",
+      "metadata_json": {
+        "roadmap": "SWING10-RM-1.2",
+        "parent_mwe": "MWE-SW10-S2B3-001",
+        "execution_mode": "CHATGPT_WORK_ORCHESTRATION",
+        "execution_state": "MWE_ACTIVE_NOT_EXECUTING",
+        "deterministic_compute": "governed GitHub Actions",
+        "protected_data_access": false,
+        "cloud_run_spend_approved": false
+      },
+      "record_origin": "NATIVE",
+      "cost_policy_code": "ZERO_INCREMENTAL_COST_FIRST",
+      "escalation_class": null,
+      "receiving_thread": "Indicator: Swing Trades",
+      "work_envelope_id": "0117f1d1-34a0-4354-8545-a1a97cfec076",
+      "authority_ceiling": "E1",
+      "originating_thread": "Indicator: Swing Trades",
+      "user_action_summary": null,
+      "frozen_contract_json": {
+        "factors": [
+          "REL_STRENGTH",
+          "LIQUIDITY",
+          "MARKET_REG"
+        ],
+        "prohibited": [
+          "forward/path outcomes",
+          "effect/significance calculations",
+          "outcome-driven methodology changes",
+          "protected holdout",
+          "S3/S6",
+          "paid compute without explicit authorization"
+        ],
+        "decision_id": "79a7238b-fb84-423a-8326-b75d53703181",
+        "input_sha256": "ea2908cd89123548404a0f48dca6633f6ef87491793f327705588b4e2ecefae2",
+        "decision_code": "SW10_S2_B4_PREFLIGHT_V1",
+        "input_dataset": "market_daily_history_2025-02-03_2026-08-27",
+        "completion_criteria": [
+          "read frozen decision in full",
+          "inspect available predictor-side sources and semantics",
+          "implement outcome-blind preflight guards and regression certification",
+          "execute through governed zero-incremental-cost infrastructure",
+          "persist and byte-verify required artifacts/readbacks",
+          "return component dispositions and representation recommendation",
+          "confirm no B4 scientific outcomes were read or computed",
+          "handoff to Indicator: Swing Trades"
+        ],
+        "component_dispositions": [
+          "CERTIFIED",
+          "CERTIFIED_PROXY",
+          "UNAVAILABLE"
+        ]
+      },
+      "user_action_required": false
+    },
+    "parent": {
+      "job_id": "edcf724d-5c4e-486e-846c-d23ccef8920d",
+      "mwe_id": "MWE-SW10-S2B3-001",
+      "status": "COMPLETE",
+      "metadata": {
+        "roadmap": "SWING10-RM-1.2",
+        "research_sha": "b06df7cfc20d1008a3137c236593aa3566e29c46",
+        "execution_mode": "CHATGPT_WORK_ORCHESTRATION",
+        "execution_state": "VERIFIED",
+        "parent_mwe_uuid": "f4fa6cbd-f203-4798-a970-27fa7400a2ee",
+        "research_job_id": "edcf724d-5c4e-486e-846c-d23ccef8920d",
+        "infrastructure_sha": "8e83723572f0f646e6b6cbeca116de639eb54bcc",
+        "required_artifacts": 7,
+        "verified_readbacks": 7,
+        "verification_status": "PASS",
+        "certification_run_id": 36978030308,
+        "protocol_decision_id": "b60b0a56-75fb-4db1-b584-b6bf0eb819f0",
+        "deterministic_compute": "governed GitHub Actions",
+        "protected_data_access": false,
+        "cloud_run_spend_approved": false,
+        "regression_checks_passed": 212,
+        "scientific_promotion_decision_made": false
+      }
+    },
+    "decision": {
+      "title": "S2-B4 remaining-factor outcome-blind feasibility and semantic preflight freeze",
+      "status": "active",
+      "decision": "Freeze SW10_S2_B4_PREFLIGHT_V1 prospectively. Before any B4 forward-return, path, MFE/MAE, first-passage, effect-size or significance analysis, certify predictor-side data availability, point-in-time semantics, causal constructability, coverage and numerical geometry for REL_STRENGTH, LIQUIDITY and MARKET_REG. Each candidate component receives CERTIFIED, CERTIFIED_PROXY or UNAVAILABLE. Do not fabricate unavailable inputs: current sector membership must not be silently backfilled as historical point-in-time membership; bid/ask spread must not be inferred as a true spread from daily OHLCV; turnover requiring shares outstanding remains unavailable unless point-in-time shares-outstanding data are certified. MARKET_REG benchmark inputs must be causally aligned through t. Recommend B4 representations using predictor-side feasibility evidence only.",
+      "evidence": "S1/S2 durable factor registry currently marks MARKET_REG data_available=true, REL_STRENGTH=false and LIQUIDITY=false. S2-B2/B3 established outcome-blind semantic and feasibility certification patterns. B3 completed with no mechanical ADVANCE/WEAK_EVIDENCE results, so B4 is a distinct remaining-factor batch rather than a rescue retest.",
+      "rationale": "B4 must decide what remaining factors mean and whether they are computable before learning their outcomes. This preserves S2 anti-lookahead and no-optimization rules and avoids repeating the VOL_TURN legacy semantic defect.",
+      "decision_id": "79a7238b-fb84-423a-8326-b75d53703181",
+      "strategy_id": "09f30dc1-81ae-440f-aeca-18652df69896",
+      "decision_date": "2026-10-02T16:03:16.886228+00:00",
+      "metadata_json": {
+        "batch": "SW10-S2-B4-PREFLIGHT",
+        "phase": "S2",
+        "status": "FROZEN",
+        "factors": [
+          "REL_STRENGTH",
+          "LIQUIDITY",
+          "MARKET_REG"
+        ],
+        "prohibited": [
+          "forward returns or path outcomes",
+          "MFE/MAE or first passage",
+          "effect sizes or p-values",
+          "B2/B3 scientific outcome artifacts except identities/governance",
+          "outcome-driven representation/window/threshold selection",
+          "current membership backfill presented as PIT history",
+          "fabricated true bid/ask spread from daily OHLCV",
+          "turnover without certified PIT shares outstanding",
+          "protected holdout",
+          "S3/S6",
+          "paid compute without explicit authorization"
+        ],
+        "prospective": true,
+        "input_sha256": "ea2908cd89123548404a0f48dca6633f6ef87491793f327705588b4e2ecefae2",
+        "decision_code": "SW10_S2_B4_PREFLIGHT_V1",
+        "input_dataset": "market_daily_history_2025-02-03_2026-08-27",
+        "required_outputs": [
+          "component semantic registry",
+          "source and point-in-time availability audit",
+          "coverage/missingness by date and symbol",
+          "causal lookback and future-data invariance checks",
+          "temporal block coverage",
+          "symbol participation/concentration",
+          "predictor dispersion/ties/geometry where applicable",
+          "CERTIFIED/CERTIFIED_PROXY/UNAVAILABLE disposition with reason",
+          "outcome-blind B4 representation recommendation",
+          "manifest/provenance"
+        ],
+        "factor_constraints": {
+          "LIQUIDITY": "Audit dollar-volume, price and activity proxies separately; label proxies explicitly; no true spread claim from OHLCV; turnover gated on PIT shares outstanding.",
+          "MARKET_REG": "Audit benchmark trend/volatility and causal cross-sectional environment inputs with date alignment through t only.",
+          "REL_STRENGTH": "Audit market-relative, sector-relative and industry-relative components separately; only certify sector/industry forms if membership semantics are supported without lookahead."
+        },
+        "no_composite_scoring": true,
+        "parent_scientific_mwe": "MWE-SW10-S2B3-001",
+        "component_dispositions": [
+          "CERTIFIED",
+          "CERTIFIED_PROXY",
+          "UNAVAILABLE"
+        ],
+        "paid_compute_prohibited": true,
+        "no_parameter_optimization": true,
+        "forward_outcomes_prohibited": true,
+        "protected_holdout_access_prohibited": true,
+        "outcomes_inspected_for_this_decision": false
+      },
+      "affects_model_version": "SWING10-RM-1.2",
+      "supersedes_decision_id": null
+    }
+  },
+  "source_audit": {
+    "daily_columns": [
+      "id",
+      "symbol",
+      "trade_date",
+      "open",
+      "high",
+      "low",
+      "close",
+      "volume",
+      "vwap",
+      "transactions",
+      "timestamp_ms",
+      "data_source",
+      "adjusted",
+      "created_at"
+    ],
+    "factor_registry": [
+      {
+        "metadata": {},
+        "description": "Dollar volume, price, spread proxy and turnover state.",
+        "factor_code": "LIQUIDITY",
+        "timing_type": "signal_time",
+        "dependencies": [],
+        "data_available": false,
+        "implementation_status": "research_specified"
+      },
+      {
+        "metadata": {},
+        "description": "Broad-market trend, volatility and cross-sectional environment.",
+        "factor_code": "MARKET_REG",
+        "timing_type": "signal_time",
+        "dependencies": [
+          "benchmark_history"
+        ],
+        "data_available": true,
+        "implementation_status": "research_specified"
+      },
+      {
+        "metadata": {},
+        "description": "Stock performance relative to market, sector and industry.",
+        "factor_code": "REL_STRENGTH",
+        "timing_type": "signal_time",
+        "dependencies": [
+          "sector_mapping",
+          "benchmark_history"
+        ],
+        "data_available": false,
+        "implementation_status": "research_specified"
+      }
+    ],
+    "mapping_inventory": [
+      {
+        "source": "MSCI_GICS_ANNOUNCEMENT_AUDIT_2025_2026",
+        "records": 111,
+        "symbols": 111,
+        "provenance": [
+          {
+            "notes": "Broad/leveraged ETF; sector benchmark not applicable.",
+            "verified_at": "2026-09-08T14:28:08.19598+00:00",
+            "applicability": "NOT_APPLICABLE",
+            "verification_method": "MSCI GICS industry-change announcement audit for 2025 through 2026-09-08; no in-window sector-level change identified for this symbol",
+            "classification_scope": "PMS research baseline",
+            "historical_continuity_verified": true
+          },
+          {
+            "notes": "Provisional sector assignment pending point-in-time historical continuity verification for 2025-2026.",
+            "verified_at": "2026-09-08T14:28:08.19598+00:00",
+            "applicability": "APPLICABLE",
+            "verification_method": "MSCI GICS industry-change announcement audit for 2025 through 2026-09-08; no in-window sector-level change identified for this symbol",
+            "classification_scope": "PMS research baseline",
+            "historical_continuity_verified": true
+          }
+        ],
+        "effective_max": null,
+        "effective_min": "2025-01-01",
+        "mapping_status": "VALID",
+        "mapping_version": "PMS-SECTOR-MAP-0.1",
+        "confidence_status": "VERIFIED",
+        "first_recorded_at": "2026-09-08T13:56:31.974208+00:00"
+      },
+      {
+        "source": "MSCI_GICS_CHANGE_2026-07-01",
+        "records": 2,
+        "symbols": 1,
+        "provenance": [
+          {
+            "applicability": "APPLICABLE",
+            "verification_note": "MSCI announced AppLovin change from Application Software to Advertising effective after close 2026-07-31.",
+            "classification_scope": "PMS research baseline",
+            "historical_continuity_verified": true
+          },
+          {
+            "notes": "Provisional sector assignment pending point-in-time historical continuity verification for 2025-2026.",
+            "applicability": "APPLICABLE",
+            "verification_note": "MSCI announced AppLovin change from Application Software (Information Technology) to Advertising (Communication Services), effective after close 2026-07-31.",
+            "classification_scope": "PMS research baseline",
+            "historical_continuity_verified": true
+          }
+        ],
+        "effective_max": "2026-07-31",
+        "effective_min": "2025-01-01",
+        "mapping_status": "VALID",
+        "mapping_version": "PMS-SECTOR-MAP-0.1",
+        "confidence_status": "VERIFIED",
+        "first_recorded_at": "2026-09-08T13:56:31.974208+00:00"
+      }
+    ],
+    "available_aux_schema": [
+      {
+        "table": "pm_pd_entry_context",
+        "column": "sector_current_return"
+      },
+      {
+        "table": "pm_pd_entry_context",
+        "column": "sector_alignment"
+      },
+      {
+        "table": "pms_sector_mappings",
+        "column": "sector_code"
+      },
+      {
+        "table": "pms_sector_mappings",
+        "column": "sector_name"
+      },
+      {
+        "table": "pms_sector_mappings",
+        "column": "sector_benchmark_symbol"
+      },
+      {
+        "table": "pms_sector_mappings",
+        "column": "industry_code"
+      },
+      {
+        "table": "pms_sector_mappings",
+        "column": "industry_name"
+      },
+      {
+        "table": "pm_pd_entry_context",
+        "column": "sector_symbol"
+      },
+      {
+        "table": "pms_sector_mappings",
+        "column": "industry_benchmark_symbol"
+      }
+    ]
+  },
+  "source_inventory": {
+    "mapping_exception": [
+      {
+        "to": "2026-07-31",
+        "from": "2025-01-01",
+        "sector": "45",
+        "source": "MSCI_GICS_CHANGE_2026-07-01",
+        "symbol": "APP",
+        "industry": null,
+        "metadata": {
+          "notes": "Provisional sector assignment pending point-in-time historical continuity verification for 2025-2026.",
+          "applicability": "APPLICABLE",
+          "verification_note": "MSCI announced AppLovin change from Application Software (Information Technology) to Advertising (Communication Services), effective after close 2026-07-31.",
+          "classification_scope": "PMS research baseline",
+          "historical_continuity_verified": true
+        },
+        "sector_benchmark": "XLK",
+        "industry_benchmark": null
+      },
+      {
+        "to": null,
+        "from": "2026-08-01",
+        "sector": "50",
+        "source": "MSCI_GICS_CHANGE_2026-07-01",
+        "symbol": "APP",
+        "industry": null,
+        "metadata": {
+          "applicability": "APPLICABLE",
+          "verification_note": "MSCI announced AppLovin change from Application Software to Advertising effective after close 2026-07-31.",
+          "classification_scope": "PMS research baseline",
+          "historical_continuity_verified": true
+        },
+        "sector_benchmark": "XLC",
+        "industry_benchmark": null
+      }
+    ],
+    "daily_source_metadata": [
+      {
+        "rows": 44128,
+        "symbols": 112,
+        "adjusted": true,
+        "max_date": "2026-08-27",
+        "min_date": "2025-02-03",
+        "vwap_rows": 44128,
+        "data_source": "massive",
+        "transaction_rows": 44128
+      }
+    ],
+    "mapping_reference_coverage": [
+      {
+        "records": 10,
+        "symbols": 10,
+        "applicability": "APPLICABLE",
+        "sector_benchmark_symbol": "XLC",
+        "industry_benchmark_symbol": null
+      },
+      {
+        "records": 7,
+        "symbols": 7,
+        "applicability": "APPLICABLE",
+        "sector_benchmark_symbol": "XLE",
+        "industry_benchmark_symbol": null
+      },
+      {
+        "records": 14,
+        "symbols": 14,
+        "applicability": "APPLICABLE",
+        "sector_benchmark_symbol": "XLF",
+        "industry_benchmark_symbol": null
+      },
+      {
+        "records": 13,
+        "symbols": 13,
+        "applicability": "APPLICABLE",
+        "sector_benchmark_symbol": "XLI",
+        "industry_benchmark_symbol": null
+      },
+      {
+        "records": 32,
+        "symbols": 32,
+        "applicability": "APPLICABLE",
+        "sector_benchmark_symbol": "XLK",
+        "industry_benchmark_symbol": null
+      },
+      {
+        "records": 4,
+        "symbols": 4,
+        "applicability": "APPLICABLE",
+        "sector_benchmark_symbol": "XLP",
+        "industry_benchmark_symbol": null
+      },
+      {
+        "records": 2,
+        "symbols": 2,
+        "applicability": "APPLICABLE",
+        "sector_benchmark_symbol": "XLU",
+        "industry_benchmark_symbol": null
+      },
+      {
+        "records": 15,
+        "symbols": 15,
+        "applicability": "APPLICABLE",
+        "sector_benchmark_symbol": "XLV",
+        "industry_benchmark_symbol": null
+      },
+      {
+        "records": 12,
+        "symbols": 12,
+        "applicability": "APPLICABLE",
+        "sector_benchmark_symbol": "XLY",
+        "industry_benchmark_symbol": null
+      },
+      {
+        "records": 4,
+        "symbols": 4,
+        "applicability": "NOT_APPLICABLE",
+        "sector_benchmark_symbol": null,
+        "industry_benchmark_symbol": null
+      }
+    ],
+    "registered_predictor_sources": [
+      {
+        "input_type": "market_data",
+        "dataset_version": "market_daily_history_2025-02-03_2026-08-27"
+      }
+    ]
+  },
+  "prospective_representation_spec": {
+    "protocol": "SW10_S2_B4_PREFLIGHT_V1",
+    "decision_id": "79a7238b-fb84-423a-8326-b75d53703181",
+    "timing": "AFTER_COMPLETED_DAILY_BAR_T; no intraday availability claim",
+    "lookbacks": {
+      "relative_strength": 10,
+      "market_trend": 10,
+      "market_volatility": 14,
+      "activity_denominator": 20,
+      "breadth": 10,
+      "dispersion": 10
+    },
+    "selection_basis": "Reuse existing causal RET_MOM(10), VOL_REGIME(prior14 true ranges/previous close), VOL_TURN_V2_CAUSAL(prior20); no outcome inspection or window/threshold search.",
+    "benchmark": "SPY ETF large-cap US market proxy; no index-level/total-market/total-return claim",
+    "relative_strength": "(close_t/close_t-10 - 1) minus same-date SPY trailing10 price change; exclude self-reference SPY; mixed frozen equity/ETF universe explicit",
+    "liquidity": [
+      "close*volume (closing-price notional proxy, not exact traded dollars)",
+      "adjusted close (price/tradability proxy; not historical nominal price or fillability)",
+      "reported daily volume (activity proxy; not order/trade count)",
+      "volume/prior20 completed volume mean (relative activity proxy; not shares turnover)",
+      "(high-low)/close (range-based spread proxy; NOT bid/ask or transaction cost estimate)"
+    ],
+    "market_reg": [
+      "SPY trailing10 price change",
+      "SPY prior14 true-range mean/previous close (certified existing causal VOL_REGIME formula)",
+      "equal-weight frozen non-SPY panel fraction positive trailing10 price change (panel breadth proxy, mixed equity/ETF, no historical market constituent claim)",
+      "sample SD ddof1 of same cross-section trailing10 price changes (panel dispersion proxy)"
+    ],
+    "unavailable": [
+      "sector-relative (no certified immutable sector benchmark series; mappings audit retrospective and only PMS-scoped)",
+      "industry-relative (no industry identity/benchmark or certified membership)",
+      "true bid/ask spread (no quote input)",
+      "shares turnover (no certified PIT shares outstanding)",
+      "trade count (exists live but outside certified seven-column immutable panel)",
+      "VWAP dollar volume (exists live but outside certified seven-column immutable panel)"
+    ],
+    "blocks": "four approximately equal chronological blocks of ALL394 input dates; same calendar for every component",
+    "certification_rule": "CERTIFIED_PROXY only if causal source and exact semantics validated and finite eligible data in all four fixed blocks; no predictive or data-size optimization gates. Absent required certified source => UNAVAILABLE. No numerical threshold or composite score.",
+    "recommendation": "List semantically supported proxies with measured coverage. Canonical thread must freeze actual B4 tests; exclude unavailable components; do not imply causal predictive validity.",
+    "outcomes_prohibited": true
+  },
+  "benchmark_identity_source": "https://www.ssga.com/us/en/intermediary/etfs/state-street-spdr-sp-500-etf-trust-spy",
+  "public_reference_use": "fund identity only; no performance values imported"
+}

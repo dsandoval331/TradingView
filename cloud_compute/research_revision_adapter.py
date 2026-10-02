@@ -23,6 +23,7 @@ class GovernedResearchTarget:
 
 
 GOVERNED_RESEARCH_TARGETS: dict[str, GovernedResearchTarget] = {
+    "SW10-S2-B4-PREFLIGHT": GovernedResearchTarget("SW10-S2-B4-PREFLIGHT", "tr_platform/research/swing10_s2_b4_preflight.py", execution_mode="swing10_b4_preflight_bundle"),
     "SW10-S2-B3": GovernedResearchTarget("SW10-S2-B3", "tr_platform/research/swing10_s2_b3.py", execution_mode="swing10_b3_scientific_bundle"),
     "SW10-S2-B3-CONTINUOUS-PREFLIGHT": GovernedResearchTarget("SW10-S2-B3-CONTINUOUS-PREFLIGHT", "tr_platform/research/swing10_s2_b3_continuous_preflight.py", execution_mode="swing10_b3_continuous_bundle"),
     "SW10-S2-B3-PREFLIGHT": GovernedResearchTarget("SW10-S2-B3-PREFLIGHT", "tr_platform/research/swing10_s2_b3_preflight.py", execution_mode="swing10_b3_preflight_bundle"),
@@ -131,6 +132,24 @@ def _run_b2_bundle(repo_root: Path, sha: str, destination: Path, work_root: Path
     return json.loads(result_path.read_text())
 
 
+def _run_b4_bundle(repo_root: Path, sha: str, destination: Path, work_root: Path) -> dict:
+    for path in ("tr_platform/__init__.py", "tr_platform/research/__init__.py"):
+        target = destination / path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text("", encoding="utf-8")
+    for name in ("swing10_s2_b4_preflight.py", "swing10_causal_inputs.py"):
+        materialize_module(repo_root, sha, "tr_platform/research/" + name, destination / "tr_platform/research" / name)
+    materialize_module(repo_root, sha, "research_protocols/swing10/SW10_S2_B4_PREFLIGHT_V1.persisted.json",
+                       destination / "tr_platform/research/SW10_S2_B4_PREFLIGHT_V1.persisted.json")
+    result_path = destination / "result.json"
+    code = "from pathlib import Path; import json,sys; from tr_platform.research.swing10_s2_b4_preflight import run; Path(sys.argv[2]).write_text(json.dumps(run(Path(sys.argv[1]))))"
+    proc = subprocess.run([sys.executable, "-c", code, str(work_root.resolve()), str(result_path)],
+                          cwd=destination, env={**os.environ, "PYTHONPATH": str(destination)}, capture_output=True, text=True)
+    if proc.returncode:
+        raise RuntimeError(f"SW10-S2-B4-PREFLIGHT exact outcome-blind bundle failed: {proc.stderr[-2000:]}")
+    return json.loads(result_path.read_text())
+
+
 def run_governed_revision(*, repo_root: Path, work_root: Path, runner_job_id: str, research_sha: str) -> dict[str, Any]:
     target = GOVERNED_RESEARCH_TARGETS.get(runner_job_id)
     if target is None:
@@ -138,7 +157,9 @@ def run_governed_revision(*, repo_root: Path, work_root: Path, runner_job_id: st
     verified_sha = verify_commit(repo_root, research_sha)
     with tempfile.TemporaryDirectory(prefix="governed-research-") as td:
         module_file = materialize_module(repo_root, verified_sha, target.module_path, Path(td) / Path(target.module_path).name)
-        if target.execution_mode == "swing10_b3_scientific_bundle":
+        if target.execution_mode == "swing10_b4_preflight_bundle":
+            result = _run_b4_bundle(repo_root, verified_sha, Path(td), Path(work_root))
+        elif target.execution_mode == "swing10_b3_scientific_bundle":
             result = _run_b2_bundle(repo_root, verified_sha, Path(td), Path(work_root), scientific=True)
         elif target.execution_mode == "swing10_b3_continuous_bundle":
             result = _run_b2_bundle(repo_root, verified_sha, Path(td), Path(work_root), continuous=True)
