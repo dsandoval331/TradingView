@@ -1,0 +1,63 @@
+{
+  "title": "S2-B3 continuous-interaction preflight supplement 1",
+  "status": "active",
+  "decision": "Freeze SW10_S2_B3_CONTINUOUS_PREFLIGHT_V1_SUPPLEMENT_1 prospectively. Supersede only two conflicting design fields in the original continuous-preflight decision: use same-date cross-sectional percentile ranks centered to [-1,+1], not winsorized z-scores; and assess feasibility independently for each of the eight preregistered interactions rather than requiring all eight to pass as a bundle. All other outcome-blindness, causal-factor, interaction, diagnostic, artifact, governance and cost restrictions remain unchanged.",
+  "evidence": "MWE-SW10-S2B3P-001 COMPLETE/VERIFIED with NEITHER_FEASIBLE; no B3 outcomes inspected. Original continuous-preflight MWE exists but is ACTIVE / NOT EXECUTING, so this prospective supplement is frozen before implementation/execution.",
+  "rationale": "The canonical thread explicitly approved centered percentile-rank normalization and interaction-by-interaction feasibility after the discrete preflight showed severe cell fragmentation. This preserves information without relaxing the failed discrete screen or selecting specifications from outcomes.",
+  "decision_id": "a8142bfb-564a-40ca-95f8-4d2f2f3094c7",
+  "strategy_id": "09f30dc1-81ae-440f-aeca-18652df69896",
+  "decision_date": "2026-10-02T05:15:08.844872+00:00",
+  "metadata_json": {
+    "phase": "S2",
+    "status": "FROZEN",
+    "pass_rule": "Each of the eight preregistered interactions receives FEASIBLE or NOT_FEASIBLE independently. No requirement that all eight pass. No alternate normalization or interaction search.",
+    "prospective": true,
+    "decision_code": "SW10_S2_B3_CONTINUOUS_PREFLIGHT_V1_SUPPLEMENT_1",
+    "normalization": {
+      "method": "same-date cross-sectional percentile rank using average ranks for ties, mapped as 2*pct_rank-1 to [-1,+1]",
+      "fail_closed": "insufficient eligible cross-section, undefined ranks, or zero interaction variation is ineligible and reported",
+      "interaction": "product of centered percentile-rank primary and conditioner",
+      "raw_values_retained_for_diagnostics": true
+    },
+    "feasibility_rules": {
+      "vif_max": 10,
+      "minimum_block_dates": 20,
+      "minimum_eligible_dates": 100,
+      "minimum_distinct_symbols": 80,
+      "max_top5_observation_share": 0.2,
+      "minimum_median_symbols_per_date": 50,
+      "max_rank_deficient_date_fraction": 0.05,
+      "aggregate_design_condition_number_max": 30,
+      "minimum_block_median_symbols_per_date": 50,
+      "max_near_zero_interaction_variance_date_fraction": 0.05
+    },
+    "supersedes_fields": [
+      "normalization",
+      "pass_rule/all_eight_required"
+    ],
+    "candidate_interactions": [
+      "RET_MOM x VOL_REGIME",
+      "SHORT_REV x VOL_REGIME",
+      "RET_MOM x VOL_TURN_V2_CAUSAL",
+      "SHORT_REV x VOL_TURN_V2_CAUSAL",
+      "RET_MOM x HIGH52",
+      "SHORT_REV x HIGH52",
+      "RET_MOM x GAP_OVN",
+      "SHORT_REV x GAP_OVN"
+    ],
+    "unchanged_prohibitions": [
+      "forward returns/outcomes",
+      "B2 scientific outcome artifacts",
+      "effect sizes/p-values",
+      "outcome-driven normalization",
+      "protected holdout",
+      "B3 scientific execution",
+      "S3/S6",
+      "paid compute"
+    ],
+    "supplements_decision_id": "971aac8a-3a0e-4d5c-a1d9-609d4988a327",
+    "outcomes_inspected_for_this_decision": false
+  },
+  "affects_model_version": "SWING10-RM-1.2",
+  "supersedes_decision_id": null
+}
