@@ -6,6 +6,7 @@ CODE_ROOT=Path(__file__).resolve().parents[1]
 WORK_ROOT=Path(os.environ.get("TR_WORK_ROOT",str(CODE_ROOT))).expanduser().resolve()
 STATE_DIR=WORK_ROOT/"research_outputs"/"runner"; STATE_FILE=STATE_DIR/"state.json"
 JOBS=[
+{"id":"SW10-S2-B5-ACQUISITION","project":"swing10","module":"tr_platform.research.swing10_s2_b5_acquisition","description":"Authorized outcome-blind same-provider daily acquisition and certification"},
 {"id":"SW10-S2-B5-PREFLIGHT","project":"swing10","module":"tr_platform.research.swing10_s2_b5_preflight","description":"Outcome-blind independent source and timestamp-only feasibility audit"},
 {"id":"SW10-S2-B4","project":"swing10","module":"tr_platform.research.swing10_s2_b4","description":"Frozen liquidity discovery and supplemented two-stage market conditioning"},
 {"id":"SW10-S2-B4-PREFLIGHT","project":"swing10","module":"tr_platform.research.swing10_s2_b4_preflight","description":"Outcome-blind remaining-factor semantic and source preflight"},

@@ -1,0 +1,655 @@
+{
+  "mwe_uuid": "4cee0c88-fa5c-45a4-8713-e8f6e40b93c6",
+  "mwe_id": "MWE-SW10-S2B5A-001",
+  "authority": {
+    "title": "S2-B5 independent-validation outcome-blind preflight freeze",
+    "status": "active",
+    "decision": "Freeze SW10_S2_B5_PREFLIGHT_V1 before any independent validation outcomes are inspected. B5 preflight will inventory and certify genuinely independent, semantically compatible data for the nine B4 seed cases grouped into three hypothesis families; it will measure only data provenance, temporal/non-overlap independence, point-in-time semantic reproducibility, coverage, eligibility, and prospective validation feasibility. It must not compute or inspect forward outcomes, effect sizes, p-values, profitability, or protected holdout outcomes.",
+    "evidence": "B4 completion and verified control-plane state; no independent validation outcomes inspected for this decision.",
+    "rationale": "B4 produced nine mechanical independent-validation seed cases across LIQ_ADJUSTED_PRICE (negative 5/7/10d), LIQ_REPORTED_VOLUME (positive 3/5/7/10d), and RET_MOM x MARKET_SPY_TREND10 (positive 7/10d). Independent validation must be designed prospectively and must not select horizons or signs after viewing validation outcomes.",
+    "decision_id": "67f7cf88-dceb-47a3-8e1f-379ef19b6d08",
+    "strategy_id": "09f30dc1-81ae-440f-aeca-18652df69896",
+    "decision_date": "2026-10-02T19:24:37.933994+00:00",
+    "metadata_json": {
+      "phase": "S2",
+      "status": "FROZEN",
+      "purpose": "outcome-blind independent-validation data and semantic feasibility certification",
+      "parent_mwe": "MWE-SW10-S2B4-001",
+      "prohibited": [
+        "forward return or path-outcome computation/access",
+        "effect sizes, p-values, win rates, profitability or outcome-based power tuning",
+        "sign or horizon reselection",
+        "factor/proxy semantic changes",
+        "threshold or parameter optimization",
+        "protected holdout outcome access",
+        "historical expected earnings dates treated prospectively",
+        "S3 transition",
+        "S6 indicator design",
+        "paid compute without explicit authorization"
+      ],
+      "cost_policy": "ZERO_INCREMENTAL_COST_FIRST",
+      "prospective": true,
+      "decision_code": "SW10_S2_B5_PREFLIGHT_V1",
+      "seed_families": [
+        {
+          "factor": "LIQ_ADJUSTED_PRICE",
+          "direction": "NEGATIVE",
+          "horizons_days": [
+            5,
+            7,
+            10
+          ]
+        },
+        {
+          "factor": "LIQ_REPORTED_VOLUME",
+          "direction": "POSITIVE",
+          "horizons_days": [
+            3,
+            5,
+            7,
+            10
+          ]
+        },
+        {
+          "factor": "RET_MOM x MARKET_SPY_TREND10",
+          "direction": "POSITIVE",
+          "horizons_days": [
+            7,
+            10
+          ]
+        }
+      ],
+      "required_outputs": [
+        "independent_source_inventory.csv",
+        "independent_temporal_independence_audit.csv",
+        "independent_semantic_reproducibility.csv",
+        "independent_coverage_eligibility.csv",
+        "independent_universe_survivorship_audit.csv",
+        "sw10_s2_b5_preflight_manifest.json"
+      ],
+      "discovery_panel_end": "2026-08-27",
+      "discovery_panel_start": "2025-02-03",
+      "preflight_requirements": [
+        "inventory candidate independent datasets and exact provenance",
+        "prove no temporal overlap with B4 discovery outcomes for any proposed validation observation",
+        "certify frozen B4 factor/proxy semantics can be reproduced without drift",
+        "certify point-in-time availability and adjustment semantics",
+        "quantify symbol/date/horizon eligibility and missingness without outcomes",
+        "audit survivorship and universe-construction limitations",
+        "audit market benchmark availability for MARKET_SPY_TREND10",
+        "recommend feasible independent validation sample(s) based only on provenance and coverage"
+      ],
+      "outcomes_inspected_for_this_decision": false
+    },
+    "affects_model_version": "SWING10-RM-1.2",
+    "supersedes_decision_id": null
+  },
+  "user_handoff": "MULtipLY CHATGPT WORK EXECUTION HANDOFF\n\nMWE: MWE-SW10-S2B5A-001\n\nOriginating canonical thread: Indicator: Swing Trades\\\nReceiving canonical thread: Indicator: Swing Trades\\\nRoadmap: SWING10-RM-1.2\\\nPhase: S2 — ACTIVE\\\nWorkstream: S2-B5A Independent Daily Data Acquisition & Certification\\\nAuthority ceiling: E1\\\nCost policy: ZERO_INCREMENTAL_COST_FIRST\n\nOBJECTIVE\n\nDetermine whether a scientifically compatible, temporally independent adjusted-daily validation panel can be acquired and certified using existing authorized MULtipLY infrastructure and existing provider entitlement without incremental spend.\n\nPrioritize investigation of a same-provider pre-discovery adjusted-daily panel. If that route cannot be certified under existing entitlement and zero-incremental-cost constraints, document the blocker and evaluate the prospective post-discovery same-provider route operationally without inspecting outcomes.\n\nThis is an OUTCOME-BLIND data acquisition and certification envelope. It is NOT independent hypothesis validation.\n\nPARENT STATE\n\nParent MWE:\\\nMWE-SW10-S2B5P-001\n\nParent status:\\\nCOMPLETE / VERIFIED\n\nParent UUID:\\\nd954ac3e-1a69-4bbb-a107-d8bb863c372a\n\nParent protocol:\\\nSW10_S2_B5_PREFLIGHT_V1\n\nParent decision UUID:\\\n67f7cf88-dceb-47a3-8e1f-379ef19b6d08\n\nParent governed job:\\\n89d6b748-1c78-4891-bc01-30ee235bee09\n\nParent attempt:\\\n04ec1fe1-86bc-4592-a760-9f8f8ac02600\n\nParent research SHA:\\\n3c8f31cbb9d29c4c6bec726b31e4749599ee78c5\n\nParent infrastructure SHA:\\\na8664094d1dfb43b18e42b8f86cc29600150d0bc\n\nParent GitHub Actions run:\\\n37056174746\n\nB5P established that no currently inventoried input is a certified independent validation sample.\n\nThe existing 2024 MARKET_CACHE_V1 minute partitions cover 112 symbols over 2024-09-09 through 2024-12-31 and provide temporally independent timestamps, but adjusted=false minute data cannot be substituted for the frozen adjusted-daily definitions.\n\nThe canonical discovery panel covers 2025-02-03 through 2026-08-27 and therefore cannot provide independent validation observations.\n\nThe protected 2025 replication cache must remain unopened.\n\nFROZEN SCIENTIFIC CASES\n\nPreserve the nine existing validation cases unchanged:\n\nLIQ_ADJUSTED_PRICE\n\n- NEGATIVE — 5 trading days\n- NEGATIVE — 7 trading days\n- NEGATIVE — 10 trading days\n\nLIQ_REPORTED_VOLUME\n\n- POSITIVE — 3 trading days\n- POSITIVE — 5 trading days\n- POSITIVE — 7 trading days\n- POSITIVE — 10 trading days\n\nRET_MOM × MARKET_SPY_TREND10\n\n- POSITIVE — 7 trading days\n- POSITIVE — 10 trading days\n\nDo not add, remove, select, optimize or reprioritize hypotheses based on available data.\n\nFROZEN CAUSAL SEMANTICS\n\nPreserve:\n\n- adjusted close_t;\n- reported daily volume_t;\n- RET_MOM = close_t / close\\_(t-10) - 1;\n- same-date finite cross-sectional average_rank / N;\n- centered rank = 2 × percentile_rank - 1;\n- SPY TREND10 normalization using strictly earlier finite observations;\n- minimum 20 prior observations;\n- sample standard deviation ddof=1;\n- SD > 1e-12.\n\nDo not change these definitions to accommodate an available source.\n\nPRIMARY ACQUISITION/CERTIFICATION TARGET\n\nInvestigate whether existing authorized provider access can supply a same-provider adjusted-daily pre-discovery panel for:\n\n- all 112 frozen symbols;\n- SPY;\n- sufficient causal predictor warmup;\n- sufficient validation decision dates;\n- complete required forward-horizon endpoints;\n- every validation endpoint strictly before 2025-02-03.\n\nThe current 2024 cache extent is coverage evidence only. Do not automatically select 2024-09-09 through 2024-12-31 as the scientific validation period.\n\nDetermine the largest objectively available compatible pre-discovery coverage under existing entitlement before any scientific validation-period freeze.\n\nZERO_INCREMENTAL_COST_FIRST\n\nUse existing infrastructure and existing provider entitlement first.\n\nExisting GitHub Actions and Supabase infrastructure are preferred.\n\nDo not purchase data, upgrade a provider subscription, enable paid Cloud Run, or incur another new incremental-cost service.\n\nIf obtaining the required adjusted-daily data requires incremental spend, stop that action and report:\n\nUSER ACTION REQUIRED — E2 COST AUTHORIZATION\n\nInclude the exact provider/product, expected cost if determinable, why existing zero-incremental-cost routes are insufficient, and available alternatives.\n\nDo not treat ordinary GitHub/Supabase resource use as proof of literal $0 billing.\n\nAUTHORIZED E0/E1 WORK\n\nAutonomously perform, as supported:\n\n1. Read the complete B5P decision, MWE, completion evidence and artifact/readback registrations.\n2. Inspect existing provider integrations, entitlement evidence and acquisition code.\n3. Determine whether the existing same provider used for the canonical adjusted-daily discovery panel can supply the required pre-discovery adjusted-daily history under current authorization.\n4. Perform non-outcome entitlement/API probes where necessary.\n5. If available without incremental spend, acquire the required raw adjusted-daily data using the existing authorized provider integration.\n6. Include SPY and all 112 frozen symbols.\n7. Acquire enough earlier history for every frozen causal predictor to be computable without using future information.\n8. Preserve provider/source metadata, adjustment flags, acquisition timestamps and exact raw response/data provenance where supported.\n9. Create immutable content-addressed source objects.\n10. Register inputs in the existing control plane without overwriting historical registrations.\n11. Independently verify byte size and SHA-256.\n12. Certify:\n\n- symbol coverage;\n- trading-date coverage;\n- adjusted-price semantics;\n- reported-volume semantics;\n- OHLCV integrity;\n- duplicate/null/nonfinite conditions;\n- SPY availability;\n- causal warmup sufficiency;\n- required horizon endpoint availability;\n- temporal independence from discovery;\n- source/session compatibility with the discovery definitions.\n\n13. Quantify the outcome-blind capacity of each of the nine frozen cases using dates/eligibility only.\n14. Explicitly document survivorship/universe limitations. The frozen 112-symbol universe is not certified as a historical point-in-time tradable universe.\n15. Persist jobs, attempts, inputs, artifacts, readbacks, provenance, findings and MWE state to the existing control plane and verify writes.\n16. Use governed GitHub Actions for deterministic execution where appropriate.\n17. Return a complete handoff to Indicator: Swing Trades.\n\nOUTCOME-BLINDNESS / PROHIBITED ACTIONS\n\nDo NOT:\n\n- compute validation forward returns;\n- inspect future endpoint prices for scientific evaluation;\n- compute validation effect sizes;\n- compute validation p-values;\n- calculate validation win rates or profitability;\n- compare hypothesis performance;\n- select dates based on outcomes;\n- select symbols based on outcomes;\n- optimize horizons, thresholds or parameters;\n- read B5 validation outcomes because none are authorized yet;\n- open protected holdout contents;\n- use historical earnings dates;\n- alter B1-B4 results;\n- modify the nine frozen cases;\n- begin S3;\n- begin S6 indicator design;\n- claim factor validation;\n- make a promotion/rejection decision.\n\nData necessary to verify source semantics may be inspected, but outcome calculations and outcome-based sample selection are prohibited.\n\nPREFERRED DECISION LOGIC\n\nA. If a compatible pre-discovery same-provider adjusted-daily panel is available under existing authorization and can be fully certified:\n\nReport PRE_DISCOVERY_DAILY_CERTIFIABLE.\n\nProvide exact objectively available coverage and causal/horizon capacity, but do not choose the final scientific validation interval unless that interval is already unambiguously forced by the frozen compatibility requirements.\n\nReturn to Indicator: Swing Trades for the prospective B5 scientific protocol/sample freeze before any outcomes are inspected.\n\nB. If data can be acquired but material semantic/coverage deficiencies prevent certification:\n\nReport PRE_DISCOVERY_DAILY_NOT_CERTIFIABLE.\n\nPreserve the evidence and identify every failed certification dimension.\n\nThen evaluate the prospective post-discovery route operationally.\n\nC. If compatible pre-discovery data requires incremental spend:\n\nDo not purchase it.\n\nReport BLOCKED — USER ACTION REQUIRED with the exact E2 cost decision.\n\nContinue any remaining independent E0/E1 investigation that does not require spend.\n\nD. If no compatible pre-discovery route exists:\n\nEvaluate requirements for a prospectively accumulated same-provider adjusted-daily panel after 2026-08-27.\n\nDo not inspect outcomes or retrospectively select a favorable start/end date.\n\nCOMPLETION CRITERIA\n\nThe MWE may be marked COMPLETE only when:\n\n- provider/entitlement investigation is complete;\n- pre-discovery adjusted-daily feasibility is conclusively classified;\n- any authorized acquisition is complete;\n- acquired bytes are immutably registered;\n- hashes and sizes are independently verified;\n- semantic compatibility is audited;\n- temporal independence is audited;\n- causal warmup and horizon capacity are audited;\n- SPY coverage is audited;\n- all 112 frozen symbols are accounted for;\n- survivorship limitations are documented;\n- required artifacts/readbacks are durable and verified;\n- control-plane state is reconciled;\n- no validation outcome has been inspected;\n- a complete canonical handoff is produced.\n\nIf certification succeeds, STOP BEFORE SCIENTIFIC VALIDATION.\n\nIndicator: Swing Trades must prospectively freeze the exact B5 validation protocol/sample before outcome computation.\n\nIf a genuine E2 blocker arises, mark the MWE BLOCKED_USER rather than COMPLETE and provide the exact required authorization.\n\nREQUIRED COMPLETION HANDOFF\n\nReturn:\n\n- MWE identity/status;\n- provider/source identity;\n- entitlement/cost determination;\n- acquisition job/attempt/run identities;\n- exact research/infrastructure SHAs;\n- immutable source objects;\n- SHA-256 and byte sizes;\n- complete coverage dates;\n- symbol/SPY coverage;\n- causal warmup capacity;\n- nine-case endpoint capacity;\n- semantic compatibility findings;\n- temporal-independence findings;\n- universe/survivorship limitations;\n- artifact UUIDs/paths/hashes/readbacks;\n- outcome-blindness verification;\n- cost evidence and limitations;\n- exact blockers, if any;\n- recommendation for the canonical B5 scientific freeze.\n\nDo not make the B5 scientific validation decision inside Work.\n\nPreserve all B1-B5P historical provenance and frozen decisions.",
+  "entitlement_evidence": [
+    {
+      "decision_id": "99eb2331-9ad4-4c75-ac21-165c7028b20d",
+      "title": "S1 market-data architecture",
+      "decision": "Use Massive as primary zero-incremental-cost market/reference source where existing entitlement permits: bulk unadjusted daily bars; splits/dividends; date-aware ticker reference including delisted symbols/ticker events. Use SEC EDGAR as free authoritative source for realized earnings-announcement timestamps. EDGAR alone does not reconstruct the pre-announcement projected earnings calendar or schedule revisions.",
+      "rationale": "Preserves anti-lookahead, raw-data reproducibility and survivorship controls without incremental spend.",
+      "metadata_json": {
+        "phase": "S1",
+        "decision_code": "SW10_S1_DATA_ARCH_V1",
+        "incremental_cost": 0,
+        "projected_earnings_calendar": "unresolved"
+      }
+    },
+    {
+      "decision_id": "92c85407-196e-44c1-ab8c-0a36ad314475",
+      "title": "S1 earnings anti-lookahead tiering",
+      "decision": "Classify earnings-event evidence into Tier A historical as-known schedule/revision records, Tier B issuer timestamped forward announcement, and Tier C realized SEC event. Only A/B may establish a pre-event exclusion boundary as of a historical decision timestamp; C can enforce retrospective no-crossing and post-event analysis but cannot be treated as previously known.",
+      "rationale": "Prevents finalized realized dates from contaminating historical eligibility while allowing free SEC evidence to remain useful.",
+      "metadata_json": {
+        "phase": "S1",
+        "decision_code": "SW10_S1_EARNINGS_TIERS_V1",
+        "incremental_cost": 0
+      }
+    },
+    {
+      "decision_id": "64180dea-6308-48c7-8382-30a65498dda5",
+      "title": "S1 acquisition implementation audit",
+      "decision": "Existing repository downloader is optimized for per-symbol 1-minute acquisition and exposes only get_minute_aggs(adjusted=false). It does not currently implement daily full-universe bulk flat-file acquisition, ticker-reference history, splits/dividends, or earnings-calendar reconstruction. Build/extend acquisition tooling before the S1 multi-year panel can be certified.",
+      "rationale": "Avoid misusing an intraday per-symbol client for a much larger survivorship-aware daily-universe job; preserve ZERO_INCREMENTAL_COST_FIRST and reproducibility.",
+      "metadata_json": {
+        "repo": "dsandoval331/TradingView",
+        "needs": [
+          "daily_bulk_or_daily_aggs",
+          "ticker_reference_point_in_time",
+          "splits",
+          "dividends",
+          "earnings_event_layer"
+        ],
+        "phase": "S1",
+        "decision_code": "SW10_S1_ACQ_IMPL_AUDIT_V1",
+        "existing_client": "minute_aggs_only"
+      }
+    },
+    {
+      "decision_id": "2e0c4f21-0b9f-4c35-9761-39b4e7fd2a9e",
+      "title": "S1 current data inventory certification",
+      "decision": "Current market_daily_history is Massive-sourced but contains only adjusted daily bars for 112 symbols from 2025-02-03 through 2026-08-27 (44,128 rows). This is insufficient for the frozen S1 requirement of survivorship-aware multi-year swing research and does not provide unadjusted daily bars/corporate-action reconstruction. Existing sector mapping covers 112 symbols and is useful for the current universe but not a historical broad-universe survivorship solution.",
+      "rationale": "Freeze the observed baseline before acquisition expansion so later certification can distinguish existing data from newly acquired data.",
+      "metadata_json": {
+        "phase": "S1",
+        "daily_rows": 44128,
+        "daily_source": "massive",
+        "certification": "INSUFFICIENT_FOR_S2_FULL_CLAIMS",
+        "daily_symbols": 112,
+        "decision_code": "SW10_S1_DATA_INVENTORY_V1",
+        "required_next": [
+          "multi_year_daily_history",
+          "unadjusted_or_corporate_action_reconstruction",
+          "survivorship_controls",
+          "point_in_time_earnings"
+        ],
+        "daily_last_date": "2026-08-27",
+        "daily_first_date": "2025-02-03",
+        "daily_adjusted_rows": 44128,
+        "daily_unadjusted_rows": 0,
+        "sector_mapping_symbols": 112
+      }
+    },
+    {
+      "decision_id": "ebd386b9-f40e-44e0-bd39-b0658d2afd68",
+      "title": "Massive S1 entitlement probe prepared",
+      "decision": "A read-only repository probe now tests existing Massive credentials against unadjusted daily history at 2021/2016/2004, date-aware ticker reference, delisted tickers, and current splits/dividends endpoints. No credential is stored and no paid entitlement is activated.",
+      "rationale": "Empirically determine existing history/reference/corporate-action access before designing or launching the multi-year acquisition.",
+      "metadata_json": {
+        "path": "tr_platform/downloader/probe_massive_swing_entitlement.py",
+        "phase": "S1",
+        "tests": [
+          "daily_2021",
+          "daily_2016",
+          "daily_2004",
+          "ticker_asof_2021",
+          "delisted_tickers",
+          "splits",
+          "dividends"
+        ],
+        "read_only": true,
+        "commit_sha": "d6dcd26ce3896dd9cc3665d3d72d311449bb252c",
+        "decision_code": "SW10_S1_MASSIVE_PROBE_V1",
+        "incremental_cost": 0,
+        "credential_storage": false
+      }
+    },
+    {
+      "decision_id": "e6088709-9745-450e-9081-5aad23be95ee",
+      "title": "Massive entitlement probe result",
+      "decision": "Existing Massive entitlement does not authorize AAPL daily aggregate history at 2021, 2016, or 2004 (HTTP 403 NOT_AUTHORIZED). It does authorize date-aware ticker reference at 2021, delisted ticker discovery, splits, and dividends (HTTP 200). Therefore use existing Massive entitlement for reference/corporate-action layers, but do not design S1 multi-year price acquisition around unavailable historical daily API access or assume a paid upgrade.",
+      "rationale": "Observed credentialed read-only probe establishes account-specific capabilities without incremental spend.",
+      "metadata_json": {
+        "phase": "S1",
+        "splits": "200_OK",
+        "dividends": "200_OK",
+        "implication": "reference_and_corporate_actions_available; multi_year_price_history_requires_zero_cost_alternative_or_explicit_paid_authorization",
+        "daily_history": {
+          "2004": "403_NOT_AUTHORIZED",
+          "2016": "403_NOT_AUTHORIZED",
+          "2021": "403_NOT_AUTHORIZED"
+        },
+        "decision_code": "SW10_S1_MASSIVE_ENTITLEMENT_RESULT_V1",
+        "delisted_tickers": "200_OK",
+        "incremental_cost": 0,
+        "ticker_asof_2021": "200_OK"
+      }
+    },
+    {
+      "decision_id": "aa779d01-a509-44ef-acb6-29a83786ae9e",
+      "title": "S1 zero-cost price-source screen batch 1",
+      "decision": "HF Data Library is retained only as a preliminary/prototyping source, not the canonical survivorship-aware S1 panel: it is free and deep but explicitly uses a circa-2022/2023 fixed universe and is severely survivorship-biased before 2022; post-March-2022 data also changes to IEX-only. Sharadar is technically strong for active+delisted OHLCV and corporate actions but its full Prices dataset is paid, so no subscription will be activated without explicit approval.",
+      "rationale": "Preserve strict anti-survivorship and zero-incremental-cost requirements rather than adopting an attractive but methodologically incompatible free dataset.",
+      "metadata_json": {
+        "phase": "S1",
+        "sharadar": {
+          "cost": "paid_full_dataset",
+          "role": "candidate_only_requires_cost_approval",
+          "ohlcv": true,
+          "history": "1997-present",
+          "corporate_actions": true,
+          "active_and_delisted": true
+        },
+        "decision_code": "SW10_S1_PRICE_SOURCE_SCREEN_B1",
+        "hf_data_library": {
+          "cost": "free",
+          "role": "prototype_or_sensitivity_only",
+          "history": "2002-present",
+          "universe": "fixed_2022_2023_snapshot",
+          "survivorship": "FAIL_PRE2022_CANONICAL",
+          "post_2022_source": "IEX_only"
+        },
+        "canonical_source": "UNRESOLVED",
+        "incremental_cost_authorized": false
+      }
+    },
+    {
+      "decision_id": "4bbbde70-6b20-40be-81e2-33279cfcf6e7",
+      "title": "S1 zero-cost price-source screen batch 2",
+      "decision": "Do not treat a single free source as the canonical S1 multi-year panel yet. QuantRocket free learning data is a strong survivorship-bias-free validation/replication panel but is fixed to 2007-2011; FMP Basic is useful for zero-cost recent EOD/reference/calendar probing but published plan limits and historical semantics are insufficient for a 5-10+ year canonical PIT panel without certification; CRSP is methodologically ideal but access is institutional/paid. Continue a hybrid architecture: Massive reference/delist/corporate actions + free validation panels + seek lawful zero-cost canonical daily history, while independently certifying earnings-calendar temporal semantics.",
+      "rationale": "Preserves ZERO_INCREMENTAL_COST_FIRST and anti-lookahead requirements while using free datasets only where their documented scope supports the claim.",
+      "metadata_json": {
+        "fmp": {
+          "role": "free_recent_eod_reference_calendar_probe_candidate",
+          "canonical_current_panel": false,
+          "requires_temporal_semantics_certification": true
+        },
+        "crsp": {
+          "role": "methodological_gold_standard_reference",
+          "zero_incremental_cost": false
+        },
+        "phase": "S1",
+        "quantrocket": {
+          "role": "free_survivorship_bias_free_replication_panel",
+          "coverage": "2007-2011",
+          "canonical_current_panel": false
+        },
+        "architecture": "hybrid_until_canonical_source_certified",
+        "decision_code": "SW10_S1_PRICE_SOURCE_SCREEN_B2",
+        "incremental_spend_authorized": false
+      }
+    },
+    {
+      "decision_id": "80467af6-2d13-472d-878d-88c08d93bf06",
+      "title": "S1 hybrid price-panel anti-lookahead architecture",
+      "decision": "A free-source combination can support meaningful research but is not yet certified as one canonical modern primary panel. Use raw/as-traded prices for signal and return construction where possible; apply splits/dividends only through a separately versioned corporate-action ledger with effective/ex dates; construct each historical universe from date-aware active/delisted identity rather than today current symbols; never retroactively use future corporate-action or membership knowledge. QuantRocket 2007-2011 is approved as an independent survivorship-bias-free replication panel. Alpha Vantage is a candidate supplemental layer because it documents raw daily history and historical listing/delisting status back to 2010, but account entitlement, delisted-symbol price continuity, and adjustment temporal semantics require empirical certification before canonical use.",
+      "rationale": "This architecture separates raw observations, corporate actions, identity/universe state, and derived adjustments so future-known information cannot leak backward.",
+      "metadata_json": {
+        "phase": "S1",
+        "decision_code": "SW10_S1_HYBRID_PANEL_ARCH_V1",
+        "replication_panel": "QUANTROCKET_2007_2011",
+        "raw_price_preferred": true,
+        "anti_lookahead_rules": [
+          "no_current_universe_backfill",
+          "no_future_corporate_action_knowledge",
+          "no_final_earnings_date_backfill",
+          "version_adjustment_inputs"
+        ],
+        "canonical_modern_panel": "NOT_YET_CERTIFIED",
+        "alpha_vantage_candidate": true,
+        "massive_reference_actions": true,
+        "corporate_actions_separate_ledger": true,
+        "historical_universe_point_in_time": true
+      }
+    },
+    {
+      "decision_id": "600c6d01-2d7c-4a1b-a095-52e97256c165",
+      "title": "S1 earnings temporal-semantics certification",
+      "decision": "Freeze a two-layer earnings model. Layer A (certifiable now): realized earnings event timestamp from SEC EDGAR filing acceptance / Item 2.02 evidence, usable for post-event labeling and ex-post contamination audits. Layer B (not yet certified): pre-event expected earnings date/time as actually known on each historical decision date, including tentative/confirmed state and revisions. Current Alpha Vantage and FMP documentation exposes current/historical/upcoming earnings calendars but does not document a historical as-of/revision ledger sufficient to prove what schedule was known on a past decision date. Therefore final realized dates must not be backfilled as if known in advance, and the pre-event 2-day exclusion buffer remains gated on a PIT schedule source or prospectively archived snapshots.",
+      "rationale": "This prevents earnings-date lookahead while allowing realized-event exclusion research to proceed separately.",
+      "metadata_json": {
+        "phase": "S1",
+        "fallback": "prospective_snapshot_archive_for_forward_validation",
+        "prohibited": "using_final_realized_earnings_date_as_if_known_in_advance",
+        "decision_code": "SW10_S1_EARNINGS_TEMPORAL_CERT_V1",
+        "required_fields": [
+          "symbol_identity",
+          "expected_event_date",
+          "expected_event_session",
+          "knowledge_timestamp",
+          "confirmation_state",
+          "revision_timestamp",
+          "source"
+        ],
+        "realized_event_layer": "CERTIFIABLE_SEC_EDGAR",
+        "buffer_days_candidate": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "pre_event_schedule_layer": "NOT_CERTIFIED_PIT",
+        "default_research_buffer_days": 2
+      }
+    },
+    {
+      "decision_id": "81182931-d4ca-405d-af20-e677193aa288",
+      "title": "Alpha Vantage S1 entitlement probe prepared",
+      "decision": "Prepare a read-only credentialed Alpha Vantage probe before considering Alpha Vantage for the canonical S1 panel. Probe full AAPL daily history, historical active/delisted listing snapshots, historical bars for delisted TWTR, earnings history, and forward earnings calendar. No paid activation or secret persistence is authorized.",
+      "rationale": "Official Alpha Vantage documentation states daily equity APIs have 25+ years of depth and LISTING_STATUS can query active/delisted securities as of dates after 2010-01-01, but actual account entitlement and delisted-price availability require empirical certification.",
+      "metadata_json": {
+        "path": "tr_platform/downloader/probe_alpha_vantage_swing_entitlement.py",
+        "phase": "S1",
+        "tests": [
+          "daily_full_aapl",
+          "listing_active_2013",
+          "listing_delisted_2013",
+          "daily_full_twtr_delisted",
+          "earnings_history_aapl",
+          "earnings_calendar_aapl"
+        ],
+        "status": "requires_credentialed_execution",
+        "read_only": true,
+        "commit_sha": "9e689f6fdacb7f745341edc652f26e95e26b7ac3",
+        "decision_code": "SW10_S1_ALPHA_VANTAGE_PROBE_V1",
+        "incremental_cost": 0,
+        "credential_storage": false
+      }
+    },
+    {
+      "decision_id": "d9fe4c49-3ac4-45db-b1ac-767f45f54d15",
+      "title": "Alpha Vantage entitlement probe result",
+      "decision": "Existing Alpha Vantage free entitlement is insufficient for the canonical S1 historical price panel. TIME_SERIES_DAILY outputsize=full is premium for both AAPL and delisted TWTR. Historical LISTING_STATUS probes returned HTTP 200 but an empty/JSON response rather than usable CSV rows, so historical active/delisted reconstruction is not certified from this run. EARNINGS was rate-limited under the free-key 25 requests/day / burst rules. EARNINGS_CALENDAR returned a malformed one-row parse and therefore is not certified for historical point-in-time semantics. Do not upgrade or rely on Alpha Vantage for the primary panel without explicit paid authorization.",
+      "rationale": "The credentialed read-only probe directly measured the user account and removed uncertainty around free-tier historical depth.",
+      "metadata_json": {
+        "phase": "S1",
+        "decision_code": "SW10_S1_ALPHA_VANTAGE_ENTITLEMENT_RESULT_V1",
+        "daily_full_aapl": "PREMIUM_REQUIRED",
+        "incremental_cost": 0,
+        "listing_active_2013": "NOT_CERTIFIED_EMPTY_RESPONSE",
+        "canonical_panel_role": "REJECT_FREE_TIER",
+        "earnings_history_aapl": "RATE_LIMITED_FREE_KEY",
+        "listing_delisted_2013": "NOT_CERTIFIED_EMPTY_RESPONSE",
+        "earnings_calendar_aapl": "NOT_CERTIFIED_MALFORMED_PARSE",
+        "paid_upgrade_authorized": false,
+        "daily_full_twtr_delisted": "PREMIUM_REQUIRED"
+      }
+    },
+    {
+      "decision_id": "b71853c0-f9fa-4800-8c8a-ac851cf6292b",
+      "title": "S1 zero-cost source screen batch 3",
+      "decision": "Promote FMP Basic to empirical-probe candidate, not canonical source. Current provider materials state the free Basic plan includes end-of-day historical data, profile/reference data, 250 calls/day, and a 5-year historical range; FMP also states its free delisted-company endpoint includes IPO and delisting dates. This combination could support a recent 5-year PIT-ish universe/price panel if delisted-symbol EOD history and raw/unadjusted semantics pass empirical certification. Nasdaq Data Link WIKI remains legacy/frozen rather than a modern primary panel.",
+      "rationale": "A five-year free recent panel would materially improve S1 if it preserves delisted histories and avoids adjustment lookahead, but documentation alone does not certify those properties.",
+      "metadata_json": {
+        "phase": "S1",
+        "fmp_basic": {
+          "status": "PROMOTE_TO_PROBE",
+          "must_probe": [
+            "AAPL_full_eod_5y",
+            "known_delisted_symbol_eod",
+            "delisted_company_list",
+            "unadjusted_endpoint_or_raw_semantics",
+            "splits_dividends",
+            "earnings_calendar_payload"
+          ],
+          "calls_per_day": 250,
+          "eod_historical": true,
+          "delisted_endpoint_free": true,
+          "documented_history_years": 5
+        },
+        "nasdaq_wiki": {
+          "status": "LEGACY_REPLICATION_ONLY",
+          "modern_primary_panel": false
+        },
+        "decision_code": "SW10_S1_PRICE_SOURCE_SCREEN_B3",
+        "canonical_modern_panel": "UNRESOLVED",
+        "paid_upgrade_authorized": false
+      }
+    },
+    {
+      "decision_id": "9914335f-cdf1-4954-8450-642ab0747982",
+      "title": "FMP Basic S1 capability probe prepared",
+      "decision": "Prepare a read-only FMP Basic probe for recent 5-year EOD depth, delisted-symbol price continuity, free delisted-company reference, non-split-adjusted price availability, splits/dividends, and earnings-calendar payload. No paid activation or secret persistence.",
+      "rationale": "FMP Basic is currently the strongest untested zero-cost candidate for a recent survivorship-aware panel, but must pass empirical anti-lookahead checks.",
+      "metadata_json": {
+        "path": "tr_platform/downloader/probe_fmp_swing_entitlement.py",
+        "phase": "S1",
+        "status": "requires_credentialed_execution",
+        "read_only": true,
+        "commit_sha": "7a9036021ce5ae618bb4a2c56b819a9e2b812946",
+        "decision_code": "SW10_S1_FMP_PROBE_V1",
+        "incremental_cost": 0,
+        "credential_storage": false
+      }
+    },
+    {
+      "decision_id": "bfa587d0-c866-487e-9499-548479b15a02",
+      "title": "FMP Basic entitlement probe result",
+      "decision": "FMP Basic free entitlement passes the first empirical gate for a recent primary-panel candidate: AAPL EOD data was returned for September 2021; delisted TWTR EOD data was returned through 2022-10-27; the delisted-companies endpoint returned IPO/delisting fields; non-split-adjusted endpoint returned data; splits and dividends returned historical corporate-action records; and the forward earnings calendar returned estimated fields plus lastUpdated. Do not yet freeze FMP as canonical: certify actual maximum history depth, US-universe completeness, delisted coverage at scale, semantics of the non-split-adjusted fields, and whether earnings lastUpdated/history can reconstruct as-known schedule revisions.",
+      "rationale": "This is direct credentialed evidence from the user free FMP account and materially advances the zero-cost architecture.",
+      "metadata_json": {
+        "phase": "S1",
+        "free_tier": {
+          "splits": "PASS",
+          "dividends": "PASS",
+          "aapl_2021_eod": "PASS",
+          "earnings_calendar": "PASS_CURRENT_SNAPSHOT",
+          "twtr_delisted_eod": "PASS",
+          "delisted_companies": "PASS",
+          "non_split_adjusted": "PASS_ENDPOINT_ACCESS"
+        },
+        "decision_code": "SW10_S1_FMP_ENTITLEMENT_RESULT_V1",
+        "canonical_status": "CANDIDATE_REQUIRES_SCALE_AND_SEMANTICS_CERTIFICATION",
+        "remaining_checks": [
+          "max_history_depth",
+          "US_universe_completeness",
+          "delisted_coverage_scale",
+          "non_split_adjusted_field_semantics",
+          "corporate_action_crosscheck_vs_massive",
+          "earnings_lastUpdated_temporal_semantics",
+          "historical_schedule_revision_availability"
+        ],
+        "paid_upgrade_authorized": false
+      }
+    },
+    {
+      "decision_id": "e19e3415-7df2-485e-84fd-84f3aba86115",
+      "title": "S1 hybrid architecture certification batch prepared",
+      "decision": "Prepare one read-only dual-provider probe covering two remaining empirical certifications: Massive point-in-time active-universe extraction at 2019/2021/2025 plus delisted discovery, and Massive-vs-FMP split/dividend agreement for AAPL/TSLA. Freeze the third certification methodology now: historical pre-event earnings-buffer claims remain gated because no free historical as-known schedule/revision ledger has been certified; historical research may use SEC realized-event timing for contamination exclusion/audit, while implementable pre-event buffers require prospectively archived FMP future-calendar snapshots or a later PIT source.",
+      "rationale": "These checks directly target the last empirical S1 data architecture gates without paid spend.",
+      "metadata_json": {
+        "path": "tr_platform/downloader/probe_swing_s1_hybrid_cert.py",
+        "phase": "S1",
+        "status": "requires_credentialed_execution",
+        "read_only": true,
+        "commit_sha": "a87e662e49ccacd866ce3cf7a74f1e1c5c0c771a",
+        "decision_code": "SW10_S1_HYBRID_CERT_BATCH_V1",
+        "certifications": [
+          "massive_pit_universe_scale",
+          "massive_fmp_corporate_action_crosscheck",
+          "earnings_buffer_temporal_policy"
+        ],
+        "earnings_policy": {
+          "realized_sec_events": "ALLOWED_FOR_CONTAMINATION_AUDIT",
+          "prospective_fmp_snapshots": "ALLOWED_FOR_FORWARD_VALIDATION",
+          "historical_expected_schedule": "NOT_CERTIFIED",
+          "historical_pre_event_buffer_claim": "GATED"
+        },
+        "incremental_cost": 0,
+        "credential_storage": false
+      }
+    },
+    {
+      "decision_id": "06e7bffe-855f-4797-a3e4-f87e4d4c2770",
+      "title": "S1 hybrid certification result",
+      "decision": "Massive passes the tested point-in-time universe/reference gate at 2019-09-10, 2021-09-10, and 2025-09-10: each query returned 1,000 rows with next_url pagination, and inactive/delisted discovery returned 1,000 rows with next_url. Massive and FMP exactly agree on tested AAPL and TSLA split dates and ratios. Dividend feeds are not directly count-comparable because the Massive probe returned 57 rows versus FMP 92 and sampled different date ranges/orderings; dividend certification therefore remains a field/date-level cross-check task rather than a count-equality requirement. Freeze Massive as universe/identity authority and primary corporate-action reference, FMP as symbol-level raw/non-split-adjusted price source and secondary corporate-action cross-check. Historical expected earnings schedules remain unavailable free; historical pre-event buffer claims stay gated, while SEC realized events support contamination audits and prospectively archived FMP snapshots support forward validation.",
+      "rationale": "The dual-provider credentialed probe directly tested PIT reference pagination and cross-provider corporate actions.",
+      "metadata_json": {
+        "phase": "S1",
+        "architecture": {
+          "splits": "MASSIVE_PRIMARY_FMP_CROSSCHECK",
+          "dividends": "MASSIVE_PRIMARY_FMP_CROSSCHECK_PENDING_NORMALIZATION",
+          "raw_prices": "FMP_PRIMARY_CANDIDATE",
+          "realized_earnings": "SEC_EDGAR",
+          "universe_identity": "MASSIVE_PRIMARY",
+          "prospective_earnings": "FMP_SNAPSHOT_ARCHIVE",
+          "pre_event_historical_buffer": "GATED"
+        },
+        "decision_code": "SW10_S1_HYBRID_CERT_RESULT_V1",
+        "certifications": {
+          "split_cross_provider": "PASS_TESTED_AAPL_TSLA",
+          "dividend_cross_provider": "PARTIAL_REQUIRES_NORMALIZED_MATCH",
+          "massive_pit_active_2019": "PASS_PAGINATED",
+          "massive_pit_active_2021": "PASS_PAGINATED",
+          "massive_pit_active_2025": "PASS_PAGINATED",
+          "massive_delisted_discovery": "PASS_PAGINATED",
+          "historical_expected_earnings_schedule": "NOT_CERTIFIED_FREE"
+        },
+        "paid_upgrade_authorized": false
+      }
+    },
+    {
+      "decision_id": "b207c6b8-9e9f-464e-9c5f-b94db5262511",
+      "title": "Normalized dividend certification result and S1 completion",
+      "decision": "Normalized AAPL dividend comparison materially passes. All 57 Massive dividend ex-dates are present in FMP; 55 common events since 2013 have complete record/payment-date agreement, 53/55 declaration-date agreement, and 51/55 exact cash-amount equality at 1e-6 tolerance. The four amount mismatches differ only by one millionth (0.108929 vs 0.10893), which is immaterial rounding rather than an economic discrepancy. Freeze Massive as primary corporate-action authority with FMP as independent cross-check. S1 Data & Earnings-Calendar Certification is complete subject to an explicit limitation: no certified free historical as-known earnings schedule exists, so historical pre-event earnings-buffer claims remain gated and S2/S3 historical research must not use ex-post earnings dates as if known in advance.",
+      "rationale": "This closes the last empirical corporate-action gate while preserving the anti-lookahead earnings limitation.",
+      "metadata_json": {
+        "phase": "S1",
+        "limitations": {
+          "no_ex_post_schedule_knowledge": true,
+          "historical_pre_event_buffer_claim": "GATED"
+        },
+        "decision_code": "SW10_S1_COMPLETE_V1",
+        "certifications": {
+          "fmp_symbol_history": "PASS_CANDIDATE",
+          "massive_pit_universe": "PASS",
+          "split_cross_provider": "PASS",
+          "realized_earnings_sec": "CERTIFIABLE",
+          "dividend_cross_provider": "PASS_MATERIAL",
+          "historical_expected_earnings_schedule": "NOT_CERTIFIED_FREE"
+        },
+        "s2_admissibility": {
+          "allowed": [
+            "price_path",
+            "volume_turnover",
+            "52w_structure",
+            "volatility",
+            "gaps",
+            "liquidity",
+            "market_regime",
+            "relative_strength_where_data_available"
+          ],
+          "restricted": [
+            "historical_pre_event_earnings_schedule_features_without_PIT_source"
+          ]
+        }
+      }
+    }
+  ],
+  "symbols": [
+    "AAPL",
+    "ABBV",
+    "ABNB",
+    "ADBE",
+    "AMAT",
+    "AMD",
+    "AMGN",
+    "AMZN",
+    "ANET",
+    "APP",
+    "ARM",
+    "ASML",
+    "AVGO",
+    "AXON",
+    "AXP",
+    "BA",
+    "BAC",
+    "BKNG",
+    "BLK",
+    "BMY",
+    "C",
+    "CAT",
+    "CEG",
+    "CMCSA",
+    "CME",
+    "CMG",
+    "COIN",
+    "COP",
+    "COST",
+    "CRM",
+    "CRWD",
+    "CSCO",
+    "CVS",
+    "CVX",
+    "DASH",
+    "DDOG",
+    "DE",
+    "DELL",
+    "DIS",
+    "EOG",
+    "ETN",
+    "FDX",
+    "GE",
+    "GILD",
+    "GOOG",
+    "GS",
+    "HAL",
+    "HD",
+    "HON",
+    "HOOD",
+    "IBM",
+    "INTC",
+    "ISRG",
+    "IWM",
+    "JNJ",
+    "JPM",
+    "KLAC",
+    "LLY",
+    "LMT",
+    "LOW",
+    "LRCX",
+    "LULU",
+    "MA",
+    "MCD",
+    "META",
+    "MNDY",
+    "MRK",
+    "MRNA",
+    "MRVL",
+    "MS",
+    "MSFT",
+    "MU",
+    "NEE",
+    "NFLX",
+    "NKE",
+    "NOW",
+    "NVDA",
+    "ORCL",
+    "OXY",
+    "PANW",
+    "PEP",
+    "PFE",
+    "PLTR",
+    "PYPL",
+    "QCOM",
+    "QQQ",
+    "RBLX",
+    "REGN",
+    "RTX",
+    "SBUX",
+    "SCHW",
+    "SHOP",
+    "SLB",
+    "SNOW",
+    "SPY",
+    "T",
+    "TEAM",
+    "TGT",
+    "TMO",
+    "TMUS",
+    "TQQQ",
+    "TSLA",
+    "TXN",
+    "UBER",
+    "UNH",
+    "UPS",
+    "URI",
+    "V",
+    "VRTX",
+    "VZ",
+    "WMT",
+    "XOM"
+  ],
+  "documentation": [
+    {
+      "url": "https://massive.com/pricing",
+      "basic_history": "2 years",
+      "basic_rate_per_minute": 5,
+      "starter_monthly_usd": 29,
+      "developer_monthly_usd": 79,
+      "as_of": "2026-10-02",
+      "account_current_plan": "NOT_YET_PROBED"
+    }
+  ],
+  "request_policy": {
+    "oldest_provider_date": "2003-09-10",
+    "pre_discovery_end": "2025-02-02",
+    "requests_per_minute": 4,
+    "paid_upgrades": false,
+    "scientific_interval_selected": false,
+    "outcome_authorized": false
+  }
+}
