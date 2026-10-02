@@ -6,6 +6,7 @@ CODE_ROOT=Path(__file__).resolve().parents[1]
 WORK_ROOT=Path(os.environ.get("TR_WORK_ROOT",str(CODE_ROOT))).expanduser().resolve()
 STATE_DIR=WORK_ROOT/"research_outputs"/"runner"; STATE_FILE=STATE_DIR/"state.json"
 JOBS=[
+{"id":"SW10-S2-B3-PREFLIGHT","project":"swing10","module":"tr_platform.research.swing10_s2_b3_preflight","description":"Outcome-blind conditioning coverage preflight"},
 {"id":"SW10-S2-B2","project":"swing10","module":"tr_platform.research.swing10_s2_b2","description":"Frozen causal factor validation and semantic audit"},
 {"id":"CCP-QUEUE-WATCHER-FIXTURE","project":"pmpd","module":"research_runner.jobs.ccp_queue_watcher_fixture","description":"Harmless governed queue-watcher end-to-end certification fixture"},
 {"id":"PMPD-POST9N-B1","project":"pmpd","module":"research_runner.jobs.pmpd_post9n_batch1","description":"V5 contextual edge search: gap, time, geometry, RVOL, SPY/QQQ alignment"},
