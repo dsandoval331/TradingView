@@ -3,8 +3,10 @@ name: SW10 S2 B2 Causal Core Certification
 on:
   pull_request:
     paths:
-      - 'tr_platform/research/swing10_s2_b2_core.py'
-      - 'tests/test_swing10_s2_b2_core.py'
+      - 'tr_platform/research/swing10_s2_b2*.py'
+      - 'cloud_compute/**'
+      - 'research_runner/runner.py'
+      - 'tests/test_swing10_s2_b2*.py'
       - '.github/workflows/sw10-s2-b2-core-cert.yml'
 
 permissions:
@@ -24,4 +26,4 @@ jobs:
           pip install -r requirements.txt
           pip install pytest==8.4.2
       - name: Synthetic causal and existing infrastructure regression checks
-        run: python -m pytest -q tests/test_swing10_s2_b2_core.py tests/test_research_revision_adapter.py tests/test_swing10_input_prepare.py tests/test_ccp5_control_plane.py tests/test_ccp5_control_plane_worker.py tests/test_ccp8_autonomous_loop.py tests/test_ccp9_exact_claim.py tests/test_ccp10_input_materializer.py tests/test_ccp11_artifact_contract.py
+        run: python -m pytest -q tests/test_swing10_s2_b2_core.py tests/test_swing10_s2_b2.py tests/test_research_revision_adapter.py tests/test_swing10_input_prepare.py tests/test_ccp5_control_plane.py tests/test_ccp5_control_plane_worker.py tests/test_ccp8_autonomous_loop.py tests/test_ccp9_exact_claim.py tests/test_ccp10_input_materializer.py tests/test_ccp11_artifact_contract.py

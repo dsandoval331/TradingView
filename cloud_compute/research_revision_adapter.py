@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import importlib.util
+import json
+import os
 import sqlite3
 import subprocess
 import sys
@@ -21,6 +23,7 @@ class GovernedResearchTarget:
 
 
 GOVERNED_RESEARCH_TARGETS: dict[str, GovernedResearchTarget] = {
+    "SW10-S2-B2": GovernedResearchTarget("SW10-S2-B2", "tr_platform/research/swing10_s2_b2.py", execution_mode="swing10_b2_bundle"),
     "PMOD-P2-B2": GovernedResearchTarget("PMOD-P2-B2", "research_runner/jobs/pmod_p2_b2_certification.py"),
     "IR11-P3-B2": GovernedResearchTarget("IR11-P3-B2", "research_runner/jobs/ir11_p3_normalization_b2.py"),
     "SW10-S2-B1": GovernedResearchTarget("SW10-S2-B1", "tr_platform/research/swing10_s2_b1.py", execution_mode="swing10_snapshot_cli"),
@@ -97,6 +100,24 @@ def _run_swing10_snapshot_cli(module_file: Path, work_root: Path) -> dict[str, A
     }
 
 
+def _run_b2_bundle(repo_root: Path, sha: str, destination: Path, work_root: Path) -> dict:
+    # Both research files are loaded from the requested revision, never mixed
+    # with an infrastructure revision's helper implementation.
+    for path in ("tr_platform/__init__.py", "tr_platform/research/__init__.py"):
+        target = destination / path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text("", encoding="utf-8")
+    for path in ("tr_platform/research/swing10_s2_b2.py", "tr_platform/research/swing10_s2_b2_core.py"):
+        materialize_module(repo_root, sha, path, destination / path)
+    result_path = destination / "result.json"
+    code = "from pathlib import Path; import json,sys; from tr_platform.research.swing10_s2_b2 import run; Path(sys.argv[2]).write_text(json.dumps(run(Path(sys.argv[1]))))"
+    proc = subprocess.run([sys.executable, "-c", code, str(work_root.resolve()), str(result_path)],
+                          cwd=destination, env={**os.environ, "PYTHONPATH": str(destination)}, capture_output=True, text=True)
+    if proc.returncode:
+        raise RuntimeError(f"SW10-S2-B2 exact research bundle failed: {proc.stderr[-2000:]}")
+    return json.loads(result_path.read_text())
+
+
 def run_governed_revision(*, repo_root: Path, work_root: Path, runner_job_id: str, research_sha: str) -> dict[str, Any]:
     target = GOVERNED_RESEARCH_TARGETS.get(runner_job_id)
     if target is None:
@@ -104,7 +125,9 @@ def run_governed_revision(*, repo_root: Path, work_root: Path, runner_job_id: st
     verified_sha = verify_commit(repo_root, research_sha)
     with tempfile.TemporaryDirectory(prefix="governed-research-") as td:
         module_file = materialize_module(repo_root, verified_sha, target.module_path, Path(td) / Path(target.module_path).name)
-        if target.execution_mode == "swing10_snapshot_cli":
+        if target.execution_mode == "swing10_b2_bundle":
+            result = _run_b2_bundle(repo_root, verified_sha, Path(td), Path(work_root))
+        elif target.execution_mode == "swing10_snapshot_cli":
             result = _run_swing10_snapshot_cli(module_file, Path(work_root))
         else:
             spec = importlib.util.spec_from_file_location(f"governed_{runner_job_id.lower().replace('-', '_')}", module_file)
