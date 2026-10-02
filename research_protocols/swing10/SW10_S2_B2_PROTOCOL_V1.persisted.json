@@ -1,0 +1,85 @@
+{
+  "affects_model_version": "SWING10-RM-1.2",
+  "decision": "Freeze SW10_S2_B2_PROTOCOL_V1 for SW10-S2-B2 Causal Factor Validation & Semantic Audit. B2 uses point-in-time date-specific cross-sectional 80/20 tails; horizons 1/2/3/5/7/10; trading date as inference unit; Newey-West HAC with Bartlett kernel and lag=horizon-1; two-sided inference; BH-FDR q=0.05; four chronological stability blocks; 3-of-4 directional consistency; <=50% single-block absolute aggregate-effect concentration; symbol concentration and leave-top-five-out sign test; VOL_TURN_B1_LEGACY preserved and VOL_TURN_V2_CAUSAL defined as current volume divided by mean of prior 20 completed observations; explicit four-state disposition taxonomy; no optimization, holdout access, or S3 promotion from isolated B2 results.",
+  "decision_date": "2026-10-02T00:57:29.760128+00:00",
+  "decision_id": "d7b1e65f-28c6-4f13-b3fb-e77fbbd8afbe",
+  "evidence": "Parent B1 MWE MWE-SW10-S2B1-001 completed with verified factor_tail_summary.csv; B1 exposed pooled full-panel qcut temporal semantics and VOL_TURN legacy-expression limitations that B2 must explicitly test without rewriting B1.",
+  "metadata_json": {
+    "allowed_dispositions": [
+      "ADVANCE_TO_S2_ROBUSTNESS",
+      "RETAIN_AS_WEAK_EVIDENCE",
+      "RETAIN_AS_COUNTEREVIDENCE",
+      "INVALID_SEMANTICS_NOT_TESTABLE"
+    ],
+    "artifact_contract": [
+      "factor_causal_summary.csv",
+      "factor_date_spreads.csv",
+      "factor_temporal_stability.csv",
+      "factor_symbol_concentration.csv",
+      "factor_semantic_audit.csv",
+      "factor_b2_dispositions.csv",
+      "sw10_s2_b2_manifest.json"
+    ],
+    "batch": "SW10-S2-B2",
+    "decision_code": "SW10_S2_B2_PROTOCOL_V1",
+    "horizons_days": [
+      1,
+      2,
+      3,
+      5,
+      7,
+      10
+    ],
+    "inference": {
+      "ci": 0.95,
+      "estimator": "Newey-West HAC",
+      "fdr_q": 0.05,
+      "kernel": "Bartlett",
+      "lag_rule": "horizon_days - 1",
+      "multiple_testing": "Benjamini-Hochberg",
+      "two_sided": true,
+      "unit": "trading_date"
+    },
+    "parent_batch": "SW10-S2-B1",
+    "parent_mwe": "MWE-SW10-S2B1-001",
+    "phase": "S2",
+    "prohibited": [
+      "parameter_optimization",
+      "protected_holdout_access",
+      "results_driven_threshold_changes",
+      "S6_indicator_design",
+      "paid_compute_without_authorization"
+    ],
+    "status": "FROZEN",
+    "symbol_concentration": {
+      "leave_top5_out_sign_reversal_blocks_advance": true,
+      "report_top": [
+        1,
+        5,
+        10
+      ]
+    },
+    "tails": {
+      "high_percentile": 80,
+      "low_percentile": 20,
+      "point_in_time": true,
+      "scope": "cross_sectional_per_trade_date"
+    },
+    "temporal_stability": {
+      "blocks": 4,
+      "directional_blocks_required": 3,
+      "max_single_block_abs_effect_share": 0.5
+    },
+    "vol_turn": {
+      "causal_id": "VOL_TURN_V2_CAUSAL",
+      "denominator_excludes_current": true,
+      "formula": "volume_t / mean(volume_t-1..t-20)",
+      "legacy_id": "VOL_TURN_B1_LEGACY"
+    }
+  },
+  "rationale": "Freeze causal/statistical/semantic rules before B2 outcomes so discovery validation cannot be tuned after observing results.",
+  "status": "active",
+  "strategy_id": "09f30dc1-81ae-440f-aeca-18652df69896",
+  "supersedes_decision_id": null,
+  "title": "S2-B2 causal validation protocol freeze"
+}
