@@ -80,6 +80,9 @@ jobs:
         run: python -m cloud_compute.swing10_input_prepare --job-id "${{ inputs.job_id }}"
 
       - name: Execute exact governed research job
+        env:
+          MASSIVE_API_KEY: ${{ inputs.job_id == '2cc99ebc-66f6-4bf5-a4d7-b6fc46cdb6a4' && secrets.MASSIVE_API_KEY || '' }}
+          TR_MASSIVE_API_KEY: ${{ inputs.job_id == '2cc99ebc-66f6-4bf5-a4d7-b6fc46cdb6a4' && secrets.TR_MASSIVE_API_KEY || '' }}
         run: python -m cloud_compute.autonomous_loop --executor github_actions --external-execution-id "$GITHUB_RUN_ID" --job-id "${{ inputs.job_id }}" --max-jobs 10
 
       - name: Independently read back SW10 output bytes into durable cache
