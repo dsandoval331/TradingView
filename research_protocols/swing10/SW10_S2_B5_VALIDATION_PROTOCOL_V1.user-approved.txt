@@ -1,0 +1,446 @@
+MULtipLY CHATGPT WORK EXECUTION HANDOFF
+
+MWE: MWE-SW10-S2B5-001
+
+Originating canonical thread: Indicator: Swing Trades
+Receiving canonical thread: Indicator: Swing Trades
+Roadmap: SWING10-RM-1.2
+Phase: S2 — ACTIVE
+Workstream: S2-B5 Independent Validation
+Authority ceiling: E1
+Cost policy: ZERO_INCREMENTAL_COST_FIRST
+
+CANONICAL SCIENTIFIC AUTHORITY
+
+The user has explicitly approved:
+
+SW10_S2_B5_VALIDATION_PROTOCOL_V1 — FROZEN
+
+This approval occurred prospectively, before inspection of B5 validation outcomes.
+
+Persist the complete frozen protocol and its approval in the authoritative control plane before scientific execution. Independently read it back and verify that the implementation contract exactly matches it.
+
+Do not reinterpret, weaken, optimize or supplement the scientific contract based on validation results.
+
+OBJECTIVE
+
+Implement, regression-certify, execute and independently verify the first genuine independent validation of the nine prospectively frozen Swing Trades hypotheses using the immutable B5A-certified pre-discovery dataset.
+
+Return the complete verified scientific results to Indicator: Swing Trades.
+
+Work may mechanically calculate the frozen dispositions, but Indicator: Swing Trades retains scientific interpretation, S2 exit and roadmap authority.
+
+PARENT B5A
+
+MWE:
+MWE-SW10-S2B5A-001
+
+MWE UUID:
+4cee0c88-fa5c-45a4-8713-e8f6e40b93c6
+
+B5A status:
+COMPLETE / VERIFIED
+
+Immutable validation dataset:
+massive_adjusted_daily_pre_discovery_2024-10-02_2025-01-31_asof_2026-10-03
+
+Input UUID:
+86045cd0-8e49-4261-aed9-3f24bfb5ff07
+
+SHA-256:
+b905affcb0843a4d313557fc59fc543a46413258f2c49a68f1eb87d338e55915
+
+Bytes:
+792,664
+
+Coverage:
+2024-10-02 through 2025-01-31
+
+Panel:
+9,296 rows
+112 frozen symbols
+83 trading dates
+complete 112-symbol cross section including SPY
+
+Every validation horizon endpoint must remain strictly before 2025-02-03.
+
+Use the immutable registered bytes. Do not regenerate or replace the validation panel.
+
+FROZEN PRIMARY FAMILY
+
+Exactly nine primary tests:
+
+LIQ_ADJUSTED_PRICE
+
+* NEGATIVE — 5 trading days
+* NEGATIVE — 7 trading days
+* NEGATIVE — 10 trading days
+
+LIQ_REPORTED_VOLUME
+
+* POSITIVE — 3 trading days
+* POSITIVE — 5 trading days
+* POSITIVE — 7 trading days
+* POSITIVE — 10 trading days
+
+RET_MOM × MARKET_SPY_TREND10
+
+* POSITIVE — 7 trading days
+* POSITIVE — 10 trading days
+
+The two RET_MOM × MARKET_SPY_TREND10 cases are prospectively flagged:
+
+LIMITED_TEMPORAL_CAPACITY
+
+because B5A established approximately 46 and 43 eligible trading dates respectively.
+
+Do not remove that flag based on outcomes.
+
+SAMPLE RULE
+
+Use the entire objectively available B5A source envelope.
+
+For each case, use every causally eligible date satisfying its frozen predictor requirements and complete forward horizon while requiring the endpoint to remain strictly before 2025-02-03.
+
+No discretionary date or symbol removal.
+
+No outcome-driven exclusions.
+
+FROZEN CAUSAL SEMANTICS
+
+Preserve the certified causal definitions and all prior frozen semantics.
+
+These include, where applicable:
+
+* adjusted close_t;
+* reported daily volume_t;
+* RET_MOM = close_t / close_(t-10) - 1;
+* finite same-date cross-sectional average_rank / N;
+* centered rank = 2 × percentile_rank - 1;
+* SPY TREND10 state using the frozen B4/B5 definition;
+* state normalization from strictly earlier finite observations;
+* minimum 20 prior observations;
+* sample SD ddof=1;
+* SD > 1e-12.
+
+Use only information causally available at each decision date.
+
+PRIMARY INFERENCE UNIT
+
+Trading date is the primary inference unit.
+
+Do not treat individual symbol/date observations as independent inferential observations.
+
+Construct the frozen date-level cross-sectional effect for each eligible trading date and perform primary inference on the resulting date-level series.
+
+OVERLAPPING-RETURN INFERENCE
+
+Use Bartlett/Newey-West HAC covariance.
+
+For horizon H:
+
+HAC lag = H - 1 trading dates.
+
+Use:
+
+* two-sided inference;
+* asymptotic-normal reference distribution;
+* 95% confidence interval;
+* no unplanned small-sample multiplier;
+* sample SD ddof=1 where required.
+
+Report the frozen directional interpretation separately from the two-sided inferential calculation.
+
+Do not convert the primary test into an unplanned one-sided test.
+
+MULTIPLICITY
+
+All nine primary cases form ONE multiple-testing family.
+
+Apply Benjamini-Hochberg jointly across all nine primary p-values.
+
+Primary FDR threshold:
+
+q <= 0.05
+
+Do not split the family by factor, horizon or result.
+
+Unavailable primary cases remain explicitly unavailable and must not silently disappear in a manner that reduces multiplicity burden.
+
+REQUIRED PRIMARY STATISTICS
+
+For every case report at minimum:
+
+* family;
+* horizon;
+* frozen direction;
+* eligible date count;
+* mean date-level effect;
+* median date-level effect;
+* sample SD;
+* standardized effect = mean / sample SD;
+* HAC standard error;
+* 95% HAC CI;
+* raw two-sided p-value;
+* BH-adjusted p-value;
+* positive/negative date share as applicable;
+* LIMITED_TEMPORAL_CAPACITY flag.
+
+MATERIAL-EFFECT GATE
+
+Preserve the existing S2 material-effect convention already frozen upstream.
+
+Do not create a more permissive B5-specific threshold.
+
+The exact inherited threshold/convention must be located in authoritative prior frozen decisions and included explicitly in the B5 implementation/manifest before outcome execution.
+
+If the authoritative inherited material-effect rule cannot be determined unambiguously without inspecting B5 outcomes:
+
+STOP BEFORE OUTCOME COMPUTATION.
+
+Return BLOCKED_USER to Indicator: Swing Trades identifying the ambiguity.
+
+Do not invent a threshold.
+
+TEMPORAL STABILITY
+
+Before outcome inspection, deterministically partition each case’s eligible validation dates chronologically into four approximately equal blocks.
+
+Report per block:
+
+* start/end;
+* N;
+* mean;
+* median;
+* sign.
+
+Preserve any applicable previously frozen stability gate semantics. Do not remove a poor block.
+
+SYMBOL CONCENTRATION
+
+Where additive symbol contribution is defined, report:
+
+* every symbol’s contribution;
+* top-1 absolute contribution share;
+* top-5;
+* top-10;
+* concentration/HHI diagnostic;
+* leave-top-five aggregate effect;
+* sign reversal after removing top five.
+
+Do not remove symbols from the primary test based on these diagnostics.
+
+MECHANICAL DISPOSITIONS
+
+Exactly one disposition per frozen hypothesis:
+
+INDEPENDENT_VALIDATION_SUPPORTED
+
+PARTIAL_VALIDATION_EVIDENCE
+
+INDEPENDENT_VALIDATION_FAILED
+
+NOT_TESTABLE
+
+INDEPENDENT_VALIDATION_SUPPORTED requires:
+
+* frozen hypothesized sign;
+* inherited material-effect gate;
+* BH-FDR q <= 0.05;
+* required frozen stability gate;
+* required concentration gate;
+* no semantic/data-integrity failure.
+
+PARTIAL_VALIDATION_EVIDENCE indicates supportive evidence with one or more preregistered confirmation gates failing. It is not equivalent to independent validation.
+
+INDEPENDENT_VALIDATION_FAILED indicates failure of required directional/material/inferential confirmation or substantive contradictory evidence.
+
+NOT_TESTABLE is reserved for a prospectively required estimand that cannot validly be computed because of semantic/data/numerical insufficiency.
+
+The LIMITED_TEMPORAL_CAPACITY flag remains attached to the two market-state tests regardless of mechanical disposition.
+
+NO VALIDATION-SAMPLE RECYCLING
+
+After B5 outcomes are exposed, this validation dataset is used.
+
+Do not use its outcomes to create or confirm:
+
+* new thresholds;
+* alternate horizons;
+* new factors;
+* alternate transformations;
+* revised market-state definitions;
+* symbol filters;
+* date filters;
+* new interactions;
+* optimized parameters.
+
+Diagnostics may explain results but may not convert an exploratory revision into a validated result on this sample.
+
+Any materially revised hypothesis requires another genuinely untouched sample.
+
+IMPLEMENTATION AND REGRESSION CERTIFICATION
+
+Before real B5 outcomes execute:
+
+1. Persist/read back the complete frozen protocol.
+2. Verify immutable input UUID/hash/size.
+3. Verify exact nine-test registry.
+4. Implement the scientific runner.
+5. Add synthetic regression tests covering:
+    * causal predictor construction;
+    * date eligibility;
+    * strict pre-2025-02-03 endpoint rule;
+    * each frozen hypothesis;
+    * direction handling;
+    * date-level estimands;
+    * overlapping horizons;
+    * exact Bartlett HAC lag;
+    * known HAC fixtures;
+    * two-sided p-values;
+    * BH over exactly nine cases;
+    * inherited material-effect boundary;
+    * four deterministic temporal blocks;
+    * symbol contribution reconciliation;
+    * top-1/top-5/top-10 concentration;
+    * leave-five-out sign reversal;
+    * all four mechanical dispositions;
+    * LIMITED_TEMPORAL_CAPACITY persistence;
+    * immutable-input rejection on hash mismatch;
+    * artifact schema;
+    * no extra hypothesis;
+    * no protected-data access.
+6. Run local/isolated synthetic certification where appropriate.
+7. Run online GitHub certification.
+8. Merge/integrate only after exact-revision certification.
+9. Register a governed research job.
+10. Execute through governed GitHub Actions.
+11. Preserve every attempt and failure.
+
+REQUIRED ARTIFACTS
+
+Define and freeze exact schemas before outcome execution.
+
+At minimum produce durable artifacts for:
+
+1. b5_validation_primary_summary.csv
+2. b5_validation_date_effects.csv
+3. b5_validation_temporal_stability.csv
+4. b5_validation_symbol_concentration.csv
+5. b5_validation_dispositions.csv
+6. b5_validation_semantic_audit.csv
+7. sw10_s2_b5_validation_manifest.json
+
+Additional diagnostic artifacts are permitted only if their schemas/purpose are prospectively defined before real outcomes execute and they do not introduce new hypotheses.
+
+Register exactly one appropriate primary scientific artifact.
+
+ARTIFACT VERIFICATION
+
+For every required artifact:
+
+* upload to immutable/private governed storage;
+* register artifact UUID/path/hash/byte size;
+* perform independent private-storage readback;
+* recompute SHA-256 and byte size;
+* persist durable readback;
+* independently verify durable readback bytes/content;
+* reconcile research SHA, infrastructure SHA, job, attempt and external GitHub run.
+
+Verify the manifest against durable registrations without recursive self-hashing.
+
+CONTROL-PLANE REQUIREMENTS
+
+Persist and independently read back:
+
+* MWE;
+* frozen protocol decision;
+* job;
+* attempt(s);
+* input;
+* artifacts;
+* readbacks;
+* exact research SHA;
+* infrastructure SHA;
+* GitHub run/job identities;
+* terminal MWE status;
+* outcome-access boundary;
+* cost/protected-data status.
+
+Preserve all B1-B5A provenance.
+
+PROHIBITED ACTIONS
+
+Do NOT:
+
+* change SW10_S2_B5_VALIDATION_PROTOCOL_V1;
+* add/drop hypotheses;
+* alter horizons;
+* alter the sample period;
+* optimize parameters;
+* change factor semantics;
+* inspect another protected holdout;
+* use historical earnings dates;
+* use B5 outcomes for new hypothesis selection;
+* advance S2 to S3;
+* begin S6;
+* make the canonical research interpretation;
+* use paid compute without explicit authorization.
+
+COST
+
+ZERO_INCREMENTAL_COST_FIRST.
+
+Use governed GitHub Actions and existing infrastructure first.
+
+No paid Cloud Run or provider upgrade is authorized.
+
+If incremental spend becomes necessary:
+
+USER ACTION REQUIRED — E2 COST AUTHORIZATION.
+
+COMPLETION CRITERIA
+
+MWE-SW10-S2B5-001 is COMPLETE only when:
+
+* frozen protocol is durably persisted/read back;
+* inherited material-effect convention is unambiguously resolved prospectively;
+* implementation is regression-certified;
+* immutable validation input is verified;
+* governed execution succeeds;
+* all nine cases are accounted for;
+* all required artifacts are produced;
+* storage and durable readbacks pass;
+* exact provenance reconciles;
+* no protected data was accessed;
+* no scientific contract changed after outcome exposure;
+* complete results are returned to Indicator: Swing Trades.
+
+If an ambiguity requiring scientific authority is discovered before outcome execution, stop and mark BLOCKED_USER.
+
+REQUIRED RETURN HANDOFF
+
+Return a self-contained completion/blocker handoff containing:
+
+* MWE/decision identities;
+* exact job/attempt/run/revisions;
+* immutable input identity;
+* certification evidence;
+* all nine primary results;
+* raw and BH-adjusted inference;
+* material-effect results;
+* temporal stability;
+* concentration diagnostics;
+* mechanical dispositions;
+* LIMITED_TEMPORAL_CAPACITY flags;
+* all artifact UUIDs/paths/hashes/bytes/readbacks;
+* protected-data/outcome-boundary evidence;
+* cost evidence/limitations;
+* failures/recovery history;
+* terminal control-plane verification.
+
+Do not decide S2 -> S3.
+
+Return that authority to:
+
+Indicator: Swing Trades
