@@ -26,7 +26,7 @@ def main():
         artifacts = _fetch_rows(config, 'research_job_artifacts', {'job_id':f'eq.{a.job_id}', 'attempt_id':f'eq.{attempt_id}', 'limit':'200'})
         FILES = tuple(row['object_path'].split('/')[-1] for row in artifacts)
         extra = set(FILES) - set(BASE_FILES)
-        if not set(BASE_FILES).issubset(FILES) or len(FILES)!=len(set(FILES)) or any(not (n.startswith('independent_adjusted_daily_panel_') and n.endswith('.csv')) and not (n.startswith('raw_') and n.endswith('.json')) for n in extra):
+        if not set(BASE_FILES).issubset(FILES) or len(FILES)!=len(set(FILES)) or any(not (n.startswith('entitlement_boundary_verification_') and n.endswith('.json')) and not (n.startswith('independent_adjusted_daily_panel_') and n.endswith('.csv')) and not (n.startswith('raw_') and n.endswith('.json')) for n in extra):
             raise RuntimeError('B5A source/certification output contract violated')
     elif jobs[0]['runner_job_id'] == 'SW10-S2-B5-PREFLIGHT':
         from tr_platform.research.swing10_s2_b5_preflight import FILES
