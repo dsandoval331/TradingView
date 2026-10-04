@@ -32,7 +32,7 @@ def verify_activation(config,parameters):
     rb={x['artifact_id']:x for x in readbacks}
     for a in artifacts:
         b=rb.get(a['artifact_id'])
-        if not b or b['verified_sha256'] is not True or b['sha256']!=a['sha256'] or b['size_bytes']!=a['size_bytes'] or b['source_git_sha']!=evidence['research_sha'] or b['metadata_json'].get('source_attempt_id')!=evidence['attempt_id']:
+        if not b or b['verified_sha256'] is not True or b['sha256']!=a['sha256'] or b['size_bytes']!=a['size_bytes'] or b['source_git_sha']!=evidence['research_sha'] or b['metadata_json'].get('source_attempt_id')!=evidence['attempt_id'] or a['metadata_json'].get('storage_encoding')=='gzip' and b['metadata_json'].get('durable_chunked_sql_verified') is not True:
             raise RuntimeError('complete exact-attempt durable lossless readback parity required')
     paths=[a for a in artifacts if a['metadata_json']['logical_name']=='s3_event_paths.csv']
     if paths[0]['metadata_json'].get('rows')!=3138120 or paths[0]['metadata_json'].get('logical_size_bytes',0)<=10*1024*1024:

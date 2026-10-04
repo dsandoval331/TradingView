@@ -32,7 +32,7 @@ def test_fail_closed(tmp_path,kind):
 
 def test_storage_or_sql_capacity_fails_without_truncation(tmp_path,monkeypatch):
     path=tmp_path/'complete.csv';path.write_bytes(b'x\n'*6000000)
-    monkeypatch.setattr(stream,'MAX_SQL_ENCODED_BYTES',1)
+    monkeypatch.setattr(stream,'MAX_STORAGE_BYTES',1)
     with pytest.raises(RuntimeError,match='never truncate'):stream.package(path)
     assert path.stat().st_size==12000000
 
