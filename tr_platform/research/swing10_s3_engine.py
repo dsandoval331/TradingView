@@ -145,11 +145,11 @@ def build_synthetic_tables(cohorts,contract):
     archparams={a['id']:a for a in contract['architectures']}
     for side in SIDES:
         for architecture in ARCHITECTURES:
-            capmap={};eventcount=0
+            capmap={};eventcount=0;event_index={}
             for cap in CAPS:
                 candidate=f'{side}__{architecture}__CAP{cap}';a=archparams[architecture]
                 tables['s3_candidate_registry.csv'].append(dict(candidate_id=candidate,side=side,architecture_id=architecture,cap_days=cap,factor_semantics='adjusted close_t',entry_definition='next-session adjusted open',target_fraction=a['profit_target'],stop_fraction=a['initial_stop'],trailing_definition=a['trailing'],cost_primary_bp=10,primary_family_id=f'{side}__{architecture}'))
-                scenario_values={b:[] for b in (0,10,25,50)};target_first=[];event_records=[]
+                scenario_values={b:[] for b in (0,10,25,50)};target_first=[];event_records=[];full_mfe=[];full_mae=[];adverse_gaps=[]
                 for date in dates:
                     rows=cohorts[date].get(side,{})
                     if not rows:raise ValueError('common side/date fixture cohorts required')
@@ -160,13 +160,20 @@ def build_synthetic_tables(cohorts,contract):
                         for day,b in enumerate(bars,1):rawpaths.append(dict(candidate_id=candidate,symbol=symbol,signal_date=date,entry_date=bars[0]['date'],entry_price=entry,path_day=day,session_date=b['date'],open=b['open'],high=b['high'],low=b['low'],close=b['close'],side_return=direction*(b['close']-entry)/entry,path_eligible=True,censor_reason='FULL10_DIAGNOSTIC_NOT_POST_EXIT_PNL' if day>result['held_sessions'] else 'DAILY_OHLC_ORDER_UNKNOWN'))
                         exitrow={k:result.get(k) for k in schemas['s3_event_exits.csv']}
                         exitrow.update(candidate_id=candidate,symbol=symbol,signal_date=date,exit_date=bars[result['held_sessions']-1]['date'])
-                        exits.append(exitrow)
+                        exits.append(exitrow);event_index.setdefault((cap,date),[]).append(exitrow)
+                        full_excursions=[0.]+[direction*(b[k]-entry)/entry for b in bars for k in ('high','low')]
+                        full_mfe.append(max(full_excursions));full_mae.append(min(full_excursions))
+                        adverse_gaps.append(min([0.]+[direction*(bars[k]['open']-bars[k-1]['close'])/entry for k in range(1,10)]))
                         for b in scenario_values:scenario_values[b].append(event(side,architecture,cap,record['prior'],bars,b)['dailyized_net_return'])
                         target_first.append(event(side,architecture,cap,record['prior'],bars,ordering='TARGET_FIRST')['dailyized_net_return'])
                 for bp,values in scenario_values.items():costs.append(dict(candidate_id=candidate,cost_bp=bp,metric='mean_event_dailyized_net',value=statistics.mean(values),available=True,ordering_scenario='STOP_FIRST',reason='fixed diagnostic scenario; primary10bp'))
                 costs.append(dict(candidate_id=candidate,cost_bp=10,metric='mean_event_dailyized_net',value=statistics.mean(target_first),available=True,ordering_scenario='TARGET_FIRST_DIAGNOSTIC',reason='never replaces primary'))
                 for key in ('ambiguous_bar','gap_fill','held_sessions','gross_return','net_return','mfe_lower','mfe_upper','mae_lower','mae_upper'):
                     costs.append(dict(candidate_id=candidate,cost_bp=10,metric=key,value=statistics.mean(float(r[key]) for r in event_records),available=True,ordering_scenario='STOP_FIRST',reason='bounded/censored daily-bar path diagnostics'))
+                extras={'full10_mfe_mean':statistics.mean(full_mfe),'full10_mae_mean':statistics.mean(full_mae),'worst_adverse_gap':min(adverse_gaps),'median_event_net_return':statistics.median(r['net_return'] for r in event_records),'positive_event_share':sum(r['net_return']>0 for r in event_records)/len(event_records)}
+                for key in ('first_passage_day','time_to_target_days'):
+                    finite=[r[key] for r in event_records if r[key] is not None];extras['mean_'+key]=statistics.mean(finite) if finite else None
+                for metric,value in extras.items():costs.append(dict(candidate_id=candidate,cost_bp=10,metric=metric,value=value,available=value is not None,ordering_scenario='STOP_FIRST',reason='fixed path diagnostic; unavailable first passage remains censored'))
                 for reason in ('STOP','STOP_GAP','TARGET','TARGET_GAP','TIME'):
                     costs.append(dict(candidate_id=candidate,cost_bp=10,metric='exit_frequency_'+reason,value=sum(r['exit_reason']==reason for r in event_records)/len(event_records),available=True,ordering_scenario='STOP_FIRST',reason='fixed exit-reason registry'))
             v,c,capmeans=family(capmap);temporal_rows,tp=temporal(v,fixed_blocks);effect=statistics.mean(v.values());conc=concentration(capmap,c,effect)
@@ -181,7 +188,7 @@ def build_synthetic_tables(cohorts,contract):
                 costs.append(dict(candidate_id=f'{side}__{architecture}__FAMILY',cost_bp=10,metric=key,value=conc[key],available=True,ordering_scenario='STOP_FIRST',reason='additive date-family symbol diagnostics'))
             for date in dates:
                 for cap in CAPS:
-                    events=[r for r in exits if r['candidate_id']==f'{side}__{architecture}__CAP{cap}' and r['signal_date']==date]
+                    events=event_index[(cap,date)]
                     datemetrics.append(dict(side=side,architecture_id=architecture,signal_date=date,cap_days=cap,eligible_symbols=len(events),mean_gross_total_return=statistics.mean(r['gross_return'] for r in events),mean_net_total_return=statistics.mean(r['net_return'] for r in events),mean_net_dailyized_return=statistics.mean(r['dailyized_net_return'] for r in events),family_dailyized_return=v[date]))
             # Explicit cohort index, never portfolio capital simulation.
             total=0.;peak=0.;drawdown=0.
@@ -206,7 +213,8 @@ def build_synthetic_tables(cohorts,contract):
     tables['s3_candidate_summary.csv']=summaries
     tables['s3_semantic_integrity.csv']=[dict(check_id='SYNTHETIC_ONLY_FULL_CONTRACT',pass_=True,reason='synthetic certification; no real scientific execution',input_uuid=None,input_sha256=None,input_bytes=None,B5_read=False,S5_read=False,future_information=False,unavailable_cells=sum(not r['testable'] for r in summaries))]
     tables['s3_semantic_integrity.csv'][0]['pass']=tables['s3_semantic_integrity.csv'][0].pop('pass_')
-    tables['sw10_s3_manifest.json']={'protocol_decision_ids':['21091322-b757-42e5-9918-dba46b2e1252'],'synthetic_only':True,'36_cell_registry':[r['candidate_id'] for r in tables['s3_candidate_registry.csv']],'12_test_family':[r['side']+'__'+r['architecture_id'] for r in summaries],'four_block_definitions':fixed_blocks,'cost_scenarios':[0,10,25,50],'protected_flags':{'B5_read':False,'S5_read':False},'S5_locked':True,'scientific_execution_authorized':False,'artifact_identities_hashes_bytes':'assigned only by separately authorized governed execution; no self-hash'}
+    tables['sw10_s3_manifest.json']={k:None for k in schemas['sw10_s3_manifest.json']}
+    tables['sw10_s3_manifest.json'].update({'protocol_decision_ids':['21091322-b757-42e5-9918-dba46b2e1252'],'synthetic_only':True,'36_cell_registry':[r['candidate_id'] for r in tables['s3_candidate_registry.csv']],'12_test_family':[r['side']+'__'+r['architecture_id'] for r in summaries],'four_block_definitions':fixed_blocks,'cost_scenarios':[0,10,25,50],'protected_flags':{'B5_read':False,'S5_read':False},'S5_locked':True,'scientific_execution_authorized':False,'artifact_identities_hashes_bytes':'assigned only by separately authorized governed execution; no self-hash','eligibility_dates':dates,'development_consumed_boundary':'DEVELOPMENT_PREVIOUSLY_USED_S2','billing_evidence':'not available; synthetic certification only'})
     for name,rows in tables.items():
         if name.endswith('.csv') and any(set(row)!=set(schemas[name]) for row in rows):raise ValueError('exact frozen schema mismatch '+name)
     return tables
