@@ -189,7 +189,9 @@ def concentration(data,market,h,estimate):
 def temporal(data,market,h,direction,mapping):
     rows=[]
     for block in range(1,5):
-        local=[d for d in data if mapping[d['date']]==block];available=True;reason=''
+        local=[dict(d) for d in data if mapping[d['date']]==block];available=True;reason=''
+        if market:
+            for d in local:d['quantity']=slope_fit(d['x'],d['y'])[0]
         try:estimate=primary(local,market,h)['primary_estimate']
         except ValueError as e:estimate=np.nan;available=False;reason=str(e)
         vals=np.array([d['quantity'] for d in local])

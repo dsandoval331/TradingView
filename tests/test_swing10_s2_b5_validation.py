@@ -170,6 +170,13 @@ def test_leave5_sign_rules(monkeypatch):
     monkeypatch.setattr(v,'refit_without',lambda *args: 0)
     assert not v.concentration(data,True,7,full)[1]['leave_top5_sign_reversal']
 
+def test_temporal_recomputes_stage1_not_cached_slopes():
+    data=market_data();mapping={d['date']:i//20+1 for i,d in enumerate(data)}
+    expected=v.temporal(data,True,7,'POSITIVE',mapping)[0]
+    for d in data:d['quantity']=999.
+    recomputed=v.temporal(data,True,7,'POSITIVE',mapping)[0]
+    for a,b in zip(expected,recomputed):assert a['primary_estimate']==pytest.approx(b['primary_estimate'])
+
 def test_unavailable_block_not_primary_not_testable():
     data=market_data(43);full=v.primary(data,True,10)
     chunks=np.array_split(range(43),4);mapping={data[i]['date']:b for b,ch in enumerate(chunks,1) for i in ch}
