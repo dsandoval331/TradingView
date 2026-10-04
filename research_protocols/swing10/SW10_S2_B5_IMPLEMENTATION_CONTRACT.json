@@ -1,0 +1,231 @@
+{
+  "protocol": "SW10_S2_B5_VALIDATION_PROTOCOL_V1",
+  "base_decision": "880644f4-afcc-49d9-8641-27cc0bf5bcfd",
+  "supplement_decision": "80b02259-dd45-4b45-b496-66a36ff303a4",
+  "registry": [
+    {
+      "family": "LIQ_ADJUSTED_PRICE",
+      "horizon_days": 5,
+      "direction": "NEGATIVE",
+      "limited_temporal_capacity": false
+    },
+    {
+      "family": "LIQ_ADJUSTED_PRICE",
+      "horizon_days": 7,
+      "direction": "NEGATIVE",
+      "limited_temporal_capacity": false
+    },
+    {
+      "family": "LIQ_ADJUSTED_PRICE",
+      "horizon_days": 10,
+      "direction": "NEGATIVE",
+      "limited_temporal_capacity": false
+    },
+    {
+      "family": "LIQ_REPORTED_VOLUME",
+      "horizon_days": 3,
+      "direction": "POSITIVE",
+      "limited_temporal_capacity": false
+    },
+    {
+      "family": "LIQ_REPORTED_VOLUME",
+      "horizon_days": 5,
+      "direction": "POSITIVE",
+      "limited_temporal_capacity": false
+    },
+    {
+      "family": "LIQ_REPORTED_VOLUME",
+      "horizon_days": 7,
+      "direction": "POSITIVE",
+      "limited_temporal_capacity": false
+    },
+    {
+      "family": "LIQ_REPORTED_VOLUME",
+      "horizon_days": 10,
+      "direction": "POSITIVE",
+      "limited_temporal_capacity": false
+    },
+    {
+      "family": "RET_MOM x MARKET_SPY_TREND10",
+      "horizon_days": 7,
+      "direction": "POSITIVE",
+      "limited_temporal_capacity": true
+    },
+    {
+      "family": "RET_MOM x MARKET_SPY_TREND10",
+      "horizon_days": 10,
+      "direction": "POSITIVE",
+      "limited_temporal_capacity": true
+    }
+  ],
+  "liquidity": "inclusive same-date20/80 HIGH-minus-LOW mean spread",
+  "market": "Stage1 forward_return~intercept+RET_MOM_rank; Stage2 b~intercept+Z; primarygamma; ESgamma/sampleSD(b),ddof1",
+  "inference": {
+    "kernel": "Bartlett",
+    "HAC_lag": "H-1",
+    "reference": "asymptotic_normal",
+    "two_sided": true,
+    "ci": 0.95,
+    "small_sample_multiplier": false
+  },
+  "multiplicity": {
+    "family": 9,
+    "BH_q": 0.05,
+    "unavailable": "p1 bookkeeping only; no family reduction"
+  },
+  "material_abs_threshold": 0.2,
+  "temporal": {
+    "case_specific_four_blocks": true,
+    "required_direction_blocks": 3,
+    "max_absolute_block_share": 0.5,
+    "full_market_refit": true,
+    "unavailable_fails_robustness": true
+  },
+  "concentration": {
+    "full_refit_remove5": true,
+    "zero_is_reversal": false,
+    "rank": "absolute contribution desc, symbol asc tie",
+    "original_causal_ranks_tails_state_fixed": true
+  },
+  "adjacency": "same-sign immediate grid neighbor among registered cases only; absent ignored",
+  "disposition": "NOT_TESTABLE primary insufficiency; FAILED any primarygate fail; PARTIAL primarygates pass butrobustnessfails; SUPPORTED allpass",
+  "schemas": {
+    "b5_validation_primary_summary.csv": [
+      "family",
+      "horizon_days",
+      "frozen_direction",
+      "limited_temporal_capacity",
+      "testable",
+      "testability_reason",
+      "primary_quantity_type",
+      "eligible_dates",
+      "eligible_symbol_dates",
+      "primary_estimate",
+      "date_effect_mean",
+      "date_effect_median",
+      "date_effect_sample_sd",
+      "standardized_effect",
+      "positive_date_share",
+      "negative_date_share",
+      "hypothesized_date_share",
+      "hac_lag",
+      "hac_se",
+      "hac_t",
+      "ci95_low",
+      "ci95_high",
+      "p_raw",
+      "p_bh",
+      "direction_pass",
+      "material_pass",
+      "fdr_pass",
+      "same_direction_blocks",
+      "max_absolute_block_share",
+      "temporal_direction_pass",
+      "temporal_concentration_pass",
+      "symbol_diagnostics_available",
+      "top1_absolute_share",
+      "top5_absolute_share",
+      "top10_absolute_share",
+      "contribution_hhi",
+      "removed_top5_symbols",
+      "leave_top5_estimate",
+      "leave_top5_sign_reversal",
+      "symbol_sign_pass",
+      "registered_adjacent_horizons",
+      "adjacency_applicable",
+      "adjacent_coherence_pass",
+      "robustness_pass",
+      "disposition",
+      "failed_gates"
+    ],
+    "b5_validation_date_effects.csv": [
+      "family",
+      "horizon_days",
+      "frozen_direction",
+      "limited_temporal_capacity",
+      "trade_date",
+      "temporal_block",
+      "eligible_symbols",
+      "date_effect",
+      "effect_type",
+      "standardized_market_state",
+      "stage1_intercept",
+      "low_count",
+      "high_count",
+      "low_mean_return",
+      "high_mean_return",
+      "overlap_count"
+    ],
+    "b5_validation_temporal_stability.csv": [
+      "family",
+      "horizon_days",
+      "frozen_direction",
+      "limited_temporal_capacity",
+      "block",
+      "start",
+      "end",
+      "eligible_dates",
+      "primary_estimate",
+      "date_effect_mean",
+      "date_effect_median",
+      "primary_sign",
+      "required_direction_pass",
+      "absolute_block_effect",
+      "absolute_block_share",
+      "diagnostic_available",
+      "unavailable_reason"
+    ],
+    "b5_validation_symbol_concentration.csv": [
+      "family",
+      "horizon_days",
+      "frozen_direction",
+      "limited_temporal_capacity",
+      "symbol",
+      "eligible_symbol_dates",
+      "contribution_rank",
+      "additive_primary_contribution",
+      "absolute_contribution_share",
+      "removed_leave_top5"
+    ],
+    "b5_validation_dispositions.csv": [
+      "family",
+      "horizon_days",
+      "frozen_direction",
+      "limited_temporal_capacity",
+      "testable",
+      "direction_pass",
+      "material_pass",
+      "fdr_pass",
+      "temporal_direction_pass",
+      "temporal_concentration_pass",
+      "symbol_sign_pass",
+      "adjacent_coherence_pass",
+      "robustness_pass",
+      "disposition",
+      "failed_gates"
+    ],
+    "b5_validation_semantic_audit.csv": [
+      "family",
+      "horizon_days",
+      "frozen_direction",
+      "limited_temporal_capacity",
+      "semantic_data_integrity_pass",
+      "predictor_future_invariance",
+      "input_sha256",
+      "input_bytes",
+      "parent_input_id",
+      "strict_endpoint_before",
+      "eligibility_dates",
+      "blocks_fixed_before_outcomes",
+      "raw_p_available",
+      "bh_unavailable_bookkeeping",
+      "protected_data_access",
+      "earnings_used",
+      "reason"
+    ]
+  },
+  "input_uuid": "86045cd0-8e49-4261-aed9-3f24bfb5ff07",
+  "input_sha": "b905affcb0843a4d313557fc59fc543a46413258f2c49a68f1eb87d338e55915",
+  "input_bytes": 792664,
+  "outcomes_computed_when_frozen": false
+}

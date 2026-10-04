@@ -184,7 +184,7 @@ def run_one_outcome(
                 } for item in materialized]},
             })
 
-        if runner_job_id in {"SW10-S2-B2", "SW10-S2-B3-PREFLIGHT", "SW10-S2-B3-CONTINUOUS-PREFLIGHT", "SW10-S2-B3", "SW10-S2-B4-PREFLIGHT", "SW10-S2-B4", "SW10-S2-B5-PREFLIGHT", "SW10-S2-B5-ACQUISITION"}:
+        if runner_job_id in {"SW10-S2-B2", "SW10-S2-B3-PREFLIGHT", "SW10-S2-B3-CONTINUOUS-PREFLIGHT", "SW10-S2-B3", "SW10-S2-B4-PREFLIGHT", "SW10-S2-B4", "SW10-S2-B5-PREFLIGHT", "SW10-S2-B5-ACQUISITION", "SW10-S2-B5"}:
             context = {
                 "job_id": job_id, "attempt_id": attempt_id, "attempt_no": attempt_no,
                 "research_revision": research_sha, "infrastructure_revision": infrastructure_sha,
@@ -194,6 +194,10 @@ def run_one_outcome(
                 "materialized_inputs": [{"input_id": x.input_id, "object_path": x.object_path,
                                          "size_bytes": x.size_bytes, "sha256": x.sha256} for x in materialized],
             }
+            if runner_job_id == "SW10-S2-B5":
+                parameters = job.get("parameters_json") or {}
+                context["parent_input_id"] = parameters.get("parent_input_id")
+                context["input_registration_id"] = parameters.get("input_registration_id")
             context_path = runner.WORK_ROOT / "job_inputs" / "swing10" / "execution_context.json"
             context_path.parent.mkdir(parents=True, exist_ok=True)
             context_path.write_text(json.dumps(context), encoding="utf-8")
