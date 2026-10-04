@@ -1,0 +1,20 @@
+name: SW10 S3 Outcome-Blind Preparation Certification
+on:
+  pull_request:
+    paths:
+      - 'tr_platform/research/swing10_s3_preparation.py'
+      - 'tests/test_swing10_s3_preparation.py'
+      - 'research_protocols/swing10/SW10_S3_CANDIDATE_PROTOCOL_V1.proposed.json'
+      - '.github/workflows/sw10-s3-preparation-cert.yml'
+permissions:
+  contents: read
+jobs:
+  certify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Certify draft protocol and outcome-blind guards using synthetic data only
+        run: python -m unittest discover -s tests -p test_swing10_s3_preparation.py -v

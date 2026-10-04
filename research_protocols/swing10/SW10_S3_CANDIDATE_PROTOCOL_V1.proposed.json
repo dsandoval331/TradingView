@@ -1,0 +1,363 @@
+{
+  "protocol_code": "SW10_S3_CANDIDATE_PROTOCOL_V1_PROPOSED",
+  "status": "DRAFT_CANONICAL_REVIEW_REQUIRED",
+  "outcome_execution_authorized": false,
+  "parent_decision_id": "cfc2ab86-ad8c-4b47-a91f-71a71360c4ab",
+  "mwe_uuid": "7d95c3a7-1c08-48a2-a865-3aa7eea8873a",
+  "development": {
+    "role": "DEVELOPMENT_PREVIOUSLY_USED_S2",
+    "parent_input_id": "1d4fa60f-930d-47fb-b5e2-6d4ccc09738a",
+    "dataset": "market_daily_history_2025-02-03_2026-08-27",
+    "sha256": "ea2908cd89123548404a0f48dca6633f6ef87491793f327705588b4e2ecefae2",
+    "bytes": 2411604,
+    "start": "2025-02-03",
+    "end": "2026-08-27",
+    "rows": 44128,
+    "symbols": 112,
+    "dates": 394,
+    "object_path": "governed_inputs/swing10/s2_b1/market_daily_history_2025-02-03_2026-08-27/ea2908cd89123548404a0f48dca6633f6ef87491793f327705588b4e2ecefae2.csv",
+    "preparation_input_id": "131b6bd5-65d1-4dc7-a856-3300f73babcb",
+    "subset_regeneration": false,
+    "whole_panel_common_eligibility": "signal date t qualifies only when next-session entry and all ten holding sessions exist in the registered trading-date calendar, all required bars finite/valid; no outcome-based exclusion; untestable rows recorded",
+    "in_run_byte_readback": "REQUIRED_BEFORE_REAL_ACCESS; existing registrations certify historical identity, fresh storage download not yet performed"
+  },
+  "consumed_validation": {
+    "deny_sha256": "b905affcb0843a4d313557fc59fc543a46413258f2c49a68f1eb87d338e55915",
+    "deny_input_id": "86045cd0-8e49-4261-aed9-3f24bfb5ff07",
+    "no_bytes_or_outcomes_read_for_this_preflight": true
+  },
+  "factor": {
+    "name": "LIQ_ADJUSTED_PRICE",
+    "formula": "adjusted close_t unchanged",
+    "tails": "same-date finite frozen112-symbol cross section; inclusive p20 LOW / p80 HIGH; linear quantile interpolation",
+    "candidate_sides": [
+      {
+        "side": "LONG_LOW",
+        "entry_membership": "close_t<=p20_t",
+        "sign": "LONG"
+      },
+      {
+        "side": "SHORT_HIGH",
+        "entry_membership": "close_t>=p80_t",
+        "sign": "SHORT"
+      }
+    ],
+    "not_implied_by_spread_validation": true,
+    "extra_factors": false
+  },
+  "horizons": {
+    "validated_caps": [
+      5,
+      7,
+      10
+    ],
+    "path_days": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "horizon_selection": "none; every architecture treated as inseparable cap5/7/10 family with equal weights and all caps reported; paths1..10 diagnostic only"
+  },
+  "entry": {
+    "decision_time": "after official RTH close on t",
+    "price": "next available registered session adjusted open(t+1)",
+    "counting": "entry session is holding day1, time exit at official adjusted close of holding day cap",
+    "all_signals_included": true,
+    "independent_event_cohorts_not_capital_simulator": true,
+    "real_adjusted_price_limitation": "retrospectively split-adjusted research coordinate, not as-traded nominal price; no claim of executable share counts or borrow availability",
+    "reentry": "independent daily event cohorts; overlapping positions are not represented as an implementable self-financing portfolio"
+  },
+  "architectures": [
+    {
+      "id": "TIME",
+      "profit_target": null,
+      "initial_stop": null,
+      "trailing": null
+    },
+    {
+      "id": "BRACKET_1_1",
+      "profit_target": 0.01,
+      "initial_stop": 0.01,
+      "trailing": null
+    },
+    {
+      "id": "BRACKET_2_1",
+      "profit_target": 0.02,
+      "initial_stop": 0.01,
+      "trailing": null
+    },
+    {
+      "id": "BRACKET_2_2",
+      "profit_target": 0.02,
+      "initial_stop": 0.02,
+      "trailing": null
+    },
+    {
+      "id": "TRAIL_2",
+      "profit_target": null,
+      "initial_stop": 0.02,
+      "trailing": "2% from best completed holding-session close; ratchet after close effective next session; never use current high/low to ratchet same session"
+    },
+    {
+      "id": "STRUCTURE_5",
+      "profit_target": null,
+      "initial_stop": 0.02,
+      "trailing": "long prior5 completed session lows max-ratchet / short prior5 completed session highs min-ratchet; active next session; extra predictor warmup means common signal-date eligibility needs prior5 sessions"
+    }
+  ],
+  "architecture_count": 6,
+  "candidate_cells": 36,
+  "primary_tests": 12,
+  "path_execution": {
+    "barrier_coordinates": "fraction of actual adjusted entry open; short favorable price decrease, adverse increase",
+    "gap_rule": "check opening price before daily high/low; execute at opening price when crossing active barrier; profit target gap conservatively fill at target, adverse stop gap at worse opening price",
+    "same_session_double_hit": "stop first conservative convention; separately flag unresolvable OHLC ordering and report target-first sensitivity diagnostically; no inferred intraday path",
+    "force_exit": "at cap close, cap<=10; barrier event takes precedence before closing time exit",
+    "short_return": "(entry-exit)/entry; simple not leveraged; short sale borrow/locate/corporate-action execution unavailable and S4 gate",
+    "missing": "retain audit row UNTESTABLE_DATA; never impute a price, extrapolate, pick another date, or remove because result unfavorable"
+  },
+  "metrics": {
+    "primary": "date-level equal-weight eligible-symbol arithmetic mean of net simple side return divided by held sessions, then equal-weight cap5/7/10 within side/architecture; mean across common eligible signal dates",
+    "secondary": [
+      "gross total simple return",
+      "net total simple return",
+      "median event and date returns",
+      "positive-return share diagnostic",
+      "holding duration",
+      "MFE and MAE relative to entry for full1..10 path and pre-exit bar envelope with ordering censor flag",
+      "first-passage day",
+      "time-to-target",
+      "barrier/force-exit frequency",
+      "ambiguous double-hit rate",
+      "worst adverse price gap",
+      "cumulative date-cohort PnL and maximum drawdown labeled cohort-index not implementable portfolio",
+      "paired dailyized difference to same-side TIME per cap and equal-weight family diagnostic"
+    ],
+    "MFE_MAE": "signed favorable and adverse excursion from entry to exit using known completed bars; exit-session unobserved sequence cannot identify pre-exit excursion; report conservative bounds/censored diagnostic, never exact intraday claim",
+    "first_passage": "opening crossings known first; intra-session high/low crossings only daily interval resolution; joint stop/target crossings flagged and deterministic conservative fill; no unobserved timestamps",
+    "dailyized": "simple net return divided by held trading sessions; no annualization primary; geometric holding-rate diagnostic only when1+return>0",
+    "drawdown": "from cumulative equal-weight date-cohort net total-return index; no portfolio-capital claim"
+  },
+  "inference": {
+    "unit": "signal trading date",
+    "aggregation": "symbol events averaged within signal-date, caps equal-weighted within side/architecture; no per-symbol independence",
+    "primary_family": "2 sides x6 architecture families =12 tests; unavailable retain conservative p1 bookkeeping slot",
+    "HAC": "Newey-West Bartlett lag9 for every family due shared max10 holding sessions",
+    "reference": "asymptotic normal two-sided95% CI; no small-sample multiplier",
+    "BH_q": 0.05,
+    "materiality": "proposed positive family mean / sampleSD(date-family dailyized return), ddof1 >=0.20; this S3 translation requires canonical approval, not inherited validation of trading leg"
+  },
+  "robustness": {
+    "temporal": "4 common chronological blocks fixed on predictor/common endpoint eligibility before outcomes; >=3 positive blocks and maximum abs(block_mean*blockN)/sum<=0.50",
+    "symbol": "additive daily cohort contributions reconcile; top1/5/10 absolute shares, HHI; remove top5 deterministic abs desc symbol asc then recompute all caps/family; no sign reversal, zero not reversal; primary never drops symbols",
+    "horizon": "all3 cap-specific mean net dailyized side effects positive; no best-cap selection; cap-specific inferential results diagnostic only",
+    "missing_diagnostics": "fail support, not primary testability",
+    "ambiguity": "stop-first primary; target-first sensitivity never replaces primary"
+  },
+  "costs": {
+    "round_trip_basis_points": [
+      0,
+      10,
+      25,
+      50
+    ],
+    "primary_round_trip_bp": 10,
+    "application": "subtract fixed entry-notional round-trip bps once/event; divide resulting net by held sessions",
+    "semantics": "scenario assumptions only, no empirical spread/market-impact/borrow inference; S4 certifies fills/gaps/nominal prices/borrow/fees/tax/dividends/execution stress; no selection of cost scenario"
+  },
+  "dispositions": {
+    "NOT_TESTABLE": "primary estimand semantic/data/numerical insufficiency",
+    "NO_S4_SUPPORT": "valid testable; positive direction, materiality or BH gate fails",
+    "DEVELOPMENT_ONLY_WEAK": "all primary gates pass but any required robustness gate fails",
+    "ELIGIBLE_FOR_CANONICAL_S4_REVIEW": "all primary and robustness gates pass; not independently validated or automatically advanced"
+  },
+  "selection": {
+    "max_architectures_per_side": 1,
+    "rule": "among ELIGIBLE_FOR_CANONICAL_S4_REVIEW only: descending lower95% HAC CI of equal-weight cap-family primary net dailyized mean; exact ties fixed architecture ID lexicographic; report all36 cells regardless selection",
+    "risk": "drawdown and path metrics fully reported, no unplanned risk weighting or threshold",
+    "no_candidate_allowed": true,
+    "S4_transition": "separate canonical approval, no automatic queue; S5/S6 locked"
+  },
+  "S5": {
+    "status": "PROPOSED_RESERVED_POLICY_NOT_YET_REGISTERED_DATASET",
+    "protected_interval": "all dates after2026-08-27 outside approved development deny by default; consumed pre2025-02-03 validation separately denied",
+    "recommended_start_rule": "first common source trading session on or after2026-10-05 AND strictly after full S4 candidate freeze timestamp converted to NewYork date; no decision outcomes before that anchor; no retrospective backfill for sample selection",
+    "recommended_sample": "first126 prospectively eligible signal dates from anchor plus up to10 endpoint sessions; fixed enrolment/certification before outcomes; no result-based extension; acquisition/identity/PIT universe/source semantics separately governed",
+    "development_exclusion": "S3/S4 cannot inspect any S5 bars/outcomes; use same development object only unless prospectively authorized additional development input is permanently marked consumed",
+    "actual_input_uuid": null,
+    "actual_sha256": null,
+    "actual_byte_size": null,
+    "future_validation_authorized": false
+  },
+  "artifact_schemas": {
+    "s3_candidate_registry.csv": [
+      "candidate_id",
+      "side",
+      "architecture_id",
+      "cap_days",
+      "factor_semantics",
+      "entry_definition",
+      "target_fraction",
+      "stop_fraction",
+      "trailing_definition",
+      "cost_primary_bp",
+      "primary_family_id"
+    ],
+    "s3_event_paths.csv": [
+      "candidate_id",
+      "symbol",
+      "signal_date",
+      "entry_date",
+      "entry_price",
+      "path_day",
+      "session_date",
+      "open",
+      "high",
+      "low",
+      "close",
+      "side_return",
+      "path_eligible",
+      "censor_reason"
+    ],
+    "s3_event_exits.csv": [
+      "candidate_id",
+      "symbol",
+      "signal_date",
+      "exit_date",
+      "exit_reason",
+      "exit_price",
+      "held_sessions",
+      "gross_return",
+      "net_return",
+      "dailyized_net_return",
+      "mfe_lower",
+      "mfe_upper",
+      "mae_lower",
+      "mae_upper",
+      "first_passage_day",
+      "time_to_target_days",
+      "ambiguous_bar",
+      "gap_fill",
+      "data_status"
+    ],
+    "s3_date_candidate_metrics.csv": [
+      "side",
+      "architecture_id",
+      "signal_date",
+      "cap_days",
+      "eligible_symbols",
+      "mean_gross_total_return",
+      "mean_net_total_return",
+      "mean_net_dailyized_return",
+      "family_dailyized_return"
+    ],
+    "s3_candidate_summary.csv": [
+      "side",
+      "architecture_id",
+      "testable",
+      "eligible_dates",
+      "eligible_events",
+      "mean_family_dailyized",
+      "median_family_dailyized",
+      "sample_sd",
+      "standardized_effect",
+      "hac_se",
+      "ci95_low",
+      "ci95_high",
+      "p_raw",
+      "p_bh",
+      "cap5_mean",
+      "cap7_mean",
+      "cap10_mean",
+      "cost_bp",
+      "temporal_pass",
+      "concentration_pass",
+      "horizon_pass",
+      "disposition",
+      "rank",
+      "selected_for_canonical_review"
+    ],
+    "s3_temporal_stability.csv": [
+      "side",
+      "architecture_id",
+      "block",
+      "start",
+      "end",
+      "N",
+      "mean",
+      "median",
+      "effect_share",
+      "direction_pass",
+      "available"
+    ],
+    "s3_symbol_concentration.csv": [
+      "side",
+      "architecture_id",
+      "symbol",
+      "contribution",
+      "absolute_share",
+      "rank",
+      "top5_removed",
+      "leave5_effect",
+      "sign_reversal",
+      "available"
+    ],
+    "s3_cost_path_diagnostics.csv": [
+      "candidate_id",
+      "cost_bp",
+      "metric",
+      "value",
+      "available",
+      "ordering_scenario",
+      "reason"
+    ],
+    "s3_semantic_integrity.csv": [
+      "check_id",
+      "pass",
+      "reason",
+      "input_uuid",
+      "input_sha256",
+      "input_bytes",
+      "B5_read",
+      "S5_read",
+      "future_information",
+      "unavailable_cells"
+    ],
+    "sw10_s3_manifest.json": [
+      "protocol_decision_ids",
+      "protocol_snapshot_sha256",
+      "execution_ids",
+      "research_sha",
+      "infra_sha",
+      "input_identities",
+      "36_cell_registry",
+      "12_test_family",
+      "eligibility_dates",
+      "four_block_definitions",
+      "cost_scenarios",
+      "artifact_identities_hashes_bytes",
+      "protected_flags",
+      "development_consumed_boundary",
+      "S5_locked",
+      "billing_evidence"
+    ]
+  },
+  "verification": {
+    "required": "all output immutable private objects; exactly1 primary summary; every SHA/bytes independently downloaded/read back and SQL UTF8/blob parity verified; exact research/infrastructure/job/attempt/run/job revisions reconciled; no recursive manifest hash; terminal MWE reread; failures preserved",
+    "preflight_only": true
+  },
+  "exit_gates": "S3 may be marked COMPLETE and S4 considered only when ALL are satisfied:\n1. A prospective S3 protocol and any supplements were frozen before the corresponding S3 candidate outcomes were inspected.\n2. Exact S3 development inputs and data-use boundaries are registered and verified, with no consumed B5 validation sample used for parameter/candidate selection and no protected holdout accessed.\n3. LIQ_ADJUSTED_PRICE semantics are either preserved exactly or any change is explicitly treated as a new exploratory hypothesis without inherited B5 validation status.\n4. All prespecified S3 candidate architectures and parameter cells are accounted for; no favorable-result deletion or post-hoc grid expansion occurred.\n5. Required holding-path outputs are complete for the applicable 1-10 day envelope: total return, dailyized return, MFE, MAE, first passage/time-to-target and exit/stop behavior as prospectively defined.\n6. Long and short sides are separately reported; no aggregate result conceals a failing side.\n7. Temporal stability, symbol concentration and leave-contributor diagnostics are complete, with the inherited concentration concern explicitly reported rather than optimized away.\n8. Any transaction-cost/slippage diagnostics required by the S3 protocol are complete and clearly labeled preliminary; S4 retains final execution-stress authority.\n9. S3 produces a bounded candidate set with fully specified entry/exit/holding semantics and a mechanical disposition for every preregistered candidate. It is acceptable for S3 to conclude that no candidate merits S4.\n10. Candidate selection, if any, follows the prospectively frozen rule and does not claim independent validation from S3 development evidence.\n11. All required artifacts, hashes/bytes, job/attempt/revision provenance and independent readbacks are durably reconciled.\n12. S4 entry, if recommended, carries forward only the bounded S3 candidate(s), unresolved limitations and frozen rules; S5 remains the untouched out-of-sample validation stage and S6 remains locked.\n",
+  "canonical_decisions_needed": [
+    "approve adjusted next-open long-low/short-high event-cohort semantics and conservative daily-OHLC ordering/bounded36-cell architecture",
+    "approve proposed12-test family dailyized estimand, materiality, preliminary costs and ranking/disposition mapping",
+    "approve full existing discovery envelope as DEVELOPMENT and prospectively reserve exact S5 enrolment policy; no existing registered S5 interval found"
+  ],
+  "next_execution": "NONE_UNTIL_CANONICAL_FREEZE_AND_READBACK; then certify input fresh private bytes and candidate eligibility before separately authorized science"
+}
