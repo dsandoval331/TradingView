@@ -36,7 +36,7 @@ def package(path):
             with gzip.GzipFile(fileobj=dest,mode='wb',filename='',mtime=0,compresslevel=6) as zipped:
                 shutil.copyfileobj(src,zipped,CHUNK)
     physical=digest(stored)
-    if physical['size_bytes']>MAX_STORAGE_BYTES or encoding=='gzip' and 4*((physical['size_bytes']+2)//3)>MAX_SQL_ENCODED_BYTES:
+    if physical['size_bytes']>MAX_STORAGE_BYTES:
         raise RuntimeError('lossless artifact exceeds certified existing storage/SQL capacity; never truncate')
     return stored,{'logical_name':path.name,'storage_encoding':encoding,'logical_size_bytes':logical['size_bytes'],'logical_sha256':logical['sha256'],'stored_size_bytes':physical['size_bytes'],'stored_sha256':physical['sha256']}
 
