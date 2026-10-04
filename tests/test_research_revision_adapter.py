@@ -4,7 +4,7 @@ from cloud_compute import research_revision_adapter as adapter
 
 
 def test_targets_are_explicit_and_narrow():
-    assert set(adapter.GOVERNED_RESEARCH_TARGETS) == {"PMOD-P2-B2", "IR11-P3-B2", "SW10-S2-B1", "SW10-S2-B2", "SW10-S2-B3-PREFLIGHT", "SW10-S2-B3-CONTINUOUS-PREFLIGHT", "SW10-S2-B3", "SW10-S2-B4-PREFLIGHT", "SW10-S2-B4", "SW10-S2-B5-PREFLIGHT", "SW10-S2-B5-ACQUISITION", "SW10-S2-B5"}
+    assert set(adapter.GOVERNED_RESEARCH_TARGETS) == {"SW10-S3-PREFLIGHT", "PMOD-P2-B2", "IR11-P3-B2", "SW10-S2-B1", "SW10-S2-B2", "SW10-S2-B3-PREFLIGHT", "SW10-S2-B3-CONTINUOUS-PREFLIGHT", "SW10-S2-B3", "SW10-S2-B4-PREFLIGHT", "SW10-S2-B4", "SW10-S2-B5-PREFLIGHT", "SW10-S2-B5-ACQUISITION", "SW10-S2-B5"}
     target = adapter.GOVERNED_RESEARCH_TARGETS["SW10-S2-B1"]
     assert target.module_path == "tr_platform/research/swing10_s2_b1.py"
     assert target.execution_mode == "swing10_snapshot_cli"
@@ -75,3 +75,4 @@ def test_swing10_snapshot_contract(monkeypatch, tmp_path):
     assert result["status"] == "PASS"
     assert result["artifact"].endswith("factor_tail_summary.csv")
     assert result["input_provenance"]["local_relative_path"].endswith("market_daily_history.csv")
+

@@ -43,8 +43,15 @@ def materialize_job_inputs(
     job_id: str,
     work_root: Path,
     default_bucket: str = DEFAULT_BUCKET,
+    allowed_inputs: list[dict[str, Any]] | None = None,
 ) -> list[MaterializedInput]:
     rows = fetch_job_inputs(config, job_id)
+    if allowed_inputs is not None:
+        def identity(row):
+            meta = row.get('metadata_json') or {}
+            return (row.get('input_id'), row.get('object_path'), row.get('object_size_bytes'), row.get('sha256'), meta.get('bucket_name'), meta.get('local_relative_path'))
+        if len(rows) != len(allowed_inputs) or sorted(map(identity, rows)) != sorted(map(identity, allowed_inputs)):
+            raise RuntimeError('protected input admission rejected before any private download')
     results: list[MaterializedInput] = []
     for row in rows:
         object_path = str(row.get('object_path') or '').strip()
