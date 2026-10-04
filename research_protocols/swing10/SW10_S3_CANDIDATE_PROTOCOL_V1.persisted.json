@@ -1,0 +1,391 @@
+{
+  "title": "SW10_S3_CANDIDATE_PROTOCOL_V1 — prospective canonical freeze",
+  "status": "active",
+  "decision": "SW10_S3_CANDIDATE_PROTOCOL_V1 — FROZEN PROSPECTIVELY BY CANONICAL USER AUTHORITY\n\nUser canonical authorization submitted 2026-10-03T21:36:19-05:00, before any real S3 candidate/path outcome computation or inspection: prospectively approve Option1, complete unchanged proposal decision831660de-f547-48e0-8742-fdfb7ad37a73, and freeze as SW10_S3_CANDIDATE_PROTOCOL_V1. All36 cells,12 architecture-family tests, sides,caps,barrier ordering,metrics,HAC/BH/materiality,costs,robustness,selection,S5 reservation and S6 lock approved exactly. This authorizes outcome-blind MWE-SW10-S3P-001 completion only; real S3 science remains disabled and requires a NEW separately authorized scientific-execution MWE. No B5 input/artifact access, no post2026-08-27 S3/S4 development, no S5 access and no incremental paid fallback.\n\nThe complete approved proposal is preserved verbatim below. Its historical draft labels are archival; this decision's FROZEN status supplies controlling authority. Administrative execution authorization remains outcome-blind only. Original proposal831660de-f547-48e0-8742-fdfb7ad37a73 remains unchanged.\n\nSW10_S3_CANDIDATE_PROTOCOL_V1 — COMPLETE PROSPECTIVE PROPOSAL, NOT A SCIENTIFIC FREEZE.\n\nPrepared outcome-blind under MWE-SW10-S3P-001 and frozen parent cfc2ab86-ad8c-4b47-a91f-71a71360c4ab. No real S3/B5 outcomes read or computed. Exact implementation contract follows. Canonical approval is required for the specified scientific choices; no outcomes are authorized by this proposal.\n\n{\n  \"protocol_code\": \"SW10_S3_CANDIDATE_PROTOCOL_V1_PROPOSED\",\n  \"status\": \"DRAFT_CANONICAL_REVIEW_REQUIRED\",\n  \"outcome_execution_authorized\": false,\n  \"parent_decision_id\": \"cfc2ab86-ad8c-4b47-a91f-71a71360c4ab\",\n  \"mwe_uuid\": \"7d95c3a7-1c08-48a2-a865-3aa7eea8873a\",\n  \"development\": {\n    \"role\": \"DEVELOPMENT_PREVIOUSLY_USED_S2\",\n    \"parent_input_id\": \"1d4fa60f-930d-47fb-b5e2-6d4ccc09738a\",\n    \"dataset\": \"market_daily_history_2025-02-03_2026-08-27\",\n    \"sha256\": \"ea2908cd89123548404a0f48dca6633f6ef87491793f327705588b4e2ecefae2\",\n    \"bytes\": 2411604,\n    \"start\": \"2025-02-03\",\n    \"end\": \"2026-08-27\",\n    \"rows\": 44128,\n    \"symbols\": 112,\n    \"dates\": 394,\n    \"object_path\": \"governed_inputs/swing10/s2_b1/market_daily_history_2025-02-03_2026-08-27/ea2908cd89123548404a0f48dca6633f6ef87491793f327705588b4e2ecefae2.csv\",\n    \"preparation_input_id\": \"131b6bd5-65d1-4dc7-a856-3300f73babcb\",\n    \"subset_regeneration\": false,\n    \"whole_panel_common_eligibility\": \"signal date t qualifies only when next-session entry and all ten holding sessions exist in the registered trading-date calendar, all required bars finite/valid; no outcome-based exclusion; untestable rows recorded\",\n    \"in_run_byte_readback\": \"REQUIRED_BEFORE_REAL_ACCESS; existing registrations certify historical identity, fresh storage download not yet performed\"\n  },\n  \"consumed_validation\": {\n    \"deny_sha256\": \"b905affcb0843a4d313557fc59fc543a46413258f2c49a68f1eb87d338e55915\",\n    \"deny_input_id\": \"86045cd0-8e49-4261-aed9-3f24bfb5ff07\",\n    \"no_bytes_or_outcomes_read_for_this_preflight\": true\n  },\n  \"factor\": {\n    \"name\": \"LIQ_ADJUSTED_PRICE\",\n    \"formula\": \"adjusted close_t unchanged\",\n    \"tails\": \"same-date finite frozen112-symbol cross section; inclusive p20 LOW / p80 HIGH; linear quantile interpolation\",\n    \"candidate_sides\": [\n      {\n        \"side\": \"LONG_LOW\",\n        \"entry_membership\": \"close_t<=p20_t\",\n        \"sign\": \"LONG\"\n      },\n      {\n        \"side\": \"SHORT_HIGH\",\n        \"entry_membership\": \"close_t>=p80_t\",\n        \"sign\": \"SHORT\"\n      }\n    ],\n    \"not_implied_by_spread_validation\": true,\n    \"extra_factors\": false\n  },\n  \"horizons\": {\n    \"validated_caps\": [\n      5,\n      7,\n      10\n    ],\n    \"path_days\": [\n      1,\n      2,\n      3,\n      4,\n      5,\n      6,\n      7,\n      8,\n      9,\n      10\n    ],\n    \"horizon_selection\": \"none; every architecture treated as inseparable cap5/7/10 family with equal weights and all caps reported; paths1..10 diagnostic only\"\n  },\n  \"entry\": {\n    \"decision_time\": \"after official RTH close on t\",\n    \"price\": \"next available registered session adjusted open(t+1)\",\n    \"counting\": \"entry session is holding day1, time exit at official adjusted close of holding day cap\",\n    \"all_signals_included\": true,\n    \"independent_event_cohorts_not_capital_simulator\": true,\n    \"real_adjusted_price_limitation\": \"retrospectively split-adjusted research coordinate, not as-traded nominal price; no claim of executable share counts or borrow availability\",\n    \"reentry\": \"independent daily event cohorts; overlapping positions are not represented as an implementable self-financing portfolio\"\n  },\n  \"architectures\": [\n    {\n      \"id\": \"TIME\",\n      \"profit_target\": null,\n      \"initial_stop\": null,\n      \"trailing\": null\n    },\n    {\n      \"id\": \"BRACKET_1_1\",\n      \"profit_target\": 0.01,\n      \"initial_stop\": 0.01,\n      \"trailing\": null\n    },\n    {\n      \"id\": \"BRACKET_2_1\",\n      \"profit_target\": 0.02,\n      \"initial_stop\": 0.01,\n      \"trailing\": null\n    },\n    {\n      \"id\": \"BRACKET_2_2\",\n      \"profit_target\": 0.02,\n      \"initial_stop\": 0.02,\n      \"trailing\": null\n    },\n    {\n      \"id\": \"TRAIL_2\",\n      \"profit_target\": null,\n      \"initial_stop\": 0.02,\n      \"trailing\": \"2% from best completed holding-session close; ratchet after close effective next session; never use current high/low to ratchet same session\"\n    },\n    {\n      \"id\": \"STRUCTURE_5\",\n      \"profit_target\": null,\n      \"initial_stop\": 0.02,\n      \"trailing\": \"long prior5 completed session lows max-ratchet / short prior5 completed session highs min-ratchet; active next session; extra predictor warmup means common signal-date eligibility needs prior5 sessions\"\n    }\n  ],\n  \"architecture_count\": 6,\n  \"candidate_cells\": 36,\n  \"primary_tests\": 12,\n  \"path_execution\": {\n    \"barrier_coordinates\": \"fraction of actual adjusted entry open; short favorable price decrease, adverse increase\",\n    \"gap_rule\": \"check opening price before daily high/low; execute at opening price when crossing active barrier; profit target gap conservatively fill at target, adverse stop gap at worse opening price\",\n    \"same_session_double_hit\": \"stop first conservative convention; separately flag unresolvable OHLC ordering and report target-first sensitivity diagnostically; no inferred intraday path\",\n    \"force_exit\": \"at cap close, cap<=10; barrier event takes precedence before closing time exit\",\n    \"short_return\": \"(entry-exit)/entry; simple not leveraged; short sale borrow/locate/corporate-action execution unavailable and S4 gate\",\n    \"missing\": \"retain audit row UNTESTABLE_DATA; never impute a price, extrapolate, pick another date, or remove because result unfavorable\"\n  },\n  \"metrics\": {\n    \"primary\": \"date-level equal-weight eligible-symbol arithmetic mean of net simple side return divided by held sessions, then equal-weight cap5/7/10 within side/architecture; mean across common eligible signal dates\",\n    \"secondary\": [\n      \"gross total simple return\",\n      \"net total simple return\",\n      \"median event and date returns\",\n      \"positive-return share diagnostic\",\n      \"holding duration\",\n      \"MFE and MAE relative to entry for full1..10 path and pre-exit bar envelope with ordering censor flag\",\n      \"first-passage day\",\n      \"time-to-target\",\n      \"barrier/force-exit frequency\",\n      \"ambiguous double-hit rate\",\n      \"worst adverse price gap\",\n      \"cumulative date-cohort PnL and maximum drawdown labeled cohort-index not implementable portfolio\",\n      \"paired dailyized difference to same-side TIME per cap and equal-weight family diagnostic\"\n    ],\n    \"MFE_MAE\": \"signed favorable and adverse excursion from entry to exit using known completed bars; exit-session unobserved sequence cannot identify pre-exit excursion; report conservative bounds/censored diagnostic, never exact intraday claim\",\n    \"first_passage\": \"opening crossings known first; intra-session high/low crossings only daily interval resolution; joint stop/target crossings flagged and deterministic conservative fill; no unobserved timestamps\",\n    \"dailyized\": \"simple net return divided by held trading sessions; no annualization primary; geometric holding-rate diagnostic only when1+return>0\",\n    \"drawdown\": \"from cumulative equal-weight date-cohort net total-return index; no portfolio-capital claim\"\n  },\n  \"inference\": {\n    \"unit\": \"signal trading date\",\n    \"aggregation\": \"symbol events averaged within signal-date, caps equal-weighted within side/architecture; no per-symbol independence\",\n    \"primary_family\": \"2 sides x6 architecture families =12 tests; unavailable retain conservative p1 bookkeeping slot\",\n    \"HAC\": \"Newey-West Bartlett lag9 for every family due shared max10 holding sessions\",\n    \"reference\": \"asymptotic normal two-sided95% CI; no small-sample multiplier\",\n    \"BH_q\": 0.05,\n    \"materiality\": \"proposed positive family mean / sampleSD(date-family dailyized return), ddof1 >=0.20; this S3 translation requires canonical approval, not inherited validation of trading leg\"\n  },\n  \"robustness\": {\n    \"temporal\": \"4 common chronological blocks fixed on predictor/common endpoint eligibility before outcomes; >=3 positive blocks and maximum abs(block_mean*blockN)/sum<=0.50\",\n    \"symbol\": \"additive daily cohort contributions reconcile; top1/5/10 absolute shares, HHI; remove top5 deterministic abs desc symbol asc then recompute all caps/family; no sign reversal, zero not reversal; primary never drops symbols\",\n    \"horizon\": \"all3 cap-specific mean net dailyized side effects positive; no best-cap selection; cap-specific inferential results diagnostic only\",\n    \"missing_diagnostics\": \"fail support, not primary testability\",\n    \"ambiguity\": \"stop-first primary; target-first sensitivity never replaces primary\"\n  },\n  \"costs\": {\n    \"round_trip_basis_points\": [\n      0,\n      10,\n      25,\n      50\n    ],\n    \"primary_round_trip_bp\": 10,\n    \"application\": \"subtract fixed entry-notional round-trip bps once/event; divide resulting net by held sessions\",\n    \"semantics\": \"scenario assumptions only, no empirical spread/market-impact/borrow inference; S4 certifies fills/gaps/nominal prices/borrow/fees/tax/dividends/execution stress; no selection of cost scenario\"\n  },\n  \"dispositions\": {\n    \"NOT_TESTABLE\": \"primary estimand semantic/data/numerical insufficiency\",\n    \"NO_S4_SUPPORT\": \"valid testable; positive direction, materiality or BH gate fails\",\n    \"DEVELOPMENT_ONLY_WEAK\": \"all primary gates pass but any required robustness gate fails\",\n    \"ELIGIBLE_FOR_CANONICAL_S4_REVIEW\": \"all primary and robustness gates pass; not independently validated or automatically advanced\"\n  },\n  \"selection\": {\n    \"max_architectures_per_side\": 1,\n    \"rule\": \"among ELIGIBLE_FOR_CANONICAL_S4_REVIEW only: descending lower95% HAC CI of equal-weight cap-family primary net dailyized mean; exact ties fixed architecture ID lexicographic; report all36 cells regardless selection\",\n    \"risk\": \"drawdown and path metrics fully reported, no unplanned risk weighting or threshold\",\n    \"no_candidate_allowed\": true,\n    \"S4_transition\": \"separate canonical approval, no automatic queue; S5/S6 locked\"\n  },\n  \"S5\": {\n    \"status\": \"PROPOSED_RESERVED_POLICY_NOT_YET_REGISTERED_DATASET\",\n    \"protected_interval\": \"all dates after2026-08-27 outside approved development deny by default; consumed pre2025-02-03 validation separately denied\",\n    \"recommended_start_rule\": \"first common source trading session on or after2026-10-05 AND strictly after full S4 candidate freeze timestamp converted to NewYork date; no decision outcomes before that anchor; no retrospective backfill for sample selection\",\n    \"recommended_sample\": \"first126 prospectively eligible signal dates from anchor plus up to10 endpoint sessions; fixed enrolment/certification before outcomes; no result-based extension; acquisition/identity/PIT universe/source semantics separately governed\",\n    \"development_exclusion\": \"S3/S4 cannot inspect any S5 bars/outcomes; use same development object only unless prospectively authorized additional development input is permanently marked consumed\",\n    \"actual_input_uuid\": null,\n    \"actual_sha256\": null,\n    \"actual_byte_size\": null,\n    \"future_validation_authorized\": false\n  },\n  \"artifact_schemas\": {\n    \"s3_candidate_registry.csv\": [\n      \"candidate_id\",\n      \"side\",\n      \"architecture_id\",\n      \"cap_days\",\n      \"factor_semantics\",\n      \"entry_definition\",\n      \"target_fraction\",\n      \"stop_fraction\",\n      \"trailing_definition\",\n      \"cost_primary_bp\",\n      \"primary_family_id\"\n    ],\n    \"s3_event_paths.csv\": [\n      \"candidate_id\",\n      \"symbol\",\n      \"signal_date\",\n      \"entry_date\",\n      \"entry_price\",\n      \"path_day\",\n      \"session_date\",\n      \"open\",\n      \"high\",\n      \"low\",\n      \"close\",\n      \"side_return\",\n      \"path_eligible\",\n      \"censor_reason\"\n    ],\n    \"s3_event_exits.csv\": [\n      \"candidate_id\",\n      \"symbol\",\n      \"signal_date\",\n      \"exit_date\",\n      \"exit_reason\",\n      \"exit_price\",\n      \"held_sessions\",\n      \"gross_return\",\n      \"net_return\",\n      \"dailyized_net_return\",\n      \"mfe_lower\",\n      \"mfe_upper\",\n      \"mae_lower\",\n      \"mae_upper\",\n      \"first_passage_day\",\n      \"time_to_target_days\",\n      \"ambiguous_bar\",\n      \"gap_fill\",\n      \"data_status\"\n    ],\n    \"s3_date_candidate_metrics.csv\": [\n      \"side\",\n      \"architecture_id\",\n      \"signal_date\",\n      \"cap_days\",\n      \"eligible_symbols\",\n      \"mean_gross_total_return\",\n      \"mean_net_total_return\",\n      \"mean_net_dailyized_return\",\n      \"family_dailyized_return\"\n    ],\n    \"s3_candidate_summary.csv\": [\n      \"side\",\n      \"architecture_id\",\n      \"testable\",\n      \"eligible_dates\",\n      \"eligible_events\",\n      \"mean_family_dailyized\",\n      \"median_family_dailyized\",\n      \"sample_sd\",\n      \"standardized_effect\",\n      \"hac_se\",\n      \"ci95_low\",\n      \"ci95_high\",\n      \"p_raw\",\n      \"p_bh\",\n      \"cap5_mean\",\n      \"cap7_mean\",\n      \"cap10_mean\",\n      \"cost_bp\",\n      \"temporal_pass\",\n      \"concentration_pass\",\n      \"horizon_pass\",\n      \"disposition\",\n      \"rank\",\n      \"selected_for_canonical_review\"\n    ],\n    \"s3_temporal_stability.csv\": [\n      \"side\",\n      \"architecture_id\",\n      \"block\",\n      \"start\",\n      \"end\",\n      \"N\",\n      \"mean\",\n      \"median\",\n      \"effect_share\",\n      \"direction_pass\",\n      \"available\"\n    ],\n    \"s3_symbol_concentration.csv\": [\n      \"side\",\n      \"architecture_id\",\n      \"symbol\",\n      \"contribution\",\n      \"absolute_share\",\n      \"rank\",\n      \"top5_removed\",\n      \"leave5_effect\",\n      \"sign_reversal\",\n      \"available\"\n    ],\n    \"s3_cost_path_diagnostics.csv\": [\n      \"candidate_id\",\n      \"cost_bp\",\n      \"metric\",\n      \"value\",\n      \"available\",\n      \"ordering_scenario\",\n      \"reason\"\n    ],\n    \"s3_semantic_integrity.csv\": [\n      \"check_id\",\n      \"pass\",\n      \"reason\",\n      \"input_uuid\",\n      \"input_sha256\",\n      \"input_bytes\",\n      \"B5_read\",\n      \"S5_read\",\n      \"future_information\",\n      \"unavailable_cells\"\n    ],\n    \"sw10_s3_manifest.json\": [\n      \"protocol_decision_ids\",\n      \"protocol_snapshot_sha256\",\n      \"execution_ids\",\n      \"research_sha\",\n      \"infra_sha\",\n      \"input_identities\",\n      \"36_cell_registry\",\n      \"12_test_family\",\n      \"eligibility_dates\",\n      \"four_block_definitions\",\n      \"cost_scenarios\",\n      \"artifact_identities_hashes_bytes\",\n      \"protected_flags\",\n      \"development_consumed_boundary\",\n      \"S5_locked\",\n      \"billing_evidence\"\n    ]\n  },\n  \"verification\": {\n    \"required\": \"all output immutable private objects; exactly1 primary summary; every SHA/bytes independently downloaded/read back and SQL UTF8/blob parity verified; exact research/infrastructure/job/attempt/run/job revisions reconciled; no recursive manifest hash; terminal MWE reread; failures preserved\",\n    \"preflight_only\": true\n  },\n  \"exit_gates\": \"S3 may be marked COMPLETE and S4 considered only when ALL are satisfied:\\n1. A prospective S3 protocol and any supplements were frozen before the corresponding S3 candidate outcomes were inspected.\\n2. Exact S3 development inputs and data-use boundaries are registered and verified, with no consumed B5 validation sample used for parameter/candidate selection and no protected holdout accessed.\\n3. LIQ_ADJUSTED_PRICE semantics are either preserved exactly or any change is explicitly treated as a new exploratory hypothesis without inherited B5 validation status.\\n4. All prespecified S3 candidate architectures and parameter cells are accounted for; no favorable-result deletion or post-hoc grid expansion occurred.\\n5. Required holding-path outputs are complete for the applicable 1-10 day envelope: total return, dailyized return, MFE, MAE, first passage/time-to-target and exit/stop behavior as prospectively defined.\\n6. Long and short sides are separately reported; no aggregate result conceals a failing side.\\n7. Temporal stability, symbol concentration and leave-contributor diagnostics are complete, with the inherited concentration concern explicitly reported rather than optimized away.\\n8. Any transaction-cost/slippage diagnostics required by the S3 protocol are complete and clearly labeled preliminary; S4 retains final execution-stress authority.\\n9. S3 produces a bounded candidate set with fully specified entry/exit/holding semantics and a mechanical disposition for every preregistered candidate. It is acceptable for S3 to conclude that no candidate merits S4.\\n10. Candidate selection, if any, follows the prospectively frozen rule and does not claim independent validation from S3 development evidence.\\n11. All required artifacts, hashes/bytes, job/attempt/revision provenance and independent readbacks are durably reconciled.\\n12. S4 entry, if recommended, carries forward only the bounded S3 candidate(s), unresolved limitations and frozen rules; S5 remains the untouched out-of-sample validation stage and S6 remains locked.\\n\",\n  \"canonical_decisions_needed\": [\n    \"approve adjusted next-open long-low/short-high event-cohort semantics and conservative daily-OHLC ordering/bounded36-cell architecture\",\n    \"approve proposed12-test family dailyized estimand, materiality, preliminary costs and ranking/disposition mapping\",\n    \"approve full existing discovery envelope as DEVELOPMENT and prospectively reserve exact S5 enrolment policy; no existing registered S5 interval found\"\n  ],\n  \"next_execution\": \"NONE_UNTIL_CANONICAL_FREEZE_AND_READBACK; then certify input fresh private bytes and candidate eligibility before separately authorized science\"\n}",
+  "evidence": "User handoff2026-10-03T21:36:19-05:00; no real S3 outcomes computed/inspected.",
+  "rationale": "User explicitly approved the complete unchanged proposal prospectively; preserve archival draft and preparation history.",
+  "decision_id": "21091322-b757-42e5-9918-dba46b2e1252",
+  "strategy_id": "09f30dc1-81ae-440f-aeca-18652df69896",
+  "decision_date": "2026-10-04T02:37:41.623276+00:00",
+  "metadata_json": {
+    "mwe_id": "MWE-SW10-S3P-001",
+    "status": "FROZEN",
+    "mwe_uuid": "7d95c3a7-1c08-48a2-a865-3aa7eea8873a",
+    "s6_locked": true,
+    "prospective": true,
+    "decision_code": "SW10_S3_CANDIDATE_PROTOCOL_V1",
+    "user_approved": true,
+    "frozen_contract": {
+      "S5": {
+        "status": "PROPOSED_RESERVED_POLICY_NOT_YET_REGISTERED_DATASET",
+        "actual_sha256": null,
+        "actual_byte_size": null,
+        "actual_input_uuid": null,
+        "protected_interval": "all dates after2026-08-27 outside approved development deny by default; consumed pre2025-02-03 validation separately denied",
+        "recommended_sample": "first126 prospectively eligible signal dates from anchor plus up to10 endpoint sessions; fixed enrolment/certification before outcomes; no result-based extension; acquisition/identity/PIT universe/source semantics separately governed",
+        "development_exclusion": "S3/S4 cannot inspect any S5 bars/outcomes; use same development object only unless prospectively authorized additional development input is permanently marked consumed",
+        "recommended_start_rule": "first common source trading session on or after2026-10-05 AND strictly after full S4 candidate freeze timestamp converted to NewYork date; no decision outcomes before that anchor; no retrospective backfill for sample selection",
+        "future_validation_authorized": false
+      },
+      "costs": {
+        "semantics": "scenario assumptions only, no empirical spread/market-impact/borrow inference; S4 certifies fills/gaps/nominal prices/borrow/fees/tax/dividends/execution stress; no selection of cost scenario",
+        "application": "subtract fixed entry-notional round-trip bps once/event; divide resulting net by held sessions",
+        "primary_round_trip_bp": 10,
+        "round_trip_basis_points": [
+          0,
+          10,
+          25,
+          50
+        ]
+      },
+      "entry": {
+        "price": "next available registered session adjusted open(t+1)",
+        "reentry": "independent daily event cohorts; overlapping positions are not represented as an implementable self-financing portfolio",
+        "counting": "entry session is holding day1, time exit at official adjusted close of holding day cap",
+        "decision_time": "after official RTH close on t",
+        "all_signals_included": true,
+        "real_adjusted_price_limitation": "retrospectively split-adjusted research coordinate, not as-traded nominal price; no claim of executable share counts or borrow availability",
+        "independent_event_cohorts_not_capital_simulator": true
+      },
+      "factor": {
+        "name": "LIQ_ADJUSTED_PRICE",
+        "tails": "same-date finite frozen112-symbol cross section; inclusive p20 LOW / p80 HIGH; linear quantile interpolation",
+        "formula": "adjusted close_t unchanged",
+        "extra_factors": false,
+        "candidate_sides": [
+          {
+            "side": "LONG_LOW",
+            "sign": "LONG",
+            "entry_membership": "close_t<=p20_t"
+          },
+          {
+            "side": "SHORT_HIGH",
+            "sign": "SHORT",
+            "entry_membership": "close_t>=p80_t"
+          }
+        ],
+        "not_implied_by_spread_validation": true
+      },
+      "status": "DRAFT_CANONICAL_REVIEW_REQUIRED",
+      "metrics": {
+        "MFE_MAE": "signed favorable and adverse excursion from entry to exit using known completed bars; exit-session unobserved sequence cannot identify pre-exit excursion; report conservative bounds/censored diagnostic, never exact intraday claim",
+        "primary": "date-level equal-weight eligible-symbol arithmetic mean of net simple side return divided by held sessions, then equal-weight cap5/7/10 within side/architecture; mean across common eligible signal dates",
+        "drawdown": "from cumulative equal-weight date-cohort net total-return index; no portfolio-capital claim",
+        "dailyized": "simple net return divided by held trading sessions; no annualization primary; geometric holding-rate diagnostic only when1+return>0",
+        "secondary": [
+          "gross total simple return",
+          "net total simple return",
+          "median event and date returns",
+          "positive-return share diagnostic",
+          "holding duration",
+          "MFE and MAE relative to entry for full1..10 path and pre-exit bar envelope with ordering censor flag",
+          "first-passage day",
+          "time-to-target",
+          "barrier/force-exit frequency",
+          "ambiguous double-hit rate",
+          "worst adverse price gap",
+          "cumulative date-cohort PnL and maximum drawdown labeled cohort-index not implementable portfolio",
+          "paired dailyized difference to same-side TIME per cap and equal-weight family diagnostic"
+        ],
+        "first_passage": "opening crossings known first; intra-session high/low crossings only daily interval resolution; joint stop/target crossings flagged and deterministic conservative fill; no unobserved timestamps"
+      },
+      "horizons": {
+        "path_days": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "validated_caps": [
+          5,
+          7,
+          10
+        ],
+        "horizon_selection": "none; every architecture treated as inseparable cap5/7/10 family with equal weights and all caps reported; paths1..10 diagnostic only"
+      },
+      "mwe_uuid": "7d95c3a7-1c08-48a2-a865-3aa7eea8873a",
+      "inference": {
+        "HAC": "Newey-West Bartlett lag9 for every family due shared max10 holding sessions",
+        "BH_q": 0.05,
+        "unit": "signal trading date",
+        "reference": "asymptotic normal two-sided95% CI; no small-sample multiplier",
+        "aggregation": "symbol events averaged within signal-date, caps equal-weighted within side/architecture; no per-symbol independence",
+        "materiality": "proposed positive family mean / sampleSD(date-family dailyized return), ddof1 >=0.20; this S3 translation requires canonical approval, not inherited validation of trading leg",
+        "primary_family": "2 sides x6 architecture families =12 tests; unavailable retain conservative p1 bookkeeping slot"
+      },
+      "selection": {
+        "risk": "drawdown and path metrics fully reported, no unplanned risk weighting or threshold",
+        "rule": "among ELIGIBLE_FOR_CANONICAL_S4_REVIEW only: descending lower95% HAC CI of equal-weight cap-family primary net dailyized mean; exact ties fixed architecture ID lexicographic; report all36 cells regardless selection",
+        "S4_transition": "separate canonical approval, no automatic queue; S5/S6 locked",
+        "no_candidate_allowed": true,
+        "max_architectures_per_side": 1
+      },
+      "exit_gates": "S3 may be marked COMPLETE and S4 considered only when ALL are satisfied:\n1. A prospective S3 protocol and any supplements were frozen before the corresponding S3 candidate outcomes were inspected.\n2. Exact S3 development inputs and data-use boundaries are registered and verified, with no consumed B5 validation sample used for parameter/candidate selection and no protected holdout accessed.\n3. LIQ_ADJUSTED_PRICE semantics are either preserved exactly or any change is explicitly treated as a new exploratory hypothesis without inherited B5 validation status.\n4. All prespecified S3 candidate architectures and parameter cells are accounted for; no favorable-result deletion or post-hoc grid expansion occurred.\n5. Required holding-path outputs are complete for the applicable 1-10 day envelope: total return, dailyized return, MFE, MAE, first passage/time-to-target and exit/stop behavior as prospectively defined.\n6. Long and short sides are separately reported; no aggregate result conceals a failing side.\n7. Temporal stability, symbol concentration and leave-contributor diagnostics are complete, with the inherited concentration concern explicitly reported rather than optimized away.\n8. Any transaction-cost/slippage diagnostics required by the S3 protocol are complete and clearly labeled preliminary; S4 retains final execution-stress authority.\n9. S3 produces a bounded candidate set with fully specified entry/exit/holding semantics and a mechanical disposition for every preregistered candidate. It is acceptable for S3 to conclude that no candidate merits S4.\n10. Candidate selection, if any, follows the prospectively frozen rule and does not claim independent validation from S3 development evidence.\n11. All required artifacts, hashes/bytes, job/attempt/revision provenance and independent readbacks are durably reconciled.\n12. S4 entry, if recommended, carries forward only the bounded S3 candidate(s), unresolved limitations and frozen rules; S5 remains the untouched out-of-sample validation stage and S6 remains locked.\n",
+      "robustness": {
+        "symbol": "additive daily cohort contributions reconcile; top1/5/10 absolute shares, HHI; remove top5 deterministic abs desc symbol asc then recompute all caps/family; no sign reversal, zero not reversal; primary never drops symbols",
+        "horizon": "all3 cap-specific mean net dailyized side effects positive; no best-cap selection; cap-specific inferential results diagnostic only",
+        "temporal": "4 common chronological blocks fixed on predictor/common endpoint eligibility before outcomes; >=3 positive blocks and maximum abs(block_mean*blockN)/sum<=0.50",
+        "ambiguity": "stop-first primary; target-first sensitivity never replaces primary",
+        "missing_diagnostics": "fail support, not primary testability"
+      },
+      "development": {
+        "end": "2026-08-27",
+        "role": "DEVELOPMENT_PREVIOUSLY_USED_S2",
+        "rows": 44128,
+        "bytes": 2411604,
+        "dates": 394,
+        "start": "2025-02-03",
+        "sha256": "ea2908cd89123548404a0f48dca6633f6ef87491793f327705588b4e2ecefae2",
+        "dataset": "market_daily_history_2025-02-03_2026-08-27",
+        "symbols": 112,
+        "object_path": "governed_inputs/swing10/s2_b1/market_daily_history_2025-02-03_2026-08-27/ea2908cd89123548404a0f48dca6633f6ef87491793f327705588b4e2ecefae2.csv",
+        "parent_input_id": "1d4fa60f-930d-47fb-b5e2-6d4ccc09738a",
+        "subset_regeneration": false,
+        "in_run_byte_readback": "REQUIRED_BEFORE_REAL_ACCESS; existing registrations certify historical identity, fresh storage download not yet performed",
+        "preparation_input_id": "131b6bd5-65d1-4dc7-a856-3300f73babcb",
+        "whole_panel_common_eligibility": "signal date t qualifies only when next-session entry and all ten holding sessions exist in the registered trading-date calendar, all required bars finite/valid; no outcome-based exclusion; untestable rows recorded"
+      },
+      "dispositions": {
+        "NOT_TESTABLE": "primary estimand semantic/data/numerical insufficiency",
+        "NO_S4_SUPPORT": "valid testable; positive direction, materiality or BH gate fails",
+        "DEVELOPMENT_ONLY_WEAK": "all primary gates pass but any required robustness gate fails",
+        "ELIGIBLE_FOR_CANONICAL_S4_REVIEW": "all primary and robustness gates pass; not independently validated or automatically advanced"
+      },
+      "verification": {
+        "required": "all output immutable private objects; exactly1 primary summary; every SHA/bytes independently downloaded/read back and SQL UTF8/blob parity verified; exact research/infrastructure/job/attempt/run/job revisions reconciled; no recursive manifest hash; terminal MWE reread; failures preserved",
+        "preflight_only": true
+      },
+      "architectures": [
+        {
+          "id": "TIME",
+          "trailing": null,
+          "initial_stop": null,
+          "profit_target": null
+        },
+        {
+          "id": "BRACKET_1_1",
+          "trailing": null,
+          "initial_stop": 0.01,
+          "profit_target": 0.01
+        },
+        {
+          "id": "BRACKET_2_1",
+          "trailing": null,
+          "initial_stop": 0.01,
+          "profit_target": 0.02
+        },
+        {
+          "id": "BRACKET_2_2",
+          "trailing": null,
+          "initial_stop": 0.02,
+          "profit_target": 0.02
+        },
+        {
+          "id": "TRAIL_2",
+          "trailing": "2% from best completed holding-session close; ratchet after close effective next session; never use current high/low to ratchet same session",
+          "initial_stop": 0.02,
+          "profit_target": null
+        },
+        {
+          "id": "STRUCTURE_5",
+          "trailing": "long prior5 completed session lows max-ratchet / short prior5 completed session highs min-ratchet; active next session; extra predictor warmup means common signal-date eligibility needs prior5 sessions",
+          "initial_stop": 0.02,
+          "profit_target": null
+        }
+      ],
+      "primary_tests": 12,
+      "protocol_code": "SW10_S3_CANDIDATE_PROTOCOL_V1_PROPOSED",
+      "next_execution": "NONE_UNTIL_CANONICAL_FREEZE_AND_READBACK; then certify input fresh private bytes and candidate eligibility before separately authorized science",
+      "path_execution": {
+        "missing": "retain audit row UNTESTABLE_DATA; never impute a price, extrapolate, pick another date, or remove because result unfavorable",
+        "gap_rule": "check opening price before daily high/low; execute at opening price when crossing active barrier; profit target gap conservatively fill at target, adverse stop gap at worse opening price",
+        "force_exit": "at cap close, cap<=10; barrier event takes precedence before closing time exit",
+        "short_return": "(entry-exit)/entry; simple not leveraged; short sale borrow/locate/corporate-action execution unavailable and S4 gate",
+        "barrier_coordinates": "fraction of actual adjusted entry open; short favorable price decrease, adverse increase",
+        "same_session_double_hit": "stop first conservative convention; separately flag unresolvable OHLC ordering and report target-first sensitivity diagnostically; no inferred intraday path"
+      },
+      "candidate_cells": 36,
+      "artifact_schemas": {
+        "s3_event_exits.csv": [
+          "candidate_id",
+          "symbol",
+          "signal_date",
+          "exit_date",
+          "exit_reason",
+          "exit_price",
+          "held_sessions",
+          "gross_return",
+          "net_return",
+          "dailyized_net_return",
+          "mfe_lower",
+          "mfe_upper",
+          "mae_lower",
+          "mae_upper",
+          "first_passage_day",
+          "time_to_target_days",
+          "ambiguous_bar",
+          "gap_fill",
+          "data_status"
+        ],
+        "s3_event_paths.csv": [
+          "candidate_id",
+          "symbol",
+          "signal_date",
+          "entry_date",
+          "entry_price",
+          "path_day",
+          "session_date",
+          "open",
+          "high",
+          "low",
+          "close",
+          "side_return",
+          "path_eligible",
+          "censor_reason"
+        ],
+        "sw10_s3_manifest.json": [
+          "protocol_decision_ids",
+          "protocol_snapshot_sha256",
+          "execution_ids",
+          "research_sha",
+          "infra_sha",
+          "input_identities",
+          "36_cell_registry",
+          "12_test_family",
+          "eligibility_dates",
+          "four_block_definitions",
+          "cost_scenarios",
+          "artifact_identities_hashes_bytes",
+          "protected_flags",
+          "development_consumed_boundary",
+          "S5_locked",
+          "billing_evidence"
+        ],
+        "s3_candidate_summary.csv": [
+          "side",
+          "architecture_id",
+          "testable",
+          "eligible_dates",
+          "eligible_events",
+          "mean_family_dailyized",
+          "median_family_dailyized",
+          "sample_sd",
+          "standardized_effect",
+          "hac_se",
+          "ci95_low",
+          "ci95_high",
+          "p_raw",
+          "p_bh",
+          "cap5_mean",
+          "cap7_mean",
+          "cap10_mean",
+          "cost_bp",
+          "temporal_pass",
+          "concentration_pass",
+          "horizon_pass",
+          "disposition",
+          "rank",
+          "selected_for_canonical_review"
+        ],
+        "s3_candidate_registry.csv": [
+          "candidate_id",
+          "side",
+          "architecture_id",
+          "cap_days",
+          "factor_semantics",
+          "entry_definition",
+          "target_fraction",
+          "stop_fraction",
+          "trailing_definition",
+          "cost_primary_bp",
+          "primary_family_id"
+        ],
+        "s3_semantic_integrity.csv": [
+          "check_id",
+          "pass",
+          "reason",
+          "input_uuid",
+          "input_sha256",
+          "input_bytes",
+          "B5_read",
+          "S5_read",
+          "future_information",
+          "unavailable_cells"
+        ],
+        "s3_temporal_stability.csv": [
+          "side",
+          "architecture_id",
+          "block",
+          "start",
+          "end",
+          "N",
+          "mean",
+          "median",
+          "effect_share",
+          "direction_pass",
+          "available"
+        ],
+        "s3_symbol_concentration.csv": [
+          "side",
+          "architecture_id",
+          "symbol",
+          "contribution",
+          "absolute_share",
+          "rank",
+          "top5_removed",
+          "leave5_effect",
+          "sign_reversal",
+          "available"
+        ],
+        "s3_cost_path_diagnostics.csv": [
+          "candidate_id",
+          "cost_bp",
+          "metric",
+          "value",
+          "available",
+          "ordering_scenario",
+          "reason"
+        ],
+        "s3_date_candidate_metrics.csv": [
+          "side",
+          "architecture_id",
+          "signal_date",
+          "cap_days",
+          "eligible_symbols",
+          "mean_gross_total_return",
+          "mean_net_total_return",
+          "mean_net_dailyized_return",
+          "family_dailyized_return"
+        ]
+      },
+      "architecture_count": 6,
+      "parent_decision_id": "cfc2ab86-ad8c-4b47-a91f-71a71360c4ab",
+      "consumed_validation": {
+        "deny_sha256": "b905affcb0843a4d313557fc59fc543a46413258f2c49a68f1eb87d338e55915",
+        "deny_input_id": "86045cd0-8e49-4261-aed9-3f24bfb5ff07",
+        "no_bytes_or_outcomes_read_for_this_preflight": true
+      },
+      "canonical_decisions_needed": [
+        "approve adjusted next-open long-low/short-high event-cohort semantics and conservative daily-OHLC ordering/bounded36-cell architecture",
+        "approve proposed12-test family dailyized estimand, materiality, preliminary costs and ranking/disposition mapping",
+        "approve full existing discovery envelope as DEVELOPMENT and prospectively reserve exact S5 enrolment policy; no existing registered S5 interval found"
+      ],
+      "outcome_execution_authorized": false
+    },
+    "approval_evidence": "User canonical authorization submitted 2026-10-03T21:36:19-05:00, before any real S3 candidate/path outcome computation or inspection: prospectively approve Option1, complete unchanged proposal decision831660de-f547-48e0-8742-fdfb7ad37a73, and freeze as SW10_S3_CANDIDATE_PROTOCOL_V1. All36 cells,12 architecture-family tests, sides,caps,barrier ordering,metrics,HAC/BH/materiality,costs,robustness,selection,S5 reservation and S6 lock approved exactly. This authorizes outcome-blind MWE-SW10-S3P-001 completion only; real S3 science remains disabled and requires a NEW separately authorized scientific-execution MWE. No B5 input/artifact access, no post2026-08-27 S3/S4 development, no S5 access and no incremental paid fallback.",
+    "parent_decision_id": "cfc2ab86-ad8c-4b47-a91f-71a71360c4ab",
+    "approved_proposal_id": "831660de-f547-48e0-8742-fdfb7ad37a73",
+    "outcomes_computed_at_freeze": false,
+    "outcomes_inspected_at_freeze": false,
+    "preflight_execution_authorized": true,
+    "scientific_execution_authorized": false
+  },
+  "affects_model_version": "SWING10-RM-1.2",
+  "supersedes_decision_id": null
+}
