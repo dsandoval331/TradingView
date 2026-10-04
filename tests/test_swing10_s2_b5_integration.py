@@ -9,7 +9,7 @@ from cloud_compute import research_revision_adapter as a
 from cloud_compute.certify_dispatch_contracts import selected_tests
 from tr_platform.research import swing10_s2_b5_validation as v
 from tr_platform.research import swing10_s2_b5_validation_contract as c
-from test_swing10_s2_b5_validation import panel
+from tests.test_swing10_s2_b5_validation import panel
 
 def test_adapter_whitelist_and_exact_bundle(tmp_path):
     copied=[]
