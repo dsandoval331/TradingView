@@ -60,6 +60,7 @@ def test_attempt_scoped_readback_preserves_prior_attempts(monkeypatch):
         seen.append((table,params.copy()))
         if table=='research_jobs':return [{'status':'succeeded','git_sha':'research'}]
         if table=='research_job_attempts':return [{'status':'succeeded','git_sha':'research','attempt_id':'new'}]
+        if table=='research_artifact_readbacks':return [saved[0]]
         assert params['attempt_id']=='eq.new'
         return [{'artifact_id':'new-artifact','object_path':'artifacts/job/new/audit.json','bucket_name':'private','size_bytes':len(blob),'sha256':sha,'media_type':'application/json'}]
     monkeypatch.setattr(rb,'_fetch_rows',fetch)
