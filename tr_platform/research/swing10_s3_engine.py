@@ -138,9 +138,14 @@ def build_synthetic_tables(cohorts,contract):
     cohorts[signal_date][side][FIXTURE_symbol] = {'prior':5bars,'bars':10bars}.
     """
     if not cohorts or any(not s.startswith('FIXTURE_') for sides in cohorts.values() for rows in sides.values() for s in rows):raise ValueError('synthetic-only orchestration boundary')
+    return calculate_frozen_tables(cohorts,contract)
+
+def calculate_frozen_tables(cohorts,contract,*,path_sink=None):
+    """Pure frozen computation; file/network/authorization reside in separate runner."""
     dates=sorted(cohorts);fixed_blocks=blocks(dates);schemas=contract['artifact_schemas']
     if len(schemas)!=10 or contract['primary_tests']!=12 or contract['candidate_cells']!=36:raise ValueError('frozen artifact/test grid drift')
     tables={name:[] for name in schemas if name.endswith('.csv')};summaries=[]
+    if path_sink is not None:tables['s3_event_paths.csv']=path_sink
     rawpaths=tables['s3_event_paths.csv'];exits=tables['s3_event_exits.csv'];datemetrics=tables['s3_date_candidate_metrics.csv'];costs=tables['s3_cost_path_diagnostics.csv']
     archparams={a['id']:a for a in contract['architectures']}
     for side in SIDES:
@@ -216,5 +221,5 @@ def build_synthetic_tables(cohorts,contract):
     tables['sw10_s3_manifest.json']={k:None for k in schemas['sw10_s3_manifest.json']}
     tables['sw10_s3_manifest.json'].update({'protocol_decision_ids':['21091322-b757-42e5-9918-dba46b2e1252'],'synthetic_only':True,'36_cell_registry':[r['candidate_id'] for r in tables['s3_candidate_registry.csv']],'12_test_family':[r['side']+'__'+r['architecture_id'] for r in summaries],'four_block_definitions':fixed_blocks,'cost_scenarios':[0,10,25,50],'protected_flags':{'B5_read':False,'S5_read':False},'S5_locked':True,'scientific_execution_authorized':False,'artifact_identities_hashes_bytes':'assigned only by separately authorized governed execution; no self-hash','eligibility_dates':dates,'development_consumed_boundary':'DEVELOPMENT_PREVIOUSLY_USED_S2','billing_evidence':'not available; synthetic certification only'})
     for name,rows in tables.items():
-        if name.endswith('.csv') and any(set(row)!=set(schemas[name]) for row in rows):raise ValueError('exact frozen schema mismatch '+name)
+        if name.endswith('.csv') and rows is not path_sink and any(set(row)!=set(schemas[name]) for row in rows):raise ValueError('exact frozen schema mismatch '+name)
     return tables

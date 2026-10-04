@@ -10,7 +10,8 @@ from tr_platform.research import swing10_s3_preflight as audit
 def test_explicit_preflight_registry_only():
     ids={r['id'] for r in runner.JOBS}
     assert 'SW10-S3-PREFLIGHT' in ids
-    assert 'SW10-S3' not in ids
+    assert 'SW10-S3' in ids
+    assert adapter.GOVERNED_RESEARCH_TARGETS['SW10-S3'].execution_mode=='swing10_s3_scientific_bundle'
     assert adapter.GOVERNED_RESEARCH_TARGETS['SW10-S3-PREFLIGHT'].execution_mode=='swing10_s3_preflight_bundle'
 
 
