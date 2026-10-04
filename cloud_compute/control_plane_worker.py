@@ -104,7 +104,7 @@ def _persist_result_artifacts(
             "size_bytes": path.stat().st_size,
             "sha256": digest,
             "is_primary": is_primary,
-            "metadata_json": {"runner_job_id": runner_job_id, "runner_relative_path": rel},
+            "metadata_json": {"runner_job_id": runner_job_id, "runner_relative_path": rel, **(result.get("output_artifact_metadata", {}).get(rel, {}))},
         }))
     return persisted
 
@@ -169,7 +169,12 @@ def run_one_outcome(
         "research_revision_adapter": "v1" if adapter_used else None,
     }
     try:
-        if runner_job_id == "SW10-S3-PREFLIGHT":
+        if runner_job_id == "SW10-S3-ARTIFACT-CERT":
+            parameters = job.get("parameters_json") or {}
+            if parameters.get("mwe_uuid") != "3ac865ff-4f78-4f2c-807d-e579604ea39f" or parameters.get("synthetic_only") is not True:
+                raise RuntimeError("exact synthetic S3 activation envelope required")
+            materialized = materialize_job_inputs(config, job_id=job_id, work_root=runner.WORK_ROOT, allowed_inputs=[])
+        elif runner_job_id == "SW10-S3-PREFLIGHT":
             parameters = job.get("parameters_json") or {}
             if (parameters.get("mwe_uuid") != "7d95c3a7-1c08-48a2-a865-3aa7eea8873a" or
                 parameters.get("protocol_decision_id") != "21091322-b757-42e5-9918-dba46b2e1252" or
@@ -197,7 +202,7 @@ def run_one_outcome(
                 } for item in materialized]},
             })
 
-        if runner_job_id in {"SW10-S3-PREFLIGHT", "SW10-S2-B2", "SW10-S2-B3-PREFLIGHT", "SW10-S2-B3-CONTINUOUS-PREFLIGHT", "SW10-S2-B3", "SW10-S2-B4-PREFLIGHT", "SW10-S2-B4", "SW10-S2-B5-PREFLIGHT", "SW10-S2-B5-ACQUISITION", "SW10-S2-B5"}:
+        if runner_job_id in {"SW10-S3-ARTIFACT-CERT", "SW10-S3-PREFLIGHT", "SW10-S2-B2", "SW10-S2-B3-PREFLIGHT", "SW10-S2-B3-CONTINUOUS-PREFLIGHT", "SW10-S2-B3", "SW10-S2-B4-PREFLIGHT", "SW10-S2-B4", "SW10-S2-B5-PREFLIGHT", "SW10-S2-B5-ACQUISITION", "SW10-S2-B5"}:
             context = {
                 "job_id": job_id, "attempt_id": attempt_id, "attempt_no": attempt_no,
                 "research_revision": research_sha, "infrastructure_revision": infrastructure_sha,
@@ -207,9 +212,9 @@ def run_one_outcome(
                 "materialized_inputs": [{"input_id": x.input_id, "object_path": x.object_path,
                                          "size_bytes": x.size_bytes, "sha256": x.sha256} for x in materialized],
             }
-            if runner_job_id == "SW10-S3-PREFLIGHT":
+            if runner_job_id in {"SW10-S3-PREFLIGHT", "SW10-S3-ARTIFACT-CERT"}:
                 parameters = job.get("parameters_json") or {}
-                for key in ("mwe_uuid", "protocol_decision_id", "scientific_outcomes_authorized", "preflight_only"):
+                for key in ("mwe_uuid", "protocol_decision_id", "scientific_outcomes_authorized", "preflight_only", "synthetic_only"):
                     context[key] = parameters.get(key)
             if runner_job_id == "SW10-S2-B5":
                 parameters = job.get("parameters_json") or {}

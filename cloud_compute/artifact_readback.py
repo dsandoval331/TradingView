@@ -11,6 +11,7 @@ import requests
 
 from cloud_compute.control_plane import ControlPlaneConfig, _fetch_rows, _request_headers
 from cloud_compute.storage_poc import _download_object
+from cloud_compute.streaming_artifacts import sql_encode, verify_sql
 
 MAX_TEXT_BYTES = 10 * 1024 * 1024
 
@@ -67,17 +68,17 @@ def run(job_id: str, names: list[str] | None = None, *, attempt_id: str | None =
     artifacts = _fetch_rows(config, "research_job_artifacts", filters)
     wanted = set(names or [])
     if wanted:
-        artifacts = [a for a in artifacts if Path(a["object_path"]).name in wanted]
-        found = {Path(a["object_path"]).name for a in artifacts}
+        artifacts = [a for a in artifacts if (a.get("metadata_json", {}).get("logical_name") or Path(a["object_path"]).name) in wanted]
+        found = {a.get("metadata_json", {}).get("logical_name") or Path(a["object_path"]).name for a in artifacts}
         missing = sorted(wanted - found)
         if missing:
             raise RuntimeError(f"requested artifacts not registered: {missing}")
 
     rows = []
     for artifact in artifacts:
-        name = Path(artifact["object_path"]).name
+        name = artifact.get("metadata_json", {}).get("logical_name") or Path(artifact["object_path"]).name
         size = int(artifact["size_bytes"])
-        if size > MAX_TEXT_BYTES:
+        if size > MAX_TEXT_BYTES and (artifact.get("metadata_json") or {}).get("storage_encoding") != "gzip":
             raise RuntimeError(f"artifact exceeds governed text-readback limit ({MAX_TEXT_BYTES} bytes): {name}")
         with tempfile.TemporaryDirectory(prefix="tr-artifact-readback-") as td:
             local = Path(td) / name
@@ -86,10 +87,7 @@ def run(job_id: str, names: list[str] | None = None, *, attempt_id: str | None =
             actual_sha = _sha256(local)
             if actual_size != size or actual_sha != artifact["sha256"]:
                 raise RuntimeError(f"artifact parity failure: {name}")
-            try:
-                content = local.read_text(encoding="utf-8")
-            except UnicodeDecodeError as exc:
-                raise RuntimeError(f"artifact is not UTF-8 text: {name}") from exc
+            content, encoding, logical = sql_encode(local, artifact)
 
         payload = {
             "artifact_id": artifact["artifact_id"],
@@ -100,17 +98,25 @@ def run(job_id: str, names: list[str] | None = None, *, attempt_id: str | None =
             "size_bytes": size,
             "sha256": artifact["sha256"],
             "content_text": content,
-            "content_encoding": "utf-8",
+            "content_encoding": encoding,
             "source_git_sha": source_sha,
             "readback_git_sha": readback_sha,
             "verified_sha256": True,
             "metadata_json": {
-                "mechanism": "governed_private_storage_text_readback_v1",
+                "mechanism": "governed_lossless_private_storage_sql_readback_v2",
+                "logical_sha256": logical["sha256"], "logical_size_bytes": logical["size_bytes"],
+                "storage_encoding": (artifact.get("metadata_json") or {}).get("storage_encoding", "identity"),
                 "source_job_status": "succeeded",
                 **({"source_attempt_id": attempt_id} if attempt_id is not None else {}),
             },
         }
         row = _upsert(config, payload)
+        # Independently GET the durable SQL row, reconstruct complete original
+        # stored bytes, decompress/validate UTF-8 and rehash both representations.
+        durable = _fetch_rows(config, "research_artifact_readbacks", {"artifact_id": f"eq.{artifact['artifact_id']}", "limit":"2"})
+        if len(durable)!=1:raise RuntimeError("durable readback missing/duplicated")
+        with tempfile.TemporaryDirectory(prefix="tr-sql-byte-parity-") as td:
+            verify_sql(durable[0], artifact, Path(td)/"durable-bytes")
         rows.append({"artifact_id": row["artifact_id"], "name": name, "size_bytes": size, "sha256": actual_sha})
 
     return {"job_id": job_id, "source_git_sha": source_sha, "readback_git_sha": readback_sha, "count": len(rows), "artifacts": rows}
