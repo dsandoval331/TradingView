@@ -76,3 +76,29 @@ def test_future_values_never_affect_signal_cohort():
     b=audit.coverage(panel,dates,symbols)
     assert [r for r in a[1] if r['signal_date']==dates[5]]==[r for r in b[1] if r['signal_date']==dates[5]]
     assert a[0]==b[0]
+
+
+def test_protected_admission_before_any_download(monkeypatch,tmp_path):
+    from cloud_compute import input_materializer as materializer
+    from cloud_compute.control_plane import ControlPlaneConfig
+    calls=[]
+    allowed={"input_id":"approved", "object_path":"approved.csv", "object_size_bytes":1, "sha256":"abc", "metadata_json":{"bucket_name":"private", "local_relative_path":"approved.csv"}}
+    prohibited={**allowed,"input_id":"consumed-B5", "object_path":"B5.csv"}
+    monkeypatch.setattr(materializer,'fetch_job_inputs',lambda *a:[allowed,prohibited])
+    monkeypatch.setattr(materializer,'_download_object',lambda *a:calls.append(a))
+    with pytest.raises(RuntimeError,match='before any private download'):
+        materializer.materialize_job_inputs(ControlPlaneConfig('https://fixture.invalid','fixture'),job_id='fixture',work_root=tmp_path,allowed_inputs=[allowed])
+    assert calls==[]
+
+
+def test_protected_admission_rejects_object_bucket_or_path_drift(monkeypatch,tmp_path):
+    from cloud_compute import input_materializer as materializer
+    from cloud_compute.control_plane import ControlPlaneConfig
+    allowed={"input_id":"approved", "object_path":"approved.csv", "object_size_bytes":1, "sha256":"abc", "metadata_json":{"bucket_name":"private", "local_relative_path":"approved.csv"}}
+    calls=[];monkeypatch.setattr(materializer,'_download_object',lambda *a:calls.append(a))
+    variants=[{**allowed,'sha256':'B5SHA'},{**allowed,'object_path':'S5.csv'},{**allowed,'metadata_json':{'bucket_name':'other','local_relative_path':'approved.csv'}}]
+    for row in variants:
+        monkeypatch.setattr(materializer,'fetch_job_inputs',lambda *a:[row])
+        with pytest.raises(RuntimeError,match='before any private download'):
+            materializer.materialize_job_inputs(ControlPlaneConfig('https://fixture.invalid','fixture'),job_id='fixture',work_root=tmp_path,allowed_inputs=[allowed])
+    assert calls==[]

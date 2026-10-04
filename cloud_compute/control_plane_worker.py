@@ -169,7 +169,20 @@ def run_one_outcome(
         "research_revision_adapter": "v1" if adapter_used else None,
     }
     try:
-        materialized = materialize_job_inputs(config, job_id=job_id, work_root=runner.WORK_ROOT)
+        if runner_job_id == "SW10-S3-PREFLIGHT":
+            parameters = job.get("parameters_json") or {}
+            if (parameters.get("mwe_uuid") != "7d95c3a7-1c08-48a2-a865-3aa7eea8873a" or
+                parameters.get("protocol_decision_id") != "21091322-b757-42e5-9918-dba46b2e1252" or
+                parameters.get("preflight_only") is not True or parameters.get("scientific_outcomes_authorized") is not False):
+                raise RuntimeError("S3P exact frozen outcome-blind envelope required before private access")
+            admitted = [{"input_id":"131b6bd5-65d1-4dc7-a856-3300f73babcb",
+                         "object_path":"governed_inputs/swing10/s2_b1/market_daily_history_2025-02-03_2026-08-27/ea2908cd89123548404a0f48dca6633f6ef87491793f327705588b4e2ecefae2.csv",
+                         "object_size_bytes":2411604,
+                         "sha256":"ea2908cd89123548404a0f48dca6633f6ef87491793f327705588b4e2ecefae2",
+                         "metadata_json":{"bucket_name":"trading-research-market-data", "local_relative_path":"job_inputs/swing10/s3_development_daily_history.csv"}}]
+            materialized = materialize_job_inputs(config, job_id=job_id, work_root=runner.WORK_ROOT, allowed_inputs=admitted)
+        else:
+            materialized = materialize_job_inputs(config, job_id=job_id, work_root=runner.WORK_ROOT)
         if materialized:
             create_log(config, {
                 "job_id": job_id, "attempt_id": attempt_id, "sequence_no": 0,
