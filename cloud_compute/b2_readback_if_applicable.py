@@ -14,10 +14,10 @@ def main():
     jobs = _fetch_rows(config, 'research_jobs', {'job_id': f'eq.{a.job_id}', 'limit': '2'})
     if len(jobs) != 1:
         raise RuntimeError('exact job not found')
-    if jobs[0]['runner_job_id'] not in {'SW10-S3-ARTIFACT-CERT', 'SW10-S3-PREFLIGHT', 'SW10-S2-B2', 'SW10-S2-B3-PREFLIGHT', 'SW10-S2-B3-CONTINUOUS-PREFLIGHT', 'SW10-S2-B3', 'SW10-S2-B4-PREFLIGHT', 'SW10-S2-B4', 'SW10-S2-B5-PREFLIGHT', 'SW10-S2-B5-ACQUISITION', 'SW10-S2-B5'}:
+    if jobs[0]['runner_job_id'] not in {'SW10-S3', 'SW10-S3-ARTIFACT-CERT', 'SW10-S3-PREFLIGHT', 'SW10-S2-B2', 'SW10-S2-B3-PREFLIGHT', 'SW10-S2-B3-CONTINUOUS-PREFLIGHT', 'SW10-S2-B3', 'SW10-S2-B4-PREFLIGHT', 'SW10-S2-B4', 'SW10-S2-B5-PREFLIGHT', 'SW10-S2-B5-ACQUISITION', 'SW10-S2-B5'}:
         print('B2_READBACK_NOT_APPLICABLE')
         return
-    if jobs[0]['runner_job_id'] == 'SW10-S3-ARTIFACT-CERT':
+    if jobs[0]['runner_job_id'] in {'SW10-S3','SW10-S3-ARTIFACT-CERT'}:
         from pathlib import Path
         FILES=tuple(json.loads(Path('research_protocols/swing10/SW10_S3_CANDIDATE_PROTOCOL_V1.proposed.json').read_text())['artifact_schemas'])
         attempts = _fetch_rows(config, 'research_job_attempts', {'job_id':f'eq.{a.job_id}', 'order':'attempt_no.desc', 'limit':'1'})
@@ -56,7 +56,7 @@ def main():
         from tr_platform.research.swing10_s2_b3_preflight import FILES
     else:
         from tr_platform.research.swing10_s2_b2 import FILES
-    result = run(a.job_id, list(FILES), attempt_id=attempt_id) if jobs[0]['runner_job_id'] in {'SW10-S3-ARTIFACT-CERT', 'SW10-S3-PREFLIGHT','SW10-S2-B5-ACQUISITION'} else run(a.job_id, list(FILES))
+    result = run(a.job_id, list(FILES), attempt_id=attempt_id) if jobs[0]['runner_job_id'] in {'SW10-S3', 'SW10-S3-ARTIFACT-CERT', 'SW10-S3-PREFLIGHT','SW10-S2-B5-ACQUISITION'} else run(a.job_id, list(FILES))
     if result['count'] != len(FILES):
         raise RuntimeError('SW10 must register/read back every required output')
     print(json.dumps(result, sort_keys=True))

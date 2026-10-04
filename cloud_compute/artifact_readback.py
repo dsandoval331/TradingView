@@ -33,7 +33,7 @@ def _upsert(config: ControlPlaneConfig, payload: dict) -> dict:
             prefer="resolution=merge-duplicates,return=representation",
         ),
         json=payload,
-        timeout=30,
+        timeout=180,
     )
     if not response.ok:
         raise RuntimeError(f"readback upsert failed: HTTP {response.status_code} {response.text[:500]}")

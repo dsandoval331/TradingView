@@ -23,6 +23,7 @@ class GovernedResearchTarget:
 
 
 GOVERNED_RESEARCH_TARGETS: dict[str, GovernedResearchTarget] = {
+    "SW10-S3": GovernedResearchTarget("SW10-S3", "tr_platform/research/swing10_s3_science.py", execution_mode="swing10_s3_scientific_bundle"),
     "SW10-S3-ARTIFACT-CERT": GovernedResearchTarget("SW10-S3-ARTIFACT-CERT", "tr_platform/research/swing10_s3_artifact_cert.py", execution_mode="swing10_s3_artifact_cert_bundle"),
     "SW10-S3-PREFLIGHT": GovernedResearchTarget("SW10-S3-PREFLIGHT", "tr_platform/research/swing10_s3_preflight.py", execution_mode="swing10_s3_preflight_bundle"),
     "SW10-S2-B5": GovernedResearchTarget("SW10-S2-B5", "tr_platform/research/swing10_s2_b5_validation.py", execution_mode="swing10_b5_validation_bundle"),
@@ -254,6 +255,18 @@ def _run_s3_artifact_cert_bundle(repo_root,sha,destination,work_root):
     return json.loads(result.read_text())
 
 
+def _run_s3_scientific_bundle(repo_root,sha,destination,work_root):
+    for name in ('tr_platform/__init__.py','tr_platform/research/__init__.py','cloud_compute/__init__.py'):
+        path=destination/name;path.parent.mkdir(parents=True,exist_ok=True);path.write_text('')
+    for name in ('tr_platform/research/swing10_s3_science.py','tr_platform/research/swing10_s3_engine.py','tr_platform/research/swing10_s3_preflight.py','tr_platform/research/swing10_s3_preparation.py','cloud_compute/streaming_artifacts.py','research_protocols/swing10/SW10_S3_CANDIDATE_PROTOCOL_V1.proposed.json','research_protocols/swing10/SW10_S3_CANDIDATE_PROTOCOL_V1.persisted.json'):
+        materialize_module(repo_root,sha,name,destination/name)
+    result=destination/'result.json'
+    code="import json,sys;from pathlib import Path;from tr_platform.research.swing10_s3_science import run;Path(sys.argv[2]).write_text(json.dumps(run(Path(sys.argv[1]))))"
+    proc=subprocess.run([sys.executable,'-c',code,str(work_root),str(result)],cwd=destination,env={**os.environ,'PYTHONPATH':str(destination)},capture_output=True,text=True)
+    if proc.returncode:raise RuntimeError('S3 exact frozen scientific bundle failed: '+proc.stderr[-2000:])
+    return json.loads(result.read_text())
+
+
 def run_governed_revision(*, repo_root: Path, work_root: Path, runner_job_id: str, research_sha: str) -> dict[str, Any]:
     target = GOVERNED_RESEARCH_TARGETS.get(runner_job_id)
     if target is None:
@@ -261,7 +274,9 @@ def run_governed_revision(*, repo_root: Path, work_root: Path, runner_job_id: st
     verified_sha = verify_commit(repo_root, research_sha)
     with tempfile.TemporaryDirectory(prefix="governed-research-") as td:
         module_file = materialize_module(repo_root, verified_sha, target.module_path, Path(td) / Path(target.module_path).name)
-        if target.execution_mode == "swing10_s3_artifact_cert_bundle":
+        if target.execution_mode == "swing10_s3_scientific_bundle":
+            result = _run_s3_scientific_bundle(repo_root, verified_sha, Path(td), Path(work_root))
+        elif target.execution_mode == "swing10_s3_artifact_cert_bundle":
             result = _run_s3_artifact_cert_bundle(repo_root, verified_sha, Path(td), Path(work_root))
         elif target.execution_mode == "swing10_s3_preflight_bundle":
             result = _run_s3_preflight_bundle(repo_root, verified_sha, Path(td), Path(work_root))

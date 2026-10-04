@@ -61,7 +61,7 @@ def _fetch_rows(config: ControlPlaneConfig, table: str, params: dict[str, str]) 
         f'{config.rest_url}/{table}',
         headers=_request_headers(config.secret_key),
         params=params,
-        timeout=30,
+        timeout=180,
     )
     if not response.ok:
         raise RuntimeError(f'{table} fetch failed: HTTP {response.status_code} {response.text[:500]}')
