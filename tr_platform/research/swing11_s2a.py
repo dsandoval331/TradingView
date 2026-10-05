@@ -1,5 +1,6 @@
 """SWING11 predictor-only preflight. Scientific outcomes/dispositions are disabled."""
 import ast
+import gzip
 import hashlib
 import io
 import json
@@ -33,7 +34,7 @@ def reject_schema(columns):
 
 def source_guard(source):
     tree=ast.parse(source)
-    allowed={"ast","hashlib","io","json","os","pathlib","numpy","pandas"}
+    allowed={"ast","gzip","hashlib","io","json","os","pathlib","numpy","pandas"}
     banned={"forward_return","forward_returns","profitability","win_rate","p_value","read_sql","read_parquet","bfill","interpolate","eval","exec","__import__","pct_change"}
     for n in ast.walk(tree):
         if isinstance(n,(ast.Import,ast.ImportFrom)):
@@ -172,11 +173,20 @@ def run(work_root):
           FILES[5]:[("IMMUTABLE_INPUT",True,SHA),("OUTCOME_BLIND",True,"no future price primitive or outcome import"),
                     ("PROTECTED_DENIAL",True,"B5 and all post2026-08-27 sources excluded"),
                     ("SCIENTIFIC_CONTRACT",False,"attenuation inference and disposition mapping require canonical clarification")]}
-    declarations=[]
+    declarations=[];physical_paths=[];artifact_metadata={}
     for name,table in rows.items():
         df=table if isinstance(table,pd.DataFrame) else pd.DataFrame(table,columns=SCHEMAS[name])
         df.to_csv(out/name,index=False)
-        blob=(out/name).read_bytes();declarations.append({"name":name,"sha256":hashlib.sha256(blob).hexdigest(),"bytes":len(blob)})
+        blob=(out/name).read_bytes();logical_sha=hashlib.sha256(blob).hexdigest()
+        stored=out/name
+        if name==FILES[0]:
+            stored=out/(name+".gz")
+            with stored.open("wb") as f:
+                with gzip.GzipFile(fileobj=f,mode="wb",filename="",mtime=0) as zipped:zipped.write(blob)
+        physical=stored.read_bytes();rel=str(stored.relative_to(root));physical_paths.append(rel)
+        metadata={"logical_name":name,"logical_sha256":logical_sha,"logical_size_bytes":len(blob),"storage_encoding":"gzip" if stored!=out/name else "identity","stored_sha256":hashlib.sha256(physical).hexdigest(),"stored_size_bytes":len(physical)}
+        artifact_metadata[rel]=metadata
+        declarations.append({"name":name,**metadata})
     manifest={"mwe_uuid":MWE,"decisions":DECISIONS,"outcome_blind":True,"scientific_outcomes_computed":False,
               "protected_data_access":False,"input_sha256":SHA,"input_bytes":SIZE,"execution":context,
               "files":FILES,"schemas":SCHEMAS,"artifacts":declarations,"horizons":HORIZONS,
@@ -186,4 +196,4 @@ def run(work_root):
               "readiness":"BLOCKED_USER","billing_evidence_available":False,"paid_fallback":False,
               "limitations":["previously used S2/S3 development, not untouched validation","adjusted price/reported volume proxy coordinates","no actual attenuation/disposition scientific rule invented"]}
     (out/FILES[-1]).write_text(json.dumps(manifest,indent=2,sort_keys=True)+"\n")
-    return {"status":"PASS","artifact":str((out/FILES[1]).relative_to(root)),"output_paths":[str((out/n).relative_to(root)) for n in FILES]}
+    return {"status":"PASS","artifact":str((out/FILES[1]).relative_to(root)),"output_paths":physical_paths+[str((out/FILES[-1]).relative_to(root))],"output_artifact_metadata":artifact_metadata}
