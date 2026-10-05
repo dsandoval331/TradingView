@@ -177,7 +177,10 @@ def run_one_outcome(
             if _fetch_rows(config,"research_job_inputs",{"job_id":f"eq.{job_id}","limit":"1"}):
                 raise RuntimeError("synthetic certification must have zero input dependencies")
             snapshot=parameters.get("contract_snapshot") or []
-            if len(snapshot)!=4 or set(x["decision_id"] for x in snapshot)!={"7c6279c1-a86d-4336-a08d-244bb5e005b4","11407ad3-97cd-459e-b78e-9162a115b8e4","f240f40d-65a0-40dd-91dc-bdf722431e2b","a040e9fa-4fdf-4dc8-8ab7-5d8db622c779"}:
+            required={"7c6279c1-a86d-4336-a08d-244bb5e005b4","11407ad3-97cd-459e-b78e-9162a115b8e4","f240f40d-65a0-40dd-91dc-bdf722431e2b","a040e9fa-4fdf-4dc8-8ab7-5d8db622c779"}
+            if parameters.get("final_binding_certification") is True:
+                required.add("4f7cf8cf-3738-4b3c-8345-68722cf77644")
+            if len(snapshot)!=len(required) or set(x["decision_id"] for x in snapshot)!=required:
                 raise RuntimeError("four complete SW11 decisions required")
             for expected in snapshot:
                 found=_fetch_rows(config,"project_decisions",{"decision_id":f"eq.{expected['decision_id']}","limit":"2"})
@@ -254,7 +257,7 @@ def run_one_outcome(
                 context["operational_activation_verified"]=True
                 context["operational_activation_evidence"]=activation
             if runner_job_id in {"SW11-S2A", "SW11-S2A-CERT"}:
-                for key in ("mwe_uuid","preflight_only","synthetic_only","scientific_outcomes_authorized","contract_snapshot"):
+                for key in ("mwe_uuid","preflight_only","synthetic_only","scientific_outcomes_authorized","contract_snapshot","final_binding_certification"):
                     context[key]=parameters.get(key)
             if runner_job_id in {"SW10-S3-PREFLIGHT", "SW10-S3-ARTIFACT-CERT"}:
                 parameters = job.get("parameters_json") or {}

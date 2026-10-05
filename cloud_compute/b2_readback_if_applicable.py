@@ -17,6 +17,8 @@ def main():
     if jobs[0]['runner_job_id'] in {'SW11-S2A','SW11-S2A-CERT'}:
         if jobs[0]['runner_job_id']=='SW11-S2A-CERT':
             from tr_platform.research.swing11_s2a_supplement import CERT_FILES as FILES
+            if jobs[0].get('parameters_json',{}).get('final_binding_certification') is True:
+                from tr_platform.research.swing11_s2a_supplement import FINAL_FILES as FILES
         else:
             from tr_platform.research.swing11_s2a import FILES
         attempts=_fetch_rows(config,'research_job_attempts',{'job_id':f'eq.{a.job_id}','order':'attempt_no.desc','limit':'1'})

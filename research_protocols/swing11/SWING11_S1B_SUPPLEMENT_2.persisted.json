@@ -1,0 +1,26 @@
+{
+  "title": "SWING11_S1B_INFERENCE_ADVANCEMENT_SPEC_V1_SUPPLEMENT_2 — PRICE-only baseline-family binding",
+  "status": "active",
+  "decision": "Prospective canonical binding for MWE-SW11-S2A-001. (1) The eight baseline PRICE tests, one per frozen horizon H, use every registered symbol/date observation with finite PRICE centered same-date average-percentile rank, finite current adjusted close, and a valid registered-calendar t+H adjusted-close endpoint. No mechanism eligibility restriction applies to the baseline family. (2) For each horizon H, the attenuation sign anchor s_H is derived exclusively from that horizon''s complete PRICE-only baseline coefficient series; all six mechanism-specific attenuation tests at H use this same frozen s_H. (3) Paired attenuation inference remains on each mechanism''s already-defined matched baseline/adjusted sample; broader PRICE-only observations are not substituted into paired mechanism comparisons. (4) Baseline-family temporal robustness uses four chronological blocks constructed independently from eligible PRICE-only baseline decision dates for each horizon under the already-frozen block rules. (5) Baseline leave-five robustness first fixes the full PRICE-only baseline sample and its original PRICE ranks, then removes the frozen top-five contributors under the certified procedure and completely refits the baseline estimator; no mechanism eligibility is introduced. (6) All other original decisions and Supplement 1 remain unchanged, including 8/48/48 families, horizons, thresholds, inference, disposition rules and outcome protections. Resume the SAME MWE after this freeze. S2-B remains unauthorized until S2-A closes and canonical authority separately authorizes transition.",
+  "evidence": "User explicitly approved the recommended PRICE-only baseline-family binding in canonical thread Indicator: Swing Trades on 2026-10-04 CT, after the verified resumed S2-A handoff reported that REV5, DOLLARVOL20, and ACT20/ILLIQ20/RV20/MOM20 have different predictor eligibility calendars and that no SWING11 scientific outcomes had been computed or inspected.",
+  "rationale": "PRICE is the focal baseline hypothesis. A PRICE-only baseline avoids arbitrarily making baseline inference depend on mechanism-specific warm-up/eligibility calendars while preserving mechanism-matched samples for decomposition and paired attenuation inference.",
+  "decision_id": "4f7cf8cf-3738-4b3c-8345-68722cf77644",
+  "strategy_id": "09f30dc1-81ae-440f-aeca-18652df69896",
+  "decision_date": "2026-10-05T03:57:41.941633+00:00",
+  "metadata_json": {
+    "mwe_id": "MWE-SW11-S2A-001",
+    "status": "FROZEN",
+    "mwe_uuid": "eabd2257-bb59-4f32-af71-ad4b87bda4f5",
+    "prospective": true,
+    "decision_code": "SWING11_S1B_INFERENCE_ADVANCEMENT_SPEC_V1_SUPPLEMENT_2",
+    "user_approved": true,
+    "s2b_authorized": false,
+    "resume_same_mwe": true,
+    "baseline_binding": "PRICE_ONLY",
+    "parent_decision_id": "a040e9fa-4fdf-4dc8-8ab7-5d8db622c779",
+    "scientific_outcomes_computed_before_freeze": false,
+    "scientific_outcomes_inspected_before_freeze": false
+  },
+  "affects_model_version": "SWING11-RM-1.0 / S2-A",
+  "supersedes_decision_id": null
+}

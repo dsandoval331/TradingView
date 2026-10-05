@@ -6,6 +6,7 @@ on:
       - 'tests/test_swing11_s2a.py'
       - 'tr_platform/research/swing11_s2a_supplement.py'
       - 'tests/test_swing11_s2a_supplement.py'
+      - 'tests/test_swing11_s2a_binding.py'
       - '.github/workflows/sw11-s2a-cert.yml'
       - 'research_protocols/swing11/**'
 permissions:
@@ -23,7 +24,7 @@ jobs:
       - run: pip install -r requirements.txt pytest
       - name: Synthetic-only predictor, geometry, registry and source safeguards
         run: >-
-          python -m pytest -q tests/test_swing11_s2a_supplement.py
+          python -m pytest -q tests/test_swing11_s2a_supplement.py tests/test_swing11_s2a_binding.py
           tests/test_ccp5_control_plane.py tests/test_ccp5_control_plane_worker.py
           tests/test_ccp8_autonomous_loop.py tests/test_ccp9_exact_claim.py
           tests/test_ccp10_input_materializer.py tests/test_ccp11_artifact_contract.py
