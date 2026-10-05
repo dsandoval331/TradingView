@@ -187,6 +187,21 @@ def run_one_outcome(
                 fields=("decision_id","title","decision","rationale","evidence","metadata_json")
                 if len(found)!=1 or any(found[0].get(k)!=expected.get(k) for k in fields) or found[0]["metadata_json"].get("status")!="FROZEN":
                     raise RuntimeError("unchanged frozen SW11 authority required")
+        elif runner_job_id == "SW11-S2B":
+            from cloud_compute.control_plane import _fetch_rows
+            parameters=job.get('parameters_json') or {}
+            if parameters.get('mwe_uuid')!='40b5af4a-557e-4fb4-90e6-76fc33a54ff8' or parameters.get('scientific_outcomes_authorized') is not True or parameters.get('authorization_decision_id')!='3a960763-a1c2-42be-bebd-9adbe4ff9d58':raise RuntimeError('exact SW11 S2-B authorization required before private access')
+            snapshot=parameters.get('contract_snapshot') or []
+            required={'7c6279c1-a86d-4336-a08d-244bb5e005b4','11407ad3-97cd-459e-b78e-9162a115b8e4','f240f40d-65a0-40dd-91dc-bdf722431e2b','a040e9fa-4fdf-4dc8-8ab7-5d8db622c779','4f7cf8cf-3738-4b3c-8345-68722cf77644','3a960763-a1c2-42be-bebd-9adbe4ff9d58'}
+            if len(snapshot)!=6 or {x['decision_id'] for x in snapshot}!=required:raise RuntimeError('six complete frozen scientific decisions required')
+            for expected in snapshot:
+                found=_fetch_rows(config,'project_decisions',{'decision_id':f"eq.{expected['decision_id']}",'limit':'2'})
+                fields=('decision_id','title','decision','rationale','evidence','metadata_json')
+                if len(found)!=1 or any(found[0].get(k)!=expected.get(k) for k in fields) or found[0]['metadata_json'].get('status')!='FROZEN':raise RuntimeError('unchanged frozen scientific authority required')
+            parent=_fetch_rows(config,'work_envelopes',{'work_envelope_id':'eq.eabd2257-bb59-4f32-af71-ad4b87bda4f5','limit':'2'})
+            if len(parent)!=1 or parent[0]['status']!='COMPLETE' or parent[0]['metadata_json'].get('state')!='VERIFIED':raise RuntimeError('verified S2-A parent required')
+            admitted=[{'input_id':parameters['input_registration_id'],'object_path':'governed_inputs/swing10/s2_b1/market_daily_history_2025-02-03_2026-08-27/ea2908cd89123548404a0f48dca6633f6ef87491793f327705588b4e2ecefae2.csv','object_size_bytes':2411604,'sha256':'ea2908cd89123548404a0f48dca6633f6ef87491793f327705588b4e2ecefae2','metadata_json':{'bucket_name':'trading-research-market-data','local_relative_path':'job_inputs/swing11/development.csv'}}]
+            materialized=materialize_job_inputs(config,job_id=job_id,work_root=runner.WORK_ROOT,allowed_inputs=admitted)
         elif runner_job_id == "SW11-S2A":
             parameters=job.get("parameters_json") or {}
             if parameters.get("mwe_uuid")!="eabd2257-bb59-4f32-af71-ad4b87bda4f5" or parameters.get("preflight_only") is not True or parameters.get("scientific_outcomes_authorized") is not False:
@@ -240,7 +255,7 @@ def run_one_outcome(
                 } for item in materialized]},
             })
 
-        if runner_job_id in {"SW11-S2A-CERT", "SW11-S2A", "SW10-S3", "SW10-S3-ARTIFACT-CERT", "SW10-S3-PREFLIGHT", "SW10-S2-B2", "SW10-S2-B3-PREFLIGHT", "SW10-S2-B3-CONTINUOUS-PREFLIGHT", "SW10-S2-B3", "SW10-S2-B4-PREFLIGHT", "SW10-S2-B4", "SW10-S2-B5-PREFLIGHT", "SW10-S2-B5-ACQUISITION", "SW10-S2-B5"}:
+        if runner_job_id in {"SW11-S2B", "SW11-S2A-CERT", "SW11-S2A", "SW10-S3", "SW10-S3-ARTIFACT-CERT", "SW10-S3-PREFLIGHT", "SW10-S2-B2", "SW10-S2-B3-PREFLIGHT", "SW10-S2-B3-CONTINUOUS-PREFLIGHT", "SW10-S2-B3", "SW10-S2-B4-PREFLIGHT", "SW10-S2-B4", "SW10-S2-B5-PREFLIGHT", "SW10-S2-B5-ACQUISITION", "SW10-S2-B5"}:
             context = {
                 "job_id": job_id, "attempt_id": attempt_id, "attempt_no": attempt_no,
                 "research_revision": research_sha, "infrastructure_revision": infrastructure_sha,
@@ -256,6 +271,9 @@ def run_one_outcome(
                     context[key]=parameters.get(key)
                 context["operational_activation_verified"]=True
                 context["operational_activation_evidence"]=activation
+            if runner_job_id == "SW11-S2B":
+                for key in ('mwe_uuid','authorization_decision_id','scientific_outcomes_authorized','contract_snapshot','input_registration_id','github_job_id'):
+                    context[key]=parameters.get(key)
             if runner_job_id in {"SW11-S2A", "SW11-S2A-CERT"}:
                 for key in ("mwe_uuid","preflight_only","synthetic_only","scientific_outcomes_authorized","contract_snapshot","final_binding_certification"):
                     context[key]=parameters.get(key)
