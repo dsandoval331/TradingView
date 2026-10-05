@@ -23,6 +23,7 @@ class GovernedResearchTarget:
 
 
 GOVERNED_RESEARCH_TARGETS: dict[str, GovernedResearchTarget] = {
+    "SW11-S2A": GovernedResearchTarget("SW11-S2A", "tr_platform/research/swing11_s2a.py"),
     "SW10-S3": GovernedResearchTarget("SW10-S3", "tr_platform/research/swing10_s3_science.py", execution_mode="swing10_s3_scientific_bundle"),
     "SW10-S3-ARTIFACT-CERT": GovernedResearchTarget("SW10-S3-ARTIFACT-CERT", "tr_platform/research/swing10_s3_artifact_cert.py", execution_mode="swing10_s3_artifact_cert_bundle"),
     "SW10-S3-PREFLIGHT": GovernedResearchTarget("SW10-S3-PREFLIGHT", "tr_platform/research/swing10_s3_preflight.py", execution_mode="swing10_s3_preflight_bundle"),
@@ -313,4 +314,3 @@ def run_governed_revision(*, repo_root: Path, work_root: Path, runner_job_id: st
     if not isinstance(result, dict):
         raise RuntimeError("governed research runner must return a dict")
     return {**result, "governed_research_sha": verified_sha, "governed_research_module": target.module_path, "exact_research_sha_verified": True}
-
