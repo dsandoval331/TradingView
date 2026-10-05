@@ -24,6 +24,7 @@ class GovernedResearchTarget:
 
 GOVERNED_RESEARCH_TARGETS: dict[str, GovernedResearchTarget] = {
     "SW11-S2A": GovernedResearchTarget("SW11-S2A", "tr_platform/research/swing11_s2a.py"),
+    "SW11-S2A-CERT": GovernedResearchTarget("SW11-S2A-CERT", "tr_platform/research/swing11_s2a_supplement.py"),
     "SW10-S3": GovernedResearchTarget("SW10-S3", "tr_platform/research/swing10_s3_science.py", execution_mode="swing10_s3_scientific_bundle"),
     "SW10-S3-ARTIFACT-CERT": GovernedResearchTarget("SW10-S3-ARTIFACT-CERT", "tr_platform/research/swing10_s3_artifact_cert.py", execution_mode="swing10_s3_artifact_cert_bundle"),
     "SW10-S3-PREFLIGHT": GovernedResearchTarget("SW10-S3-PREFLIGHT", "tr_platform/research/swing10_s3_preflight.py", execution_mode="swing10_s3_preflight_bundle"),
