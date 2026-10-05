@@ -1,0 +1,64 @@
+[
+  {
+    "decision_id": "7c6279c1-a86d-4336-a08d-244bb5e005b4",
+    "strategy_id": "09f30dc1-81ae-440f-aeca-18652df69896",
+    "decision_date": "2026-10-05T01:45:12.267212+00:00",
+    "title": "SWING11_S1A_PREDICTOR_HYPOTHESIS_SPEC_V1 — prospective canonical freeze",
+    "decision": "Freeze SWING11 S1-A prospectively before SWING11 scientific outcomes. Focal PRICE predictor = same-date centered average percentile rank of adjusted close: 2*(average_rank/N)-1. Six causal mechanism families: ACT20=current reported volume / mean(previous 20 completed valid volumes), current excluded; DOLLARVOL20=mean(adjusted close*reported volume over t-19:t); ILLIQ20=mean(abs(daily return)/(adjusted close*reported volume) over t-19:t); RV20=sample SD daily returns t-19:t ddof=1; REV5=close_t/close_t-5-1; MOM20=close_t/close_t-20-1. Rolling 20-day measures require all 20 valid observations; no imputation/shortened warmup. Preserve raw causal value and same-date centered average-percentile rank. Frozen horizons 1,2,3,5,7,10,15,20 trading days; no best-horizon selection. Hypotheses: activity, dollar-liquidity, illiquidity, volatility, short-reversal and momentum may explain and/or condition the PRICE relationship. Primary scientific purpose is mechanism decomposition of PRICE, not generic factor promotion. Required decomposition: effect existence, attenuation, interaction, temporal behavior, symbol concentration and horizon shape. No SWING11 scientific outcomes inspected or authorized by this decision.",
+    "rationale": "Prospectively define exact causal predictors and hypotheses before implementation/outcomes.",
+    "evidence": "Canonical user authorized continued S1 batching and autonomous preparation before next MWE.",
+    "affects_model_version": "SWING11-RM-1.0",
+    "supersedes_decision_id": null,
+    "status": "active",
+    "metadata_json": {
+      "status": "FROZEN",
+      "prospective": true,
+      "decision_code": "SWING11_S1A_PREDICTOR_HYPOTHESIS_SPEC_V1",
+      "user_approved": true,
+      "canonical_thread": "Indicator: Swing Trades",
+      "outcome_execution_authorized": false
+    }
+  },
+  {
+    "decision_id": "11407ad3-97cd-459e-b78e-9162a115b8e4",
+    "strategy_id": "09f30dc1-81ae-440f-aeca-18652df69896",
+    "decision_date": "2026-10-05T01:45:12.267212+00:00",
+    "title": "SWING11_S1B_INFERENCE_ADVANCEMENT_SPEC_V1 — prospective canonical freeze",
+    "decision": "Freeze SWING11 S1-B prospectively. For each mechanism and horizon estimate date-level cross-sectional baseline Return~1+PRICE; adjusted Return~1+PRICE+M; conditioning Return~1+PRICE+M+PRICE*M, then conduct time-series inference on date-level coefficients. Bartlett HAC lag=H-1; two-sided asymptotic-normal 95% CI; no small-sample multiplier. Three fixed BH families q<=0.05: A baseline PRICE 8 tests; B PRICE attenuation 6x8=48 tests; C PRICE*mechanism interactions 6x8=48 tests. Mechanism main effects diagnostic only. Standardized effect = mean relevant date coefficient/sample SD ddof=1; |ES|>=0.20. Attenuation=1-|beta_PRICE_adjusted|/|beta_PRICE_baseline|; >=25% material explanatory, 10-25% weak/modest, <10% negligible, negative means PRICE strengthens. Four chronological blocks fixed from predictor eligibility before outcomes; directional robustness requires >=3/4 required-direction blocks and max absolute block contribution <=50%; attenuation robustness requires positive attenuation >=3/4 blocks. Symbol robustness reports top1/5/10 absolute contribution shares, HHI and full leave-top-five refit; strongest advancement fails if leave-five sign reverses or absolute effect attenuates >75%. Horizon coherence requires support at >=2 adjacent preregistered horizons in sequence 1,2,3,5,7,10,15,20. Mechanical dispositions: MECHANISM_SUPPORTED, CONDITIONING_SUPPORTED, EXPLANATORY_EVIDENCE, COUNTEREVIDENCE, NOT_TESTABLE. S2 completes only after all six mechanisms receive a disposition with required diagnostics. S3 entry requires at least one of MECHANISM_SUPPORTED/CONDITIONING_SUPPORTED/EXPLANATORY_EVIDENCE and may use only supported aspects. No protected validation outcomes during S1-S3.",
+    "rationale": "Freeze inference, multiplicity, robustness and advancement rules before outcomes to prevent post-result selection.",
+    "evidence": "Canonical user authorized continued S1 batching and autonomous preparation before next MWE.",
+    "affects_model_version": "SWING11-RM-1.0",
+    "supersedes_decision_id": null,
+    "status": "active",
+    "metadata_json": {
+      "status": "FROZEN",
+      "prospective": true,
+      "decision_code": "SWING11_S1B_INFERENCE_ADVANCEMENT_SPEC_V1",
+      "user_approved": true,
+      "canonical_thread": "Indicator: Swing Trades",
+      "outcome_execution_authorized": false
+    }
+  },
+  {
+    "decision_id": "f240f40d-65a0-40dd-91dc-bdf722431e2b",
+    "strategy_id": "09f30dc1-81ae-440f-aeca-18652df69896",
+    "decision_date": "2026-10-05T01:45:12.267212+00:00",
+    "title": "SWING11_S1_CLOSURE_S2_ENTRY_V1 — S1 closure and S2 operational contract",
+    "decision": "SWING11 S1 is COMPLETE/FROZEN subject to independent readback. S2 architecture: S2-A outcome-blind predictor/estimator/capacity preflight, then S2-B governed mechanism decomposition, then canonical S2-C interpretation/closure. S2-A must implement all six mechanisms together and certify causal construction, same-date ranking, eligibility, all eight horizons, estimator identifiability, fixed BH registries, chronological blocks, additive contribution accounting, leave-five full refits, schemas and capacity using predictor-only real-data diagnostics; it MUST NOT compute/read forward-return scientific outcomes. S2-B may execute only after successful preflight and canonical contract reconciliation. Required S2 scientific artifacts: sw11_s2_primary_summary.csv (sole primary), sw11_s2_date_effects.csv, sw11_s2_temporal_stability.csv, sw11_s2_symbol_concentration.csv, sw11_s2_predictor_semantic_audit.csv, sw11_s2_mechanism_dispositions.csv, sw11_s2_manifest.json. Missing/nonfinite predictors are ineligible and never imputed; average ranks retain ties; insufficient identification or zero/near-zero predictor variation fails closed; standardized-effect SD zero/nonfinite fails materiality; temporal blocks are predictor-eligible and outcome-blind; leave-five removes deterministic top-five absolute contributors then refits complete estimator; unavailable registered BH slots do not shrink families. Reuse certified development lineage where semantically compatible; do not use the outcome-exposed SWING10 B5 independent-validation panel as fresh SWING11 validation evidence. Any insufficient warmup/20d endpoint coverage returns capacity blocker, never outcome-selected dates. Protected future validation remains unopened through S3. S3 is bounded candidate construction only from S2-supported aspects and must fully freeze tradable candidate semantics before independent validation.",
+    "rationale": "Close S1 and establish fail-closed operational boundary so next work can be executed in one substantial outcome-blind preflight envelope.",
+    "evidence": "Canonical user requested maximum batching through a ready ChatGPT Work envelope without routine confirmation.",
+    "affects_model_version": "SWING11-RM-1.0",
+    "supersedes_decision_id": null,
+    "status": "active",
+    "metadata_json": {
+      "status": "FROZEN",
+      "next_phase": "S2-A",
+      "prospective": true,
+      "s1_complete": true,
+      "decision_code": "SWING11_S1_CLOSURE_S2_ENTRY_V1",
+      "user_approved": true,
+      "canonical_thread": "Indicator: Swing Trades",
+      "outcome_execution_authorized": false
+    }
+  }
+]
