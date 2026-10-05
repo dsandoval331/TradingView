@@ -11,6 +11,8 @@ from pathlib import Path
 import numpy as np
 
 SUPPLEMENT = "a040e9fa-4fdf-4dc8-8ab7-5d8db622c779"
+SUPPLEMENT_2 = "4f7cf8cf-3738-4b3c-8345-68722cf77644"
+FINAL_FILES = ("sw11_s2a_final_binding_certification.json", "sw11_s2_final_sample_registry.json", "sw11_s2_final_scientific_schemas.json", "sw11_s2a_final_binding_manifest.json")
 MWE = "eabd2257-bb59-4f32-af71-ad4b87bda4f5"
 MECHANISMS = ("ACT20", "DOLLARVOL20", "ILLIQ20", "RV20", "REV5", "MOM20")
 HORIZONS = (1, 2, 3, 5, 7, 10, 15, 20)
@@ -185,6 +187,9 @@ def certify():
 
 def run(work_root):
     root=Path(work_root)
+    context_path=root/"job_inputs/swing10/execution_context.json"
+    if context_path.exists() and json.loads(context_path.read_text()).get("final_binding_certification") is True:
+        return run_final(root)
     if os.environ.get("GITHUB_ACTIONS")!="true":raise ValueError("governed certification only")
     context=json.loads((root/"job_inputs/swing10/execution_context.json").read_text())
     if context.get("mwe_uuid")!=MWE or context.get("synthetic_only") is not True or context.get("scientific_outcomes_authorized") is not False or context.get("materialized_inputs"):
@@ -197,4 +202,83 @@ def run(work_root):
     manifest={"authority":context,"artifacts":artifacts,"schemas":SCIENTIFIC_SCHEMAS,"synthetic_only":True,"scientific_execution_enabled":False,"real_forward_outcomes_computed":False,"protected_data_access":False,"paid_fallback":False,"billing_evidence_available":False}
     (out/CERT_FILES[2]).write_text(json.dumps(manifest,sort_keys=True,indent=2)+"\n")
     paths=[str((out/name).relative_to(root)) for name in CERT_FILES]
+    return {"status":"PASS","artifact":paths[0],"output_paths":paths}
+
+def price_only_design(price_raw, close_t, endpoint, symbols):
+    """Synthetic binding fixture; rank the finite date cross section first."""
+    fixture_only(symbols)
+    p=ranks(price_raw);a,z=np.asarray(close_t,float),np.asarray(endpoint,float)
+    if p.shape!=a.shape or p.shape!=z.shape or len(symbols)!=len(p):
+        raise ValueError("same registered symbol cross section required")
+    mask=np.isfinite(p)&np.isfinite(a)&np.isfinite(z)&(a>0)&(z>0)
+    x=np.column_stack([np.ones(int(mask.sum())),p[mask]])
+    identify(x)
+    return mask,x
+
+def baseline_anchor(horizon, baseline_registry):
+    """Only a complete, unique PRICE-only family record may supply s_H."""
+    if set(baseline_registry)!=set(HORIZONS):raise ValueError("eight baseline records required")
+    case=baseline_registry[horizon]
+    if case.get("test_id")!=f"BASELINE_PRICE_H{horizon}" or case.get("sample_binding")!="PRICE_ONLY" or case.get("complete_series") is not True:
+        raise ValueError("complete PRICE-only sign source required")
+    z=np.asarray(case["coefficient_series"],float);z=z[np.isfinite(z)]
+    mean=float(z.mean()) if len(z) else np.nan
+    if not np.isfinite(mean) or mean==0:raise ValueError("baseline sign unavailable")
+    return float(np.sign(mean))
+
+def bound_paired_difference(b0,b1,horizon,baseline_registry):
+    s=baseline_anchor(horizon,baseline_registry)
+    # Keep the matched comparison, never substitute the PRICE-only series.
+    return paired_difference(b0,b1,[s])
+
+def baseline_blocks(eligible_dates):
+    dates=list(eligible_dates)
+    if dates!=sorted(set(dates)):raise ValueError("unique chronological eligibility dates required")
+    return [list(block) for block in np.array_split(np.asarray(dates),4)]
+
+def final_registry():
+    rows=[]
+    for h in HORIZONS:
+        rows.append({"test_id":f"BASELINE_PRICE_H{h}","family":"BASELINE","horizon":h,"mechanism":None,"sample_binding":"PRICE_ONLY","sign_source":f"BASELINE_PRICE_H{h}","rank_scope":"finite same-date PRICE before endpoint mask","blocks":"four chronological PRICE-only eligible-date blocks","leave5":"fixed sample and original ranks; complete PRICE-only refit","bh_family_size":8})
+    for family in ("ATTENUATION","INTERACTION"):
+        for m in MECHANISMS:
+            for h in HORIZONS:
+                rows.append({"test_id":f"{family}_{m}_H{h}","family":family,"horizon":h,"mechanism":m,"sample_binding":"MECHANISM_MATCHED","sign_source":f"BASELINE_PRICE_H{h}" if family=="ATTENUATION" else None,"rank_scope":"separately finite same-date PRICE and mechanism before endpoint mask","blocks":"four chronological matched eligible-date blocks","leave5":"fixed matched sample and original ranks; complete matched estimator refit","bh_family_size":48})
+    return rows
+
+def final_schemas():
+    schemas={k:list(v) for k,v in SCIENTIFIC_SCHEMAS.items()}
+    for name in ("sw11_s2_primary_summary.csv","sw11_s2_date_effects.csv"):
+        schemas[name]+=["sample_binding","baseline_family_test_id","baseline_family_sign_source"]
+    schemas["sw11_s2_manifest.json"]+=["baseline_family_sample_rule","baseline_sign_anchor_rule","baseline_blocks_rule","baseline_leave5_rule","matched_comparison_separation"]
+    return schemas
+
+def certify_binding():
+    ids=[f"SYNTHETIC_{i:03}" for i in range(12)]
+    prices=np.arange(1.,13.);mask,x=price_only_design(prices,prices,prices+1,ids)
+    y=.2-.4*x[:,1]
+    beta,contribution=ols_contributions(x,y,ids,1)
+    remaining,diag=leave_five_refit([x],[y],ids,1,[contribution])
+    registry={h:{"test_id":f"BASELINE_PRICE_H{h}","sample_binding":"PRICE_ONLY","complete_series":True,"coefficient_series":[beta,beta-.1]} for h in HORIZONS}
+    d,atten=bound_paired_difference([.4,.6],[.2,.3],5,registry)
+    assert mask.sum()==12 and abs(beta+.4)<1e-12 and abs(remaining[0]+.4)<1e-12
+    assert np.allclose(d,[-.2,-.3]) and abs(atten-.5)<1e-12
+    assert len(final_registry())==104
+    return {"status":"PASS_FINAL_SAMPLE_BINDING","synthetic_only":True,"price_only_baseline":"CERTIFIED","global_s_H_source":"COMPLETE_PRICE_ONLY_BASELINE_H","matched_attenuation_separation":"CERTIFIED","baseline_blocks":"CERTIFIED","baseline_leave5_full_refit":"CERTIFIED","bh_family_sizes":[8,48,48],"real_outcomes_computed":False,"protected_data_access":False,"scientific_execution_enabled":False,"S2B_readiness":"READY_FOR_CANONICAL_AUTHORIZATION","supplement_2_id":SUPPLEMENT_2}
+
+def run_final(root):
+    if os.environ.get("GITHUB_ACTIONS")!="true":raise ValueError("governed certification only")
+    context=json.loads((root/"job_inputs/swing10/execution_context.json").read_text())
+    required={SUPPLEMENT,SUPPLEMENT_2,"7c6279c1-a86d-4336-a08d-244bb5e005b4","11407ad3-97cd-459e-b78e-9162a115b8e4","f240f40d-65a0-40dd-91dc-bdf722431e2b"}
+    snapshots=context.get("contract_snapshot",[])
+    if context.get("mwe_uuid")!=MWE or context.get("synthetic_only") is not True or context.get("scientific_outcomes_authorized") is not False or context.get("materialized_inputs") or len(snapshots)!=5 or {x["decision_id"] for x in snapshots}!=required:
+        raise ValueError("five frozen decisions and zero-source synthetic envelope required")
+    if any(x.get("metadata_json",{}).get("status")!="FROZEN" for x in snapshots):raise ValueError("frozen authority required")
+    out=root/"research_outputs/swing11/s2a_final_binding";out.mkdir(parents=True,exist_ok=True)
+    values=[certify_binding(),final_registry(),final_schemas()]
+    for name,value in zip(FINAL_FILES,values):(out/name).write_text(json.dumps(value,sort_keys=True,indent=2)+"\n")
+    declarations=[{"name":name,"sha256":hashlib.sha256((out/name).read_bytes()).hexdigest(),"bytes":(out/name).stat().st_size} for name in FINAL_FILES[:-1]]
+    manifest={"authority":context,"artifacts":declarations,"schemas":final_schemas(),"registry":final_registry(),"synthetic_only":True,"real_forward_outcomes_computed":False,"protected_data_access":False,"scientific_execution_enabled":False,"paid_fallback":False,"billing_evidence_available":False,"preserved_parent_jobs":["42204772-60f1-4ac2-b005-f103e97f14b2","0f54aa61-5c01-4290-af9a-3805d2f2a320"]}
+    (out/FINAL_FILES[-1]).write_text(json.dumps(manifest,sort_keys=True,indent=2)+"\n")
+    paths=[str((out/name).relative_to(root)) for name in FINAL_FILES]
     return {"status":"PASS","artifact":paths[0],"output_paths":paths}
