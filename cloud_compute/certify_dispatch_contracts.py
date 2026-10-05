@@ -12,6 +12,8 @@ BASE = ['tests/test_ccp5_control_plane.py','tests/test_ccp5_control_plane_worker
 
 
 def selected_tests(runner_id):
+    if runner_id == "SW11-S2B":
+        return BASE + ["tests/test_swing11_s2a_supplement.py", "tests/test_swing11_s2a_binding.py", "tests/test_swing11_s2b.py", "tests/test_swing11_s2b_guard.py"]
     if runner_id == "SW11-S2A-CERT":
         return BASE + ["tests/test_swing11_s2a_supplement.py", "tests/test_swing11_s2a_binding.py"]
     if runner_id == "SW11-S2A":
