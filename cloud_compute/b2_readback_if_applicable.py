@@ -14,8 +14,11 @@ def main():
     jobs = _fetch_rows(config, 'research_jobs', {'job_id': f'eq.{a.job_id}', 'limit': '2'})
     if len(jobs) != 1:
         raise RuntimeError('exact job not found')
-    if jobs[0]['runner_job_id'] == 'SW11-S2A':
-        from tr_platform.research.swing11_s2a import FILES
+    if jobs[0]['runner_job_id'] in {'SW11-S2A','SW11-S2A-CERT'}:
+        if jobs[0]['runner_job_id']=='SW11-S2A-CERT':
+            from tr_platform.research.swing11_s2a_supplement import CERT_FILES as FILES
+        else:
+            from tr_platform.research.swing11_s2a import FILES
         attempts=_fetch_rows(config,'research_job_attempts',{'job_id':f'eq.{a.job_id}','order':'attempt_no.desc','limit':'1'})
         if len(attempts)!=1 or attempts[0]['status']!='succeeded' or attempts[0]['git_sha']!=jobs[0]['git_sha']:
             raise RuntimeError('latest succeeded exact-revision preflight attempt required')

@@ -7,6 +7,7 @@ WORK_ROOT=Path(os.environ.get("TR_WORK_ROOT",str(CODE_ROOT))).expanduser().resol
 STATE_DIR=WORK_ROOT/"research_outputs"/"runner"; STATE_FILE=STATE_DIR/"state.json"
 JOBS=[
 {"id":"SW11-S2A","project":"swing11","module":"tr_platform.research.swing11_s2a","description":"Outcome-blind six-predictor geometry/capacity; scientific contract remains fail-closed"},
+{"id":"SW11-S2A-CERT","project":"swing11","module":"tr_platform.research.swing11_s2a_supplement","description":"Supplement-1 SYNTHETIC ONLY certification; no market input or S2-B execution"},
 {"id":"SW10-S3","project":"swing10","module":"tr_platform.research.swing10_s3_science","description":"Frozen 36-cell/12-family authorized S3 development science"},
 {"id":"SW10-S3-ARTIFACT-CERT","project":"swing10","module":"tr_platform.research.swing10_s3_artifact_cert","description":"Zero-source full-scale synthetic S3 artifact activation certification"},
 {"id":"SW10-S3-PREFLIGHT","project":"swing10","module":"tr_platform.research.swing10_s3_preflight","description":"Frozen outcome-blind S3 private input and cohort eligibility certification"},
