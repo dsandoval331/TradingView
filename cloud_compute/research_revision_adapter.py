@@ -23,6 +23,7 @@ class GovernedResearchTarget:
 
 
 GOVERNED_RESEARCH_TARGETS: dict[str, GovernedResearchTarget] = {
+    "SW11-S3P": GovernedResearchTarget("SW11-S3P", "tr_platform/research/swing11_s3p.py", execution_mode="sw11_s3p_bundle"),
     "SW11-S2B": GovernedResearchTarget("SW11-S2B", "tr_platform/research/swing11_s2b.py", execution_mode="sw11_s2b_bundle"),
     "SW11-S2A": GovernedResearchTarget("SW11-S2A", "tr_platform/research/swing11_s2a.py"),
     "SW11-S2A-CERT": GovernedResearchTarget("SW11-S2A-CERT", "tr_platform/research/swing11_s2a_supplement.py"),
@@ -113,6 +114,18 @@ def _run_swing10_snapshot_cli(module_file: Path, work_root: Path) -> dict[str, A
         "input_provenance": {"local_relative_path": str(snapshot.relative_to(work_root))},
     }
 
+
+def _run_sw11_s3p_bundle(repo_root: Path, sha: str, destination: Path, work_root: Path) -> dict:
+    for path in ('tr_platform/__init__.py','tr_platform/research/__init__.py'):
+        target=destination/path;target.parent.mkdir(parents=True,exist_ok=True);target.write_text('')
+    for name in ('swing11_s2a.py','swing11_s2a_supplement.py','swing11_s3_contract.py','swing11_s3p.py'):
+        path='tr_platform/research/'+name
+        materialize_module(repo_root,sha,path,destination/path)
+    result_path=destination/'result.json'
+    code="from pathlib import Path; import json,sys; from tr_platform.research.swing11_s3p import run; Path(sys.argv[2]).write_text(json.dumps(run(Path(sys.argv[1]))))"
+    proc=subprocess.run([sys.executable,'-c',code,str(work_root.resolve()),str(result_path)],cwd=destination,env={**os.environ,'PYTHONPATH':str(destination)},capture_output=True,text=True)
+    if proc.returncode:raise RuntimeError('SW11 exact outcome-blind bundle failed: '+proc.stderr[-2000:])
+    return json.loads(result_path.read_text())
 
 def _run_sw11_s2b_bundle(repo_root: Path, sha: str, destination: Path, work_root: Path) -> dict:
     for path in ("tr_platform/__init__.py", "tr_platform/research/__init__.py"):
@@ -305,6 +318,8 @@ def run_governed_revision(*, repo_root: Path, work_root: Path, runner_job_id: st
             result = _run_b4_bundle(repo_root, verified_sha, Path(td), Path(work_root), scientific=True)
         elif target.execution_mode == "swing10_b4_preflight_bundle":
             result = _run_b4_bundle(repo_root, verified_sha, Path(td), Path(work_root))
+        elif target.execution_mode == "sw11_s3p_bundle":
+            result = _run_sw11_s3p_bundle(repo_root, verified_sha, Path(td), Path(work_root))
         elif target.execution_mode == "sw11_s2b_bundle":
             result = _run_sw11_s2b_bundle(repo_root, verified_sha, Path(td), Path(work_root))
         elif target.execution_mode == "swing10_b3_scientific_bundle":
