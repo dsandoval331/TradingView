@@ -172,12 +172,15 @@ def run_one_outcome(
         if runner_job_id == 'SW11-S4P':
             parameters=job.get('parameters_json') or {}
             from cloud_compute.control_plane import _fetch_rows
-            from tr_platform.research.swing11_s4p import guard, AUTHORITY, PARENT
+            from tr_platform.research.swing11_s4p import guard, source_guard, SOURCE_AUTHORITY, AUTHORITY, PARENT
             guard(parameters)
             if _fetch_rows(config,'research_job_inputs',{'job_id':f'eq.{job_id}','limit':'1'}):raise RuntimeError('S4P denies all market/source input bytes')
             snapshot=parameters.get('contract_snapshot') or []
             required={AUTHORITY,'d3dfd67f-b40d-45ed-af1d-9c7e079bab66','8ef41b93-e42c-4b53-bcca-23c8f8eb3f4e','f41b3c8b-3d19-4fb6-9ded-2d91c9ab037a','5a2508a3-0837-4080-b3e2-9dec28eecc31'}
-            if len(snapshot)!=5 or {x['decision_id'] for x in snapshot}!=required:raise RuntimeError('all five exact S4P authorities required')
+            if parameters.get('source_certification') is True:
+                source_guard(parameters)
+                required.add(SOURCE_AUTHORITY)
+            if len(snapshot)!=len(required) or {x['decision_id'] for x in snapshot}!=required:raise RuntimeError('all exact S4P authorities required')
             for expected in snapshot:
                 found=_fetch_rows(config,'project_decisions',{'decision_id':f"eq.{expected['decision_id']}",'limit':'2'})
                 fields=('decision_id','title','decision','rationale','evidence','metadata_json')
@@ -314,7 +317,7 @@ def run_one_outcome(
                                          "size_bytes": x.size_bytes, "sha256": x.sha256} for x in materialized],
             }
             if runner_job_id == 'SW11-S4P':
-                for key in ('mwe_uuid','parent_mwe_uuid','selected_architecture','preflight_only','scientific_outcomes_authorized','protected_validation_authorized','contract_snapshot','github_job_id','source_audit','development_metadata','certification'):
+                for key in ('mwe_uuid','parent_mwe_uuid','selected_architecture','preflight_only','scientific_outcomes_authorized','protected_validation_authorized','contract_snapshot','github_job_id','source_audit','development_metadata','certification','source_certification','source_option'):
                     context[key]=parameters.get(key)
             if runner_job_id == "SW10-S3":
                 parameters=job.get("parameters_json") or {}

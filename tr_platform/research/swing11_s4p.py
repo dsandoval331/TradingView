@@ -138,6 +138,8 @@ def run(work_root):
     guard(context)
     if os.environ.get('GITHUB_ACTIONS')!='true':raise ValueError('governed execution only')
     if any((Path(work_root)/'job_inputs').rglob('*.csv')):raise ValueError('real data materialization denied')
+    if context.get('source_certification') is True:
+        return run_source_certification(work_root, context)
     out=Path(work_root)/'research_outputs/swing11/s4p';out.mkdir(parents=True,exist_ok=True)
     docs={
       FILES[0]:{'status':PROPOSAL['status'],'registry':PROPOSAL['registry']},
@@ -155,3 +157,139 @@ def run(work_root):
     (out/FILES[-1]).write_text(json.dumps(manifest,sort_keys=True,indent=2)+'\n')
     paths=[str((out/n).relative_to(work_root)) for n in FILES]
     return {'status':'PASS','artifact':paths[0],'output_paths':paths,'output_artifact_metadata':{p:{'logical_name':Path(p).name} for p in paths}}
+
+# Option A is a separate bounded source-certification mode. Legacy evidence stays unchanged.
+SOURCE_AUTHORITY = '46b8d99f-db1c-4dec-9f50-a0b1a5f01c4e'
+SOURCE_FILES = ('sw11_s4p_option_a_source_inventory.json',
+ 'sw11_s4p_option_a_entitlement_probes.json',
+ 'sw11_s4p_option_a_historical_notice.json',
+ 'sw11_s4p_option_a_cashflow_funding.json',
+ 'sw11_s4p_option_a_gate_summary.json', 'sw11_s4p_option_a_manifest.json')
+NOTICE_URL = 'https://news.microsoft.com/source/2025/04/09/microsoft-announces-quarterly-earnings-release-date-63/'
+PROBES = (
+ ('earnings', '/benzinga/v1/earnings', {'ticker':'MSFT','date.gte':'2025-02-03','date.lte':'2026-08-27','limit':1},
+  ('benzinga_id','ticker','date','time','date_status','last_updated')),
+ ('dividends', '/stocks/v1/dividends', {'ticker':'MSFT','ex_dividend_date.gte':'2025-02-03','ex_dividend_date.lte':'2026-08-27','limit':1},
+  ('id','ticker','declaration_date','ex_dividend_date','record_date','pay_date','cash_amount','currency','split_adjusted_cash_amount')),
+ ('splits', '/stocks/v1/splits', {'ticker':'MSFT','execution_date.gte':'2025-02-03','execution_date.lte':'2026-08-27','limit':1},
+  ('id','ticker','execution_date','split_from','split_to')))
+
+def source_guard(context):
+    guard(context)
+    if context.get('source_certification') is not True or context.get('source_option') != 'A_FIRST':
+        raise ValueError('Option A only')
+    snapshots=context.get('contract_snapshot') or []
+    new=[x for x in snapshots if x.get('decision_id') == SOURCE_AUTHORITY]
+    if len(new)!=1:raise ValueError('frozen source authority required')
+    md=new[0].get('metadata_json') or {}
+    if md.get('state')!='FROZEN' or md.get('source_certification_option')!='A_FIRST' or md.get('s4_development_outcome_exposure_authorized') is not False:
+        raise ValueError('source authority or outcome boundary mismatch')
+
+def source_request(url, *, key=None, params=None):
+    # No redirects, pagination, prices, broker logins, exception text, or response-body logs.
+    import requests
+    allowed={'https://api.massive.com'+x[1] for x in PROBES}|{NOTICE_URL}
+    if url not in allowed:raise ValueError('closed source URL registry')
+    headers={'Authorization':'Bearer '+key} if key else {}
+    try:
+        response=requests.get(url,headers=headers,params=params,timeout=45,allow_redirects=False)
+        if len(response.content)>2_000_000:raise ValueError('bounded source response exceeded')
+        return response.status_code, response.content
+    except requests.RequestException:
+        return None, b''
+
+def project_probe(name, status, body, keys, secret):
+    # Failed bodies may echo authentication data. Never persist them or exception text.
+    base={'source':name,'http_status':status,'rows_projected':[],
+          'scope':'single-symbol endpoint access probe, not universe or PIT completeness'}
+    if status!=200:
+        base['access']='DENIED' if status in (401,403) else 'UNAVAILABLE_HTTP_OR_NETWORK'
+        return base
+    try:payload=json.loads(body)
+    except (ValueError,UnicodeDecodeError):
+        base['access']='UNPARSEABLE';return base
+    rows=payload.get('results')
+    if not isinstance(rows,list):base['access']='UNEXPECTED_SCHEMA';return base
+    projected=[]
+    for row in rows:
+        if not isinstance(row,dict):raise ValueError('source row schema')
+        clean={k:row[k] for k in keys if k in row and isinstance(row[k],(str,int,float,bool,type(None)))}
+        if secret and secret in json.dumps(clean):raise ValueError('credential-bearing source projection rejected')
+        for k in ('date','ex_dividend_date','execution_date'):
+            if k in clean and not ('2025-02-03' <= str(clean[k]) <= '2026-08-27'):
+                raise ValueError('source date outside development boundary')
+        projected.append(clean)
+    base.update(access='AVAILABLE_ENDPOINT_ONLY',rows_projected=projected,
+                projected_count=len(projected),pagination_present=bool(payload.get('next_url')),
+                excluded_fields='No EPS, revenue, surprises, price, return, effect or outcome fields retained')
+    return base
+
+def notice_evidence(status, body):
+    import re
+    import html
+    result={'url':NOTICE_URL,'http_status':status,'certification':'UNAVAILABLE',
+            'universe_completeness':False,'revisions_complete':False}
+    if status!=200:return result
+    text=body.decode('utf-8',errors='strict')
+    plain=html.unescape(re.sub('<[^>]+>',' ',text))
+    plain=' '.join(plain.split())
+    required=('April 9, 2025','April 30, 2025','after the close of the market')
+    if not all(x in plain for x in required):return result
+    result.update(certification='PARTIAL_ISSUER_NOTICE_ONLY',symbol='MSFT',
+      publication_date='2025-04-09',event_date='2025-04-30',event_session='AFTER_CLOSE',
+      session_timezone='America/New_York',publication_time='UNKNOWN',
+      earliest_conservative_daily_admission='2025-04-10',
+      raw_public_archive_utf8=text,raw_sha256=hashlib.sha256(body).hexdigest(),raw_size_bytes=len(body),
+      limitations=['Retrieved current authoritative archived page; publication date is issuer asserted, not independent historical capture proof.',
+       'One notice does not certify revisions or absence of other events for 112 symbols and 394 sessions.'])
+    return result
+
+def funding_cashflows(*, cash, long_reserve, short_collateral, fees, dividend_debit):
+    vals=(cash,long_reserve,short_collateral,fees,dividend_debit)
+    if not all(math.isfinite(x) and x>=0 for x in vals):raise ValueError('finite nonnegative funding required')
+    remaining=cash-long_reserve-short_collateral-fees-dividend_debit
+    return {'remaining_cash':remaining,'fully_funded':remaining>=0,'short_proceeds_reinvested':False}
+
+def run_source_certification(work_root, context):
+    source_guard(context)
+    key=os.environ.get('MASSIVE_API_KEY') or os.environ.get('TR_MASSIVE_API_KEY')
+    probes=[]
+    for name,path,params,keys in PROBES:
+        if not key:
+            probes.append({'source':name,'access':'CREDENTIAL_NOT_AVAILABLE','http_status':None,'rows_projected':[]});continue
+        status,body=source_request('https://api.massive.com'+path,key=key,params=params)
+        probes.append(project_probe(name,status,body,keys,key))
+    status,body=source_request(NOTICE_URL)
+    notice=notice_evidence(status,body)
+    inv={'authority':context['contract_snapshot'],'source_audit':context.get('source_audit'),
+         'development_metadata_only':context.get('development_metadata'),
+         'credential_available_boolean_only':bool(key),'new_price_data_requested':False,
+         'no_provider_purchase_or_upgrade':True,'scope':'Option A historical certification, not prospective snapshot archival'}
+    cash={'synthetic_fully_funded_fixture':funding_cashflows(cash=100,long_reserve=40,short_collateral=40,fees=2,dividend_debit=1),
+      'semantics':'Debit short dividend obligations on consistent share basis. Reserve long capital and short collateral. No reinvestment of short proceeds or external funding.',
+      'corporate_actions':'Endpoint access alone is not full coverage. Split-adjusted prices require same-basis dividends/quantities; never add dividends twice to a total-return series.',
+      'historical_broker_terms_certified':False,'complete_universe_cashflows_certified':False,
+      'funding_certification':'SYNTHETIC_ACCOUNTING_ONLY_NOT_HISTORICAL_BROKER_CERTIFICATION'}
+    gates={'pit_earnings_complete':False,'historical_locate_availability_fee_recall_complete':False,
+           'corporate_action_cashflow_universe_complete':False,'historical_funding_terms_complete':False,
+           'source_option_a_certified':False,'s4_execution_ready':False,
+           'reason':'No complete as-known earnings revision/completeness ledger or historical broker locate/recall ledger in registered sources. Current endpoint probes and isolated issuer notices cannot supply missing knowledge.',
+           'design_blocker_resolved':True,'option_b_authorized':False,
+           'new_s4_outcomes_exposed':False,'protected_validation_access':False,
+           'frozen_candidate_registry':[x['id'] for x in PROPOSAL['registry']],
+           'primary_modeled_cost':{'execution_round_trip_bp':25,'short_borrow_annual_pct':5},
+           'stress_views':[[x,y] for x in (0,10,25,50) for y in (0,5,20)],
+           'certification':context.get('certification')}
+    docs=dict(zip(SOURCE_FILES[:-1],(inv,{'probes':probes,'failure_bodies_persisted':False},notice,cash,gates)))
+    out=Path(work_root)/'research_outputs/swing11/s4p_option_a';out.mkdir(parents=True,exist_ok=True)
+    inventory=[]
+    for name,doc in docs.items():
+        p=out/name;p.write_text(json.dumps(doc,sort_keys=True,indent=2,allow_nan=False)+'\n',encoding='utf-8')
+        inventory.append({'name':name,'size_bytes':p.stat().st_size,'sha256':hashlib.sha256(p.read_bytes()).hexdigest()})
+    manifest={k:context.get(k) for k in ('job_id','attempt_id','github_run_id','github_job_id','research_revision','infrastructure_revision','mwe_uuid')}
+    manifest.update(authority=SOURCE_AUTHORITY,artifact_inventory=inventory,manifest_self_hash='external registration only',
+       source_gate_status='BLOCKED_USER_SOURCE_REQUIREMENTS',new_s4_outcomes_exposed=False,protected_validation_access=False,
+       incremental_paid_fallback=False,literal_zero_billing_verified=False)
+    (out/SOURCE_FILES[-1]).write_text(json.dumps(manifest,sort_keys=True,indent=2)+'\n',encoding='utf-8')
+    paths=[str((out/n).relative_to(work_root)) for n in SOURCE_FILES]
+    return {'status':'PASS','artifact':paths[0],'output_paths':paths,'output_artifact_metadata':{p:{'logical_name':Path(p).name,'scope':'OPTION_A_SOURCE_CERTIFICATION_ONLY'} for p in paths}}
