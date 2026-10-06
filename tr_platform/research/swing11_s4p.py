@@ -138,6 +138,8 @@ def run(work_root):
     guard(context)
     if os.environ.get('GITHUB_ACTIONS')!='true':raise ValueError('governed execution only')
     if any((Path(work_root)/'job_inputs').rglob('*.csv')):raise ValueError('real data materialization denied')
+    if context.get('prospective_archival') is True:
+        return run_prospective_archival(work_root, context)
     if context.get('source_certification') is True:
         return run_source_certification(work_root, context)
     out=Path(work_root)/'research_outputs/swing11/s4p';out.mkdir(parents=True,exist_ok=True)
@@ -293,3 +295,138 @@ def run_source_certification(work_root, context):
     (out/SOURCE_FILES[-1]).write_text(json.dumps(manifest,sort_keys=True,indent=2)+'\n',encoding='utf-8')
     paths=[str((out/n).relative_to(work_root)) for n in SOURCE_FILES]
     return {'status':'PASS','artifact':paths[0],'output_paths':paths,'output_artifact_metadata':{p:{'logical_name':Path(p).name,'scope':'OPTION_A_SOURCE_CERTIFICATION_ONLY'} for p in paths}}
+
+# Option B: metadata only. No boundary is assigned and no market bars are fetched.
+ARCHIVE_AUTHORITY = '650c2556-5b10-437b-9bf6-cdf9af20c29e'
+ARCHIVE_SYMBOLS = ["AAPL","ABBV","ABNB","ADBE","AMAT","AMD","AMGN","AMZN","ANET","APP","ARM","ASML","AVGO","AXON","AXP","BA","BAC","BKNG","BLK","BMY","C","CAT","CEG","CMCSA","CME","CMG","COIN","COP","COST","CRM","CRWD","CSCO","CVS","CVX","DASH","DDOG","DE","DELL","DIS","EOG","ETN","FDX","GE","GILD","GOOG","GS","HAL","HD","HON","HOOD","IBM","INTC","ISRG","IWM","JNJ","JPM","KLAC","LLY","LMT","LOW","LRCX","LULU","MA","MCD","META","MNDY","MRK","MRNA","MRVL","MS","MSFT","MU","NEE","NFLX","NKE","NOW","NVDA","ORCL","OXY","PANW","PEP","PFE","PLTR","PYPL","QCOM","QQQ","RBLX","REGN","RTX","SBUX","SCHW","SHOP","SLB","SNOW","SPY","T","TEAM","TGT","TMO","TMUS","TQQQ","TSLA","TXN","UBER","UNH","UPS","URI","V","VRTX","VZ","WMT","XOM"]
+ARCHIVE_NAMES = ('architecture','schemas','source_registry','collector_specification',
+ 'quality_gates','coverage_specification','boundary_recommendation','contamination_controls',
+ 'scheduler_specification','synthetic_certification','unresolved_decisions',
+ 'snapshot','coverage_health','manifest')
+ARCHIVE_FILES = tuple('sw11_s4p_option_b_'+n+'.json' for n in ARCHIVE_NAMES)
+ARCHIVE_DOMAINS = ('earnings','dividends','splits','broker_locate','borrow_fee','recall','funding')
+ARCHIVE_ENDPOINTS = {'earnings':'/benzinga/v1/earnings',
+ 'dividends':'/stocks/v1/dividends','splits':'/stocks/v1/splits'}
+ARCHIVE_KEYS = dict((n,k) for n,_,_,k in PROBES)
+BOUNDARY_RECOMMENDATION = {
+ 'state':'PROPOSED_NOT_FROZEN_REQUIRES_CANONICAL_APPROVAL',
+ 'collection_start':'Actual first successful certified retrieval; never authorization time or provider last_updated.',
+ 'maturity_sessions':20,'required_slot_success_rate':0.95,
+ 'universe_symbols':112,'minimum_fully_observed_symbols':101,
+ 'per_symbol_admission':'All applicable sources complete and finite; earnings revisions/session known; account-specific short availability, quantity, fee and observable recall; declared cash flows and funding certified. Unknown is ineligible. Observed unavailable differs from unknown and is not tradable.',
+ 'freshness':'Latest relevant observation must precede decision/entry; pre-entry and pre-close snapshot age <=30 minutes. Delayed capture is not backdated.',
+ 'S4':'First fixed 126 registered trading sessions after prospective maturity/source gates pass. Missing dates remain in the interval and cannot extend it. At least 100 usable common dates; >=80% active rate; >=5 symbols/side. Final ten sessions additionally reserved for S4 endpoint runoff; no new S4 signals.',
+ 'S5':'Next fixed 252 registered trading sessions after S4 ten-session runoff, plus ten endpoint-only runoff sessions. At least 200 usable comparison dates and four blocks >=20 dates; missing dates never extend or move the reservation.',
+ 'seal':'Approve deterministic algorithm before any future price admission; publish exact dates as soon start/maturity is mechanically established and before any S4 outcome exposure. Sealed S5 never reassigned, resized or extended on results.',
+ 'symbol_changes':'Frozen 112-symbol universe; eligibility changes prospectively only from source records and actual timestamp. No imputation/backfill or outcome-driven inclusion.',
+ 'outage':'Append error/UNKNOWN; no carried-forward complete status across stale slots. Coverage gating uses actual captured slots; scheduler success alone is not source success.',
+ 'duration':'Conditional minimum 20 maturity +126 S4 +10 runoff +252 S5 +10 runoff =418 trading sessions (~20 months). No guaranteed start/ETA; unresolved sources prevent maturity clock.',
+ 'rationale':'126/252 sessions bound development and protected validation approximately half/full year; 126 allows four >=20-date blocks and >=100-date gate. Coverage thresholds are prospective proposals, not power calculations.',
+ 'alternatives':['Fixed calendar half-year development/full-year validation: simpler sealing but calendar/holiday coverage variation.', '252-session development +252-session validation: more stability coverage, roughly six months longer; no outcome-driven extension.'],
+ 'trade_count':'Report all trades; no new optimized trade-count cutoff. Existing >=5 per side and >=80% active rate remain controlling.',
+ 'current_boundary_assignments':0,'future_price_access_authorized':False}
+
+def archive_guard(context):
+    guard(context)
+    if context.get('prospective_archival') is not True or context.get('source_option')!='B':
+        raise ValueError('exact Option B metadata mode required')
+    if context.get('source_certification') is True:raise ValueError('mutually exclusive source modes')
+    records=[x for x in context.get('contract_snapshot',[]) if x.get('decision_id')==ARCHIVE_AUTHORITY]
+    if len(records)!=1:raise ValueError('Option B frozen authority missing')
+    md=records[0].get('metadata_json') or {}
+    if md.get('state')!='FROZEN' or md.get('prospective_archival_authorized') is not True:
+        raise ValueError('prospective archival not authorized')
+    for k in ('exact_future_boundary_frozen','future_price_access_authorized','protected_validation_authorized','s4_development_outcome_exposure_authorized'):
+        if md.get(k) is not False:raise ValueError('metadata-only authorization boundary')
+    symbols=context.get('archive_symbols')
+    if symbols != ARCHIVE_SYMBOLS:
+        raise ValueError('exact frozen symbol registry required')
+    if any(k in context for k in ('price_rows','forward_returns','boundary_assignments','validation_input')):
+        raise ValueError('prices/outcomes/boundary assignment denied')
+
+def archive_request(domain,params,key):
+    import requests
+    if domain not in ARCHIVE_ENDPOINTS:raise ValueError('closed metadata source registry')
+    try:
+        r=requests.get('https://api.massive.com'+ARCHIVE_ENDPOINTS[domain],
+          headers={'Authorization':'Bearer '+key},params=params,allow_redirects=False,timeout=45)
+        if len(r.content)>2_000_000:return None,b''
+        return r.status_code,r.content if r.status_code==200 else b''
+    except requests.RequestException:return None,b''
+
+def archive_projection(domain,status,body,secret,symbols,retrieved_at):
+    # Preserve metadata projection, wire SHA and version hash; never credentials,
+    # next_url query tokens, EPS/revenue, prices, error bodies or exception text.
+    if domain not in ARCHIVE_ENDPOINTS:raise ValueError('unregistered source')
+    observed=datetime.fromisoformat(retrieved_at.replace('Z','+00:00'))
+    if observed.tzinfo is None:raise ValueError('timezone required')
+    base={'domain':domain,'source':'Massive','retrieved_at':retrieved_at,
+          'http_status':status,'records':[],'coverage_complete':False,
+          'raw_wire_retained':False,'raw_projection_retained':True,
+          'missing_status':'UNKNOWN','wire_sha256':None}
+    if status!=200:return base
+    try:payload=json.loads(body)
+    except (ValueError,UnicodeDecodeError):return base
+    if not isinstance(payload,dict) or not isinstance(payload.get('results'),list):return base
+    for row in payload['results']:
+        if not isinstance(row,dict):raise ValueError('source row schema')
+        ticker=row.get('ticker')
+        if ticker not in symbols:continue
+        clean={k:row[k] for k in ARCHIVE_KEYS[domain] if k in row and isinstance(row[k],(str,int,float,bool,type(None)))}
+        if any(isinstance(v,float) and not math.isfinite(v) for v in clean.values()):raise ValueError('nonfinite metadata')
+        if secret and secret in json.dumps(clean):raise ValueError('secret-bearing projection rejected')
+        canonical=json.dumps(clean,sort_keys=True,separators=(',',':'),allow_nan=False).encode()
+        clean['normalized_record_sha256']=hashlib.sha256(canonical).hexdigest()
+        clean['known_no_earlier_than']=retrieved_at
+        clean['session_semantics_certified']=False
+        base['records'].append(clean)
+    base['wire_sha256']=hashlib.sha256(body).hexdigest()
+    base['projection_sha256']=hashlib.sha256(json.dumps(base['records'],sort_keys=True,allow_nan=False).encode()).hexdigest()
+    base['pagination_pending']=bool(payload.get('next_url'))
+    base['missing_status']='PARTIAL_METADATA_OBSERVATION'
+    # One bounded bulk page never proves per-symbol no-event or broker coverage.
+    return base
+
+def run_prospective_archival(work_root,context):
+    from datetime import timezone,timedelta
+    archive_guard(context)
+    now=datetime.now(timezone.utc)
+    key=os.environ.get('MASSIVE_API_KEY') or os.environ.get('TR_MASSIVE_API_KEY')
+    snapshots=[]
+    for domain in ARCHIVE_ENDPOINTS:
+        params={'limit':1000}
+        if domain=='earnings':params.update({'date.gte':now.date().isoformat(),'date.lte':(now+timedelta(days=42)).date().isoformat()})
+        elif domain=='dividends':params.update({'declaration_date.gte':(now-timedelta(days=10)).date().isoformat()})
+        else:params.update({'execution_date.gte':now.date().isoformat(),'execution_date.lte':(now+timedelta(days=42)).date().isoformat()})
+        status,body=archive_request(domain,params,key) if key else (None,b'')
+        snapshots.append(archive_projection(domain,status,body,key,context['archive_symbols'],datetime.now(timezone.utc).isoformat()))
+    unavailable=[{'domain':d,'status':'NOT_CONNECTED_UNKNOWN','complete':False} for d in ARCHIVE_DOMAINS if d not in ARCHIVE_ENDPOINTS]
+    schema={'version':1,'append_only':True,'observation_fields':['source','domain','symbol/ticker','event_id','retrieved_at','provider_last_updated','expected_date','expected_time','revision/status','availability','available_quantity','borrow_fee','recall_state','wire_sha256','projection_sha256','normalized_record_sha256','collector_revision','job_id','attempt_id','run_id','coverage_complete','missing_status'],
+      'retention':'All prior artifacts/readbacks stay immutable. Same event changed projection hash creates a new version, never overwrites.',
+      'timestamps':'UTC timezone-aware actual retrieval establishes knowledge. Provider timestamp never backdates archived knowledge.',
+      'raw_policy':'Whitelisted provider metadata projection retained; full wire hash retained, raw wire not retained. Projection cannot establish absent-provider-field knowledge.',
+      'no_event':'Empty page is UNKNOWN, not certified no earnings.',
+      'corporate_action_basis':'Preserve provider amount/currency/ex/pay/declaration/split ratio; adjusted-price/share-basis mapping remains uncertified until source plus broker cash ledger certified.'}
+    docs={
+      ARCHIVE_FILES[0]:{'mode':'METADATA_ONLY_NO_PRICES','storage':'Existing private Supabase governed job/attempt immutable objects and durable readbacks','new_tables':False,'source_inputs':0,'archival_start_backdating':False},
+      ARCHIVE_FILES[1]:schema,
+      ARCHIVE_FILES[2]:{'existing_credential_configured':bool(key),'active_endpoint_registry':ARCHIVE_ENDPOINTS,'sources_not_connected':unavailable,'indicative_borrow_is_not_account_specific_locate':True,'FMP':'No configured entitlement established in this collector; not probed or claimed globally unavailable.'},
+      ARCHIVE_FILES[3]:{'window_days':42,'page_limit':1000,'max_response_bytes':2000000,'redirects':False,'pagination':'No pagination follow; pending page marks incomplete. Never copy secret-bearing next_url.','retries':'Next scheduled governed job creates new immutable attempt/output; failed history preserved.','knowledge':'Current-as-collected only; never historical reconstruction before first capture.'},
+      ARCHIVE_FILES[4]:{'operational_checks':['UTC timestamp','closed endpoint','bounded response','finite metadata','secret rejection','immutable private upload','independent hash/byte readback'],'practical_complete':False,'source_missing_fails_closed':True,'boundary_quality_thresholds':'Proposed separately, not scientific freeze.'},
+      ARCHIVE_FILES[5]:{'symbols':context['archive_symbols'],'expected_symbols':112,'required_domains':ARCHIVE_DOMAINS,'complete_practical_symbol_count':0,'coverage_cannot_be_inferred_from_empty_pages':True},
+      ARCHIVE_FILES[6]:BOUNDARY_RECOMMENDATION,
+      ARCHIVE_FILES[7]:{'future_prices_denied':True,'B5_consumed_denied':True,'protected_validation_denied':True,'boundary_assignments':0,'S5_S6_locked':True,'snapshot_metadata_not_strategy_outcomes':True},
+      ARCHIVE_FILES[8]:{'workflow':'.github/workflows/sw11-s4p-archive.yml','timezone':'America/New_York','weekdays':['09:15','15:45','16:15'],'cron_delays':'Actual retrieval time controls; missed/late snapshots do not become historical knowledge.','activation':'Exact certified research head persisted in MWE collector config; dedicated workflow checks ancestor and snapshot authority.','secrets':'Existing Massive/Supabase only in dedicated trusted collector workflow; no credential logs/artifacts.'},
+      ARCHIVE_FILES[9]:{'scope':'Synthetic + governed compatibility only; zero real strategy performance','certification':context.get('certification'),'protected_boundaries_pass':True},
+      ARCHIVE_FILES[10]:{'status':'BLOCKED_USER','decisions':['Prospectively approve exact S4/S5 boundary recommendation or alternatives.','Connect/certify a zero-cost complete current earnings revision/session feed and broker/account-specific locate/fee/recall/funding evidence; do not weaken practical gates.'],'scientific_ready':False},
+      ARCHIVE_FILES[11]:{'capture_started_at':now.isoformat(),'snapshots':snapshots,'unconnected_domains':unavailable},
+      ARCHIVE_FILES[12]:{'technical_capture_succeeded':any(x['http_status']==200 for x in snapshots),'all_practical_domains_complete':False,'source_statuses':[{k:x.get(k) for k in ('domain','http_status','retrieved_at','missing_status','pagination_pending')} for x in snapshots],'complete_symbols':0,'MWE':MWE,'job_id':context['job_id'],'attempt_id':context['attempt_id']}}
+    out=Path(work_root)/'research_outputs/swing11/s4p';out.mkdir(parents=True,exist_ok=True)
+    inventory=[]
+    for name,data in docs.items():
+        p=out/name;p.write_text(json.dumps(data,sort_keys=True,indent=2,allow_nan=False)+'\n')
+        inventory.append({'name':name,'sha256':hashlib.sha256(p.read_bytes()).hexdigest(),'size_bytes':p.stat().st_size})
+    manifest={'MWE':MWE,'authority':ARCHIVE_AUTHORITY,'job_id':context['job_id'],'attempt_id':context['attempt_id'],'run_id':context['github_run_id'],'research_sha':context['research_revision'],'infrastructure_sha':context['infrastructure_revision'],'artifacts':inventory,'self_hash':'external registration only','input_count':0,'new_S4_outcomes_exposed':False,'protected_validation_access':False,'future_price_access':False,'boundary_assignments':0,'paid_fallback':False,'billing_verified_zero':False}
+    (out/ARCHIVE_FILES[-1]).write_text(json.dumps(manifest,sort_keys=True,indent=2)+'\n')
+    paths=[str((out/n).relative_to(work_root)) for n in ARCHIVE_FILES]
+    return {'status':'PASS','artifact':paths[0],'output_paths':paths,'output_artifact_metadata':{p:{'logical_name':Path(p).name} for p in paths}}

@@ -11,6 +11,8 @@ def eligible_jobs(config: ControlPlaneConfig, *, limit: int = 10) -> list[dict]:
     rows = fetch_queued_jobs(config, limit=max(limit * 4, 20))
     out = []
     for row in rows:
+        if (row.get('parameters_json') or {}).get('persistent_collector_direct') is True:
+            continue
         if row.get("preferred_executor") != "github_actions":
             continue
         if bool(row.get("cloud_run_spend_approved")):
@@ -44,3 +46,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
