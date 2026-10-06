@@ -76,3 +76,11 @@ def test_universe_identity_not_just_size():
 def test_activation_cannot_open_science(k):
  c={'enabled':True,'research_sha':'a'*40,'scientific_outcomes_authorized':False,'future_price_access_authorized':False,'parameters':context()};c[k]=True
  with pytest.raises(ValueError):validate_activation({'work_envelope_id':m.MWE,'status':'ACTIVE','metadata_json':{'option_b_collector':c}})
+
+
+def test_exact_claim_env_preserves_infrastructure(monkeypatch):
+ from cloud_compute.s4p_archive_schedule import execution_env
+ monkeypatch.setenv('GITHUB_SHA','b'*40);monkeypatch.setenv('TR_RESEARCH_SHA','b'*40)
+ e=execution_env('a'*40)
+ assert e['TR_RESEARCH_SHA']=='a'*40 and e['TR_GIT_REF']=='a'*40 and e['GITHUB_SHA']=='b'*40
+ with pytest.raises(ValueError):execution_env('main')
