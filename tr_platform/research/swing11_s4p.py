@@ -344,9 +344,32 @@ def archive_guard(context):
     if any(k in context for k in ('price_rows','forward_returns','boundary_assignments','validation_input')):
         raise ValueError('prices/outcomes/boundary assignment denied')
 
+_ARCHIVE_LAST_REQUEST = None
+_ARCHIVE_DEADLINE = None
+
+def archive_pace():
+    import time
+    global _ARCHIVE_LAST_REQUEST
+    now=time.monotonic()
+    if _ARCHIVE_DEADLINE is not None and now+61>_ARCHIVE_DEADLINE:return False
+    delay=max(0,16- (now-_ARCHIVE_LAST_REQUEST)) if _ARCHIVE_LAST_REQUEST is not None else 0
+    if delay:time.sleep(delay)
+    _ARCHIVE_LAST_REQUEST=time.monotonic()
+    return True
+
+def archive_parameters(domain,now):
+    from datetime import timedelta
+    p={'limit':1000}
+    if domain=='earnings':p.update({'date.gte':now.date().isoformat(),'date.lte':(now+timedelta(days=42)).date().isoformat()})
+    elif domain=='dividends':p.update({'ex_dividend_date.gte':(now-timedelta(days=30)).date().isoformat(),'ex_dividend_date.lte':(now+timedelta(days=42)).date().isoformat(),'sort':'ex_dividend_date.asc'})
+    elif domain=='splits':p.update({'execution_date.gte':now.date().isoformat(),'execution_date.lte':(now+timedelta(days=42)).date().isoformat()})
+    else:raise ValueError('closed metadata source registry')
+    return p
+
 def archive_request(domain,params,key):
     import requests
     if domain not in ARCHIVE_ENDPOINTS:raise ValueError('closed metadata source registry')
+    if not archive_pace():return None,b''
     try:
         r=requests.get('https://api.massive.com'+ARCHIVE_ENDPOINTS[domain],
           headers={'Authorization':'Bearer '+key},params=params,allow_redirects=False,timeout=45)
@@ -403,6 +426,7 @@ def archive_cursor(domain,url):
 
 def archive_collect(domain,params,key,symbols):
     from datetime import timezone
+    filters={k:v for k,v in params.items() if k!='cursor'}
     pages=[];records=[];seen=set();pending=False
     for _ in range(10):
         status,body=archive_request(domain,params,key) if key else (None,b'')
@@ -429,7 +453,16 @@ def archive_collect(domain,params,key,symbols):
         duplicates+=h in seen_hash;seen_hash.add(h)
         identity=(row.get('ticker'),row.get('id') or row.get('benzinga_id'))
         if identity[1]:versions.setdefault(identity,set()).add(h)
-    return {'domain':domain,'source':'Massive','retrieved_at':pages[-1]['retrieved_at'],
+    date_field={'earnings':'date','dividends':'ex_dividend_date','splits':'execution_date'}[domain]
+    low=filters.get(date_field+'.gte');high=filters.get(date_field+'.lte')
+    def in_window(row):
+        value=row.get(date_field)
+        if not isinstance(value,str):return False
+        try:datetime.fromisoformat(value)
+        except ValueError:return False
+        return (not low or value>=low) and (not high or value<=high)
+    outside=sum(not in_window(r) for r in records) if low or high else 0
+    return {'domain':domain,'source':'Massive','retrieved_at':pages[-1]['retrieved_at'],'requested_filters':filters,'outside_window_records':outside,'requested_window_pass':outside==0,
       'http_status':pages[-1]['http_status'],'records':records,'pages':pages,
       'page_count':len(pages),'listing_exhausted':not pending and pages[-1].get('projection_sha256') is not None,
       'pagination_pending':pending,'coverage_complete':False,
@@ -442,14 +475,14 @@ def archive_collect(domain,params,key,symbols):
 def run_prospective_archival(work_root,context):
     from datetime import timezone,timedelta
     archive_guard(context)
+    import time
+    global _ARCHIVE_DEADLINE
+    _ARCHIVE_DEADLINE=time.monotonic()+600
     now=datetime.now(timezone.utc)
     key=os.environ.get('MASSIVE_API_KEY') or os.environ.get('TR_MASSIVE_API_KEY')
     snapshots=[]
     for domain in ARCHIVE_ENDPOINTS:
-        params={'limit':1000}
-        if domain=='earnings':params.update({'date.gte':now.date().isoformat(),'date.lte':(now+timedelta(days=42)).date().isoformat()})
-        elif domain=='dividends':params.update({'declaration_date.gte':(now-timedelta(days=10)).date().isoformat()})
-        else:params.update({'execution_date.gte':now.date().isoformat(),'execution_date.lte':(now+timedelta(days=42)).date().isoformat()})
+        params=archive_parameters(domain,now)
         snapshots.append(archive_collect(domain,params,key,context['archive_symbols']))
     unavailable=[{'domain':d,'status':'NOT_CONNECTED_UNKNOWN','complete':False} for d in ARCHIVE_DOMAINS if d not in ARCHIVE_ENDPOINTS]
     schema={'version':1,'append_only':True,'observation_fields':['source','domain','symbol/ticker','event_id','retrieved_at','provider_last_updated','expected_date','expected_time','revision/status','availability','available_quantity','borrow_fee','recall_state','wire_sha256','projection_sha256','normalized_record_sha256','collector_revision','job_id','attempt_id','run_id','coverage_complete','missing_status'],
@@ -462,7 +495,7 @@ def run_prospective_archival(work_root,context):
       ARCHIVE_FILES[0]:{'mode':'METADATA_ONLY_NO_PRICES','storage':'Existing private Supabase governed job/attempt immutable objects and durable readbacks','new_tables':False,'source_inputs':0,'archival_start_backdating':False},
       ARCHIVE_FILES[1]:schema,
       ARCHIVE_FILES[2]:{'existing_credential_configured':bool(key),'active_endpoint_registry':ARCHIVE_ENDPOINTS,'sources_not_connected':unavailable,'indicative_borrow_is_not_account_specific_locate':True,'FMP':'No configured entitlement established in this collector; not probed or claimed globally unavailable.'},
-      ARCHIVE_FILES[3]:{'window_days':42,'page_limit':1000,'max_response_bytes':2000000,'max_pages':10,'redirects':False,'pagination':'At most ten pages; same exact HTTPS Massive source path and bounded cursor only, repeated/unsafe cursors fail closed; original wire hashes per page. Pending page marks incomplete; listing exhaustion never proves universe/absence completeness.','retries':'Next scheduled governed job creates new immutable attempt/output; failed history preserved.','knowledge':'Current-as-collected only; never historical reconstruction before first capture.'},
+      ARCHIVE_FILES[3]:{'window_days':42,'dividend_lookback_calendar_days':30,'min_request_gap_seconds':16,'total_source_budget_seconds':600,'documented_filter':'ex_dividend_date range; never unsupported declaration_date query','page_limit':1000,'max_response_bytes':2000000,'max_pages':10,'redirects':False,'pagination':'At most ten pages; same exact HTTPS Massive source path and bounded cursor only, repeated/unsafe cursors fail closed; original wire hashes per page. Pending page marks incomplete; listing exhaustion never proves universe/absence completeness.','retries':'Next scheduled governed job creates new immutable attempt/output; failed history preserved.','knowledge':'Current-as-collected only; never historical reconstruction before first capture.'},
       ARCHIVE_FILES[4]:{'operational_checks':['UTC timestamp','closed endpoint','bounded response','finite metadata','secret rejection','immutable private upload','independent hash/byte readback'],'practical_complete':False,'source_missing_fails_closed':True,'boundary_quality_thresholds':'Proposed separately, not scientific freeze.'},
       ARCHIVE_FILES[5]:{'symbols':context['archive_symbols'],'expected_symbols':112,'required_domains':ARCHIVE_DOMAINS,'complete_practical_symbol_count':0,'coverage_cannot_be_inferred_from_empty_pages':True},
       ARCHIVE_FILES[6]:BOUNDARY_RECOMMENDATION,
