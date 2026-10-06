@@ -1,0 +1,37 @@
+name: SWING11 S4P Prospective Metadata Archive
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/sw11-s4p-archive.yml', 'cloud_compute/s4p_archive_schedule.py']
+  schedule:
+    - cron: '15 9,16 * * 1-5'
+      timezone: 'America/New_York'
+    - cron: '45 15 * * 1-5'
+      timezone: 'America/New_York'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: sw11-s4p-metadata-archive
+  cancel-in-progress: false
+jobs:
+  archive:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      SUPABASE_URL: ${{ secrets.TR_SUPABASE_URL }}
+      SUPABASE_SECRET_KEY: ${{ secrets.TR_SUPABASE_SECRET_KEY }}
+      MASSIVE_API_KEY: ${{ secrets.MASSIVE_API_KEY }}
+      TR_MASSIVE_API_KEY: ${{ secrets.TR_MASSIVE_API_KEY }}
+      TR_GIT_SHA: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt pytest
+      - name: Governed metadata capture with independent readback
+        run: python -m cloud_compute.s4p_archive_schedule

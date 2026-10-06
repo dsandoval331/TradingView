@@ -15,8 +15,9 @@ def main():
     if len(jobs) != 1:
         raise RuntimeError('exact job not found')
     if jobs[0]['runner_job_id']=='SW11-S4P':
-        from tr_platform.research.swing11_s4p import FILES, SOURCE_FILES
+        from tr_platform.research.swing11_s4p import FILES, SOURCE_FILES, ARCHIVE_FILES
         if (jobs[0].get('parameters_json') or {}).get('source_certification') is True:FILES=SOURCE_FILES
+        if (jobs[0].get('parameters_json') or {}).get('prospective_archival') is True:FILES=ARCHIVE_FILES
         attempts=_fetch_rows(config,'research_job_attempts',{'job_id':f'eq.{a.job_id}','order':'attempt_no.desc','limit':'1'})
         if len(attempts)!=1 or attempts[0]['status']!='succeeded' or attempts[0]['git_sha']!=jobs[0]['git_sha']:raise RuntimeError('latest exact succeeded S4P attempt required')
         result=run(a.job_id,list(FILES),attempt_id=attempts[0]['attempt_id'])
