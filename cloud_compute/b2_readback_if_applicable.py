@@ -14,6 +14,13 @@ def main():
     jobs = _fetch_rows(config, 'research_jobs', {'job_id': f'eq.{a.job_id}', 'limit': '2'})
     if len(jobs) != 1:
         raise RuntimeError('exact job not found')
+    if jobs[0]['runner_job_id']=='SW11-S3':
+        from tr_platform.research.swing11_s3 import FILES
+        attempts=_fetch_rows(config,'research_job_attempts',{'job_id':f'eq.{a.job_id}','order':'attempt_no.desc','limit':'1'})
+        if len(attempts)!=1 or attempts[0]['status']!='succeeded' or attempts[0]['git_sha']!=jobs[0]['git_sha']:raise RuntimeError('latest exact succeeded preflight attempt required')
+        result=run(a.job_id,list(FILES),attempt_id=attempts[0]['attempt_id'])
+        if result['count']!=9:raise RuntimeError('nine frozen scientific readbacks required')
+        print(json.dumps(result,sort_keys=True));return
     if jobs[0]['runner_job_id']=='SW11-S3P':
         from tr_platform.research.swing11_s3p import FILES
         attempts=_fetch_rows(config,'research_job_attempts',{'job_id':f'eq.{a.job_id}','order':'attempt_no.desc','limit':'1'})
@@ -92,3 +99,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+

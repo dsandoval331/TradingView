@@ -187,6 +187,22 @@ def run_one_outcome(
                 fields=("decision_id","title","decision","rationale","evidence","metadata_json")
                 if len(found)!=1 or any(found[0].get(k)!=expected.get(k) for k in fields) or found[0]["metadata_json"].get("status")!="FROZEN":
                     raise RuntimeError("unchanged frozen SW11 authority required")
+        elif runner_job_id == 'SW11-S3':
+            from cloud_compute.control_plane import _fetch_rows
+            from tr_platform.research.swing11_s3 import authority, PARENT, CONTRACT_SHA, CONTRACT_SIZE
+            parameters=job.get('parameters_json') or {}
+            authority(parameters)
+            envelope=_fetch_rows(config,'work_envelopes',{'work_envelope_id':f"eq.{parameters['mwe_uuid']}",'limit':'2'})
+            if len(envelope)!=1 or envelope[0]['mwe_id']!='MWE-SW11-S3-001' or envelope[0]['status']!='ACTIVE':raise RuntimeError('active exact scientific envelope required')
+            for expected in parameters['contract_snapshot']:
+                found=_fetch_rows(config,'project_decisions',{'decision_id':f"eq.{expected['decision_id']}",'limit':'2'})
+                fields=('decision_id','title','decision','rationale','evidence','metadata_json')
+                if len(found)!=1 or any(found[0].get(k)!=expected.get(k) for k in fields) or found[0]['metadata_json'].get('status')!='FROZEN':raise RuntimeError('unchanged prospective S3 authority required')
+            parent=_fetch_rows(config,'work_envelopes',{'work_envelope_id':f'eq.{PARENT}','limit':'2'})
+            if len(parent)!=1 or parent[0]['status']!='COMPLETE' or parent[0]['metadata_json'].get('state')!='VERIFIED':raise RuntimeError('verified S3P parent required')
+            admitted=[{'input_id':parameters['input_registration_id'],'object_path':'governed_inputs/swing10/s2_b1/market_daily_history_2025-02-03_2026-08-27/ea2908cd89123548404a0f48dca6633f6ef87491793f327705588b4e2ecefae2.csv','object_size_bytes':2411604,'sha256':'ea2908cd89123548404a0f48dca6633f6ef87491793f327705588b4e2ecefae2','metadata_json':{'bucket_name':'trading-research-market-data','local_relative_path':'job_inputs/swing11/development.csv'}},
+                      {'input_id':parameters['contract_input_id'],'object_path':'artifacts/d011d836-27ae-4295-be54-9a54b34261f5/365fa948-b8b4-4e9c-8693-c099ee0902c1/sw11_s3p_execution_contract.json','object_size_bytes':CONTRACT_SIZE,'sha256':CONTRACT_SHA,'metadata_json':{'bucket_name':'trading-research-market-data','local_relative_path':'job_inputs/swing11/s3p_contract.json'}}]
+            materialized=materialize_job_inputs(config,job_id=job_id,work_root=runner.WORK_ROOT,allowed_inputs=admitted)
         elif runner_job_id == 'SW11-S3P':
             from cloud_compute.control_plane import _fetch_rows
             parameters=job.get('parameters_json') or {}
@@ -271,7 +287,7 @@ def run_one_outcome(
                 } for item in materialized]},
             })
 
-        if runner_job_id in {"SW11-S3P", "SW11-S2B", "SW11-S2A-CERT", "SW11-S2A", "SW10-S3", "SW10-S3-ARTIFACT-CERT", "SW10-S3-PREFLIGHT", "SW10-S2-B2", "SW10-S2-B3-PREFLIGHT", "SW10-S2-B3-CONTINUOUS-PREFLIGHT", "SW10-S2-B3", "SW10-S2-B4-PREFLIGHT", "SW10-S2-B4", "SW10-S2-B5-PREFLIGHT", "SW10-S2-B5-ACQUISITION", "SW10-S2-B5"}:
+        if runner_job_id in {"SW11-S3", "SW11-S3P", "SW11-S2B", "SW11-S2A-CERT", "SW11-S2A", "SW10-S3", "SW10-S3-ARTIFACT-CERT", "SW10-S3-PREFLIGHT", "SW10-S2-B2", "SW10-S2-B3-PREFLIGHT", "SW10-S2-B3-CONTINUOUS-PREFLIGHT", "SW10-S2-B3", "SW10-S2-B4-PREFLIGHT", "SW10-S2-B4", "SW10-S2-B5-PREFLIGHT", "SW10-S2-B5-ACQUISITION", "SW10-S2-B5"}:
             context = {
                 "job_id": job_id, "attempt_id": attempt_id, "attempt_no": attempt_no,
                 "research_revision": research_sha, "infrastructure_revision": infrastructure_sha,
@@ -287,6 +303,9 @@ def run_one_outcome(
                     context[key]=parameters.get(key)
                 context["operational_activation_verified"]=True
                 context["operational_activation_evidence"]=activation
+            if runner_job_id == 'SW11-S3':
+                for key in ('mwe_uuid','authorization_decision_id','preflight_only','scientific_outcomes_authorized','contract_snapshot','input_registration_id','contract_input_id','github_job_id'):
+                    context[key]=parameters.get(key)
             if runner_job_id == 'SW11-S3P':
                 for key in ('mwe_uuid','preflight_only','scientific_outcomes_authorized','contract_snapshot','input_registration_id','github_job_id'):
                     context[key]=parameters.get(key)
@@ -391,3 +410,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
