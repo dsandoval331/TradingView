@@ -111,3 +111,22 @@ def test_max_pages_fail_closed(monkeypatch):
   return 200,json.dumps({'results':[],'next_url':'https://api.massive.com/stocks/v1/dividends?cursor='+str(n[0])}).encode()
  monkeypatch.setattr(m,'archive_request',get)
  r=m.archive_collect('dividends',{},'secret',['MSFT']);assert r['page_count']==10 and r['pagination_pending']
+
+def test_missing_credential_makes_no_request(monkeypatch):
+ monkeypatch.setattr(m,'archive_request',lambda *a:pytest.fail('request without existing credential'))
+ r=m.archive_collect('dividends',{},None,['MSFT']);assert r['page_count']==1 and r['missing_status']=='UNKNOWN' and not r['listing_exhausted']
+
+def test_credential_bearing_cursor_never_replayed(monkeypatch):
+ calls=[]
+ def get(*a):
+  calls.append(a)
+  return 200,json.dumps({'results':[],'next_url':'https://api.massive.com/stocks/v1/dividends?cursor=secret'}).encode()
+ monkeypatch.setattr(m,'archive_request',get)
+ r=m.archive_collect('dividends',{},'secret',['MSFT'])
+ assert len(calls)==1 and r['pagination_pending'] and 'secret' not in json.dumps(r)
+
+def test_duplicate_observations_do_not_create_false_conflict(monkeypatch):
+ row={'ticker':'MSFT','id':'e','cash_amount':1}
+ monkeypatch.setattr(m,'archive_request',lambda *a:(200,json.dumps({'results':[row,row]}).encode()))
+ r=m.archive_collect('dividends',{},'secret',['MSFT'])
+ assert r['identical_projection_duplicates']==1 and r['conflicting_event_ids']==0 and len(r['records'])==2
