@@ -62,3 +62,17 @@ def test_proposal_only():
 def test_queue_skip(monkeypatch):
  from cloud_compute import queue_watcher as q
  monkeypatch.setattr(q,'fetch_queued_jobs',lambda *a,**k:[{'parameters_json':{'persistent_collector_direct':True},'preferred_executor':'github_actions','git_sha':'a'*40,'job_id':'a'*36}]);assert q.eligible_jobs(None)==[]
+
+@pytest.mark.parametrize('status',['COMPLETE','CANCELLED'])
+def test_inactive_mwe_cannot_collect(status):
+ c={'enabled':True,'research_sha':'a'*40,'scientific_outcomes_authorized':False,'future_price_access_authorized':False,'parameters':context()}
+ with pytest.raises(ValueError):validate_activation({'work_envelope_id':m.MWE,'status':status,'metadata_json':{'option_b_collector':c}})
+
+def test_universe_identity_not_just_size():
+ c=context();c['archive_symbols']=['FAKE'+chr(65+i//26)+chr(65+i%26) for i in range(112)]
+ with pytest.raises(ValueError):m.archive_guard(c)
+
+@pytest.mark.parametrize('k',['scientific_outcomes_authorized','future_price_access_authorized'])
+def test_activation_cannot_open_science(k):
+ c={'enabled':True,'research_sha':'a'*40,'scientific_outcomes_authorized':False,'future_price_access_authorized':False,'parameters':context()};c[k]=True
+ with pytest.raises(ValueError):validate_activation({'work_envelope_id':m.MWE,'status':'ACTIVE','metadata_json':{'option_b_collector':c}})
