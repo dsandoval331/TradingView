@@ -2,7 +2,7 @@ name: SWING11 S4P Prospective Metadata Archive
 on:
   push:
     branches: [main]
-    paths: ['.github/workflows/sw11-s4p-archive.yml', 'cloud_compute/s4p_archive_schedule.py']
+    paths: ['.github/workflows/sw11-s4p-archive.yml', 'cloud_compute/s4p_archive_schedule.py', 'tr_platform/research/swing11_s4p.py']
   schedule:
     - cron: '15 9,16 * * 1-5'
       timezone: 'America/New_York'
