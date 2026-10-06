@@ -1,0 +1,30 @@
+name: SWING11 S4P Outcome-Blind Certification
+on:
+  pull_request:
+    paths:
+      - 'tr_platform/research/swing11_s4p.py'
+      - 'tests/test_swing11_s4p.py'
+      - '.github/workflows/sw11-s4p-cert.yml'
+      - 'cloud_compute/**'
+      - 'research_runner/**'
+permissions:
+  contents: read
+jobs:
+  certify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt pytest
+      - name: Zero-source synthetic safeguards and governed infrastructure
+        run: >-
+          python -m pytest -q tests/test_swing11_s4p.py
+          tests/test_ccp5_control_plane.py tests/test_ccp5_control_plane_worker.py
+          tests/test_ccp8_autonomous_loop.py tests/test_ccp9_exact_claim.py
+          tests/test_ccp10_input_materializer.py tests/test_ccp11_artifact_contract.py
+          tests/test_research_revision_adapter.py tests/test_swing10_input_prepare.py

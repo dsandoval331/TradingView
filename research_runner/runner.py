@@ -6,6 +6,7 @@ CODE_ROOT=Path(__file__).resolve().parents[1]
 WORK_ROOT=Path(os.environ.get("TR_WORK_ROOT",str(CODE_ROOT))).expanduser().resolve()
 STATE_DIR=WORK_ROOT/"research_outputs"/"runner"; STATE_FILE=STATE_DIR/"state.json"
 JOBS=[
+{"id":"SW11-S4P","project":"swing11","module":"tr_platform.research.swing11_s4p","description":"Zero-market-input design recommendation and synthetic safeguards; real S4 denied"},
 {"id":"SW11-S3","project":"swing11","module":"tr_platform.research.swing11_s3","description":"Authorized frozen candidate development science"},
 {"id":"SW11-S3P","project":"swing11","module":"tr_platform.research.swing11_s3p","description":"Outcome-blind frozen candidate implementation preflight"},
 {"id":"SW11-S2B","project":"swing11","module":"tr_platform.research.swing11_s2b","description":"Authorized frozen 104-test scientific mechanism decomposition"},
@@ -76,4 +77,3 @@ def main():
     if args.command=="run-all":return run_all(args.project)
     return 2
 if __name__=="__main__":raise SystemExit(main())
-

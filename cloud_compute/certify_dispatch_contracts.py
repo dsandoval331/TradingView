@@ -12,6 +12,8 @@ BASE = ['tests/test_ccp5_control_plane.py','tests/test_ccp5_control_plane_worker
 
 
 def selected_tests(runner_id):
+    if runner_id == 'SW11-S4P':
+        return BASE + ['tests/test_swing11_s4p.py']
     if runner_id == 'SW11-S3':
         return BASE + ['tests/test_swing11_s3p.py','tests/test_swing11_s3p_integration.py','tests/test_swing11_s3.py']
     if runner_id == 'SW11-S3P':
@@ -58,4 +60,3 @@ def main():
 
 
 if __name__=='__main__':main()
-
