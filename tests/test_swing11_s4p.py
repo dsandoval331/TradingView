@@ -95,6 +95,14 @@ def test_no_future_return_primitive():
     tree=ast.parse(Path(p.__file__).read_text())
     calls=[n.func.attr for n in ast.walk(tree) if isinstance(n,ast.Call) and isinstance(n.func,ast.Attribute)]
     assert not set(calls)&{'shift','pct_change','read_csv','read_parquet'}
-def test_real_runner_refuses_local(tmp_path):
+def test_real_runner_refuses_local(tmp_path,monkeypatch):
+    monkeypatch.delenv('GITHUB_ACTIONS',raising=False)
     target=tmp_path/'job_inputs/swing10';target.mkdir(parents=True);(target/'execution_context.json').write_text(json.dumps(context()))
     with pytest.raises(ValueError,match='governed'):p.run(tmp_path)
+def test_synthetic_artifact_path(tmp_path,monkeypatch):
+    monkeypatch.setenv('GITHUB_ACTIONS','true')
+    c=context();c.update(job_id='SYNTHETIC',attempt_id='SYNTHETIC',github_run_id='SYNTHETIC',research_revision='0'*40,infrastructure_revision='1'*40)
+    target=tmp_path/'job_inputs/swing10';target.mkdir(parents=True);(target/'execution_context.json').write_text(json.dumps(c))
+    result=p.run(tmp_path);assert len(result['output_paths'])==10
+    manifest=json.loads((tmp_path/result['output_paths'][-1]).read_text())
+    assert len(manifest['artifact_inventory'])==9 and manifest['new_S4_outcomes_exposed'] is False
