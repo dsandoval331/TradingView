@@ -130,3 +130,30 @@ def test_duplicate_observations_do_not_create_false_conflict(monkeypatch):
  monkeypatch.setattr(m,'archive_request',lambda *a:(200,json.dumps({'results':[row,row]}).encode()))
  r=m.archive_collect('dividends',{},'secret',['MSFT'])
  assert r['identical_projection_duplicates']==1 and r['conflicting_event_ids']==0 and len(r['records'])==2
+
+
+def test_documented_dividend_filter():
+ from datetime import datetime,timezone
+ p=m.archive_parameters('dividends',datetime(2026,10,6,tzinfo=timezone.utc))
+ assert p['ex_dividend_date.gte']=='2026-09-06' and p['ex_dividend_date.lte']=='2026-11-17'
+ assert not any('declaration' in k for k in p)
+
+def test_request_pacing_synthetic(monkeypatch):
+ import time
+ clock=[100.];sleeps=[]
+ monkeypatch.setattr(m,'_ARCHIVE_LAST_REQUEST',None);monkeypatch.setattr(m,'_ARCHIVE_DEADLINE',1000.)
+ monkeypatch.setattr(time,'monotonic',lambda:clock[0])
+ def sleep(s):sleeps.append(s);clock[0]+=s
+ monkeypatch.setattr(time,'sleep',sleep)
+ assert m.archive_pace() and m.archive_pace() and sleeps==[16.]
+
+def test_source_budget_fails_closed(monkeypatch):
+ import time
+ monkeypatch.setattr(time,'monotonic',lambda:100.)
+ monkeypatch.setattr(m,'_ARCHIVE_DEADLINE',130.)
+ assert not m.archive_pace()
+
+def test_response_window_mismatch_reported(monkeypatch):
+ monkeypatch.setattr(m,'archive_request',lambda *a:(200,json.dumps({'results':[{'ticker':'MSFT','ex_dividend_date':'2012-08-09'}]}).encode()))
+ r=m.archive_collect('dividends',{'ex_dividend_date.gte':'2026-09-06','ex_dividend_date.lte':'2026-11-17'},'secret',['MSFT'])
+ assert r['outside_window_records']==1 and not r['requested_window_pass'] and not r['coverage_complete']
