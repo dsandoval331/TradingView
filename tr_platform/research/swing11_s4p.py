@@ -387,6 +387,58 @@ def archive_projection(domain,status,body,secret,symbols,retrieved_at):
     # One bounded bulk page never proves per-symbol no-event or broker coverage.
     return base
 
+def archive_cursor(domain,url):
+    from urllib.parse import urlsplit,parse_qs
+    if domain not in ARCHIVE_ENDPOINTS:raise ValueError('unregistered source')
+    u=urlsplit(url)
+    if u.scheme!='https' or u.netloc!='api.massive.com' or u.path!=ARCHIVE_ENDPOINTS[domain] or u.fragment:
+        raise ValueError('closed pagination source')
+    q=parse_qs(u.query,strict_parsing=True)
+    if set(q)-{'cursor','limit','apiKey'} or len(q.get('cursor',[]))!=1:
+        raise ValueError('closed pagination parameters')
+    cursor=q['cursor'][0]
+    if not cursor or len(cursor)>16000:raise ValueError('bounded cursor')
+    # Ignore supplied API keys; use existing header authentication only.
+    return {'cursor':cursor,'limit':1000}
+
+def archive_collect(domain,params,key,symbols):
+    from datetime import timezone
+    pages=[];records=[];seen=set();pending=False
+    for _ in range(10):
+        status,body=archive_request(domain,params,key) if key else (None,b'')
+        at=datetime.now(timezone.utc).isoformat()
+        page=archive_projection(domain,status,body,key,symbols,at)
+        records.extend(page['records'])
+        pages.append({k:v for k,v in page.items() if k!='records'})
+        if status!=200 or not page.get('projection_sha256'):
+            pending=True;break
+        payload=json.loads(body)
+        nxt=payload.get('next_url')
+        if not nxt:pending=False;break
+        pending=True
+        try:new=archive_cursor(domain,nxt)
+        except ValueError:pages[-1]['pagination_rejection']='UNKNOWN_UNSAFE_OR_UNSUPPORTED_CURSOR';break
+        if key and key in new['cursor']:
+            pages[-1]['pagination_rejection']='UNKNOWN_CREDENTIAL_BEARING_CURSOR';break
+        if new['cursor'] in seen:
+            pages[-1]['pagination_rejection']='UNKNOWN_REPEATED_CURSOR';break
+        seen.add(new['cursor']);params=new
+    versions={};duplicates=0;seen_hash=set()
+    for row in records:
+        h=row['normalized_record_sha256']
+        duplicates+=h in seen_hash;seen_hash.add(h)
+        identity=(row.get('ticker'),row.get('id') or row.get('benzinga_id'))
+        if identity[1]:versions.setdefault(identity,set()).add(h)
+    return {'domain':domain,'source':'Massive','retrieved_at':pages[-1]['retrieved_at'],
+      'http_status':pages[-1]['http_status'],'records':records,'pages':pages,
+      'page_count':len(pages),'listing_exhausted':not pending and pages[-1].get('projection_sha256') is not None,
+      'pagination_pending':pending,'coverage_complete':False,
+      'missing_status':'PARTIAL_METADATA_OBSERVATION' if records else 'UNKNOWN',
+      'raw_wire_retained':False,'raw_projection_retained':True,
+      'projection_sha256':hashlib.sha256(json.dumps(records,sort_keys=True,allow_nan=False).encode()).hexdigest(),
+      'identical_projection_duplicates':duplicates,'conflicting_event_ids':sum(len(v)>1 for v in versions.values()),
+      'wire_hashes':[x['wire_sha256'] for x in pages if x.get('wire_sha256')]}
+
 def run_prospective_archival(work_root,context):
     from datetime import timezone,timedelta
     archive_guard(context)
@@ -398,8 +450,7 @@ def run_prospective_archival(work_root,context):
         if domain=='earnings':params.update({'date.gte':now.date().isoformat(),'date.lte':(now+timedelta(days=42)).date().isoformat()})
         elif domain=='dividends':params.update({'declaration_date.gte':(now-timedelta(days=10)).date().isoformat()})
         else:params.update({'execution_date.gte':now.date().isoformat(),'execution_date.lte':(now+timedelta(days=42)).date().isoformat()})
-        status,body=archive_request(domain,params,key) if key else (None,b'')
-        snapshots.append(archive_projection(domain,status,body,key,context['archive_symbols'],datetime.now(timezone.utc).isoformat()))
+        snapshots.append(archive_collect(domain,params,key,context['archive_symbols']))
     unavailable=[{'domain':d,'status':'NOT_CONNECTED_UNKNOWN','complete':False} for d in ARCHIVE_DOMAINS if d not in ARCHIVE_ENDPOINTS]
     schema={'version':1,'append_only':True,'observation_fields':['source','domain','symbol/ticker','event_id','retrieved_at','provider_last_updated','expected_date','expected_time','revision/status','availability','available_quantity','borrow_fee','recall_state','wire_sha256','projection_sha256','normalized_record_sha256','collector_revision','job_id','attempt_id','run_id','coverage_complete','missing_status'],
       'retention':'All prior artifacts/readbacks stay immutable. Same event changed projection hash creates a new version, never overwrites.',
@@ -411,7 +462,7 @@ def run_prospective_archival(work_root,context):
       ARCHIVE_FILES[0]:{'mode':'METADATA_ONLY_NO_PRICES','storage':'Existing private Supabase governed job/attempt immutable objects and durable readbacks','new_tables':False,'source_inputs':0,'archival_start_backdating':False},
       ARCHIVE_FILES[1]:schema,
       ARCHIVE_FILES[2]:{'existing_credential_configured':bool(key),'active_endpoint_registry':ARCHIVE_ENDPOINTS,'sources_not_connected':unavailable,'indicative_borrow_is_not_account_specific_locate':True,'FMP':'No configured entitlement established in this collector; not probed or claimed globally unavailable.'},
-      ARCHIVE_FILES[3]:{'window_days':42,'page_limit':1000,'max_response_bytes':2000000,'redirects':False,'pagination':'No pagination follow; pending page marks incomplete. Never copy secret-bearing next_url.','retries':'Next scheduled governed job creates new immutable attempt/output; failed history preserved.','knowledge':'Current-as-collected only; never historical reconstruction before first capture.'},
+      ARCHIVE_FILES[3]:{'window_days':42,'page_limit':1000,'max_response_bytes':2000000,'max_pages':10,'redirects':False,'pagination':'At most ten pages; same exact HTTPS Massive source path and bounded cursor only, repeated/unsafe cursors fail closed; original wire hashes per page. Pending page marks incomplete; listing exhaustion never proves universe/absence completeness.','retries':'Next scheduled governed job creates new immutable attempt/output; failed history preserved.','knowledge':'Current-as-collected only; never historical reconstruction before first capture.'},
       ARCHIVE_FILES[4]:{'operational_checks':['UTC timestamp','closed endpoint','bounded response','finite metadata','secret rejection','immutable private upload','independent hash/byte readback'],'practical_complete':False,'source_missing_fails_closed':True,'boundary_quality_thresholds':'Proposed separately, not scientific freeze.'},
       ARCHIVE_FILES[5]:{'symbols':context['archive_symbols'],'expected_symbols':112,'required_domains':ARCHIVE_DOMAINS,'complete_practical_symbol_count':0,'coverage_cannot_be_inferred_from_empty_pages':True},
       ARCHIVE_FILES[6]:BOUNDARY_RECOMMENDATION,

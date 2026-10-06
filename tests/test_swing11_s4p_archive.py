@@ -84,3 +84,30 @@ def test_exact_claim_env_preserves_infrastructure(monkeypatch):
  e=execution_env('a'*40)
  assert e['TR_RESEARCH_SHA']=='a'*40 and e['TR_GIT_REF']=='a'*40 and e['GITHUB_SHA']=='b'*40
  with pytest.raises(ValueError):execution_env('main')
+
+
+def test_safe_cursor_removes_credential():
+ assert m.archive_cursor('dividends','https://api.massive.com/stocks/v1/dividends?cursor=abc&apiKey=neverpersist')=={'cursor':'abc','limit':1000}
+
+@pytest.mark.parametrize('url',['http://api.massive.com/stocks/v1/dividends?cursor=x','https://evil.test/stocks/v1/dividends?cursor=x','https://api.massive.com/v2/aggs?cursor=x','https://api.massive.com/stocks/v1/dividends?cursor=x&price=1'])
+def test_unsafe_cursor(url):
+ with pytest.raises(ValueError):m.archive_cursor('dividends',url)
+
+def test_bounded_pages_preserve_versions(monkeypatch):
+ bodies=[{'results':[{'ticker':'MSFT','id':'e','cash_amount':1}],'next_url':'https://api.massive.com/stocks/v1/dividends?cursor=abc'}, {'results':[{'ticker':'MSFT','id':'e','cash_amount':2}]}]
+ monkeypatch.setattr(m,'archive_request',lambda *a:(200,json.dumps(bodies.pop(0)).encode()))
+ r=m.archive_collect('dividends',{},'secret',['MSFT'])
+ assert r['page_count']==2 and len(r['records'])==2 and r['listing_exhausted'] and r['conflicting_event_ids']==1 and not r['coverage_complete']
+
+def test_repeated_cursor_stops(monkeypatch):
+ b={'results':[],'next_url':'https://api.massive.com/stocks/v1/dividends?cursor=abc'}
+ monkeypatch.setattr(m,'archive_request',lambda *a:(200,json.dumps(b).encode()))
+ r=m.archive_collect('dividends',{},'secret',['MSFT']);assert r['page_count']==2 and r['pagination_pending'] and not r['listing_exhausted']
+
+def test_max_pages_fail_closed(monkeypatch):
+ n=[0]
+ def get(*a):
+  n[0]+=1
+  return 200,json.dumps({'results':[],'next_url':'https://api.massive.com/stocks/v1/dividends?cursor='+str(n[0])}).encode()
+ monkeypatch.setattr(m,'archive_request',get)
+ r=m.archive_collect('dividends',{},'secret',['MSFT']);assert r['page_count']==10 and r['pagination_pending']
