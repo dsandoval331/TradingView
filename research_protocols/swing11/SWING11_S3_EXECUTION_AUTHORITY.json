@@ -1,0 +1,195 @@
+[
+  {
+    "decision_id": "5a2508a3-0837-4080-b3e2-9dec28eecc31",
+    "strategy_id": "09f30dc1-81ae-440f-aeca-18652df69896",
+    "decision_date": "2026-10-05 07:12:06.98193+00",
+    "title": "SWING11_S2_CLOSURE_S3_ENTRY_V1 — S2 closure and bounded S3 entry",
+    "decision": "Close SWING11 S2 as COMPLETE based on verified S2-A and S2-B evidence. Advance into S3 only the supported PRICE baseline and RV20-supported aspects. PRICE baseline scientific support is carried forward at horizons 5, 7, 10, 15, and 20 sessions, where baseline PRICE passed frozen FDR, materiality, temporal, concentration, and adjacency gates. RV20 is the sole mechanism eligible for S3: primary disposition CONDITIONING_SUPPORTED at horizons 3, 5, 7, 10, and 15; secondary EXPLANATORY_EVIDENCE at horizons 5, 7, 10, and 15. ACT20, DOLLARVOL20, ILLIQ20, REV5, and MOM20 are closed as COUNTEREVIDENCE under the frozen S2 contract and are excluded from S3 candidate construction absent a separately prospectively authorized new research lane. S3 is bounded candidate construction, not protected validation and not a reopening of S2. S3 may construct candidate tradable semantics only from PRICE and the supported RV20 conditioning/explanatory structure; it may compare a PRICE-only reference against prospectively specified PRICE+RV20 candidate forms for development purposes, but may not search new mechanisms, add predictors, reopen the 104-test families, alter S2 estimands/gates, or reinterpret failed S2 evidence. S3 must preserve the fixed 112-symbol development lineage limitations, keep protected future validation unopened, and freeze exact candidate signal, direction, RV20 conditioning representation, horizon/holding semantics, ranking/selection, entry/exit timing, overlap/position rules, missingness, portfolio exposure, and no-trade logic before any later independent validation. S3 completion requires: outcome-blind/pre-outcome candidate architecture and finite registry frozen before candidate performance comparison; deterministic implementation and reproducibility certification; development-only comparative evidence for all registered candidate forms with temporal, concentration, turnover/exposure and sensitivity diagnostics; exactly one candidate architecture selected prospectively/mechanically for advancement or explicit NO_ADVANCE; complete immutable artifacts/provenance/readbacks; and canonical S3 closure before S4 or protected validation. S3 does not authorize protected validation, paid compute, S4/S5/S6 transition, or live/paper deployment.",
+    "rationale": "S2-A completed outcome-blind scientific-contract certification. S2-B then completed the frozen scientific execution. S3 entry is justified only for the PRICE baseline and RV20 aspects that passed their prospectively frozen gates.",
+    "evidence": "MWE-SW11-S2B-001 COMPLETE/VERIFIED (UUID 40b5af4a-557e-4fb4-90e6-76fc33a54ff8): baseline PRICE passed complete gates at 5/7/10/15/20; RV20 CONDITIONING_SUPPORTED at 3/5/7/10/15 with secondary EXPLANATORY_EVIDENCE at 5/7/10/15; ACT20, DOLLARVOL20, ILLIQ20, REV5 and MOM20 COUNTEREVIDENCE.",
+    "affects_model_version": "SWING11-RM-1.0",
+    "supersedes_decision_id": null,
+    "status": "active",
+    "metadata_json": {
+      "phase": "S2-C/S3-entry",
+      "status": "FROZEN",
+      "roadmap": "SWING11-RM-1.0",
+      "s3_scope": "BOUNDED_CANDIDATE_CONSTRUCTION",
+      "source_mwe": "MWE-SW11-S2B-001",
+      "s2_complete": true,
+      "decision_code": "SWING11_S2_CLOSURE_S3_ENTRY_V1",
+      "s3_authorized": true,
+      "s4_authorized": false,
+      "s5_authorized": false,
+      "s6_authorized": false,
+      "user_approved": true,
+      "source_mwe_uuid": "40b5af4a-557e-4fb4-90e6-76fc33a54ff8",
+      "canonical_thread": "Indicator: Swing Trades",
+      "eligible_mechanisms": [
+        "RV20"
+      ],
+      "excluded_mechanisms": [
+        "ACT20",
+        "DOLLARVOL20",
+        "ILLIQ20",
+        "REV5",
+        "MOM20"
+      ],
+      "price_supported_horizons": [
+        5,
+        7,
+        10,
+        15,
+        20
+      ],
+      "rv20_explanatory_horizons": [
+        5,
+        7,
+        10,
+        15
+      ],
+      "rv20_conditioning_horizons": [
+        3,
+        5,
+        7,
+        10,
+        15
+      ],
+      "zero_incremental_cost_first": true,
+      "protected_validation_authorized": false
+    }
+  },
+  {
+    "decision_id": "f41b3c8b-3d19-4fb6-9ded-2d91c9ab037a",
+    "strategy_id": "09f30dc1-81ae-440f-aeca-18652df69896",
+    "decision_date": "2026-10-05 14:15:42.865864+00",
+    "title": "SWING11_S3_CANDIDATE_ADVANCEMENT_PROTOCOL_V1 — prospective candidate architecture and advancement freeze",
+    "decision": "Prospectively freeze SWING11 S3 as a bounded development-only candidate architecture experiment. Registry: S3-C0 PRICE-only reference; S3-C1 PRICE conditioned by RV20; S3-C2 PRICE with continuous RV20 modulation. No other predictors or mechanisms are eligible. Primary common development horizons are 5,7,10,15 sessions. PRICE-only 20-session evidence is retained as reference/robustness diagnostic and RV20 3-session conditioning evidence remains scientific support but is not a primary candidate trading horizon. All candidate signals use information available by the close of decision date t and enter no earlier than the next trading session open. The economic PRICE orientation is lower relative PRICE rank long and higher relative PRICE rank short. Development comparison uses a market-neutral long/short research portfolio with prospectively fixed 20 percent tails, equal weight within each side, 50 percent gross long plus 50 percent gross short at cohort inception. Positions hold exactly the registered horizon; overlapping cohorts are permitted under a deterministic equal-cohort-capital convention. Missing or nonfinite required predictors make a symbol ineligible; no imputation or eligibility relaxation. A cohort is NO_TRADE if frozen side-capacity requirements cannot be met. No stop loss, profit target, trailing stop, volatility sizing, discretionary exit, earnings filter, market-timing overlay, transaction-cost optimization or additional trading rule is introduced in S3. C1 must implement RV20 conditioning orientation directly from the frozen S2-supported relationship without choosing high/low RV20 after candidate-return inspection. C2 must implement a deterministic continuous centered PRICE-rank/RV20-rank modulation consistent with the frozen S2 interaction orientation; S2 coefficients are not optimized into portfolio weights. Candidate evaluation is architecture selection, not maximum-return optimization. Report mean/median cohort return, dispersion/standardized or risk-adjusted quantity, cumulative development return as diagnostic, hit rate, drawdown diagnostic, exposure, turnover, cohort/position capacity, temporal blocks, symbol concentration, leave-top-five sensitivity and frozen implementation-sensitivity diagnostics. Architecture advancement requires frozen S2-consistent economic direction, family-level evidence across 5/7/10/15 rather than isolated best-horizon success, temporal robustness, no excessive single-block dependence, acceptable concentration and no leave-five sign reversal, adequate capacity, interpretable exposure/turnover, and passage of frozen implementation-sensitivity gates. If neither RV20 architecture clears relative and absolute gates, C0 may advance only if it independently clears all absolute gates; otherwise disposition is NO_ADVANCE. If multiple architectures pass, precedence is robustness/consistency first and improvement magnitude second, under a deterministic pre-outcome truth table to be implemented and certified before real candidate performance. Exactly one architecture may advance or NO_ADVANCE. Development outcomes cannot authorize protected validation, S4, S5, S6, deployment, new predictors, parameter search, methodology revision after outcome exposure, or reuse of the consumed SWING10 B5 panel as fresh validation.",
+    "rationale": "The S2 evidence supports PRICE at 5/7/10/15/20 and identifies RV20 as the sole advancing mechanism, with conditioning support at 3/5/7/10/15 and explanatory evidence at 5/7/10/15. A finite candidate registry and fixed tradable semantics are required before candidate-return exposure to prevent post-outcome architecture/threshold search.",
+    "evidence": "User explicitly approved this consolidated prospective S3 protocol in the canonical Indicator: Swing Trades thread on 2026-10-05 before S3 candidate performance computation. Parent decision SWING11_S2_CLOSURE_S3_ENTRY_V1 UUID 5a2508a3-0837-4080-b3e2-9dec28eecc31 was reread before persistence.",
+    "affects_model_version": "SWING11-RM-1.0",
+    "supersedes_decision_id": null,
+    "status": "active",
+    "metadata_json": {
+      "phase": "S3",
+      "status": "FROZEN",
+      "roadmap": "SWING11-RM-1.0",
+      "prospective": true,
+      "decision_code": "SWING11_S3_CANDIDATE_ADVANCEMENT_PROTOCOL_V1",
+      "s4_authorized": false,
+      "s5_authorized": false,
+      "s6_authorized": false,
+      "user_approved": true,
+      "canonical_thread": "Indicator: Swing Trades",
+      "development_only": true,
+      "primary_horizons": [
+        5,
+        7,
+        10,
+        15
+      ],
+      "candidate_registry": [
+        "S3-C0_PRICE_ONLY",
+        "S3-C1_PRICE_RV20_CONDITIONED",
+        "S3-C2_PRICE_RV20_CONTINUOUS"
+      ],
+      "parent_decision_uuid": "5a2508a3-0837-4080-b3e2-9dec28eecc31",
+      "price_reference_horizon": 20,
+      "exactly_one_or_no_advance": true,
+      "zero_incremental_cost_first": true,
+      "protected_validation_authorized": false
+    }
+  },
+  {
+    "decision_id": "8ef41b93-e42c-4b53-bcca-23c8f8eb3f4e",
+    "strategy_id": "09f30dc1-81ae-440f-aeca-18652df69896",
+    "decision_date": "2026-10-05 14:45:16.973857+00",
+    "title": "SWING11_S3_CANDIDATE_ADVANCEMENT_PROTOCOL_V1_SUPPLEMENT_1 — deterministic S3 implementation and advancement contract",
+    "decision": "Prospectively supplement, without replacing, SWING11_S3_CANDIDATE_ADVANCEMENT_PROTOCOL_V1. Coordinates/common samples: retain certified full same-date finite PRICE and RV20 average-percentile ranks. C0 requires finite PRICE; C1/C2 require both predictors. Do not rerank certified predictor coordinates inside conditioned subsets. Use common complete calendar capacity through maximum primary H=15 for comparative evaluation and explicitly report architecture-specific NO_TRADE coverage; future return magnitude/sign cannot determine eligibility. C0: inclusive finite PRICE percentile p_PRICE<=0.20 long and p_PRICE>=0.80 short, retaining all exact boundary ties at equal side weight; do not break economic ties; degenerate overlapping membership is NO_TRADE. C1: start from the same full-cross-section C0 PRICE tails and retain only members with finite p_RV20>=0.50; HIGH-RV20 median conditioning is prospectively selected from the S2-consistent HIGH-RV orientation, not claimed as uniquely implied by S2; equal weight after filtering, 50 percent per side. C2: on jointly eligible symbols define S=-PRICE_centered*(1+RV20_centered)/2; same-date average-rank S; top20 percent score long, bottom20 percent score short, inclusive ties, equal weights. This fixed bounded activity modulation is accepted as a distinct architecture and does not preserve C0 membership exactly; no fitted coefficients or optimized weights. Capacity: minimum five members per side per architecture/date; otherwise NO_TRADE with cash sleeve retained; no post-outcome relaxation. Timing/return: decision close t; entry adjusted open t+1; exit adjusted close t+H, counting entry as holding session 1. Long R=P_exit/P_entry-1; short R=1-P_exit/P_entry; side arithmetic means; cohort R=0.5*mean(long)+0.5*mean(short). Missing required bars fail eligibility without endpoint substitution. Borrow, financing and transaction costs are omitted and must be disclosed as development limitations; no S3 costs may be optimized. Capital: for horizon H use H fixed capital sleeves, each 1/H of initial research capital, one launched per decision date; NO_TRADE leaves that sleeve cash. Each cohort initial gross is 1/H, equally split long/short, no rebalancing/leverage to compensate for another architecture NO_TRADE. Mark-to-market P&L uses fixed entry-price notionals; aggregate daily P&L divided by initial research capital. Cumulative development return is additive on fixed initial capital, not compounded on reallocated equity. Report gross/net exposure drift, active cohort count, entry/exit turnover at actual marked notionals and cash occupancy; do not normalize only by active cohorts. Primary family metric: arithmetic mean of cohort R/H over 5/7/10/15, with NO_TRADE=0 for an otherwise capacity-complete comparison date, using the same prospectively fixed complete comparison calendar for C0/C1/C2. Absolute architecture gate: positive mean, standardized effect ES>=0.20, at least three of four horizons positive, including at least one adjacent positive pair. RV20 candidates additionally require positive paired date-family improvement versus C0 with ES>=0.20 and at least three of four positive horizon differences. No best-horizon selection. Inferential confirmation is frozen as Bartlett HAC lag 14, two-sided asymptotic-normal 95 percent inference, with one five-test BH family consisting of three absolute architecture means plus two paired RV20-vs-C0 improvements; q<=0.05; unavailable slots retain p=1 and do not shrink the family. Robustness: four approximately equal chronological blocks on the fixed comparison calendar established before responses, minimum 20 dates/block; require at least 3/4 positive blocks and maximum abs(block_mean*N)/sum(abs(block_mean*N))<=0.50. Relative gates use paired improvements. Unavailable diagnostics fail advancement. Report per-symbol additive effects, absolute shares and HHI. Hard concentration gates: top-five absolute share<=0.50 and HHI<=0.10. Deterministic top-five absolute-contributor removal uses symbol-ascending tie break; preserve original ranks, remove those symbols, rebuild actual equal-weight candidate portfolios/accounting on remaining members under unchanged capacity rules. Require no sign reversal and absolute ES loss<=75 percent; zero is not a sign reversal but fails positive-effect advancement. RV20 architectures must pass applicable absolute and relative diagnostics. Capacity/exposure gate: at least 100 comparison dates; each temporal block at least 20 dates; architecture active-cohort rate>=0.80; every active cohort satisfies minimum side capacity; exposure/turnover must reconcile to frozen weights/sleeves with no unintended leverage or unaccounted cash. Sensitivity registry is synthetic implementation-only: average-rank boundary-tie membership invariant to input order; exact minimum-side five-versus-four capacity boundary; next-open/H-session calendar indexing; capital/cash/entry-maturity accounting conservation. All must pass. No real-return alternative tails/cutoffs/weights/entry delays are introduced. Selection precedence: candidate qualifies only if every applicable absolute, relative, temporal, concentration, capacity and implementation gate passes. If any RV20 architecture qualifies, select only among qualifying C1/C2; otherwise C0 may qualify only if all C0 absolute gates pass; otherwise NO_ADVANCE. Among qualifying C1/C2 order by: number of passing horizons descending; minimum positive-block count across absolute/relative gates descending; maximum absolute block share ascending; maximum top-five share ascending; active-cohort rate descending; paired family improvement descending; candidate ID ascending. Use unrounded values with numeric tie tolerance 1e-12. No discretionary override. Scientifically unavailable required estimands yield NOT_TESTABLE; valid candidates failing gates yield NO_ADVANCE; at most one architecture can be selected. S3P remains outcome-blind and must not calculate these real-data dispositions. This supplement authorizes resumption of the SAME S3P MWE for preflight implementation/certification only. It does not authorize real S3 candidate-return exposure, candidate selection, protected validation, S4/S5/S6, deployment, paid compute, new predictors or post-outcome methodology changes.",
+    "rationale": "The blocked S3P preflight established that the base S3 protocol did not uniquely determine C1 cutoff, C2 score, capacity, return/accounting conventions, numeric advancement/robustness gates, sensitivity cases or selection precedence. These are consequential scientific choices and therefore are frozen prospectively before any S3 candidate-return exposure. The complete package follows the outcome-blind recommendation returned by MWE-SW11-S3P-001 and preserves the base decision unchanged.",
+    "evidence": "User explicitly approved the complete recommended S3P blocker proposal in the canonical Indicator: Swing Trades thread on 2026-10-05, before S3 candidate outcome exposure. Source blocker: MWE-SW11-S3P-001 UUID b1e57ab2-19a5-4fc0-a375-11a369650204. The blocker reported no real S3 candidate forward/cohort/portfolio returns, P&L, hit rates, drawdowns, rankings or scientific dispositions were computed or inspected. Base S3 decision UUID f41b3c8b-3d19-4fb6-9ded-2d91c9ab037a remains unchanged.",
+    "affects_model_version": "SWING11-RM-1.0",
+    "supersedes_decision_id": null,
+    "status": "active",
+    "metadata_json": {
+      "exit": "adjusted_close_t_plus_H",
+      "entry": "adjusted_open_t_plus_1",
+      "phase": "S3P",
+      "status": "FROZEN",
+      "hac_lag": 14,
+      "roadmap": "SWING11-RM-1.0",
+      "c2_score": "-PRICE_centered*(1+RV20_centered)/2",
+      "source_mwe": "MWE-SW11-S3P-001",
+      "prospective": true,
+      "decision_code": "SWING11_S3_CANDIDATE_ADVANCEMENT_PROTOCOL_V1_SUPPLEMENT_1",
+      "hhi_threshold": 0.1,
+      "s4_authorized": false,
+      "user_approved": true,
+      "bh_q_threshold": 0.05,
+      "c1_rv20_cutoff": 0.5,
+      "max_block_share": 0.5,
+      "source_mwe_uuid": "b1e57ab2-19a5-4fc0-a375-11a369650204",
+      "temporal_blocks": 4,
+      "canonical_thread": "Indicator: Swing Trades",
+      "primary_horizons": [
+        5,
+        7,
+        10,
+        15
+      ],
+      "base_decision_uuid": "f41b3c8b-3d19-4fb6-9ded-2d91c9ab037a",
+      "top5_share_threshold": 0.5,
+      "absolute_es_threshold": 0.2,
+      "minimum_side_capacity": 5,
+      "relative_es_threshold": 0.2,
+      "minimum_comparison_dates": 100,
+      "zero_incremental_cost_first": true,
+      "active_cohort_rate_threshold": 0.8,
+      "protected_validation_authorized": false,
+      "s3_outcome_execution_authorized": false
+    }
+  },
+  {
+    "decision_id": "d3dfd67f-b40d-45ed-af1d-9c7e079bab66",
+    "strategy_id": "09f30dc1-81ae-440f-aeca-18652df69896",
+    "decision_date": "2026-10-06 01:32:40.716698+00",
+    "title": "SWING11_S3_SCIENTIFIC_EXECUTION_AUTHORIZATION_V1 — prospective development outcome exposure authorization",
+    "decision": "Authorize SWING11 S3 scientific/development execution under the already frozen SWING11_S3_CANDIDATE_ADVANCEMENT_PROTOCOL_V1 and SUPPLEMENT_1. This authorization permits real development-dataset candidate outcome computation for exactly S3-C0_PRICE_ONLY, S3-C1_PRICE_RV20_CONDITIONED, and S3-C2_PRICE_RV20_CONTINUOUS at primary horizons 5,7,10,15, including the prospectively frozen cohort/portfolio returns, family metrics, HAC/BH inference, temporal robustness, concentration, leave-top-five, capacity/exposure, implementation-sensitivity checks, deterministic advancement truth table, and mechanical selection of exactly one architecture or NO_ADVANCE. Execute only on the certified SWING11 development lineage and only with the frozen implementation, thresholds, formulas, comparison calendar, schemas, and precedence. No parameter search, new predictors/mechanisms, post-outcome methodology changes, or discretionary override is authorized. This decision does not authorize protected/independent validation, reuse of the consumed SWING10 B5 panel as fresh validation, S4/S5/S6 transition, live or paper deployment, paid compute, destructive actions, or security-sensitive changes. ZERO_INCREMENTAL_COST_FIRST remains mandatory. Completion must return immutable artifacts, provenance/readbacks, exact governed execution identifiers, all frozen diagnostics and the mechanical S3 disposition to the canonical Indicator: Swing Trades thread. Any scientific ambiguity not already resolved by the frozen base protocol and Supplement_1 must fail closed.",
+    "rationale": "The outcome-blind S3P preflight is COMPLETE / VERIFIED and preserved the prospective boundary: no real S3 candidate forward/cohort/portfolio returns, P&L, hit rates, drawdowns, rankings, or scientific dispositions were computed or inspected. The canonical user explicitly approved proceeding with S3 scientific execution on 2026-10-05 after reviewing the S3P completion package.",
+    "evidence": "User explicit approval in canonical Indicator: Swing Trades thread after S3P COMPLETE / VERIFIED. Controlling base decision UUID f41b3c8b-3d19-4fb6-9ded-2d91c9ab037a; Supplement_1 UUID 8ef41b93-e42c-4b53-bcca-23c8f8eb3f4e; S3P MWE UUID b1e57ab2-19a5-4fc0-a375-11a369650204.",
+    "affects_model_version": "SWING11-RM-1.0",
+    "supersedes_decision_id": null,
+    "status": "active",
+    "metadata_json": {
+      "phase": "S3",
+      "status": "FROZEN",
+      "roadmap": "SWING11-RM-1.0",
+      "prospective": true,
+      "s3p_mwe_uuid": "b1e57ab2-19a5-4fc0-a375-11a369650204",
+      "decision_code": "SWING11_S3_SCIENTIFIC_EXECUTION_AUTHORIZATION_V1",
+      "s4_authorized": false,
+      "s5_authorized": false,
+      "s6_authorized": false,
+      "user_approved": true,
+      "canonical_thread": "Indicator: Swing Trades",
+      "primary_horizons": [
+        5,
+        7,
+        10,
+        15
+      ],
+      "supplement_1_uuid": "8ef41b93-e42c-4b53-bcca-23c8f8eb3f4e",
+      "base_decision_uuid": "f41b3c8b-3d19-4fb6-9ded-2d91c9ab037a",
+      "candidate_registry": [
+        "S3-C0_PRICE_ONLY",
+        "S3-C1_PRICE_RV20_CONDITIONED",
+        "S3-C2_PRICE_RV20_CONTINUOUS"
+      ],
+      "deployment_authorized": false,
+      "paid_compute_authorized": false,
+      "zero_incremental_cost_first": true,
+      "protected_validation_authorized": false,
+      "development_outcome_exposure_authorized": true
+    }
+  }
+]
