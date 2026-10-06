@@ -1,0 +1,675 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Count 9 /Kids [4 0 R 6 0 R 8 0 R 10 0 R 12 0 R 14 0 R 16 0 R 18 0 R 20 0 R] >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Courier >>
+endobj
+4 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 5 0 R >>
+endobj
+5 0 obj
+<< /Length 2842 >>
+stream
+BT /F1 9 Tf 36 756 Td 11 TL (# MULtipLY SWING11 S4P - Option B handoff) Tj
+T* () Tj
+T* (BLOCKED - USER ACTION REQUIRED) Tj
+T* () Tj
+T* (S4P OUTCOME-BLIND PREFLIGHT ONLY) Tj
+T* () Tj
+T* (NO NEW S4 STRATEGY OUTCOMES EXPOSED) Tj
+T* () Tj
+T* (PROTECTED VALIDATION REMAINED UNOPENED) Tj
+T* () Tj
+T* () Tj
+T* () Tj
+T* (To: Indicator: Swing Trades) Tj
+T* () Tj
+T* (MWE: MWE-SW11-S4P-001 / 9ddaa698-f607-4b86-b145-6bb0d762d34d) Tj
+T* () Tj
+T* (Roadmap: SWING11-RM-1.0; phase S4P; authority E1; ZERO_INCREMENTAL_COST_FIRST.) Tj
+T* () Tj
+T* (Terminal: BLOCKED_USER / VERIFIED_OPTION_B_ARCHIVAL_BOUNDARY_SOURCE_BLOCKED.) Tj
+T* (user_action_required=true; completed_at=NULL. Same envelope retained, not complete.) Tj
+T* () Tj
+T* () Tj
+T* () Tj
+T* (## Authority readback) Tj
+T* () Tj
+T* (Option B: SWING11_S4P_OPTION_B_PROSPECTIVE_ARCHIVAL_AUTHORIZATION_V1, decision) Tj
+T* (650c2556-5b10-437b-9bf6-cdf9af20c29e. Complete decision/rationale/evidence/metadata read directly) Tj
+T* (from Supabase and independently verified unchanged.) Tj
+T* () Tj
+T* (Frozen S4 design: SWING11_S4P_STRATEGY_DEVELOPMENT_PROTOCOL_V1, decision) Tj
+T* (46b8d99f-db1c-4dec-9f50-a0b1a5f01c4e, likewise read/reconciled unchanged. Seven complete frozen) Tj
+T* (snapshots are checked against current durable authority by the governed worker.) Tj
+T* () Tj
+T* (S4 remains C0 PRICE-only; S4-TIME-5, S4-TIME-7, S4-TIME-10. No RV20, new predictors, tail/entry/exit) Tj
+T* (grids or 15-session deployment candidate. Modeled primary costs remain 25 bp execution roundtrip +5%) Tj
+T* (annual short borrow; fixed 12 diagnostic stress views, never candidates.) Tj
+T* () Tj
+T* () Tj
+T* () Tj
+T* (## Work completed and exact revisions) Tj
+T* () Tj
+T* (PR #78: prospective metadata collector, closed source registry, frozen universe,) Tj
+T* (source/price/protected guards, append-only private artifact/readback integration and boundary) Tj
+T* (proposal.) Tj
+T* () Tj
+T* (PR #79: corrected exact research-SHA claim binding and recovered the existing queued job; no) Tj
+T* (source/scientific change.) Tj
+T* () Tj
+T* (PR #80: bounded secret-safe pagination, page timestamps/hashes, duplicate/conflict diagnostics.) Tj
+T* () Tj
+T* (PR #81: documented ex-dividend-date filters, independent scope audit, conservative 16-second request) Tj
+T* (gap, 600-second source budget. No provider upgrade.) Tj
+T* () Tj
+T* (All merged with expected-head protection; recovery/paging integration also checked unchanged base.) Tj
+T* () Tj
+T* (Research SHA: febc177761fe614eaab06e999af40e89e8c21ab9) Tj
+T* () Tj
+T* (Infrastructure/readback SHA: 432e4d55ad65056427b2ada7aa9246bf1dab58c4) Tj
+T* () Tj
+T* (Latest research job: bbac227c-c83f-44cb-9c59-59279cd813c7) Tj
+T* () Tj
+T* (Latest attempt: 6146d648-8ddd-43c9-8b17-8fae8b11881f; attempt_no=1) Tj
+T* () Tj
+ET
+BT /F1 8 Tf 36 24 Td (SWING11 S4P Option B - 1/9) Tj ET
+endstream
+endobj
+6 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 7 0 R >>
+endobj
+7 0 obj
+<< /Length 3898 >>
+stream
+BT /F1 9 Tf 36 756 Td 11 TL (GitHub run/job: 37484812483 / 112342013926) Tj
+T* () Tj
+T* (Latest workflow: .github/workflows/sw11-s4p-archive.yml) Tj
+T* () Tj
+T* (Latest code branch: fix/sw11-s4p-archive-provider-limits; PR #81 merged.) Tj
+T* () Tj
+T* (Input dependency count=0; materialized_input_count=0. Metadata sources are immutable output) Tj
+T* (observations, not an admitted scientific market input. Development/B5 lineage unchanged.) Tj
+T* () Tj
+T* () Tj
+T* () Tj
+T* (## Certification) Tj
+T* () Tj
+T* (PR #78: 170/170 exact-head online; run 37479781001 / job 112324561821. Local 169 plus one historical) Tj
+T* (Git-object fixture passed online. All 15 triggered compatibility workflows passed.) Tj
+T* () Tj
+T* (PR #79: 171/171 online; run 37480995449 / job 112328754402. Local 170 plus one Git-history fixture) Tj
+T* (passed online; all ten triggered compatibility workflows passed.) Tj
+T* () Tj
+T* (PR #80: 182/182 online; run 37482753333 / job 112334885313. Local 181 plus one Git-history fixture) Tj
+T* (passed online; 45 shared infrastructure checks in the suite.) Tj
+T* () Tj
+T* (PR #81: 186/186 exact-head online; run 37484503805 / job 112340951654. Local 185 plus one) Tj
+T* (Git-history fixture passed online; all 45 shared infrastructure checks passed.) Tj
+T* () Tj
+T* (Tests cover exact frozen universe/authority, metadata-only activation, price/outcome rejection,) Tj
+T* (as-collected timestamps, no-event UNKNOWN, secret rejection, failed-body exclusion,) Tj
+T* (closed/unsafe/repeated/credential-bearing cursor branches, immutable manifest hashes,) Tj
+T* (duplicate/version conflicts, request pacing/budget/filter/scope checks, exact) Tj
+T* (research-vs-infrastructure binding. Previous signal/entry/exit/cash/cost/earnings synthetic tests) Tj
+T* (preserved.) Tj
+T* () Tj
+T* () Tj
+T* () Tj
+T* (## Persistent collection mechanism) Tj
+T* () Tj
+T* (Dedicated default-branch GitHub Actions; existing Massive/Supabase credentials only, values never) Tj
+T* (printed or persisted. Cadence weekdays 09:15, 15:45, 16:15 America/New_York.) Tj
+T* () Tj
+T* (Collector enabled at exact certified research SHA in the SAME MWE. BLOCKED_USER allows this) Tj
+T* (separately authorized metadata archival, not price access or S4 science. First three push-triggered) Tj
+T* (captures verified; future scheduled slots not yet observed/guaranteed.) Tj
+T* () Tj
+T* (Actual UTC retrieval time establishes knowledge. Provider last_updated/publication/declaration dates) Tj
+T* (never backdate archived knowledge. Changed observations create new immutable versions; no) Tj
+T* (overwrites. Outages/delays remain UNKNOWN.) Tj
+T* () Tj
+T* (At most ten source pages; exact registered HTTPS Massive endpoint and bounded cursor only. Supplied) Tj
+T* (API keys discarded, unsafe/repeated/credential-bearing cursors rejected. No redirects.) Tj
+T* (2,000,000-byte response cap; global 16-second request gap; 600-second source budget.) Tj
+T* () Tj
+T* (Operational windows: earnings/current split metadata next42 calendar days; dividend ex-dates -30/+42) Tj
+T* (days with documented filters and returned-scope audit. These are collection windows, not frozen) Tj
+T* (scientific sample boundaries.) Tj
+T* () Tj
+T* (Each job/attempt stores projections, actual timestamps, provider/event identifiers, expected) Tj
+T* (date/time where supplied, last-updated/status, amount/currency/ex/pay/declaration/split fields,) Tj
+T* (original wire hashes, projected and normalized version hashes, job/run/revisions and coverage/error) Tj
+T* (status.) Tj
+T* () Tj
+T* (Full wire bodies NOT retained; whitelisted metadata projections and wire hashes retained.) Tj
+T* (EPS/revenue, arbitrary outcome fields, pagination credentials and failed HTTP bodies excluded.) Tj
+T* (Independent original-wire rehash is unavailable; this limitation prevents claiming unobserved source) Tj
+ET
+BT /F1 8 Tf 36 24 Td (SWING11 S4P Option B - 2/9) Tj ET
+endstream
+endobj
+8 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 9 0 R >>
+endobj
+9 0 obj
+<< /Length 4048 >>
+stream
+BT /F1 9 Tf 36 756 Td 11 TL (semantics.) Tj
+T* () Tj
+T* (Append-only existing Supabase private storage/job/attempt/readbacks/events; no new tables or paid) Tj
+T* (infrastructure. General watcher skips dedicated-owned jobs. Queue recovery preserves the existing) Tj
+T* (unclaimed job; completed captures create new immutable jobs.) Tj
+T* () Tj
+T* (GitHub cron may be delayed/missed and public-repository inactivity may disable schedules. Actual) Tj
+T* (timestamps/coverage govern; never backfill missed knowledge.) Tj
+T* () Tj
+T* () Tj
+T* () Tj
+T* (## Sources actually observed) Tj
+T* () Tj
+T* (First successful source retrieval: 2026-10-06T14:45:00.611846+00:00 \(not authorization time\). No) Tj
+T* (source maturity clock has begun because practical coverage gates fail.) Tj
+T* () Tj
+T* (Latest capture started: 2026-10-06T15:09:16.270035+00:00) Tj
+T* () Tj
+T* (earnings: HTTP 403; 0 projected frozen-universe records; pages=1; listing_exhausted=false;) Tj
+T* (requested_window_pass=true; outside_window_records=0; practical coverage_complete=false.) Tj
+T* () Tj
+T* (dividends: HTTP 200; 39 projected frozen-universe records; pages=8; listing_exhausted=true;) Tj
+T* (requested_window_pass=true; outside_window_records=0; practical coverage_complete=false.) Tj
+T* () Tj
+T* (splits: HTTP 200; 0 projected frozen-universe records; pages=1; listing_exhausted=true;) Tj
+T* (requested_window_pass=true; outside_window_records=0; practical coverage_complete=false.) Tj
+T* () Tj
+T* (Latest dividend capture exhausted eight pages, 39 projected records, zero scope mismatches, no) Tj
+T* (HTTP429. Split listing empty/exhausted is NOT certified absence. Earnings403 remains denied.) Tj
+T* (Existing credential availability/authentication evidenced without exposing its value.) Tj
+T* () Tj
+T* (Broker/account-specific locate/quantity, borrow fees, recalls and funding: NOT_CONNECTED_UNKNOWN.) Tj
+T* (Complete practical-symbol coverage=0. Indicative public availability, short interest/volume/current) Tj
+T* (quotes cannot substitute for account-specific historical-as-collected locate evidence.) Tj
+T* () Tj
+T* (FMP current calendar remains an earlier candidate, but no configured credential/entitlement was) Tj
+T* (established/probed here; not claimed globally unavailable. Timestamped issuer notices and indicative) Tj
+T* (broker feeds are partial candidates, not accepted complete practical ledgers.) Tj
+T* () Tj
+T* (Cash-dividend and split observations do not certify share-basis reconciliation, broker dividend) Tj
+T* (debits, corporate-action account ledger or collateral/funding terms. Current split-adjusted values) Tj
+T* (may be retrospective. These remain mandatory source/integration limitations.) Tj
+T* () Tj
+T* () Tj
+T* () Tj
+T* (## Exact prospective boundary recommendation - NOT FROZEN) Tj
+T* () Tj
+T* (Collection start: actual first certified successful retrieval; full operational maturity starts only) Tj
+T* (after practical sources/coverage are certified. Never manufacture pre-collection PIT knowledge.) Tj
+T* () Tj
+T* (Maturity: 20 complete registered trading sessions, >=95% required snapshot-slot success, >=101/112) Tj
+T* (frozen symbols fully observed. Every traded symbol needs complete applicable PIT) Tj
+T* (earnings/session/revision evidence; shorts need account-specific availability/quantity/fee/recall;) Tj
+T* (cash-flow/funding must be certified. Observed unavailable is not tradable; missing is UNKNOWN.) Tj
+T* () Tj
+T* (Freshness: latest relevant observation precedes decision/entry, required pre-entry/pre-close record) Tj
+T* (age<=30 minutes. Late/post-decision information never used retroactively.) Tj
+T* () Tj
+T* (S4: first FIXED 126 registered trading sessions after deterministic maturity/source gates, >=100) Tj
+T* (usable common comparison dates, >=80% active cohorts and >=5 symbols/side for active cohorts.) Tj
+T* (Missing dates stay in the interval, no extension on results. Then ten S4 endpoint-runoff sessions,) Tj
+T* (no new S4 signals.) Tj
+T* () Tj
+ET
+BT /F1 8 Tf 36 24 Td (SWING11 S4P Option B - 3/9) Tj ET
+endstream
+endobj
+10 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 11 0 R >>
+endobj
+11 0 obj
+<< /Length 3934 >>
+stream
+BT /F1 9 Tf 36 756 Td 11 TL (S5: next FIXED 252 registered trading sessions after S4 runoff, plus ten endpoint-only runoff) Tj
+T* (sessions. Proposed minimum >=200 usable comparison dates, four chronological blocks >=20 dates each.) Tj
+T* (No extension, reassignment or resizing based on S4/validation results.) Tj
+T* () Tj
+T* (Sealing: canonically approve algorithm before future-price admission; publish exact dates once) Tj
+T* (start/maturity mechanically established and BEFORE any S4 outcome exposure. Once protected S5, never) Tj
+T* (moved into S4. Separate frozen S5 protocol/authority still required before any S5 access.) Tj
+T* () Tj
+T* (Frozen 112-symbol universe; source-based eligibility enters/leaves prospectively only, no outcome) Tj
+T* (filtering or imputation. Outages append UNKNOWN; stale records do not silently remain complete.) Tj
+T* () Tj
+T* (Conditional duration: 418 trading sessions \(20+126+10+252+10\), roughly20 months AFTER necessary) Tj
+T* (sources available. No guaranteed ETA, power assertion or favorable-date selection.) Tj
+T* () Tj
+T* (Rationale: bounded approximately half-year development/full-year protected reservation supports) Tj
+T* (four-block and >=100-date capacity rules without outcomes. Proposed maturity/coverage/S5 minimum) Tj
+T* (require canonical judgment.) Tj
+T* () Tj
+T* (Alternatives: fixed calendar half-year/full-year intervals simplify date sealing but risk) Tj
+T* (holiday/coverage variation; 252-session development +252-session validation adds roughly six months.) Tj
+T* (No alternative selected. No future date assigned to S4/S5; no future price UUID admitted.) Tj
+T* () Tj
+T* () Tj
+T* () Tj
+T* (## Exact required canonical/user actions) Tj
+T* () Tj
+T* (1. Approve/revise complete boundary package \(maturity, slots, observed-symbol gate, freshness, fixed) Tj
+T* (intervals/runoffs, minimum dates and irreversible sealing\). This is E2 because decision650c) Tj
+T* (explicitly leaves exact_future_boundary_frozen=false.) Tj
+T* () Tj
+T* (2. Identify/connect existing zero-cost READ-ONLY earnings revision/session/completeness feed and) Tj
+T* (broker/account-specific availability/locate/fee/recall/funding/cash-flow feed/export path. Do not) Tj
+T* (provide credential values in chat. Work can certify within E1 once access exists.) Tj
+T* () Tj
+T* (Recommendation: retain the authorized partial collector and prospectively freeze conservative) Tj
+T* (boundaries; complete sources without weakening no-earnings/practical-short gates. If a purchase) Tj
+T* (becomes necessary, separate E2 cost authorization is required; none incurred/requested here.) Tj
+T* () Tj
+T* (Neither action alone authorizes S4 science. Remaining practical feed integration,) Tj
+T* (cash-flow/share-basis/funding handling, final future-science schemas and exact-revision) Tj
+T* (certification must pass before a separately authorized execution MWE.) Tj
+T* () Tj
+T* () Tj
+T* () Tj
+T* (## Artifact verification and inventory) Tj
+T* () Tj
+T* (All 42 Option B artifacts/readbacks \(three captures\) and 16 preserved parent artifacts independently) Tj
+T* (reconcile. Latest14: exactly one technical primary \(architecture\). Thirteen sibling hashes declared) Tj
+T* (in manifest; manifest own hash external, never recursive.) Tj
+T* () Tj
+T* (Private bucket trading-research-market-data independently verified public=false. Independent GitHub) Tj
+T* (process downloaded every object, recomputed SHA/size, persisted durable readback and read it back.) Tj
+T* (Orchestrator independently recomputed durable-text SHA/bytes through SQL and separate SHA-256) Tj
+T* (implementation; manifest/ownership/source/readback/run/attempt/input-count parity passes.) Tj
+T* () Tj
+T* (Latest artifact registrations:) Tj
+T* () Tj
+T* () Tj
+T* () Tj
+T* (sw11_s4p_option_b_architecture.json) Tj
+T* () Tj
+T* (Artifact UUID: daf12a2a-3a31-427d-aea5-9903fa89f540) Tj
+T* () Tj
+ET
+BT /F1 8 Tf 36 24 Td (SWING11 S4P Option B - 4/9) Tj ET
+endstream
+endobj
+12 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 13 0 R >>
+endobj
+13 0 obj
+<< /Length 2319 >>
+stream
+BT /F1 9 Tf 36 756 Td 11 TL (Path: artifacts/bbac227c-c83f-44cb-9c59-59279cd813c7/6146d648-8ddd-43c9-8b17-8fae8b11881f/sw11_s4p_o) Tj
+T* (ption_b_architecture.json) Tj
+T* () Tj
+T* (Bytes: 226) Tj
+T* () Tj
+T* (SHA-256: 9963c7dc94260df7fd3a228d9a21501611bfbea22746b88ffd5d9669ce4096b2) Tj
+T* () Tj
+T* (Readback UUID: 915f67e3-1e31-49bc-96e5-80a3694587b6) Tj
+T* () Tj
+T* (Source/readback SHA: febc177761fe614eaab06e999af40e89e8c21ab9 /) Tj
+T* (432e4d55ad65056427b2ada7aa9246bf1dab58c4) Tj
+T* () Tj
+T* () Tj
+T* () Tj
+T* (sw11_s4p_option_b_boundary_recommendation.json) Tj
+T* () Tj
+T* (Artifact UUID: f0d20387-6142-4ff8-99a1-f89e262a5839) Tj
+T* () Tj
+T* (Path: artifacts/bbac227c-c83f-44cb-9c59-59279cd813c7/6146d648-8ddd-43c9-8b17-8fae8b11881f/sw11_s4p_o) Tj
+T* (ption_b_boundary_recommendation.json) Tj
+T* () Tj
+T* (Bytes: 2886) Tj
+T* () Tj
+T* (SHA-256: 2231fd2a8122a987c56cbb8645a40333ed5e7955c3f439ed6a1bf7d02ca75f6e) Tj
+T* () Tj
+T* (Readback UUID: 0155ed75-b099-4871-99a3-35134fcf96aa) Tj
+T* () Tj
+T* (Source/readback SHA: febc177761fe614eaab06e999af40e89e8c21ab9 /) Tj
+T* (432e4d55ad65056427b2ada7aa9246bf1dab58c4) Tj
+T* () Tj
+T* () Tj
+T* () Tj
+T* (sw11_s4p_option_b_collector_specification.json) Tj
+T* () Tj
+T* (Artifact UUID: 539f6514-9ce5-46f5-a706-21c8fe1b2690) Tj
+T* () Tj
+T* (Path: artifacts/bbac227c-c83f-44cb-9c59-59279cd813c7/6146d648-8ddd-43c9-8b17-8fae8b11881f/sw11_s4p_o) Tj
+T* (ption_b_collector_specification.json) Tj
+T* () Tj
+T* (Bytes: 792) Tj
+T* () Tj
+T* (SHA-256: 4be8bd46553b40936ecfa6092056690e574daefd67329340fdb58f61dac84ea6) Tj
+T* () Tj
+T* (Readback UUID: d142ef83-2681-4b53-9e5c-e2b4015b6e1c) Tj
+T* () Tj
+T* (Source/readback SHA: febc177761fe614eaab06e999af40e89e8c21ab9 /) Tj
+T* (432e4d55ad65056427b2ada7aa9246bf1dab58c4) Tj
+T* () Tj
+T* () Tj
+T* () Tj
+T* (sw11_s4p_option_b_contamination_controls.json) Tj
+T* () Tj
+T* (Artifact UUID: 9a971a81-f205-4c39-85ed-82bfd6ed6390) Tj
+T* () Tj
+T* (Path: artifacts/bbac227c-c83f-44cb-9c59-59279cd813c7/6146d648-8ddd-43c9-8b17-8fae8b11881f/sw11_s4p_o) Tj
+T* (ption_b_contamination_controls.json) Tj
+T* () Tj
+T* (Bytes: 208) Tj
+T* () Tj
+T* (SHA-256: b3062ca80e86cd6c2decec48417d595f5ada9b7c18d611c22190aec5dfc0e63f) Tj
+T* () Tj
+T* (Readback UUID: 922dddc0-9d5e-4def-9813-ae18dee1dfa4) Tj
+T* () Tj
+ET
+BT /F1 8 Tf 36 24 Td (SWING11 S4P Option B - 5/9) Tj ET
+endstream
+endobj
+14 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 15 0 R >>
+endobj
+15 0 obj
+<< /Length 2205 >>
+stream
+BT /F1 9 Tf 36 756 Td 11 TL (Source/readback SHA: febc177761fe614eaab06e999af40e89e8c21ab9 /) Tj
+T* (432e4d55ad65056427b2ada7aa9246bf1dab58c4) Tj
+T* () Tj
+T* () Tj
+T* () Tj
+T* (sw11_s4p_option_b_coverage_health.json) Tj
+T* () Tj
+T* (Artifact UUID: bd3da4f0-3fdb-48e2-b64c-92bee8a5d095) Tj
+T* () Tj
+T* (Path: artifacts/bbac227c-c83f-44cb-9c59-59279cd813c7/6146d648-8ddd-43c9-8b17-8fae8b11881f/sw11_s4p_o) Tj
+T* (ption_b_coverage_health.json) Tj
+T* () Tj
+T* (Bytes: 895) Tj
+T* () Tj
+T* (SHA-256: 73a070273a82fd549408560ac6208c9515c50aceafb3451df94d09a815589e39) Tj
+T* () Tj
+T* (Readback UUID: 4a763b6f-42e1-4e3f-987b-3af879d649a5) Tj
+T* () Tj
+T* (Source/readback SHA: febc177761fe614eaab06e999af40e89e8c21ab9 /) Tj
+T* (432e4d55ad65056427b2ada7aa9246bf1dab58c4) Tj
+T* () Tj
+T* () Tj
+T* () Tj
+T* (sw11_s4p_option_b_coverage_specification.json) Tj
+T* () Tj
+T* (Artifact UUID: dbe90ed5-8fe4-40d2-91aa-aa92da919f2c) Tj
+T* () Tj
+T* (Path: artifacts/bbac227c-c83f-44cb-9c59-59279cd813c7/6146d648-8ddd-43c9-8b17-8fae8b11881f/sw11_s4p_o) Tj
+T* (ption_b_coverage_specification.json) Tj
+T* () Tj
+T* (Bytes: 1558) Tj
+T* () Tj
+T* (SHA-256: 5e38470af7f1e72d8c5af3e1b60812f80f464926251b7c6a57e49139e96133a8) Tj
+T* () Tj
+T* (Readback UUID: cbe7c15d-0e46-437c-bb64-fc40b0cee1c6) Tj
+T* () Tj
+T* (Source/readback SHA: febc177761fe614eaab06e999af40e89e8c21ab9 /) Tj
+T* (432e4d55ad65056427b2ada7aa9246bf1dab58c4) Tj
+T* () Tj
+T* () Tj
+T* () Tj
+T* (sw11_s4p_option_b_manifest.json) Tj
+T* () Tj
+T* (Artifact UUID: fc52bbf9-710a-4544-bb77-744cd76cf6b4) Tj
+T* () Tj
+T* (Path: artifacts/bbac227c-c83f-44cb-9c59-59279cd813c7/6146d648-8ddd-43c9-8b17-8fae8b11881f/sw11_s4p_o) Tj
+T* (ption_b_manifest.json) Tj
+T* () Tj
+T* (Bytes: 2992) Tj
+T* () Tj
+T* (SHA-256: d768bff1c5e16d93888d77d1350bd8baea680984d5e50180aaad80476bade21a) Tj
+T* () Tj
+T* (Readback UUID: 113f9f60-95ff-46b9-be67-70c1547a8543) Tj
+T* () Tj
+T* (Source/readback SHA: febc177761fe614eaab06e999af40e89e8c21ab9 /) Tj
+T* (432e4d55ad65056427b2ada7aa9246bf1dab58c4) Tj
+T* () Tj
+T* () Tj
+T* () Tj
+T* (sw11_s4p_option_b_quality_gates.json) Tj
+T* () Tj
+T* (Artifact UUID: 3ee56fcd-8795-4f17-a176-5182400fe436) Tj
+T* () Tj
+ET
+BT /F1 8 Tf 36 24 Td (SWING11 S4P Option B - 6/9) Tj ET
+endstream
+endobj
+16 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 17 0 R >>
+endobj
+17 0 obj
+<< /Length 2262 >>
+stream
+BT /F1 9 Tf 36 756 Td 11 TL (Path: artifacts/bbac227c-c83f-44cb-9c59-59279cd813c7/6146d648-8ddd-43c9-8b17-8fae8b11881f/sw11_s4p_o) Tj
+T* (ption_b_quality_gates.json) Tj
+T* () Tj
+T* (Bytes: 368) Tj
+T* () Tj
+T* (SHA-256: 257480798cd7967cbccbff4529563e21779849e7700a41a68c5c5dc00f531874) Tj
+T* () Tj
+T* (Readback UUID: c6b2c11b-bc53-495d-b128-29a850fb27a4) Tj
+T* () Tj
+T* (Source/readback SHA: febc177761fe614eaab06e999af40e89e8c21ab9 /) Tj
+T* (432e4d55ad65056427b2ada7aa9246bf1dab58c4) Tj
+T* () Tj
+T* () Tj
+T* () Tj
+T* (sw11_s4p_option_b_scheduler_specification.json) Tj
+T* () Tj
+T* (Artifact UUID: b0aa24f6-ebf1-47e7-a54f-cff7465267c8) Tj
+T* () Tj
+T* (Path: artifacts/bbac227c-c83f-44cb-9c59-59279cd813c7/6146d648-8ddd-43c9-8b17-8fae8b11881f/sw11_s4p_o) Tj
+T* (ption_b_scheduler_specification.json) Tj
+T* () Tj
+T* (Bytes: 523) Tj
+T* () Tj
+T* (SHA-256: d8c6ba007e0ac3ce7ab16870f212c8cc5645b50236036a88ceaa8bbdd10721ba) Tj
+T* () Tj
+T* (Readback UUID: 1299a11b-0f17-4ddc-92eb-4efbed76e2f6) Tj
+T* () Tj
+T* (Source/readback SHA: febc177761fe614eaab06e999af40e89e8c21ab9 /) Tj
+T* (432e4d55ad65056427b2ada7aa9246bf1dab58c4) Tj
+T* () Tj
+T* () Tj
+T* () Tj
+T* (sw11_s4p_option_b_schemas.json) Tj
+T* () Tj
+T* (Artifact UUID: 1da9e28e-3835-4668-baa7-27fc294f68d3) Tj
+T* () Tj
+T* (Path: artifacts/bbac227c-c83f-44cb-9c59-59279cd813c7/6146d648-8ddd-43c9-8b17-8fae8b11881f/sw11_s4p_o) Tj
+T* (ption_b_schemas.json) Tj
+T* () Tj
+T* (Bytes: 1249) Tj
+T* () Tj
+T* (SHA-256: e647fb2ca5bc241eec2b927ac9846eaefa9a6479ca61edc1c57fd7e25c8df92c) Tj
+T* () Tj
+T* (Readback UUID: 70a4c600-b769-48df-af7d-c786e62fcc96) Tj
+T* () Tj
+T* (Source/readback SHA: febc177761fe614eaab06e999af40e89e8c21ab9 /) Tj
+T* (432e4d55ad65056427b2ada7aa9246bf1dab58c4) Tj
+T* () Tj
+T* () Tj
+T* () Tj
+T* (sw11_s4p_option_b_snapshot.json) Tj
+T* () Tj
+T* (Artifact UUID: e8688a50-88cb-4325-a8db-dc5793410cee) Tj
+T* () Tj
+T* (Path: artifacts/bbac227c-c83f-44cb-9c59-59279cd813c7/6146d648-8ddd-43c9-8b17-8fae8b11881f/sw11_s4p_o) Tj
+T* (ption_b_snapshot.json) Tj
+T* () Tj
+T* (Bytes: 33179) Tj
+T* () Tj
+T* (SHA-256: 7c04a3b80cdaacda473139e336c4b2c08e56eb347eda0213982a9212236ebd0a) Tj
+T* () Tj
+T* (Readback UUID: 437e3fee-113f-46b6-aed2-0f1aecd21943) Tj
+T* () Tj
+ET
+BT /F1 8 Tf 36 24 Td (SWING11 S4P Option B - 7/9) Tj ET
+endstream
+endobj
+18 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 19 0 R >>
+endobj
+19 0 obj
+<< /Length 2330 >>
+stream
+BT /F1 9 Tf 36 756 Td 11 TL (Source/readback SHA: febc177761fe614eaab06e999af40e89e8c21ab9 /) Tj
+T* (432e4d55ad65056427b2ada7aa9246bf1dab58c4) Tj
+T* () Tj
+T* () Tj
+T* () Tj
+T* (sw11_s4p_option_b_source_registry.json) Tj
+T* () Tj
+T* (Artifact UUID: 5b5d7167-b3d0-4b57-99d4-84106db0c813) Tj
+T* () Tj
+T* (Path: artifacts/bbac227c-c83f-44cb-9c59-59279cd813c7/6146d648-8ddd-43c9-8b17-8fae8b11881f/sw11_s4p_o) Tj
+T* (ption_b_source_registry.json) Tj
+T* () Tj
+T* (Bytes: 832) Tj
+T* () Tj
+T* (SHA-256: 443ffd24c1d73ebc30fddc88f19a5ba69e4401a96be2cebeaf83f56806ded738) Tj
+T* () Tj
+T* (Readback UUID: 74a6bd04-fd59-457b-81a2-4e1daa56fa5d) Tj
+T* () Tj
+T* (Source/readback SHA: febc177761fe614eaab06e999af40e89e8c21ab9 /) Tj
+T* (432e4d55ad65056427b2ada7aa9246bf1dab58c4) Tj
+T* () Tj
+T* () Tj
+T* () Tj
+T* (sw11_s4p_option_b_synthetic_certification.json) Tj
+T* () Tj
+T* (Artifact UUID: 4a20ce15-699b-478d-a9bd-42ab49a9d8cf) Tj
+T* () Tj
+T* (Path: artifacts/bbac227c-c83f-44cb-9c59-59279cd813c7/6146d648-8ddd-43c9-8b17-8fae8b11881f/sw11_s4p_o) Tj
+T* (ption_b_synthetic_certification.json) Tj
+T* () Tj
+T* (Bytes: 463) Tj
+T* () Tj
+T* (SHA-256: 21411821ec5bae5fff8312b63a2f92cd657ca1b36f051351e554cfdecd54dda4) Tj
+T* () Tj
+T* (Readback UUID: 4ddb906c-596f-432d-90c0-e386b1377833) Tj
+T* () Tj
+T* (Source/readback SHA: febc177761fe614eaab06e999af40e89e8c21ab9 /) Tj
+T* (432e4d55ad65056427b2ada7aa9246bf1dab58c4) Tj
+T* () Tj
+T* () Tj
+T* () Tj
+T* (sw11_s4p_option_b_unresolved_decisions.json) Tj
+T* () Tj
+T* (Artifact UUID: 944ada13-1ff4-4c7f-b410-36e83ce92a9f) Tj
+T* () Tj
+T* (Path: artifacts/bbac227c-c83f-44cb-9c59-59279cd813c7/6146d648-8ddd-43c9-8b17-8fae8b11881f/sw11_s4p_o) Tj
+T* (ption_b_unresolved_decisions.json) Tj
+T* () Tj
+T* (Bytes: 341) Tj
+T* () Tj
+T* (SHA-256: 4fa6f4d81054b57c8449a6a9785ecdcbeb14b34377e147c93d8be0727e17e7fc) Tj
+T* () Tj
+T* (Readback UUID: 3caf16ce-8a3c-4157-9438-c26946d30a7a) Tj
+T* () Tj
+T* (Source/readback SHA: febc177761fe614eaab06e999af40e89e8c21ab9 /) Tj
+T* (432e4d55ad65056427b2ada7aa9246bf1dab58c4) Tj
+T* () Tj
+T* () Tj
+T* () Tj
+T* (## Preserved history) Tj
+T* () Tj
+T* (Original design PR76: job1bf9c58b-d63b-4367-9ce4-db9683026de6; all ten artifacts/readbacks) Tj
+T* (preserved/reverified. Option A PR77: job47894a64-cfdf-4a4d-b8d0-18e0af8ccc4b /) Tj
+ET
+BT /F1 8 Tf 36 24 Td (SWING11 S4P Option B - 8/9) Tj ET
+endstream
+endobj
+20 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 21 0 R >>
+endobj
+21 0 obj
+<< /Length 2688 >>
+stream
+BT /F1 9 Tf 36 756 Td 11 TL (attempt2c2c6d90-ea49-4e5e-a5fa-3dfe1ff0a8fa / run37473491473; all six artifacts/readbacks) Tj
+T* (preserved/reverified.) Tj
+T* () Tj
+T* (First activation run37480220074 / job112326076258 failed before claim/source request; queued job) Tj
+T* (retained, no attempt invented. Failure event40e39e84-52b3-4f43-b5d0-15ff257e72f2.) Tj
+T* () Tj
+T* (Recovered first capture: job7fb1a924-3243-496a-8512-aa4c5975b289 /) Tj
+T* (attempt4c3de8d8-a8f2-4676-88ba-f1f34d6f724f / run37481426125 / GitHubjob112330242394. Fourteen) Tj
+T* (verified artifacts;57 dividend projections; initial listing truncated.) Tj
+T* () Tj
+T* (Second capture: jobb8b1d039-5c29-46b2-b058-af3010e6b13f /) Tj
+T* (attemptd24d8908-e523-4154-acbf-a4521fd9b125 / run37483228647 / GitHubjob112336556989. Fourteen) Tj
+T* (verified artifacts;113 current-as-collected projections; HTTP429 and ignored declaration filter) Tj
+T* (detected. Historical event dates are not pre-collection PIT evidence. No source admission; E1) Tj
+T* (correction preserved all versions.) Tj
+T* () Tj
+T* (All prior28 Option B and parent16 complete identities/hashes/readback IDs are in) Tj
+T* (closure-evidence.json, alongside latest14; no deleted attempts/artifacts/events/frozen decisions.) Tj
+T* () Tj
+T* () Tj
+T* () Tj
+T* (## Terminal readback / protected boundaries / cost) Tj
+T* () Tj
+T* (Independent terminal Supabase readback: BLOCKED_USER /) Tj
+T* (VERIFIED_OPTION_B_ARCHIVAL_BOUNDARY_SOURCE_BLOCKED; E2 escalation, user_action_required=true,) Tj
+T* (completed_at=NULL; collector enabled; exact boundary unfrozen; future_prices_accessed=false,) Tj
+T* (new_s4_outcomes_exposed=false, protected_validation_access=false.) Tj
+T* () Tj
+T* (Blocker/verification event:53f93499-7c57-4552-95c0-2f96a8ca8719, 2026-10-06T15:16:49.464713Z. Full) Tj
+T* (durable handoff stored under existing MWE handoff_json.option_b.) Tj
+T* () Tj
+T* (No S4 performance/ranking, price bars, consumed SWING10 B5 price/outcome recycling, protected) Tj
+T* (validation, S5/S6, deployment/paper trading or roadmap transition. Source archival is metadata only.) Tj
+T* () Tj
+T* (No new paid compute/service, Cloud Run, provider upgrade/purchase or paid fallback. Existing GitHub) Tj
+T* (Actions/Supabase used. Billing evidence unavailable; literal$0 invoicing NOT claimed.) Tj
+T* () Tj
+T* (Local file-generation runtime became unresponsive after scientific-independent verification. This) Tj
+T* (repository-backed handoff is an alternate delivery path; no science was rerun for file delivery.) Tj
+T* () Tj
+T* (Return authority to Indicator: Swing Trades. Do not launch another phase.) Tj
+T* () Tj
+ET
+BT /F1 8 Tf 36 24 Td (SWING11 S4P Option B - 9/9) Tj ET
+endstream
+endobj
+xref
+0 22
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000169 00000 n 
+0000000237 00000 n 
+0000000363 00000 n 
+0000003256 00000 n 
+0000003382 00000 n 
+0000007331 00000 n 
+0000007457 00000 n 
+0000011556 00000 n 
+0000011684 00000 n 
+0000015670 00000 n 
+0000015798 00000 n 
+0000018169 00000 n 
+0000018297 00000 n 
+0000020554 00000 n 
+0000020682 00000 n 
+0000022996 00000 n 
+0000023124 00000 n 
+0000025506 00000 n 
+0000025634 00000 n 
+trailer
+<< /Size 22 /Root 1 0 R >>
+startxref
+28374
+%%EOF
