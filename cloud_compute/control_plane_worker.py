@@ -169,7 +169,23 @@ def run_one_outcome(
         "research_revision_adapter": "v1" if adapter_used else None,
     }
     try:
-        if runner_job_id == "SW11-S2A-CERT":
+        if runner_job_id == 'SW11-S4P':
+            parameters=job.get('parameters_json') or {}
+            from cloud_compute.control_plane import _fetch_rows
+            from tr_platform.research.swing11_s4p import guard, AUTHORITY, PARENT
+            guard(parameters)
+            if _fetch_rows(config,'research_job_inputs',{'job_id':f'eq.{job_id}','limit':'1'}):raise RuntimeError('S4P denies all market/source input bytes')
+            snapshot=parameters.get('contract_snapshot') or []
+            required={AUTHORITY,'d3dfd67f-b40d-45ed-af1d-9c7e079bab66','8ef41b93-e42c-4b53-bcca-23c8f8eb3f4e','f41b3c8b-3d19-4fb6-9ded-2d91c9ab037a','5a2508a3-0837-4080-b3e2-9dec28eecc31'}
+            if len(snapshot)!=5 or {x['decision_id'] for x in snapshot}!=required:raise RuntimeError('all five exact S4P authorities required')
+            for expected in snapshot:
+                found=_fetch_rows(config,'project_decisions',{'decision_id':f"eq.{expected['decision_id']}",'limit':'2'})
+                fields=('decision_id','title','decision','rationale','evidence','metadata_json')
+                if len(found)!=1 or any(found[0].get(k)!=expected.get(k) for k in fields) or (found[0]['metadata_json'].get('state') or found[0]['metadata_json'].get('status'))!='FROZEN':raise RuntimeError('unchanged frozen authority required')
+            parent=_fetch_rows(config,'work_envelopes',{'work_envelope_id':f'eq.{PARENT}','limit':'2'})
+            if len(parent)!=1 or parent[0]['status']!='COMPLETE' or parent[0]['metadata_json'].get('state')!='VERIFIED':raise RuntimeError('verified S3 parent required')
+            materialized=[]
+        elif runner_job_id == "SW11-S2A-CERT":
             parameters=job.get("parameters_json") or {}
             if parameters.get("mwe_uuid")!="eabd2257-bb59-4f32-af71-ad4b87bda4f5" or parameters.get("synthetic_only") is not True or parameters.get("scientific_outcomes_authorized") is not False:
                 raise RuntimeError("exact SW11 synthetic certification authority required")
@@ -287,7 +303,7 @@ def run_one_outcome(
                 } for item in materialized]},
             })
 
-        if runner_job_id in {"SW11-S3", "SW11-S3P", "SW11-S2B", "SW11-S2A-CERT", "SW11-S2A", "SW10-S3", "SW10-S3-ARTIFACT-CERT", "SW10-S3-PREFLIGHT", "SW10-S2-B2", "SW10-S2-B3-PREFLIGHT", "SW10-S2-B3-CONTINUOUS-PREFLIGHT", "SW10-S2-B3", "SW10-S2-B4-PREFLIGHT", "SW10-S2-B4", "SW10-S2-B5-PREFLIGHT", "SW10-S2-B5-ACQUISITION", "SW10-S2-B5"}:
+        if runner_job_id in {"SW11-S4P", "SW11-S3", "SW11-S3P", "SW11-S2B", "SW11-S2A-CERT", "SW11-S2A", "SW10-S3", "SW10-S3-ARTIFACT-CERT", "SW10-S3-PREFLIGHT", "SW10-S2-B2", "SW10-S2-B3-PREFLIGHT", "SW10-S2-B3-CONTINUOUS-PREFLIGHT", "SW10-S2-B3", "SW10-S2-B4-PREFLIGHT", "SW10-S2-B4", "SW10-S2-B5-PREFLIGHT", "SW10-S2-B5-ACQUISITION", "SW10-S2-B5"}:
             context = {
                 "job_id": job_id, "attempt_id": attempt_id, "attempt_no": attempt_no,
                 "research_revision": research_sha, "infrastructure_revision": infrastructure_sha,
@@ -297,6 +313,9 @@ def run_one_outcome(
                 "materialized_inputs": [{"input_id": x.input_id, "object_path": x.object_path,
                                          "size_bytes": x.size_bytes, "sha256": x.sha256} for x in materialized],
             }
+            if runner_job_id == 'SW11-S4P':
+                for key in ('mwe_uuid','parent_mwe_uuid','selected_architecture','preflight_only','scientific_outcomes_authorized','protected_validation_authorized','contract_snapshot','github_job_id','source_audit','development_metadata','certification'):
+                    context[key]=parameters.get(key)
             if runner_job_id == "SW10-S3":
                 parameters=job.get("parameters_json") or {}
                 for key in ("mwe_uuid","protocol_decision_id","scientific_outcomes_authorized","input_registration_id"):
@@ -410,4 +429,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
