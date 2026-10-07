@@ -31,7 +31,7 @@ def probe(env,opener=None):
             payload=json.loads(raw)
             from tr_platform.research.swing11_s4p import ARCHIVE_SYMBOLS
             out["FMP"]={"status":"HTTP_200","wire_sha256":hashlib.sha256(raw).hexdigest(),"wire_bytes":len(raw),
-                        **summarize(payload,set(FROZEN_SYMBOLS))}
+                        **summarize(payload,set(ARCHIVE_SYMBOLS))}
     except urllib.error.HTTPError as e:
         out["FMP"]={"status":"HTTP_"+str(e.code),"response_body_retained":False}
     except Exception:
