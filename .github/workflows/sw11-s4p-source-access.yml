@@ -1,0 +1,44 @@
+name: SWING11 S4P Source Access Certification and Probe
+on:
+  pull_request:
+    paths: ['cloud_compute/s4p_source_access_probe.py', 'tests/test_s4p_source_access_probe.py', '.github/workflows/sw11-s4p-source-access.yml']
+  push:
+    branches: [main]
+    paths: ['cloud_compute/s4p_source_access_probe.py', 'tests/test_s4p_source_access_probe.py', '.github/workflows/sw11-s4p-source-access.yml']
+permissions:
+  contents: read
+jobs:
+  certify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt pytest
+      - run: python -m pytest -q tests/test_s4p_source_access_probe.py tests/test_swing11_s4p.py tests/test_swing11_s4p_sources.py tests/test_swing11_s4p_archive.py tests/test_ccp5_control_plane.py tests/test_ccp5_control_plane_worker.py tests/test_ccp8_autonomous_loop.py tests/test_ccp9_exact_claim.py tests/test_ccp10_input_materializer.py tests/test_ccp11_artifact_contract.py tests/test_research_revision_adapter.py tests/test_swing10_input_prepare.py
+  access:
+    needs: certify
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      FMP_API_KEY: ${{ secrets.FMP_API_KEY }}
+      TR_FMP_API_KEY: ${{ secrets.TR_FMP_API_KEY }}
+      ETRADE_CONSUMER_KEY: ${{ secrets.ETRADE_CONSUMER_KEY }}
+      ETRADE_API_KEY: ${{ secrets.ETRADE_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Metadata-only access report
+        run: python -m cloud_compute.s4p_source_access_probe
+      - uses: actions/upload-artifact@v4
+        with:
+          name: s4p-source-access-probe
+          path: s4p-source-access-probe.json
