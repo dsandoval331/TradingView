@@ -12,7 +12,7 @@ class TechProviderContract(unittest.TestCase):
         self.assertIn('IGV',tech.SYMBOLS);self.assertIn('VRT',tech.SYMBOLS)
     def test_new_collector_exchange_dates_and_no_duplicate_acceptance(self):
         start=datetime(2025,1,1,tzinfo=ZoneInfo('America/New_York'))
-        p={'ticker':'VRT','adjusted':True,'status':'OK','results':[{'t':int((start+timedelta(days=i)).timestamp()*1000),'c':100+i,'v':1000} for i in range(30)]}
+        p={'ticker':'VRT','adjusted':True,'status':'OK','results':[{'t':int((start+timedelta(days=i)).timestamp()*1000),'c':100+i,'o':99+i,'h':101+i,'l':98+i,'v':1000} for i in range(30)]}
         self.assertEqual(tech.normalize(p,'VRT','2025-01-01','2025-01-30')[0]['trade_date'],'2025-01-01')
         p['results'].append(p['results'][0])
         with self.assertRaises(ValueError):tech.normalize(p,'VRT','2025-01-01','2025-01-30')

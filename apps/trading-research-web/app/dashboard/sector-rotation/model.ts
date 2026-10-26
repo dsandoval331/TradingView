@@ -12,7 +12,7 @@ export const SECTORS = [
   { symbol: 'XLRE', name: 'Real Estate', short: 'Real Estate' },
   { symbol: 'XLC', name: 'Communication Services', short: 'Communication' },
 ] as const;
-export type Bar = { symbol: string; trade_date: string; close: number | string; volume: number | string; collected_at?: string };
+export type Bar = { symbol: string; trade_date: string; close: number | string; open?: number | string | null; high?: number | string | null; low?: number | string | null; volume: number | string; collected_at?: string };
 export type Cell = { symbol: string; close: number | null; daily: number | null; relative: number | null; five: number | null; twenty: number | null; rank: number | null; rankChange: number | null };
 export type Session = { date: string; spy: number | null; cells: Record<string, Cell>; complete: boolean; leader: string | null; laggard: string | null; spread: number | null };
 export type Metric = 'relative' | 'daily' | 'rank' | 'rankChange';

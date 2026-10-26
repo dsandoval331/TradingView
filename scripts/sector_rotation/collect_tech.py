@@ -52,10 +52,16 @@ def normalize(payload, symbol, start, end):
     for bar in payload.get('results', []):
         day = datetime.fromtimestamp(bar['t']/1000, ET).date().isoformat()
         close, volume = float(bar['c']), float(bar['v'])
+        try:
+            opening, high, low = (float(bar[k]) for k in ('o','h','l'))
+        except (KeyError,TypeError,ValueError):
+            raise ValueError('INVALID_OHLC') from None
+        if not all(math.isfinite(v) and v > 0 for v in (opening,high,low)) or low > min(opening,close) or high < max(opening,close):
+            raise ValueError('INVALID_OHLC')
         if not start <= day <= end or day in seen or not math.isfinite(close) or close <= 0 or not math.isfinite(volume) or volume < 0:
             raise ValueError('INVALID_BAR')
         seen.add(day)
-        result.append({'symbol':symbol,'trade_date':day,'close':close,'volume':volume})
+        result.append({'symbol':symbol,'trade_date':day,'close':close,'volume':volume,'open':opening,'high':high,'low':low})
     if len(result) < 25:
         raise ValueError('INSUFFICIENT_HISTORY')
     return sorted(result, key=lambda row: row['trade_date'])
@@ -98,12 +104,12 @@ def main():
             old = {}
             offset = 0
             while True:
-                page = db(f'v_tech_daily_latest?symbol=eq.{symbol}&trade_date=gte.{start}&select=trade_date,close,volume&order=trade_date&limit=1000&offset={offset}')
-                old.update({r['trade_date']:(float(r['close']),float(r['volume'])) for r in page})
+                page = db(f'v_tech_daily_latest?symbol=eq.{symbol}&trade_date=gte.{start}&select=trade_date,close,volume,open,high,low&order=trade_date&limit=1000&offset={offset}')
+                old.update({r['trade_date']:tuple(float(r[k]) if r.get(k) is not None else None for k in ('close','volume','open','high','low')) for r in page})
                 if len(page) < 1000:
                     break
                 offset += 1000
-            changed = [{**r,'run_id':run_id,'response_sha256':digest} for r in rows if old.get(r['trade_date']) != (r['close'],r['volume'])]
+            changed = [{**r,'run_id':run_id,'response_sha256':digest} for r in rows if old.get(r['trade_date']) != tuple(r[k] for k in ('close','volume','open','high','low'))]
             for offset in range(0,len(changed),300):
                 db('tech_daily_observations','POST',changed[offset:offset+300])
             count += len(changed)
