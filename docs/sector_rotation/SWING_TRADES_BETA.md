@@ -28,3 +28,7 @@ Archive uses a fixed measurement horizon, not a separately materialized immutabl
 60 Node checks and Next.js production build/typecheck pass. New tests cover Day 0, weekend/holiday counting, Day 15/16 boundaries, Long/Short MFA/MAE, exclusion of Day 0 highs/lows and future bars, missing/invalid/duplicate data, unchanged results from bars after the cutoff, empty production state, reasoning before rows, Archive and basket exclusion.
 
 Browser fixture used clearly labeled synthetic entries/prices, verified empty state, Active reasoning and all nine columns, and visible Archive reasoning/final-price fields. No real suggestions were inserted. Signed-in production flow was not tested.
+
+## Numbered methods
+
+See [SWING_METHODS_V1.md](SWING_METHODS_V1.md). Suggestions now require `methodId` (1 or 2), displayed in reasoning and Active/Archive tables. Method #1 awaits user rules; #2 is a researched RSI(2) trend-pullback draft. The signal loader remains empty pending complete rules and validation.
