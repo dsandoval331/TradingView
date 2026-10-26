@@ -5,7 +5,7 @@ import type {SessionWindow} from './session-window';
 const EPS=1e-10;
 export type EventStreak={symbol:string;green:number;red:number;longestGreen:number;longestRed:number;available:boolean};
 export type AverageEvent={symbol:string;side:'Long'|'Short';value:number;average:number};
-export const EVENT_MEASURES=['relative','daily','rank','rankChange'] as const;
+export const EVENT_MEASURES=['relative','daily','rank','rankChange','rsiRelative','mansfield'] as const;
 export type StreakWinner={days:number;symbols:string[]}|null;
 export type MeasureLeaders={metric:Metric;green:StreakWinner;red:StreakWinner};
 export type DailyEvents={date:string;ema:{symbol:string;days:number;close:number;ema:number;averageStreak:number|null;completedStreaks:number}[];averages:AverageEvent[];streaks:EventStreak[];currentLongest:MeasureLeaders[];rankUp:{symbols:string[];change:number}|null;rankDown:{symbols:string[];change:number}|null;baselineUnavailable:number};
@@ -83,3 +83,7 @@ export function completedMarkerAverage(markers:readonly (boolean|null)[],index:n
  }
  return {averageStreak:completed.length?completed.reduce((a,b)=>a+b,0)/completed.length:null,completedStreaks:completed.length};
 }
+
+export const EVENT_LOG_MAX_DAYS=120;
+/** A new daily section displaces the oldest; source price history is retained for indicators. */
+export function rollingEventDays(history:readonly DailyEvents[],visibleDates:ReadonlySet<string>):DailyEvents[]{return history.filter(day=>visibleDates.has(day.date)).slice(-EVENT_LOG_MAX_DAYS).reverse();}

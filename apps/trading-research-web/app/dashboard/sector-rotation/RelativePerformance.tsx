@@ -4,8 +4,8 @@ import type { Metric, Session } from './model';
 import { formatValue } from './model';
 import { directionalMoveStats } from './normal-move';
 import styles from './tracker.module.css';
-const titles:Record<Metric,string>={relative:'Relative daily performance',daily:'Daily return',rank:'Daily rank',rankChange:'Rank change'};
-const units:Record<Metric,string>={relative:'Daily return minus SPY · percentage points',daily:'Close-to-close price return · %',rank:'Rank within this view · #1 is strongest',rankChange:'Change in rank · positive means improvement · places'};
+const titles:Record<Metric,string>={relative:'Relative daily performance',daily:'Daily return',rank:'Daily rank',rankChange:'Rank change',rsiRelative:'RSI vs SPY RSI',mansfield:'Mansfield Relative Strength'};
+const units:Record<Metric,string>={relative:'Daily return minus SPY · percentage points',daily:'Close-to-close price return · %',rank:'Rank within this view · #1 is strongest',rankChange:'Change in rank · positive means improvement · places',rsiRelative:'Wilder RSI (14) minus SPY RSI (14) · RSI points',mansfield:'Relative-price ratio versus its 200-session SMA · %'};
 export default function RelativePerformance({sessions,timeline,symbol,selectedDate,metric='relative',onSelect,scrollRef,onScroll}:{sessions:readonly Session[];timeline:readonly Session[];symbol:string;selectedDate:string|undefined;metric?:Metric;onSelect:(date:string)=>void;scrollRef?:RefObject<HTMLDivElement|null>;onScroll?:UIEventHandler<HTMLDivElement>}) {
   const layout=chartLayout(timeline.length);
   const returns=metric==='relative'||metric==='daily';
@@ -13,7 +13,7 @@ export default function RelativePerformance({sessions,timeline,symbol,selectedDa
   const complete=stats.historySessions===stats.lookback&&stats.missingSessions===0;
   const up=returns&&complete&&stats.up.count>=stats.minDirectionDays?stats.up.mean:null;
   const down=returns&&complete&&stats.down.count>=stats.minDirectionDays?stats.down.mean:null;
-  const format=(n:number|null)=>formatValue(n,metric)+(n!==null?(metric==='relative'?' pp':metric==='rankChange'?' places':''):'');
+  const format=(n:number|null)=>formatValue(n,metric)+(n!==null?(metric==='relative'?' pp':metric==='rankChange'?' places':metric==='rsiRelative'?' RSI pts':''):'');
   const current=sessions.find(d=>d.date===selectedDate)?.cells[symbol]?.[metric]??null;
   const values=timeline.map(d=>d.cells[symbol]?.[metric]??null).filter((v):v is number=>v!==null);
   const high=values.length?Math.max(...values):null;
@@ -31,7 +31,7 @@ export default function RelativePerformance({sessions,timeline,symbol,selectedDa
     {returns?<div className={styles.relativeLegend}>
       <span className={styles.averageUp}><i/>Average up: {up===null?'unavailable':format(up)} · {stats.up.count} days</span>
       <span className={styles.averageDown}><i/>Average down: {down===null?'unavailable':format(down)} · {stats.down.count} days</span>
-    </div>:<p className={styles.relativeMeta}>{metric==='rank'?'#1 is the strongest rank; lower numbers are better.':'↑ means improvement toward #1; ↓ means a loss of places.'} Average up/down return lines apply to the two return measures.</p>}
+    </div>:<p className={styles.relativeMeta}>{metric==='rank'?'#1 is the strongest rank; lower numbers are better.':metric==='rankChange'?'↑ means improvement toward #1; ↓ means a loss of places.':'Positive/negative values show relative strength/weakness around zero.'} Average up/down return lines apply to the two return measures.</p>}
     <div className={styles.chartScroll} ref={scrollRef} onScroll={onScroll} tabIndex={0} role="region" aria-label="Scrollable performance history"><div data-chart-width={layout.width} style={{width:layout.width,paddingLeft:layout.left,paddingRight:layout.right}}>
     <div className={`${styles.relativePlot} ${styles.alignedPlot} ${metric==='rank'?styles.rankPlot:''}`} aria-label={`${titles[metric]} history`}>
       {timeline.map(day=>{const value=day.cells[symbol]?.[metric]??null;return <button key={day.date} title={`${day.date}: ${format(value)}`} aria-label={`${day.date}: ${format(value)}`} aria-pressed={day.date===selectedDate} onClick={()=>onSelect(day.date)}>
@@ -43,7 +43,7 @@ export default function RelativePerformance({sessions,timeline,symbol,selectedDa
     </div>
     <div className={`${styles.chartSessionDates} ${styles.alignedDates}`}>{timeline.map((day,i)=><time key={day.date} dateTime={day.date} aria-label={day.date}>{(i%layout.labelEvery===0||i===timeline.length-1)&&<>{day.date.slice(5)}<span>{day.date.slice(0,4)}</span></>}</time>)}</div>
     </div></div>
-    <p className={styles.relativeMeta}>Same sessions as the heatmap, oldest to newest. Horizontal scrolling is linked to the daily price chart. {metric==='rank'?'Ranks start at zero at the bottom; #1 is strongest.':`Zero ${metric==='relative'?'pp':metric==='daily'?'%':'places'} at center.`}</p>
+    <p className={styles.relativeMeta}>Same sessions as the heatmap, oldest to newest. Horizontal scrolling is linked to the daily price chart. {metric==='rank'?'Ranks start at zero at the bottom; #1 is strongest.':`Zero ${metric==='relative'?'pp':metric==='daily'||metric==='mansfield'?'%':metric==='rsiRelative'?'RSI pts':'places'} at center.`}</p>
     {returns&&<p className={styles.relativeMeta}>Lines average positive and negative {metric==='relative'?'relative-to-SPY moves':'daily price returns'} separately over the 60 sessions before {selectedDate??'the selected day'}; the selected day is excluded. {stats.startDate&&`${stats.startDate} through ${stats.endDate}.`} {(!complete||up===null||down===null)&&'Each line requires 60 complete prior returns and at least five days in that direction.'}</p>}
   </section>;
 }
