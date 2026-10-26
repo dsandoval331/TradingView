@@ -42,3 +42,19 @@ test('roundoff-flat returns do not create a directional sample or division by ze
  assert.equal(stats(days).reason,'flat');assert.equal(stats(days).flatDays,1);assert.equal(stats(days).ratio,null);
  assert.throws(()=>directionalMoveStats(days,'XLK',days[61].date,0),/Invalid/);
 });
+test('relative baseline classifies moves against SPY independently of price direction',()=>{
+ const days=fixture();for(let i=0;i<days.length;i++)days[i].cells.XLK.relative=i%2===0?-.25:.75;
+ days[61].cells.XLK.relative=1.5;days[62].cells.XLK.relative=999;
+ const s=directionalMoveStats(days,'XLK',days[61].date,60,5,'relative');
+ assert.equal(s.up.mean,.75);assert.equal(s.down.mean,-.25);assert.equal(s.up.count,30);assert.equal(s.down.count,30);assert.equal(s.ratio,2);
+ assert.equal(stats(days).up.mean,1);assert.equal(stats(days).down.mean,-2);
+ days[61].cells.XLK.relative=-30;days[62].cells.XLK.relative=-999;
+ const historical=directionalMoveStats(days,'XLK',days[61].date,60,5,'relative');
+ assert.deepEqual(historical.up,s.up);assert.deepEqual(historical.down,s.down);
+});
+test('a missing relative observation cannot borrow a valid price return',()=>{
+ const days=fixture();for(const d of days)d.cells.XLK.relative=.5;
+ days[10].cells.XLK.relative=null;
+ const s=directionalMoveStats(days,'XLK',days[61].date,60,5,'relative');
+ assert.equal(s.missingSessions,1);assert.equal(s.reason,'incomplete_history');assert.equal(s.ratio,null);
+});

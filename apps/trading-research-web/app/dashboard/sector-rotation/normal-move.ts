@@ -9,19 +9,19 @@ export type NormalMoveStats = {
   up:DirectionalAverage;down:DirectionalAverage;matchingMean:number|null;ratio:number|null;percentVsAverage:number|null;
   reason:'ready'|'no_session'|'no_return'|'flat'|'incomplete_history'|'small_sample';
 };
-export function directionalMoveStats(sessions:readonly Session[],symbol:string,date:string|undefined,lookback=NORMAL_LOOKBACK,minDirectionDays=MIN_DIRECTION_DAYS):NormalMoveStats {
+export function directionalMoveStats(sessions:readonly Session[],symbol:string,date:string|undefined,lookback=NORMAL_LOOKBACK,minDirectionDays=MIN_DIRECTION_DAYS,measure:'daily'|'relative'='daily'):NormalMoveStats {
   if(!Number.isInteger(lookback)||lookback<1||!Number.isInteger(minDirectionDays)||minDirectionDays<1) throw new Error('Invalid directional comparison window');
   const index=date?sessions.findIndex(d=>d.date===date):-1;
   const baseline=index<0?[]:sessions.slice(Math.max(0,index-lookback),index);
   let upSum=0,downSum=0,upCount=0,downCount=0,missing=0,flat=0;
   for(const session of baseline){
-    const value=session.cells[symbol]?.daily;
+    const value=session.cells[symbol]?.[measure];
     if(value==null||!Number.isFinite(value)){missing++;continue;}
     if(value>FLAT_EPSILON){upSum+=value;upCount++;}
     else if(value < -FLAT_EPSILON){downSum+=value;downCount++;}
     else flat++;
   }
-  const value=index<0?null:sessions[index].cells[symbol]?.daily;
+  const value=index<0?null:sessions[index].cells[symbol]?.[measure];
   const current=value==null||!Number.isFinite(value)?null:value;
   const direction=current===null?null:Math.abs(current)<=FLAT_EPSILON?'flat':current>0?'up':'down';
   const up={mean:upCount?upSum/upCount:null,count:upCount};
