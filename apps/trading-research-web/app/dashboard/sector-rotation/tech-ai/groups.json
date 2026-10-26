@@ -1,0 +1,68 @@
+{
+  "version": "TECH_AI_V1",
+  "selected_on": "2026-10-25",
+  "historical_membership": "current_selected_basket_retrospective_not_point_in_time",
+  "benchmark": "SPY",
+  "weighting": "equal_weight_rebalanced_each_session_before_returns; price_only_no_costs",
+  "groups": [
+    {
+      "symbol": "IGV",
+      "name": "Tech Software",
+      "short": "Software",
+      "kind": "etf",
+      "members": [
+        "IGV"
+      ],
+      "note": "Software ETF proxy; also includes selected interactive media/services. ETF weights are issuer-defined."
+    },
+    {
+      "symbol": "HW",
+      "name": "Tech Hardware",
+      "short": "Hardware",
+      "kind": "basket",
+      "members": [
+        "AAPL",
+        "DELL",
+        "HPQ",
+        "HPE",
+        "ANET",
+        "CSCO",
+        "STX",
+        "WDC"
+      ],
+      "note": "Devices, servers, networking and storage. Chip producers excluded from this selected basket."
+    },
+    {
+      "symbol": "AI-CHIP",
+      "name": "AI / Semiconductors",
+      "short": "AI \u00b7 Chips",
+      "kind": "basket",
+      "members": [
+        "NVDA",
+        "AMD",
+        "AVGO",
+        "MRVL",
+        "MU",
+        "TSM"
+      ],
+      "note": "Selected AI-related chip designers, memory and foundry companies. Their revenues are not exclusively AI."
+    },
+    {
+      "symbol": "AI-OTHER",
+      "name": "AI / Non-semiconductors",
+      "short": "AI \u00b7 Non-chips",
+      "kind": "basket",
+      "members": [
+        "MSFT",
+        "GOOGL",
+        "AMZN",
+        "META",
+        "ORCL",
+        "PLTR",
+        "ANET",
+        "VRT"
+      ],
+      "note": "Cloud, software, platforms, AI networking, power and cooling. Non-semiconductor primary businesses may also develop custom chips. ANET overlaps the hardware basket."
+    }
+  ]
+}
