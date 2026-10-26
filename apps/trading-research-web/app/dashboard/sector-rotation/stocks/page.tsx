@@ -1,3 +1,5 @@
+import {loadSwingSuggestions} from '../swing-data';
+import {marketDate} from '../swing-trades';
 import Tracker from '../Tracker';
 import TrackerNav from '../TrackerNav';
 import {loadStockHistory,stockClient} from './data';
@@ -20,6 +22,6 @@ export default async function StockPage({searchParams}:{searchParams:Promise<{sy
  {data?.error&&<p role="alert">{data.error}</p>}
  {symbol&&!hasStock&&<p role="status">{request?.last_error?'Collection could not validate this symbol. Check the ticker; the overnight collector will retry.':request?'History requested. This symbol will be collected during the next overnight update. Refresh this page afterward.':'No history is loaded for this symbol. Submit the symbol above to request it.'}</p>}
  {hasStock&&request?.last_error&&<p role="alert">The latest collection failed for this symbol. Showing its last verified history.</p>}
- {data&&hasStock&&<Tracker key={symbol!} stocks singleStock groups={[{symbol:symbol!,name,short:name}]} title={`${symbol} stock history`} bars={data.bars} updatedAt={data.updatedAt} latestSession={data.latestSession} runStatus="COMPLETE" error={data.error}/>}
+ {data&&hasStock&&<Tracker swingSuggestions={await loadSwingSuggestions()} asOfDate={marketDate()} key={symbol!} stocks singleStock groups={[{symbol:symbol!,name,short:name}]} title={`${symbol} stock history`} bars={data.bars} updatedAt={data.updatedAt} latestSession={data.latestSession} runStatus="COMPLETE" error={data.error}/>}
  </main>;
 }

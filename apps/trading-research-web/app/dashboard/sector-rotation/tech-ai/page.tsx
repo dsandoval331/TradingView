@@ -1,3 +1,5 @@
+import {loadSwingSuggestions} from '../swing-data';
+import {marketDate} from '../swing-trades';
 import TrackerNav from '../TrackerNav';
 import { redirect } from 'next/navigation';
 import { createClient } from '../../../../lib/supabase/server';
@@ -25,5 +27,5 @@ export default async function TechAIPage() {
       if ((result.data?.length??0)<1000) break;
     }
   }
-  return <main><TrackerNav/><Tracker tech groups={TECH_GROUPS} title="Tech & AI rotation" bars={buildTechBars(bars)} updatedAt={latest?.completed_at??null} latestSession={latest?.latest_session??null} runStatus={runs?.[0]?.status??'NOT_STARTED'} error={error}/></main>;
+  return <main><TrackerNav/><Tracker swingSuggestions={await loadSwingSuggestions()} asOfDate={marketDate()} tech groups={TECH_GROUPS} title="Tech & AI rotation" bars={buildTechBars(bars)} updatedAt={latest?.completed_at??null} latestSession={latest?.latest_session??null} runStatus={runs?.[0]?.status??'NOT_STARTED'} error={error}/></main>;
 }
