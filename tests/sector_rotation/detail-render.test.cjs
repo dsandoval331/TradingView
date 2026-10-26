@@ -292,9 +292,58 @@ test('numbered methods persist in Active and Archive and unidentified suggestion
   assert.deepEqual(trackSwingTrades(suggestions,swingBars,date).map(row=>row.methodId),[1,2]);
   const html=renderToStaticMarkup(React.createElement(Swing,{bars:swingBars,groups:[{symbol:'X',name:'Fixture',short:'Fixture'}],asOfDate:date,suggestions}));
   assert.match(html,/#1 · Sector rotation/);assert.match(html,/#2 · RSI\(2\) trend pullback/);
-  assert.match(html,/<th scope="col">Method<\/th>/);assert.match(html,/Research draft/);assert.match(html,/Rules draft/);
+  assert.match(html,/<th scope="col">Method<\/th>/);assert.match(html,/Retrospective screen/);assert.match(html,/Rules draft/);
  }
  assert.throws(()=>trackSwingTrades([{...swingSuggestion,methodId:3}],[], '2026-10-27'),/Invalid swing suggestion/);
  const {methodId,...unidentified}=swingSuggestion;
  assert.throws(()=>trackSwingTrades([unidentified],[], '2026-10-27'),/Invalid swing suggestion/);
+});
+
+test('retrospective swing entries show provenance and retain newest-first order',()=>{
+ const Swing=require(path.join(app,'app/dashboard/sector-rotation/SwingTrades.tsx')).default;
+ const suggestions=[{...swingSuggestion,id:'older',methodId:2,origin:'retrospective',recordedAt:'2026-10-26T22:00:00Z',suggestedDate:'2026-10-20',reason:'Older retrospective row.'},{...swingSuggestion,id:'newer',methodId:2,origin:'retrospective',recordedAt:'2026-10-26T22:00:00Z',suggestedDate:'2026-10-23',reason:'Newest retrospective row.'}];
+ const html=renderToStaticMarkup(React.createElement(Swing,{bars:swingBars,groups:[{symbol:'X',name:'Fixture',short:'Fixture'}],asOfDate:'2026-10-26',suggestions}));
+ assert.ok(html.indexOf('Newest retrospective row.')<html.indexOf('Older retrospective row.'));
+ assert.match(html,/Retrospective match/);assert.match(html,/Added 2026-10-26/);assert.match(html,/signal-day closing reference/);
+});
+test('Method 2 screen respects strict thresholds, warmup, gaps, date bounds and repeated matching days',()=>{
+ const {backfillMethodTwo}=require(path.join(app,'app/dashboard/sector-rotation/method-two.ts'));
+ const date=i=>new Date(Date.UTC(2026,0,1+i)).toISOString().slice(0,10);
+ const prices=Array.from({length:220},(_,i)=>i<210?100+i:300-(i-210)*2);
+ const bars=prices.flatMap((close,i)=>[{symbol:'X',trade_date:date(i),close,volume:1},{symbol:'SPY',trade_date:date(i),close:100,volume:1}]);
+ const rows=backfillMethodTwo(bars,['X'],'2026-08-08');
+ assert.ok(rows.length>1);assert.ok(rows.every(s=>s.side==='long'&&s.methodId===2&&s.origin==='retrospective'));
+ assert.deepEqual(rows.map(s=>s.suggestedDate),rows.map(s=>s.suggestedDate).sort().reverse());
+ const {weekdaysSince}=require(path.join(app,'app/dashboard/sector-rotation/swing-trades.ts'));
+ assert.ok(rows.every(s=>weekdaysSince(s.suggestedDate,'2026-08-08')<15));
+ assert.equal(new Set(rows.map(s=>s.id)).size,rows.length);
+ const oldest=rows.at(-1);
+ const {addWeekdays}=require(path.join(app,'app/dashboard/sector-rotation/swing-trades.ts'));
+ assert.ok(backfillMethodTwo(bars,['X'],addWeekdays(oldest.suggestedDate,14)).some(s=>s.id===oldest.id));
+ assert.ok(!backfillMethodTwo(bars,['X'],addWeekdays(oldest.suggestedDate,15)).some(s=>s.id===oldest.id));
+ const {methodTwoSide}=require(path.join(app,'app/dashboard/sector-rotation/method-two.ts'));
+ assert.equal(methodTwoSide(101,100,5),null);assert.equal(methodTwoSide(99,100,95),null);
+ assert.equal(methodTwoSide(100,100,1),null);assert.equal(methodTwoSide(100,100,99),null);
+ assert.equal(methodTwoSide(101,100,4.999),'long');assert.equal(methodTwoSide(99,100,95.001),'short');
+ const earlier=backfillMethodTwo(bars,['X'],rows.at(-1).suggestedDate);
+ assert.deepEqual(earlier.find(s=>s.id===rows.at(-1).id),rows.at(-1));
+ assert.deepEqual(backfillMethodTwo(bars.slice(0,398),['X'],date(198)),[]);
+ assert.deepEqual(backfillMethodTwo(bars.filter(b=>!(b.symbol==='X'&&b.trade_date===date(205))),['X'],'2026-08-08'),[]);
+ assert.deepEqual(backfillMethodTwo(bars,['SPY'],'2026-08-08'),[]);
+ assert.deepEqual(backfillMethodTwo(bars,['X'],'2026-09-08'),[]);
+ assert.throws(()=>backfillMethodTwo([...bars,bars[0]],['X'],'2026-08-08'),/Duplicate/);
+ const flat=bars.map(b=>({...b,close:100}));assert.deepEqual(backfillMethodTwo(flat,['X'],'2026-08-08'),[]);
+ const short=prices.map(p=>400-p).flatMap((close,i)=>[{symbol:'X',trade_date:date(i),close,volume:1},{symbol:'SPY',trade_date:date(i),close:100,volume:1}]);
+ assert.ok(backfillMethodTwo(short,['X'],'2026-08-08').some(s=>s.side==='short'));
+});
+
+test('recorded swing loader paginates snapshots, converts prices and surfaces database errors',async()=>{
+ const Module=require('node:module'),original=Module._load;let fail=false;const calls=[];
+ const sample={id:'fixture',method_id:2,method_version:'rsi2-sma200-v1',symbol:'X',suggested_date:'2026-10-23',side:'long',entry_price:'100.25',reason:'Fixture',origin:'retrospective',recorded_at:'2026-10-26T22:00:00Z'};
+ const client={from(table){assert.equal(table,'sector_swing_suggestions');return {select(){return this;},order(){return this;},async range(start,end){calls.push([start,end]);return fail?{error:{message:'offline'},data:null}:{data:start===0?Array.from({length:1000},(_,i)=>({...sample,id:`fixture-${i}`})):[{...sample,id:'last'}],error:null};}};}};
+ Module._load=function(request,parent,isMain){if(request==='server-only')return {};if(request==='../../../lib/supabase/server')return {createClient:async()=>client};return original.call(this,request,parent,isMain);};
+ let load;
+ try{const file=path.join(app,'app/dashboard/sector-rotation/swing-data.ts');delete require.cache[require.resolve(file)];load=require(file).loadSwingSuggestions;}finally{Module._load=original;}
+ const rows=await load();assert.equal(rows.length,1001);assert.equal(rows[0].entryPrice,100.25);assert.equal(rows[0].origin,'retrospective');assert.deepEqual(calls,[[0,999],[1000,1999]]);
+ fail=true;await assert.rejects(load(),/could not be loaded/);
 });

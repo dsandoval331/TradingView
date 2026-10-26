@@ -4,7 +4,7 @@
 
 Suggested Swing Trades (Beta) now contains a numbered Methods list. Method 1 is Sector rotation, based on the user-supplied framework and labeled Rules draft. Method 2 is the researched RSI(2) trend-pullback proposal, explicitly labeled Research draft. Active and Archive tables have a Method column, and reasoning cards carry the same method number/name.
 
-Every suggestion must supply `methodId: 1 | 2`. The tracking engine rejects missing or unknown IDs rather than guessing attribution. IDs survive the Day 16 archive transition. Separate suggestions for the same symbol under different methods remain separate records, keyed by their recorded suggestion IDs. Existing Day 0, weekday age, Day 15 horizon and excursion behavior are unchanged. No real recorded suggestions currently exist; the server loader remains empty.
+Every suggestion must supply `methodId: 1 | 2`. The tracking engine rejects missing or unknown IDs rather than guessing attribution. IDs survive the Day 16 archive transition. Separate suggestions for the same symbol under different methods remain separate records, keyed by their recorded suggestion IDs. Existing Day 0, weekday age, Day 15 horizon and excursion behavior are unchanged. The subsequently authorized recent retrospective population is documented in METHOD2_RECENT_BACKFILL.md; the server loader now reads those recorded snapshots.
 
 ## Method 1: user-supplied Sector rotation framework
 
@@ -32,7 +32,7 @@ Sources read October 26, 2026:
 - https://chartschool.stockcharts.com/table-of-contents/trading-strategies-and-models/trading-strategies/rsi-2
 - https://cmtassociation.org/wp-content/uploads/2024/01/0808-connors-1.pdf
 
-There is no demonstrated performance claim for the tracked universe. No strategy backtest, parameter search, protected outcome inspection, signal generator, paid data change, additional collection job or activation occurs in this release. This draft supplies a concrete idea for subsequent specification and testing.
+There is no demonstrated performance claim for the tracked universe. The initial numbering release performed no strategy backtest, parameter search, protected outcome inspection or signal generation. The later bounded recent retrospective screen is documented separately in METHOD2_RECENT_BACKFILL.md; no parameter tuning or scheduled forward activation is implied. This draft supplies a concrete idea for subsequent specification and testing.
 
 ## Next implementation inputs
 
