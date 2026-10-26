@@ -49,3 +49,20 @@ test('streak panel renders two-decimal means, counts and the selected measure',(
  const relative=renderToStaticMarkup(React.createElement(StreakSummary,{sessions:days,symbol:'XLK',date:'8',measure:'relative'}));
  assert.match(relative,/Relative to SPY/);assert.match(relative,/outperforming SPY/);
 });
+test('daily candles sit after Sector Detail and use every filtered heatmap session',()=>{
+ const {SECTORS}=require(path.join(app,'app/dashboard/sector-rotation/model.ts'));
+ const Tracker=require(path.join(app,'app/dashboard/sector-rotation/Tracker.tsx')).default;
+ const bars=Array.from({length:130},(_,i)=>['SPY',...SECTORS.map(s=>s.symbol)].map((symbol,j)=>({symbol,trade_date:new Date(Date.UTC(2025,0,1+i)).toISOString().slice(0,10),open:100+i+j,high:104+i+j,low:99+i+j,close:102+i+j,volume:1}))).flat();
+ const html=renderToStaticMarkup(React.createElement(Tracker,{bars,updatedAt:null,latestSession:bars.at(-1).trade_date,runStatus:'COMPLETE',error:null}));
+ const dates=[...html.split('<thead>')[1].split('</thead>')[0].matchAll(/<small>(\d{4}-\d{2}-\d{2})<\/small>/g)].map(m=>m[1]);
+ const candleDates=[...html.matchAll(/data-candle-date="([^"]+)"/g)].map(m=>m[1]);
+ assert.deepEqual(candleDates,[...dates].reverse());assert.ok(html.indexOf('DAILY PRICE HISTORY')>html.indexOf('</aside>'));
+ assert.match(html,/Open \$230.00/);assert.match(html,/60 of 60 sessions available/);
+});
+test('basket chart is close-only, keeps missing gaps, and custom windows have no extra sessions',()=>{
+ const Daily=require(path.join(app,'app/dashboard/sector-rotation/DailyCandles.tsx')).default;
+ const days=[100,null,102].map((close,i)=>({date:`2025-01-0${i+2}`,cells:{HW:{close}}}));
+ const html=renderToStaticMarkup(React.createElement(Daily,{bars:[],sessions:days,group:{symbol:'HW',kind:'basket'},selectedDate:days[2].date,onSelect:()=>{}}));
+ assert.match(html,/Basket closing index/);assert.match(html,/2 of 3 sessions available/);assert.doesNotMatch(html,/Open \$/);
+ assert.match(html,/<path d="M[^L]+M/);assert.equal((html.match(/data-candle-date=/g)||[]).length,3);
+});

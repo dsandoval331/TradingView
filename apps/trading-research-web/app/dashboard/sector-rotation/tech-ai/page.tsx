@@ -19,7 +19,7 @@ export default async function TechAIPage() {
   let error = runError ? 'The sector data service is unavailable. No sample values are substituted.' : null;
   if (latest) {
     for (let offset=0; ;offset+=1000) {
-      const result=await supabase.from('v_tech_daily_latest').select('symbol,trade_date,close,volume,collected_at').gte('trade_date',latest.requested_start).order('trade_date').order('symbol').range(offset,offset+999);
+      const result=await supabase.from('v_tech_daily_latest').select('symbol,trade_date,close,volume,collected_at,open,high,low').gte('trade_date',latest.requested_start).order('trade_date').order('symbol').range(offset,offset+999);
       if (result.error) { error='Sector history could not be loaded. Please try again.'; bars=[]; break; }
       bars.push(...(result.data??[]) as Bar[]);
       if ((result.data?.length??0)<1000) break;
