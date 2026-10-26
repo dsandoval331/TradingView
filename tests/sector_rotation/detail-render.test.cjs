@@ -75,3 +75,15 @@ test('price chart defaults to 20 EMA with a line dropdown and uses full pre-wind
  assert.match(html,/data-overlay="ema20"/);assert.match(html,/20 EMA · \$169.50/);assert.match(html,/20 of 20 sessions available/);
  assert.doesNotMatch(html,/Unavailable · needs 20 consecutive closes/);
 });
+test('heatmap has latest Price before historical dates and marks only closes below a warmed-up EMA',()=>{
+ const {SECTORS}=require(path.join(app,'app/dashboard/sector-rotation/model.ts'));
+ const Tracker=require(path.join(app,'app/dashboard/sector-rotation/Tracker.tsx')).default;
+ const fixture=(falling)=>Array.from({length:30},(_,i)=>['SPY',...SECTORS.map(s=>s.symbol)].map(symbol=>({symbol,trade_date:new Date(Date.UTC(2025,0,1+i)).toISOString().slice(0,10),close:falling?300-i:300,volume:1}))).flat();
+ const render=(falling)=>renderToStaticMarkup(React.createElement(Tracker,{bars:fixture(falling),updatedAt:null,latestSession:'2025-01-30',runStatus:'COMPLETE',error:null}));
+ const html=render(true),head=html.split('<thead>')[1].split('</thead>')[0];
+ assert.ok(head.indexOf('ETF / Group')<head.indexOf('Price'));assert.ok(head.indexOf('Price')<head.indexOf('Thu, Jan 30'));
+ assert.match(html,/<strong>\$271.00<\/strong>/);assert.match(html,/latest close on 2025-01-30: 271, daily return -0.37%/);
+ assert.equal((html.match(/>20E<\/sup>/g)||[]).length,11*11);
+ assert.match(html,/2025-01-20: close 281.00 below 20 EMA 290.50/);
+ assert.doesNotMatch(render(false),/>20E<\/sup>/);
+});
