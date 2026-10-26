@@ -1,6 +1,6 @@
 import type {Bar} from './model';
 export const SWING_METHODS=[
- {id:1,name:'Your method',status:'Awaiting your rules',description:'Entry conditions will be added from your supplied logic.'},
+ {id:1,name:'Sector rotation',status:'Rules draft',description:'Compare the 11 sector ETFs against SPY for improving or established leadership. Look for sector ETF pullbacks or the top 2–3 stocks within a leading sector, with breakout or moving-average support confirmation and broad-market alignment. Exact lookbacks and trigger thresholds are pending.'},
  {id:2,name:'RSI(2) trend pullback',status:'Research draft',description:'Proposed Long setup: close above the 200-session SMA and RSI(2) below 5. Proposed Short setup: close below the 200-session SMA and RSI(2) above 95. A testable starting point; validation and entry/exit rules remain to be finalized.'},
 ] as const;
 export type SwingMethodId=typeof SWING_METHODS[number]['id'];

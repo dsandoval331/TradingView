@@ -31,4 +31,4 @@ Browser fixture used clearly labeled synthetic entries/prices, verified empty st
 
 ## Numbered methods
 
-See [SWING_METHODS_V1.md](SWING_METHODS_V1.md). Suggestions now require `methodId` (1 or 2), displayed in reasoning and Active/Archive tables. Method #1 awaits user rules; #2 is a researched RSI(2) trend-pullback draft. The signal loader remains empty pending complete rules and validation.
+See [SWING_METHODS_V1.md](SWING_METHODS_V1.md). Suggestions now require `methodId` (1 or 2), displayed in reasoning and Active/Archive tables. Method #1 captures the user-supplied Sector rotation framework with precise thresholds pending; #2 is a researched RSI(2) trend-pullback draft. The signal loader remains empty pending complete rules and validation.

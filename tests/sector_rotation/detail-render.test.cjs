@@ -291,8 +291,8 @@ test('numbered methods persist in Active and Archive and unidentified suggestion
  for(const date of ['2026-10-27','2026-11-16']){
   assert.deepEqual(trackSwingTrades(suggestions,swingBars,date).map(row=>row.methodId),[1,2]);
   const html=renderToStaticMarkup(React.createElement(Swing,{bars:swingBars,groups:[{symbol:'X',name:'Fixture',short:'Fixture'}],asOfDate:date,suggestions}));
-  assert.match(html,/#1 · Your method/);assert.match(html,/#2 · RSI\(2\) trend pullback/);
-  assert.match(html,/<th scope="col">Method<\/th>/);assert.match(html,/Research draft/);assert.match(html,/Awaiting your rules/);
+  assert.match(html,/#1 · Sector rotation/);assert.match(html,/#2 · RSI\(2\) trend pullback/);
+  assert.match(html,/<th scope="col">Method<\/th>/);assert.match(html,/Research draft/);assert.match(html,/Rules draft/);
  }
  assert.throws(()=>trackSwingTrades([{...swingSuggestion,methodId:3}],[], '2026-10-27'),/Invalid swing suggestion/);
  const {methodId,...unidentified}=swingSuggestion;
