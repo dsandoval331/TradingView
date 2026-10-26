@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import TrackerNav from './TrackerNav';
 import { redirect } from 'next/navigation';
 import { createClient } from '../../../lib/supabase/server';
 import Tracker from './Tracker';
@@ -24,5 +24,5 @@ export default async function SectorRotationPage() {
       if ((result.data?.length??0)<1000) break;
     }
   }
-  return <main><Link href="/dashboard" style={{color:'#f2b84b'}}>← MULtipLY control center</Link><Link href="/dashboard/sector-rotation/tech-ai" style={{color:"#f2b84b",marginLeft:24}}>Tech &amp; AI detail →</Link><Tracker bars={bars} updatedAt={latest?.completed_at??null} latestSession={latest?.latest_session??null} runStatus={runs?.[0]?.status??'NOT_STARTED'} error={error}/></main>;
+  return <main><TrackerNav/><Tracker bars={bars} updatedAt={latest?.completed_at??null} latestSession={latest?.latest_session??null} runStatus={runs?.[0]?.status??'NOT_STARTED'} error={error}/></main>;
 }
