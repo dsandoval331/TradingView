@@ -27,3 +27,7 @@ This is a one-time backfill. Page loads read saved records; they do not regenera
 `scripts/sector_rotation/backfill_method_two.cjs` accepts explicit JSON on stdin: `{asOfDate,series:[{symbol,prices:[[date,close],...]}]}`. It runs the pure `method-two.ts` screen and emits candidate snapshots. It has no database credentials or network/write behavior. Keep raw observations and actual suggestion records out of source/client fixture bundles. Insert reviewed results through an authorized server-side data path, preserving their version and provenance.
 
 71 Node checks pass, covering strict thresholds, 200-session warmup, missing-data reset, no lookahead, Day 14 inclusion / Day 15 exclusion, repeated daily matches, stable IDs, newest-first display, loader pagination and errors. Next.js production build/typecheck passed. Independent database verification matched all 63 entry closes and SMA200 values to published prices, and confirmed every initial age below 15. RLS/role grants and security advisors were checked; no advisor finding references the new table. Browser QA used labeled synthetic records and verified newest-first Day 1/Day 14 rows and retrospective labels; no authenticated production access was bypassed.
+
+## Entry-price comparison follow-up
+
+See OPEN_ENTRY_COMPARISON.md. The same 63 saved signals now yield 126 table rows: original closing references plus next-session-open comparisons. These are derived entry variants, not additional strategy signals. The separate Strategy column displays Long or Short.

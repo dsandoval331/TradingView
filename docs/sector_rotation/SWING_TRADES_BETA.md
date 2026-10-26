@@ -14,7 +14,7 @@ Each suggestion requires a stable ID, symbol, suggestion date, Long/Short side, 
 
 - Day 0 is the suggestion date. Age counts Mon–Fri strictly afterward, including weekday market holidays. Weekends do not advance age; dates use America/New_York.
 - Active includes Days 0–15. On Day 16, display in Archive, freeze displayed age at 16, and cap all price measurements at the Day 15 calendar date. Archive reasoning is retained. Later price bars do not change archived outcomes.
-- Entry price is supplied explicitly. This version assumes suggestions are recorded at the daily close. Post-entry excursions therefore begin with the next daily bar, never the suggestion day's pre-entry high/low.
+- Entry price is supplied explicitly. Each signal now has two comparison rows: its recorded closing reference and the next actual trading session open. Closing-reference excursions begin with the following daily bar; next-open excursions include that opening session. See OPEN_ENTRY_COMPARISON.md.
 - MFA is maximum favorable advance. Long: max(0, highest post-entry high minus entry). Short: max(0, entry minus lowest post-entry low).
 - MAE is maximum adverse excursion. Long: max(0, entry minus lowest post-entry low). Short: max(0, highest post-entry high minus entry).
 - Both excursions show nonnegative dollar and percentage magnitudes. Current price is the latest available close through the active measurement date, or final close through Day 15 for Archive. Every price displays its as-of date.
@@ -32,3 +32,7 @@ Browser fixture used clearly labeled synthetic entries/prices, verified empty st
 ## Numbered methods
 
 See [SWING_METHODS_V1.md](SWING_METHODS_V1.md). Suggestions now require `methodId` (1 or 2), displayed in reasoning and Active/Archive tables. Method #1 captures the user-supplied Sector rotation framework with precise thresholds pending; #2 is the RSI(2) trend-pullback screen, with authorized recent retrospective matches now recorded. Strategy validation and executable entry/exit rules remain separate work.
+
+## Entry comparisons
+
+See [OPEN_ENTRY_COMPARISON.md](OPEN_ENTRY_COMPARISON.md). Each signal has Signal close and Next session open rows, with an explicit Long/Short Strategy column and entry reference dates. Pending next opens remain unavailable; age and archive timing stay anchored to the signal.
