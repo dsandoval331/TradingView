@@ -258,7 +258,7 @@ test('Swing Trades has empty Active/Archive without fabricated suggestions and r
  const props={bars:swingBars,groups,asOfDate:'2026-10-27'};
  const empty=renderToStaticMarkup(React.createElement(Swing,props));assert.match(empty,/Suggested Swing Trades/);assert.match(empty,/Beta/);assert.match(empty,/No active suggestions yet/);assert.match(empty,/Archive \(0\)/);assert.doesNotMatch(empty,/test-only|Synthetic test/);
  const active=renderToStaticMarkup(React.createElement(Swing,{...props,suggestions:[swingSuggestion]}));assert.ok(active.indexOf(swingSuggestion.reason)<active.indexOf('<table'));assert.match(active,/Day 2/);assert.match(active,/MFA/);assert.match(active,/MAE/);assert.match(active,/As of 2026-10-27/);
- const archive=renderToStaticMarkup(React.createElement(Swing,{...props,asOfDate:'2026-11-16',suggestions:[swingSuggestion]}));assert.match(archive,/Archive \(1\)/);assert.match(archive,/Final price/);assert.match(archive,/Day 16/);
+ const archive=renderToStaticMarkup(React.createElement(Swing,{...props,asOfDate:'2026-11-16',suggestions:[swingSuggestion]}));assert.match(archive,/Archive \(2\)/);assert.match(archive,/Final price/);assert.match(archive,/Day 16/);
  const excluded=renderToStaticMarkup(React.createElement(Swing,{...props,suggestions:[{...swingSuggestion,symbol:'HW'}]}));assert.match(excluded,/No active suggestions yet/);
 });
 test('rolling Event Log keeps at most 120 dates and each new date displaces the oldest',()=>{
@@ -346,4 +346,34 @@ test('recorded swing loader paginates snapshots, converts prices and surfaces da
  try{const file=path.join(app,'app/dashboard/sector-rotation/swing-data.ts');delete require.cache[require.resolve(file)];load=require(file).loadSwingSuggestions;}finally{Module._load=original;}
  const rows=await load();assert.equal(rows.length,1001);assert.equal(rows[0].entryPrice,100.25);assert.equal(rows[0].origin,'retrospective');assert.deepEqual(calls,[[0,999],[1000,1999]]);
  fail=true;await assert.rejects(load(),/could not be loaded/);
+});
+
+test('next-session open comparison uses actual sessions and includes entry-day excursions for both sides',()=>{
+ const {trackSwingTrades}=require(path.join(app,'app/dashboard/sector-rotation/swing-trades.ts'));
+ const bars=[...swingBars.map(b=>({...b,open:102})),...swingBars.map(b=>({...b,symbol:'SPY',open:100}))];
+ const close=trackSwingTrades([swingSuggestion],bars,'2026-10-26')[0];
+ const open=trackSwingTrades([swingSuggestion],bars,'2026-10-26','next_open')[0];
+ assert.equal(close.entryPrice,100);assert.equal(open.entryPrice,102);assert.equal(open.entryDate,'2026-10-26');
+ assert.equal(open.mfa,8);assert.equal(open.mae,7);assert.equal(open.priceChange,3);assert.equal(open.percentChange,3/102*100);
+ assert.equal(open.days,close.days);assert.equal(open.suggestedDate,close.suggestedDate);assert.equal(open.currentPrice,close.currentPrice);assert.notEqual(open.id,close.id);assert.equal(open.signalId,close.signalId);
+ const short=trackSwingTrades([{...swingSuggestion,side:'short'}],bars,'2026-10-26','next_open')[0];assert.equal(short.mfa,7);assert.equal(short.mae,8);
+ const pending=trackSwingTrades([swingSuggestion],bars,'2026-10-23','next_open')[0];assert.equal(pending.entryPrice,null);assert.equal(pending.priceChange,null);assert.equal(pending.mfa,null);
+ // If the first actual session has no symbol open, never jump to a later one.
+ const missing=bars.map(b=>b.symbol==='X'&&b.trade_date==='2026-10-26'?{...b,open:null}:b);
+ const unavailable=trackSwingTrades([swingSuggestion],missing,'2026-10-27','next_open')[0];assert.equal(unavailable.entryPrice,null);assert.equal(unavailable.mae,null);
+ const absent=trackSwingTrades([swingSuggestion],bars.filter(b=>!(b.symbol==='X'&&b.trade_date==='2026-10-26')),'2026-10-27','next_open')[0];assert.equal(absent.entryPrice,null);
+ // A weekday holiday without a SPY session is skipped.
+ const holiday={...swingSuggestion,suggestedDate:'2026-10-23'};
+ const tuesday=bars.filter(b=>b.trade_date!=='2026-10-26');assert.equal(trackSwingTrades([holiday],tuesday,'2026-10-27','next_open')[0].entryDate,'2026-10-27');
+ const archived=trackSwingTrades([swingSuggestion],bars,'2026-11-16','next_open')[0];
+ assert.equal(archived.entryPrice,102);assert.equal(archived.currentPrice,107);assert.equal(archived.mfa,10);assert.equal(archived.days,16);
+ assert.deepEqual(trackSwingTrades([swingSuggestion],bars,'2026-12-31','next_open')[0],archived);
+});
+test('swing table pairs entry bases, shows explicit Long/Short column and keeps one reasoning card per signal',()=>{
+ const Swing=require(path.join(app,'app/dashboard/sector-rotation/SwingTrades.tsx')).default;
+ const html=renderToStaticMarkup(React.createElement(Swing,{bars:swingBars,groups:[{symbol:'X',name:'Fixture',short:'Fixture'}],asOfDate:'2026-10-26',suggestions:[swingSuggestion]}));
+ assert.match(html,/<th scope="col">Strategy<\/th>/);assert.match(html,/<td>Long<\/td>/);assert.match(html,/Signal close/);assert.match(html,/Next session open/);assert.match(html,/Awaiting next-session open/);
+ assert.equal(html.split(swingSuggestion.reason).length-1,1);
+ const table=html.slice(html.indexOf('<tbody>'),html.indexOf('</tbody>'));assert.equal((table.match(/<tr>/g)||[]).length,2);
+ assert.ok(table.indexOf('Signal close')<table.indexOf('Next session open'));
 });
