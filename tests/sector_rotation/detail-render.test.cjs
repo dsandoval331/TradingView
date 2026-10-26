@@ -29,7 +29,7 @@ test('missing and early-history views show unavailable values and withhold refer
  const html=renderToStaticMarkup(React.createElement(Chart,{...props,timeline:[],selectedDate:sessions[10].date}));
  assert.match(html,/Average up: unavailable/);assert.match(html,/Highest visible value<\/span><strong>—/);assert.equal((html.match(/aria-hidden="true"/g)||[]).length,0);
 });
-test('tracker chart uses every heatmap session in the same newest-first order',()=>{
+test('tracker performance chart reverses heatmap chronology to match daily candles',()=>{
  const {SECTORS}=require(path.join(app,'app/dashboard/sector-rotation/model.ts'));
  const Tracker=require(path.join(app,'app/dashboard/sector-rotation/Tracker.tsx')).default;
  const bars=Array.from({length:130},(_,i)=>['SPY',...SECTORS.map(s=>s.symbol)].map((symbol,j)=>({symbol,trade_date:new Date(Date.UTC(2025,0,1+i)).toISOString().slice(0,10),close:100+i+j,volume:1}))).flat();
@@ -37,7 +37,7 @@ test('tracker chart uses every heatmap session in the same newest-first order',(
  const heatmap=html.split('<thead>')[1].split('</thead>')[0];
  const dates=[...heatmap.matchAll(/<small>(\d{4}-\d{2}-\d{2})<\/small>/g)].map(m=>m[1]);
  const chartDates=[...html.matchAll(/<time dateTime="(\d{4}-\d{2}-\d{2})"/g)].map(m=>m[1]);
- assert.equal(dates.length,60);assert.deepEqual(chartDates,dates);
+ assert.equal(dates.length,60);assert.deepEqual(chartDates,[...dates].reverse());
  const large=renderToStaticMarkup(React.createElement(Chart,{...props,timeline:Array.from({length:120},(_,i)=>({...sessions[0],date:new Date(Date.UTC(2025,0,1+i)).toISOString().slice(0,10)})).reverse()}));
  assert.equal((large.match(/<button/g)||[]).length,120);assert.equal((large.match(/<time dateTime=/g)||[]).length,120);
 });
