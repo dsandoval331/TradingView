@@ -41,3 +41,11 @@ test('tracker chart uses every heatmap session in the same newest-first order',(
  const large=renderToStaticMarkup(React.createElement(Chart,{...props,timeline:Array.from({length:120},(_,i)=>({...sessions[0],date:new Date(Date.UTC(2025,0,1+i)).toISOString().slice(0,10)})).reverse()}));
  assert.equal((large.match(/<button/g)||[]).length,120);assert.equal((large.match(/<time dateTime=/g)||[]).length,120);
 });
+test('streak panel renders two-decimal means, counts and the selected measure',()=>{
+ const StreakSummary=require(path.join(app,'app/dashboard/sector-rotation/StreakSummary.tsx')).default;
+ const days=[0,1,1,-1,-1,1,-1,0,9].map((daily,i)=>({date:String(i),cells:{XLK:{daily,relative:-daily}}}));
+ const html=renderToStaticMarkup(React.createElement(StreakSummary,{sessions:days,symbol:'XLK',date:'8',measure:'daily'}));
+ assert.match(html,/Green days/);assert.match(html,/Red days/);assert.match(html,/>1.50<\/td><td>2/);assert.match(html,/Daily price return/);
+ const relative=renderToStaticMarkup(React.createElement(StreakSummary,{sessions:days,symbol:'XLK',date:'8',measure:'relative'}));
+ assert.match(relative,/Relative to SPY/);assert.match(relative,/outperforming SPY/);
+});
