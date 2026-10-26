@@ -1,0 +1,214 @@
+{
+  "name": "S&P 500 Top 50 Index",
+  "asOf": "2026-10-23",
+  "source": "https://dng-api.invesco.com/cache/v1/accounts/en_US/shareclasses/46137V233/holdings/fund?idType=cusip&productType=ETF",
+  "sourceSha256": "22d9b789aba56596366e503b1942d8a00db99283f44c5553d7373d84e04c11d6",
+  "sourceDescription": "Invesco XLG common-stock holdings; ETF proxy for index membership, excluding cash, money market and lending positions.",
+  "companyCount": 50,
+  "constituents": [
+    {
+      "symbol": "NVDA",
+      "name": "NVIDIA Corp"
+    },
+    {
+      "symbol": "AAPL",
+      "name": "Apple Inc"
+    },
+    {
+      "symbol": "MSFT",
+      "name": "Microsoft Corp"
+    },
+    {
+      "symbol": "AMZN",
+      "name": "Amazon.com Inc"
+    },
+    {
+      "symbol": "GOOGL",
+      "name": "Alphabet Inc"
+    },
+    {
+      "symbol": "AVGO",
+      "name": "Broadcom Inc"
+    },
+    {
+      "symbol": "GOOG",
+      "name": "Alphabet Inc"
+    },
+    {
+      "symbol": "META",
+      "name": "Meta Platforms Inc"
+    },
+    {
+      "symbol": "TSLA",
+      "name": "Tesla Inc"
+    },
+    {
+      "symbol": "LLY",
+      "name": "Eli Lilly & Co"
+    },
+    {
+      "symbol": "BRK.B",
+      "name": "Berkshire Hathaway Inc"
+    },
+    {
+      "symbol": "MU",
+      "name": "Micron Technology Inc"
+    },
+    {
+      "symbol": "JPM",
+      "name": "JPMorgan Chase & Co"
+    },
+    {
+      "symbol": "AMD",
+      "name": "Advanced Micro Devices Inc"
+    },
+    {
+      "symbol": "XOM",
+      "name": "ExxonMobil Holdings Corp"
+    },
+    {
+      "symbol": "V",
+      "name": "Visa Inc"
+    },
+    {
+      "symbol": "JNJ",
+      "name": "Johnson & Johnson"
+    },
+    {
+      "symbol": "WMT",
+      "name": "Walmart Inc"
+    },
+    {
+      "symbol": "ABBV",
+      "name": "AbbVie Inc"
+    },
+    {
+      "symbol": "MA",
+      "name": "Mastercard Inc"
+    },
+    {
+      "symbol": "CVX",
+      "name": "Chevron Corp"
+    },
+    {
+      "symbol": "PLTR",
+      "name": "Palantir Technologies Inc"
+    },
+    {
+      "symbol": "COST",
+      "name": "Costco Wholesale Corp"
+    },
+    {
+      "symbol": "INTC",
+      "name": "Intel Corp"
+    },
+    {
+      "symbol": "CSCO",
+      "name": "Cisco Systems Inc"
+    },
+    {
+      "symbol": "PG",
+      "name": "Procter & Gamble Co/The"
+    },
+    {
+      "symbol": "UNH",
+      "name": "UnitedHealth Group Inc"
+    },
+    {
+      "symbol": "KO",
+      "name": "Coca-Cola Co/The"
+    },
+    {
+      "symbol": "MRK",
+      "name": "Merck & Co Inc"
+    },
+    {
+      "symbol": "BAC",
+      "name": "Bank of America Corp"
+    },
+    {
+      "symbol": "HD",
+      "name": "Home Depot Inc/The"
+    },
+    {
+      "symbol": "CAT",
+      "name": "Caterpillar Inc"
+    },
+    {
+      "symbol": "PM",
+      "name": "Philip Morris International Inc"
+    },
+    {
+      "symbol": "AMAT",
+      "name": "Applied Materials Inc"
+    },
+    {
+      "symbol": "GE",
+      "name": "General Electric Co"
+    },
+    {
+      "symbol": "LRCX",
+      "name": "Lam Research Corp"
+    },
+    {
+      "symbol": "NFLX",
+      "name": "Netflix Inc"
+    },
+    {
+      "symbol": "TXN",
+      "name": "Texas Instruments Inc"
+    },
+    {
+      "symbol": "GS",
+      "name": "Goldman Sachs Group Inc/The"
+    },
+    {
+      "symbol": "WFC",
+      "name": "Wells Fargo & Co"
+    },
+    {
+      "symbol": "IBM",
+      "name": "International Business Machines Corp"
+    },
+    {
+      "symbol": "LIN",
+      "name": "Linde PLC"
+    },
+    {
+      "symbol": "ORCL",
+      "name": "Oracle Corp"
+    },
+    {
+      "symbol": "GEV",
+      "name": "GE Vernova Inc"
+    },
+    {
+      "symbol": "MS",
+      "name": "Morgan Stanley"
+    },
+    {
+      "symbol": "KLAC",
+      "name": "KLA Corp"
+    },
+    {
+      "symbol": "VZ",
+      "name": "Verizon Communications Inc"
+    },
+    {
+      "symbol": "QCOM",
+      "name": "QUALCOMM Inc"
+    },
+    {
+      "symbol": "PEP",
+      "name": "PepsiCo Inc"
+    },
+    {
+      "symbol": "SNDK",
+      "name": "Sandisk Corp"
+    },
+    {
+      "symbol": "MCD",
+      "name": "McDonald's Corp"
+    }
+  ]
+}

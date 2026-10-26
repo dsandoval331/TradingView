@@ -96,12 +96,12 @@ test('heatmap has latest Price before historical dates and marks only closes bel
 test('stock detail reuses candles and EMA controls without ETF holdings or single-stock ranks',()=>{
  const {SECTORS}=require(path.join(app,'app/dashboard/sector-rotation/model.ts'));
  const Tracker=require(path.join(app,'app/dashboard/sector-rotation/Tracker.tsx')).default;
- const {FREQUENT_STOCKS}=require(path.join(app,'app/dashboard/sector-rotation/stocks/symbols.ts'));
- const bars=Array.from({length:90},(_,i)=>['SPY',...FREQUENT_STOCKS.map(g=>g.symbol)].map((symbol,j)=>({symbol,trade_date:new Date(Date.UTC(2025,0,1+i)).toISOString().slice(0,10),open:100+i+j,high:104+i+j,low:99+i+j,close:102+i+j,volume:1}))).flat();
+ const {TOP_50_STOCKS}=require(path.join(app,'app/dashboard/sector-rotation/stocks/symbols.ts'));
+ const bars=Array.from({length:90},(_,i)=>['SPY',...TOP_50_STOCKS.map(g=>g.symbol)].map((symbol,j)=>({symbol,trade_date:new Date(Date.UTC(2025,0,1+i)).toISOString().slice(0,10),open:100+i+j,high:104+i+j,low:99+i+j,close:102+i+j,volume:1}))).flat();
  const props={bars,stocks:true,updatedAt:null,latestSession:'2025-03-31',runStatus:'COMPLETE',error:null};
- const single=renderToStaticMarkup(React.createElement(Tracker,{...props,singleStock:true,groups:[FREQUENT_STOCKS[0]]}));
+ const single=renderToStaticMarkup(React.createElement(Tracker,{...props,singleStock:true,groups:[TOP_50_STOCKS[0]]}));
  assert.match(single,/STOCK DETAIL/);assert.match(single,/Move vs directional average/);assert.match(single,/Consecutive day streaks/);assert.match(single,/data-overlay="ema20"/);
  assert.doesNotMatch(single,/Top 5 stock holdings|Verified holdings are unavailable|<option value="rank"|<dt>Stock rank/);
- const frequent=renderToStaticMarkup(React.createElement(Tracker,{...props,groups:FREQUENT_STOCKS}));
- assert.match(frequent,/<option value="rank"/);assert.match(frequent,/<dt>Stock rank/);for(const g of FREQUENT_STOCKS)assert.match(frequent,new RegExp(g.symbol));
+ const frequent=renderToStaticMarkup(React.createElement(Tracker,{...props,groups:TOP_50_STOCKS}));
+ assert.match(frequent,/<option value="rank"/);assert.match(frequent,/<dt>Stock rank/);for(const g of TOP_50_STOCKS)assert.match(frequent,new RegExp(g.symbol));
 });

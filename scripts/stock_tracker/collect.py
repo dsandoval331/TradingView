@@ -1,13 +1,19 @@
 """Isolated, bounded stock archive. Each symbol publishes independently.
 Uses existing credential path and provider contract; no research datasets.
 """
-import os,sys,time,uuid,re
+import os,sys,time,uuid,re,json
 from datetime import datetime,timedelta,timezone
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'sector_rotation'))
 from collect_tech import request_json,normalize,ET
 MWE_ID='MWE-SECTOR-STOCKS-001'
 FIELDS=('close','volume','open','high','low')
+MAX_SYMBOLS=80
+UNIVERSE_PATH=Path(__file__).resolve().parents[2]/'apps/trading-research-web/app/dashboard/sector-rotation/stocks/top50.json'
+def index_symbols():
+    symbols=[g['symbol'] for g in json.loads(UNIVERSE_PATH.read_text())['constituents']]
+    if len(symbols)!=51 or len(set(symbols))!=51 or any(not re.fullmatch('[A-Z][A-Z0-9.-]{0,9}',s) for s in symbols):raise ValueError('INVALID_TOP50_UNIVERSE')
+    return symbols
 def validate_calendar(rows,reference):
     dates={r['trade_date'] for r in rows}
     if not dates or not dates.issubset(reference) or max(dates)!=max(reference):
@@ -18,13 +24,17 @@ def main():
     key=os.environ.get('MASSIVE_API_KEY') or os.environ.get('TR_MASSIVE_API_KEY')
     if not key:raise RuntimeError('MASSIVE_KEY_NOT_CONFIGURED')
     headers={'apikey':secret,'Authorization':'Bearer '+secret}
-    def db(path,method='GET',data=None):return request_json(base+path,headers,method,data)[0]
+    def db(path,method='GET',data=None):
+        request_headers={**headers,'Prefer':'resolution=ignore-duplicates'} if path.startswith('stock_tracker_symbols?on_conflict=') else headers
+        return request_json(base+path,request_headers,method,data)[0]
     envelope=db('work_envelopes?mwe_id=eq.'+MWE_ID+'&select=work_envelope_id,authority_ceiling,cost_policy_code')
     if len(envelope)!=1 or envelope[0]['authority_ceiling']!='E1' or envelope[0]['cost_policy_code']!='ZERO_INCREMENTAL_COST_FIRST':raise RuntimeError('INVALID_AUTHORITY')
     sha=os.environ['GITHUB_SHA']
     if not re.fullmatch('[0-9a-f]{40}',sha):raise ValueError('INVALID_SHA')
-    requests=db('stock_tracker_symbols?select=symbol&order=requested_at,symbol&limit=30')
-    symbols=['SPY']+[r['symbol'] for r in requests if r['symbol']!='SPY']
+    # Seed required index members idempotently; never drop existing lookup symbols.
+    db('stock_tracker_symbols?on_conflict=symbol','POST',[{'symbol':s} for s in index_symbols()])
+    requests=db('stock_tracker_symbols?select=symbol&order=requested_at,symbol&limit='+str(MAX_SYMBOLS))
+    symbols=list(dict.fromkeys(['SPY',*index_symbols(),*[r['symbol'] for r in requests]]))[:MAX_SYMBOLS]
     if any(not re.fullmatch('[A-Z][A-Z0-9.-]{0,9}',s) for s in symbols):raise ValueError('INVALID_SYMBOL')
     now=datetime.now(ET);start=(now.date()-timedelta(days=729)).isoformat();end=(now.date()-timedelta(days=1)).isoformat()
     reference=None;failures=0

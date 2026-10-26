@@ -1,4 +1,6 @@
 # Stock Lookup and Frequently Traded
+
+Superseded for the multi-stock page by [TOP_50_TRACKER.md](TOP_50_TRACKER.md); Stock Lookup remains available.
 Thread: Tool: Sector Rotation Tracker
 MWE: MWE-SECTOR-STOCKS-001 | E1 | ZERO_INCREMENTAL_COST_FIRST
 
