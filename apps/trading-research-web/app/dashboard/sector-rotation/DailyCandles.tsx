@@ -1,16 +1,14 @@
 'use client';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { closeEma } from './ema';
 import type { RefObject, UIEventHandler } from 'react';
 import { chartLayout } from './chart-layout';
 import type { Bar, Group, Session } from './model';
 import { candleSeries } from './candles';
 import styles from './tracker.module.css';
-const lines=[{value:'none',label:'None'},{value:'ema20',label:'20 EMA'}] as const;
-type ChartLine=typeof lines[number]['value'];
+import type { ChartLine } from './chart-lines';
 const price=(n:number)=>n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
-export default function DailyCandles({bars,sessions,group,selectedDate,onSelect,scrollRef,onScroll,historySessions=sessions}:{bars:readonly Bar[];sessions:readonly Session[];group:Group;selectedDate?:string;onSelect:(date:string)=>void;historySessions?:readonly Session[];scrollRef?:RefObject<HTMLDivElement|null>;onScroll?:UIEventHandler<HTMLDivElement>}) {
- const [line,setLine]=useState<ChartLine>('ema20');
+export default function DailyCandles({bars,sessions,group,selectedDate,onSelect,scrollRef,onScroll,historySessions=sessions,line='ema20'}:{bars:readonly Bar[];sessions:readonly Session[];group:Group;selectedDate?:string;onSelect:(date:string)=>void;line?:ChartLine;historySessions?:readonly Session[];scrollRef?:RefObject<HTMLDivElement|null>;onScroll?:UIEventHandler<HTMLDivElement>}) {
  const ema=useMemo(()=>closeEma(historySessions,group.symbol,20),[historySessions,group.symbol]);
  const emaValues=sessions.map(s=>ema.get(s.date)??null);
  const selectedEma=selectedDate?ema.get(selectedDate)??null:null;
@@ -35,7 +33,7 @@ export default function DailyCandles({bars,sessions,group,selectedDate,onSelect,
  return <section className={styles.candleSection} aria-label="Daily price chart">
   <p className={styles.eyebrow}>DAILY PRICE HISTORY</p><h2>{group.symbol} · {basket?'Basket closing index':'1-day candlestick chart'}</h2>
   <p className={styles.relativeMeta}>{sessions.length} sessions · Same session count and date filters as the heatmap · Oldest to newest → · Scrolling linked to performance chart</p>
-  <div className={styles.chartLineControl}><label>Chart line<select aria-label="Chart line" value={line} onChange={e=>setLine(e.target.value as ChartLine)}>{lines.map(option=><option key={option.value} value={option.value}>{option.label}</option>)}</select></label>{line==='ema20'&&<span className={styles.emaLegend}><i/>20 EMA · {selectedEma===null?'Unavailable · needs 20 consecutive closes':`${basket?'':'$'}${price(selectedEma)}${basket?' index points':''}`}</span>}</div>
+  <div className={styles.chartLineControl}>{line==='ema20'&&<span className={styles.emaLegend}><i/>20 EMA · {selectedEma===null?'Unavailable · needs 20 consecutive closes':`${basket?'':'$'}${price(selectedEma)}${basket?' index points':''}`}</span>}</div>
   <div className={styles.candleReadout} aria-live="polite"><strong>{selectedDate??'No session selected'}</strong>{basket?<span>Close {selectedClose==null?'—':price(selectedClose)} index points</span>:selected?<><span>Open ${price(selected.open)}</span><span>High ${price(selected.high)}</span><span>Low ${price(selected.low)}</span><span>Close ${price(selected.close)}</span></>:<span>OHLC unavailable for this session</span>}</div>
   {available===0?<p className={styles.notice}>{sessions.length?'Verified daily OHLC history is not available for this selection yet.':'No sessions match these dates.'}</p>:<div className={styles.chartScroll} ref={scrollRef} onScroll={onScroll} tabIndex={0} role="region" aria-label="Scrollable daily price history">
    <svg className={styles.candleSvg} data-chart-width={width} width={width} height={360} role="group" aria-label={`${group.symbol} daily ${basket?'closing index':'candles'} for ${sessions.length} heatmap sessions`}>

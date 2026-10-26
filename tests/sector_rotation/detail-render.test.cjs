@@ -66,12 +66,14 @@ test('basket chart is close-only, keeps missing gaps, and custom windows have no
  assert.match(html,/Basket closing index/);assert.match(html,/2 of 3 sessions available/);assert.doesNotMatch(html,/Open \$/);
  assert.match(html,/<path d="M[^L]+M/);assert.equal((html.match(/data-candle-date=/g)||[]).length,3);
 });
-test('price chart defaults to 20 EMA with a line dropdown and uses full pre-window history',()=>{
+test('price chart follows its supplied overlay and uses full pre-window history',()=>{
  const Daily=require(path.join(app,'app/dashboard/sector-rotation/DailyCandles.tsx')).default;
  const days=Array.from({length:80},(_,i)=>({date:new Date(Date.UTC(2025,0,1+i)).toISOString().slice(0,10),cells:{XLK:{close:100+i}}}));
  const bars=days.map((d,i)=>({symbol:'XLK',trade_date:d.date,open:99+i,low:98+i,high:102+i,close:100+i,volume:1}));
  const html=renderToStaticMarkup(React.createElement(Daily,{bars,sessions:days.slice(-20),historySessions:days,group:{symbol:'XLK'},selectedDate:days.at(-1).date,onSelect:()=>{}}));
- assert.match(html,/aria-label="Chart line"/);assert.match(html,/value="none">None/);assert.match(html,/value="ema20" selected="">20 EMA/);
+ assert.doesNotMatch(html,/<select/);
+ const hidden=renderToStaticMarkup(React.createElement(Daily,{bars,sessions:days.slice(-20),historySessions:days,group:{symbol:'XLK'},line:'none',selectedDate:days.at(-1).date,onSelect:()=>{}}));
+ assert.doesNotMatch(hidden,/data-overlay="ema20"|20 EMA ·/);
  assert.match(html,/data-overlay="ema20"/);assert.match(html,/20 EMA · \$169.50/);assert.match(html,/20 of 20 sessions available/);
  assert.doesNotMatch(html,/Unavailable · needs 20 consecutive closes/);
 });
@@ -80,7 +82,11 @@ test('heatmap has latest Price before historical dates and marks only closes bel
  const Tracker=require(path.join(app,'app/dashboard/sector-rotation/Tracker.tsx')).default;
  const fixture=(falling)=>Array.from({length:30},(_,i)=>['SPY',...SECTORS.map(s=>s.symbol)].map(symbol=>({symbol,trade_date:new Date(Date.UTC(2025,0,1+i)).toISOString().slice(0,10),close:falling?300-i:300,volume:1}))).flat();
  const render=(falling)=>renderToStaticMarkup(React.createElement(Tracker,{bars:fixture(falling),updatedAt:null,latestSession:'2025-01-30',runStatus:'COMPLETE',error:null}));
- const html=render(true),head=html.split('<thead>')[1].split('</thead>')[0];
+ const html=render(true);
+ assert.equal((html.match(/aria-label="Chart line"/g)||[]).length,1);
+ assert.ok(html.indexOf('aria-label="Chart line"')<html.indexOf('<table'));
+ assert.match(html,/value="ema20" selected="">20 EMA/);
+ const head=html.split('<thead>')[1].split('</thead>')[0];
  assert.ok(head.indexOf('ETF / Group')<head.indexOf('Price'));assert.ok(head.indexOf('Price')<head.indexOf('Thu, Jan 30'));
  assert.match(html,/<strong>\$271.00<\/strong>/);assert.match(html,/latest close on 2025-01-30: 271, daily return -0.37%/);
  assert.equal((html.match(/>20E<\/sup>/g)||[]).length,11*11);
