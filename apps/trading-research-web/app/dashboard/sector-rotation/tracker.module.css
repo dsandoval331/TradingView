@@ -14,3 +14,6 @@
 .chartScroll{overflow-x:auto;scrollbar-color:#435064 #152030;padding:3px 1px 10px}.chartSessionDates{display:flex;gap:3px;margin-top:9px}.chartSessionDates time{flex:1;min-width:0;text-align:center;font-size:10px;color:var(--muted);font-variant-numeric:tabular-nums}.chartSessionDates time span{display:block;font-size:9px;margin-top:3px}
 
 .candleSection{background:#111d2b;border:1px solid var(--border);border-radius:12px;padding:22px;margin-top:18px;min-width:0}.candleSection h2{font-size:22px;margin:0 0 8px;letter-spacing:-.5px}.candleReadout{display:flex;gap:12px 24px;flex-wrap:wrap;font-size:12px;font-variant-numeric:tabular-nums;background:#182636;border-radius:7px;padding:14px;margin:16px 0}.candleReadout strong{color:var(--amber)}.candleSvg{display:block;max-width:none}.candleTarget{cursor:pointer}.candleTarget:focus{outline:none}.candleTarget:focus>rect:first-of-type,.candleTarget:hover>rect:first-of-type{stroke:#f2b84b;fill:#f2b84b12}
+
+/* Identical date slots and gutters in both linked charts. */
+.alignedPlot,.alignedDates{gap:0}.alignedPlot button{flex:1 1 0;border-radius:0}.alignedDates time{flex:1 1 0;white-space:nowrap;overflow:visible}.chartScroll{scroll-behavior:auto;overflow-anchor:none}
