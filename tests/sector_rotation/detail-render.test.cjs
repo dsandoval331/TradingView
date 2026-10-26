@@ -197,7 +197,7 @@ test('current longest winners cover all measures, include ties and ignore histor
  const groups=['A','B','C','D'].map(symbol=>({symbol,name:symbol,short:symbol}));
  const days=Array.from({length:5},(_,i)=>({date:String(i),complete:true,cells:Object.fromEntries(groups.map(g=>[g.symbol,{close:100,daily:g.symbol==='D'?(i<4?1:-1):g.symbol==='C'?-1:1,relative:g.symbol==='A'||g.symbol==='B'?-1:1,rank:g.symbol==='A'||g.symbol==='B'?1:4,rankChange:g.symbol==='C'||g.symbol==='D'?-2:2}]))}));
  const result=dailyEvents(days,groups,'daily','none').at(-1).currentLongest;
- assert.equal(result.length,4);
+ assert.equal(result.length,6);
  assert.deepEqual(result.find(m=>m.metric==='daily').green,{days:5,symbols:['A','B']});
  assert.deepEqual(result.find(m=>m.metric==='daily').red,{days:5,symbols:['C']});
  assert.deepEqual(result.find(m=>m.metric==='relative').red,{days:5,symbols:['A','B']});
@@ -260,4 +260,25 @@ test('Swing Trades has empty Active/Archive without fabricated suggestions and r
  const active=renderToStaticMarkup(React.createElement(Swing,{...props,suggestions:[swingSuggestion]}));assert.ok(active.indexOf(swingSuggestion.reason)<active.indexOf('<table'));assert.match(active,/Day 2/);assert.match(active,/MFA/);assert.match(active,/MAE/);assert.match(active,/As of 2026-10-27/);
  const archive=renderToStaticMarkup(React.createElement(Swing,{...props,asOfDate:'2026-11-16',suggestions:[swingSuggestion]}));assert.match(archive,/Archive \(1\)/);assert.match(archive,/Final price/);assert.match(archive,/Day 16/);
  const excluded=renderToStaticMarkup(React.createElement(Swing,{...props,suggestions:[{...swingSuggestion,symbol:'HW'}]}));assert.match(excluded,/No active suggestions yet/);
+});
+test('rolling Event Log keeps at most 120 dates and each new date displaces the oldest',()=>{
+ const {rollingEventDays,EVENT_LOG_MAX_DAYS}=require(path.join(app,'app/dashboard/sector-rotation/events.ts'));
+ const history=Array.from({length:235},(_,i)=>({date:String(i).padStart(3,'0')}));
+ const first=rollingEventDays(history,new Set(history.map(d=>d.date)));assert.equal(first.length,120);assert.equal(first[0].date,'234');assert.equal(first.at(-1).date,'115');
+ const next=[...history,{date:'235'}];const second=rollingEventDays(next,new Set(next.map(d=>d.date)));assert.equal(second.length,EVENT_LOG_MAX_DAYS);assert.equal(second[0].date,'235');assert.equal(second.at(-1).date,'116');assert.ok(!second.some(d=>d.date==='115'));assert.equal(history.length,235);
+ assert.equal(rollingEventDays(next,new Set(next.slice(-20).map(d=>d.date))).length,20);
+});
+test('new indicator chart modes show their units without return-average or rank-change labels',()=>{
+ const days=sessions.map(d=>({...d,cells:{XLK:{...d.cells.XLK,rsiRelative:5,mansfield:-2}}}));
+ for(const metric of ['rsiRelative','mansfield']){
+  const html=renderToStaticMarkup(React.createElement(Chart,{...props,sessions:days,timeline:days.slice(-20),metric}));
+  assert.match(html,metric==='rsiRelative'?/RSI pts/:/200-session SMA/);assert.doesNotMatch(html,/Average up:|↑ means improvement/);
+ }
+});
+test('single-stock heatmap offers RSI and Mansfield and the Event Log renders six measure rows',()=>{
+ const Tracker=require(path.join(app,'app/dashboard/sector-rotation/Tracker.tsx')).default;
+ const bars=Array.from({length:220},(_,i)=>['SPY','X'].map(symbol=>({symbol,trade_date:new Date(Date.UTC(2025,0,1+i)).toISOString().slice(0,10),close:symbol==='SPY'?100:100+i,volume:1}))).flat();
+ const html=renderToStaticMarkup(React.createElement(Tracker,{bars,stocks:true,singleStock:true,groups:eventGroup,updatedAt:null,latestSession:bars.at(-1).trade_date,runStatus:'COMPLETE',error:null}));
+ assert.match(html,/<option value="rsiRelative"/);assert.match(html,/<option value="mansfield"/);assert.doesNotMatch(html,/<option value="rank"/);
+ const table=html.match(/<table[^>]*data-current-streaks[^>]*>([\s\S]*?)<\/table>/)[1];assert.equal((table.match(/<tr>/g)||[]).length,7);assert.match(table,/RSI vs SPY RSI/);assert.match(table,/Mansfield RS/);
 });
