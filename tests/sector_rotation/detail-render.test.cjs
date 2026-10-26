@@ -163,5 +163,57 @@ test('Event Log groups days with alternating shades and includes four day-end se
  const EventLog=require(path.join(app,'app/dashboard/sector-rotation/EventLog.tsx')).default;
  const days=eventFixture(Array(65).fill(-1));
  const html=renderToStaticMarkup(React.createElement(EventLog,{sessions:days,visibleSessions:days.slice(-3),groups:eventGroup,metric:'daily',line:'ema50',onSelect:()=>{}}));
- assert.equal((html.match(/data-event-date=/g)||[]).length,3);assert.match(html,/eventDayAlternate/);assert.match(html,/50E · Close below 50 EMA/);assert.match(html,/Day 16 in a row/);assert.match(html,/Beyond average/);assert.match(html,/Green \/ red streaks at day end/);assert.match(html,/Biggest rank movers/);
+ assert.equal((html.match(/data-event-date=/g)||[]).length,3);assert.match(html,/eventDayAlternate/);assert.match(html,/50E · Close below 50 EMA/);assert.match(html,/Day 16 in a row/);assert.match(html,/Beyond average/);assert.match(html,/Current Longest Streaks/);assert.match(html,/Biggest rank movers/);
+});
+test('volume average follows 20/60/120 Sessions and All expands without future data',()=>{
+ const {volumeSeries}=require(path.join(app,'app/dashboard/sector-rotation/volume.ts'));
+ const days=Array.from({length:130},(_,i)=>({date:String(i),cells:{}}));
+ const bars=days.map((d,i)=>({symbol:'X',trade_date:d.date,volume:i+1}));
+ for(const [period,expected] of [[20,120.5],[60,100.5],[120,70.5],['all',65.5]])assert.equal(volumeSeries(bars,days,'X',period).get('129').average,expected);
+ const all=volumeSeries(bars,days,'X','all');assert.equal(all.get('9').average,5.5);
+ assert.deepEqual(all.get('9'),volumeSeries(bars.slice(0,10),days.slice(0,10),'X','all').get('9'));
+ const Daily=require(path.join(app,'app/dashboard/sector-rotation/DailyCandles.tsx')).default;
+ const priceDays=days.map(d=>({...d,cells:{X:{close:100}}}));
+ const fullBars=bars.map(b=>({...b,open:99,high:101,low:98,close:100}));
+ for(const sessionDuration of [20,60,120,'all']){
+  const html=renderToStaticMarkup(React.createElement(Daily,{bars:fullBars,sessions:priceDays.slice(-20),historySessions:priceDays,group:{symbol:'X'},sessionDuration,onSelect:()=>{}}));
+  assert.match(html,new RegExp(sessionDuration==='all'?'Expanding average volume':`${sessionDuration}-session average volume`));
+ }
+});
+test('EMA streak mean uses completed fully observed runs in the configured window',()=>{
+ const {completedMarkerAverage}=require(path.join(app,'app/dashboard/sector-rotation/events.ts'));
+ const markers=Array(30).fill(false);for(const i of [1,2,3,21,22,28,29])markers[i]=true;
+ assert.deepEqual(completedMarkerAverage(markers,29,20),{averageStreak:2,completedStreaks:1});
+ assert.deepEqual(completedMarkerAverage(markers,29,60),{averageStreak:2.5,completedStreaks:2});
+ assert.deepEqual(completedMarkerAverage(markers,29,'all'),{averageStreak:2.5,completedStreaks:2});
+ assert.deepEqual(completedMarkerAverage([null,true,true,false,false,true,false],6,20),{averageStreak:1,completedStreaks:1});
+ assert.deepEqual(completedMarkerAverage([false,true,true,null,false],4,20),{averageStreak:null,completedStreaks:0});
+ const clipped=Array(25).fill(false);for(let i=1;i<8;i++)clipped[i]=true;
+ assert.equal(completedMarkerAverage(clipped,24,20).averageStreak,null);
+ assert.deepEqual(completedMarkerAverage(markers,23,20),completedMarkerAverage([...markers.slice(0,24),true,true,true,true],23,20));
+});
+test('current longest winners cover all measures, include ties and ignore historical records',()=>{
+ const {dailyEvents}=require(path.join(app,'app/dashboard/sector-rotation/events.ts'));
+ const groups=['A','B','C','D'].map(symbol=>({symbol,name:symbol,short:symbol}));
+ const days=Array.from({length:5},(_,i)=>({date:String(i),complete:true,cells:Object.fromEntries(groups.map(g=>[g.symbol,{close:100,daily:g.symbol==='D'?(i<4?1:-1):g.symbol==='C'?-1:1,relative:g.symbol==='A'||g.symbol==='B'?-1:1,rank:g.symbol==='A'||g.symbol==='B'?1:4,rankChange:g.symbol==='C'||g.symbol==='D'?-2:2}]))}));
+ const result=dailyEvents(days,groups,'daily','none').at(-1).currentLongest;
+ assert.equal(result.length,4);
+ assert.deepEqual(result.find(m=>m.metric==='daily').green,{days:5,symbols:['A','B']});
+ assert.deepEqual(result.find(m=>m.metric==='daily').red,{days:5,symbols:['C']});
+ assert.deepEqual(result.find(m=>m.metric==='relative').red,{days:5,symbols:['A','B']});
+ assert.deepEqual(result.find(m=>m.metric==='rank').green,{days:5,symbols:['A','B']});
+ assert.deepEqual(result.find(m=>m.metric==='rankChange').red,{days:5,symbols:['C','D']});
+ const first=dailyEvents(days.slice(0,1),groups,'relative','none')[0];assert.ok(first.currentLongest.every(m=>m.green===null&&m.red===null));
+ assert.deepEqual(dailyEvents(days,groups,'relative','none').at(-1).currentLongest,result);
+ days.at(-1).cells.C.daily=null;assert.equal(dailyEvents(days,groups,'daily','none').at(-1).currentLongest.find(m=>m.metric==='daily').red,null);
+});
+test('Event Log groups Long and Short and shows winners for every measure with N/A',()=>{
+ const EventLog=require(path.join(app,'app/dashboard/sector-rotation/EventLog.tsx')).default;
+ const days=eventFixture(Array(65).fill(-1));
+ const html=renderToStaticMarkup(React.createElement(EventLog,{sessions:days,visibleSessions:days.slice(-3),groups:eventGroup,metric:'daily',line:'ema50',sessionDuration:20,onSelect:()=>{}}));
+ assert.match(html,/Average streak \(20 sessions\):/);assert.match(html,/data-event-side="Long"/);assert.match(html,/data-event-side="Short"/);
+ assert.ok(html.indexOf('data-event-side="Long"')<html.indexOf('data-event-side="Short"'));
+ const table=html.match(/<table[^>]*data-current-streaks[^>]*>([\s\S]*?)<\/table>/)[1];
+ for(const measure of ['Relative to SPY','Daily return','Daily rank','Rank change'])assert.match(table,new RegExp(measure));
+ assert.match(table,/N\/A/);assert.doesNotMatch(table,/Longest green|Current green/);
 });

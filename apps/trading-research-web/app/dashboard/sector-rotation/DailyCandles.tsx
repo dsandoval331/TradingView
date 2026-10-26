@@ -8,11 +8,13 @@ import { candleSeries } from './candles';
 import styles from './tracker.module.css';
 import { emaPeriod, type ChartLine } from './chart-lines';
 import { volumeSeries } from './volume';
+import type {SessionWindow} from './session-window';
 const price=(n:number)=>n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
-export default function DailyCandles({bars,sessions,group,selectedDate,onSelect,scrollRef,onScroll,historySessions=sessions,line='ema20'}:{bars:readonly Bar[];sessions:readonly Session[];group:Group;selectedDate?:string;onSelect:(date:string)=>void;line?:ChartLine;historySessions?:readonly Session[];scrollRef?:RefObject<HTMLDivElement|null>;onScroll?:UIEventHandler<HTMLDivElement>}) {
+export default function DailyCandles({bars,sessions,group,selectedDate,onSelect,scrollRef,onScroll,historySessions=sessions,line='ema20',sessionDuration=60}:{bars:readonly Bar[];sessions:readonly Session[];group:Group;selectedDate?:string;onSelect:(date:string)=>void;line?:ChartLine;sessionDuration?:SessionWindow;historySessions?:readonly Session[];scrollRef?:RefObject<HTMLDivElement|null>;onScroll?:UIEventHandler<HTMLDivElement>}) {
  const period=emaPeriod(line);
  const ema=useMemo(()=>closeEma(historySessions,group.symbol,period??20),[historySessions,group.symbol,period]);
- const volumes=useMemo(()=>volumeSeries(bars,historySessions,group.symbol),[bars,historySessions,group.symbol]);
+ const volumes=useMemo(()=>volumeSeries(bars,historySessions,group.symbol,sessionDuration),[bars,historySessions,group.symbol,sessionDuration]);
+ const volumeAverageLabel=sessionDuration==='all'?'Expanding average':`${sessionDuration}-session average`;
  const emaValues=sessions.map(s=>ema.get(s.date)??null);
  const selectedEma=selectedDate?ema.get(selectedDate)??null:null;
  const candles=useMemo(()=>candleSeries(bars,sessions,group.symbol),[bars,sessions,group.symbol]);
@@ -46,11 +48,11 @@ export default function DailyCandles({bars,sessions,group,selectedDate,onSelect,
   <p className={styles.relativeMeta}>{sessions.length} sessions · Same session count and date filters as the heatmap · Oldest to newest → · Scrolling linked to performance chart</p>
   <div className={styles.chartLineControl}>{period!==null&&<span className={styles.emaLegend}><i/>{period} EMA · {selectedEma===null?`Unavailable · needs ${period} consecutive closes`:`${basket?'':'$'}${price(selectedEma)}${basket?' index points':''}`}</span>}</div>
   <div className={styles.candleReadout} aria-live="polite"><strong>{selectedDate??'No session selected'}</strong>{basket?<span>Close {selectedClose==null?'—':price(selectedClose)} index points</span>:selected?<><span>Open ${price(selected.open)}</span><span>High ${price(selected.high)}</span><span>Low ${price(selected.low)}</span><span>Close ${price(selected.close)}</span></>:<span>OHLC unavailable for this session</span>}</div>
-  {!basket&&<div className={styles.candleReadout}><span>Volume · {selectedVolume?.volume==null?'Unavailable':compact(selectedVolume.volume)+' shares'}</span><span>20-session average · {selectedVolume?.average==null?'Unavailable':compact(selectedVolume.average)+' shares'}</span></div>}
+  {!basket&&<div className={styles.candleReadout}><span>Volume · {selectedVolume?.volume==null?'Unavailable':compact(selectedVolume.volume)+' shares'}</span><span>{volumeAverageLabel} · {selectedVolume?.average==null?'Unavailable':compact(selectedVolume.average)+' shares'}</span></div>}
   {available===0?<p className={styles.notice}>{sessions.length?'Verified daily OHLC history is not available for this selection yet.':'No sessions match these dates.'}</p>:<div className={styles.chartScroll} ref={scrollRef} onScroll={onScroll} tabIndex={0} role="region" aria-label="Scrollable daily price history">
    <svg className={styles.candleSvg} data-chart-width={width} width={width} height={basket?360:500} role="group" aria-label={`${group.symbol} daily ${basket?'closing index':'candles'} for ${sessions.length} heatmap sessions`}>
     {[0,1,2,3,4].map(i=>{const v=bottom+(top-bottom)*i/4;return <g key={i}><line x1={left} x2={width-right} y1={y(v)} y2={y(v)} stroke="#293647"/><text x={left-10} y={y(v)+4} textAnchor="end" fill="#9eacbe" fontSize="11">{basket?'':'$'}{price(v)}</text></g>;})}
-    {!basket&&<g aria-label="Volume axis"><line x1={left} x2={width-right} y1={volumeTop+volumeHeight} y2={volumeTop+volumeHeight} stroke="#293647"/><text x={left} y={volumeTop-12} fill="#9eacbe" fontSize="11">Volume · shares · 20-session average</text>{[0,1].map(i=><text key={i} x={left-10} y={vy(volumeMax*i)+4} textAnchor="end" fill="#9eacbe" fontSize="10">{compact(volumeMax*i)}</text>)}</g>}
+    {!basket&&<g aria-label="Volume axis"><line x1={left} x2={width-right} y1={volumeTop+volumeHeight} y2={volumeTop+volumeHeight} stroke="#293647"/><text x={left} y={volumeTop-12} fill="#9eacbe" fontSize="11">Volume · shares · {volumeAverageLabel}</text>{[0,1].map(i=><text key={i} x={left-10} y={vy(volumeMax*i)+4} textAnchor="end" fill="#9eacbe" fontSize="10">{compact(volumeMax*i)}</text>)}</g>}
     {basket&&<path d={path} fill="none" stroke="#f2b84b" strokeWidth="2"/>}
     {sessions.map((session,i)=>{
      const c=candles[i],close=closes[i],color=c?(c.close>c.open?'#52d9aa':c.close<c.open?'#ff8496':'#cad5e2'):'#f2b84b';
@@ -65,11 +67,11 @@ export default function DailyCandles({bars,sessions,group,selectedDate,onSelect,
      </g>;
     })}
     {emaPath&&<path data-overlay={line} d={emaPath} fill="none" stroke="#69b7ff" strokeWidth="2" pointerEvents="none" aria-label={`${period}-session exponential moving average of closing prices`}/>}
-    {!basket&&volumePath&&<path data-overlay="volume-average" d={volumePath} fill="none" stroke="#f2b84b" strokeWidth="2" pointerEvents="none" aria-label="20-session average volume"/>}
+    {!basket&&volumePath&&<path data-overlay="volume-average" d={volumePath} fill="none" stroke="#f2b84b" strokeWidth="2" pointerEvents="none" aria-label={`${volumeAverageLabel} volume`}/>}
    </svg>
   </div>}
   <p className={styles.relativeMeta}>{basket?'Close-only index: member daily highs/lows do not establish the basket’s intraday range.':'Each candle represents one completed provider daily OHLC bar. Green: close above open; red: close below open; gray: unchanged. Split-adjusted prices, excluding dividends.'} Select a {basket?'point':'candle'} to update the selected session. {available} of {sessions.length} sessions available; missing sessions stay blank.</p>
   {period!==null&&<p className={styles.relativeMeta}>{period} EMA uses closing {basket?'index levels':'prices'} with a {period}-session simple-average seed and smoothing factor 2/{(period??20)+1}. Calculated from full loaded history before applying the visible date range. Missing closes restart the {period}-session warmup.</p>}
-  <p className={styles.relativeMeta}>{basket?'Basket volume is unavailable; constituent share volumes are not combined into an artificial index volume.':'Volume bars use the same dates and widths as the candles. Amber line: trailing 20-session simple average including that day, computed from full loaded history. Missing volume resets the average warmup; zero volume is retained.'}</p>
+  <p className={styles.relativeMeta}>{basket?'Basket volume is unavailable; constituent share volumes are not combined into an artificial index volume.':`Volume bars use the same dates and widths as the candles. Amber line follows Sessions: ${sessionDuration==='all'?'expanding simple average through each day':`trailing ${sessionDuration}-session simple average including that day`}, computed from full loaded history. Missing volume resets the average warmup; zero volume is retained.`}</p>
  </section>;
 }
