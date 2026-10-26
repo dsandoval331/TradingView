@@ -57,7 +57,9 @@ MULtipLY allowlist; anonymous reads and browser writes are not granted.
 
 Workflow: `.github/workflows/sector-tech-ai-daily.yml`.
 Schedule: 07:15 and 11:15 UTC Tuesday–Saturday, one hour after the original
-sector collection times to reduce shared-provider rate contention. Only
+sector collection times to reduce shared-provider rate contention. Both collectors share the GitHub
+concurrency group `sector-rotation-data` to serialize their API use when
+schedules overlap. Only
 completed provider days are requested. GitHub schedules may be delayed.
 Up to 23 provider calls per pass are spaced 15 seconds apart, with bounded
 retry on throttling/server errors. A 20-minute job timeout bounds execution.

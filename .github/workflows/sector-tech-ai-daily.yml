@@ -1,7 +1,7 @@
 name: Tech and AI Daily History
 on:
   push:
-    branches: [main, work/sector-tech-ai-v1]
+    branches: [main]
     paths:
       - 'scripts/sector_rotation/collect_tech.py'
       - '.github/workflows/sector-tech-ai-daily.yml'
@@ -12,7 +12,7 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: sector-tech-ai-data
+  group: sector-rotation-data
   cancel-in-progress: false
 jobs:
   collect:
