@@ -7,7 +7,7 @@ const app=path.resolve(__dirname,'../../apps/trading-research-web');
 const appRequire=createRequire(path.join(app,'package.json'));
 const ts=appRequire('typescript');
 require.extensions['.tsx']=require.extensions['.ts']=(m,f)=>m._compile(ts.transpileModule(fs.readFileSync(f,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX,esModuleInterop:true,target:ts.ScriptTarget.ES2022}}).outputText,f);
-require.extensions['.css']=(m)=>{m.exports=new Proxy({},{get:(_,k)=>String(k)});};
+require.extensions['.css']=(m)=>{m.exports=new Proxy({},{get:(_,k)=>k==='__esModule'?false:String(k)});};
 const React=appRequire('react');
 const {renderToStaticMarkup}=appRequire('react-dom/server');
 const Chart=require(path.join(app,'app/dashboard/sector-rotation/RelativePerformance.tsx')).default;
@@ -104,4 +104,64 @@ test('stock detail reuses candles and EMA controls without ETF holdings or singl
  assert.doesNotMatch(single,/Top 5 stock holdings|Verified holdings are unavailable|<option value="rank"|<dt>Stock rank/);
  const frequent=renderToStaticMarkup(React.createElement(Tracker,{...props,groups:TOP_50_STOCKS}));
  assert.match(frequent,/<option value="rank"/);assert.match(frequent,/<dt>Stock rank/);for(const g of TOP_50_STOCKS)assert.match(frequent,new RegExp(g.symbol));
+});
+test('50 EMA and volume bars use full history and aligned candle slots',()=>{
+ const Daily=require(path.join(app,'app/dashboard/sector-rotation/DailyCandles.tsx')).default;
+ const days=Array.from({length:80},(_,i)=>({date:new Date(Date.UTC(2025,0,1+i)).toISOString().slice(0,10),cells:{XLK:{close:100+i}}}));
+ const bars=days.map((d,i)=>({symbol:'XLK',trade_date:d.date,open:99+i,low:98+i,high:102+i,close:100+i,volume:1000+i*10}));
+ const html=renderToStaticMarkup(React.createElement(Daily,{bars,sessions:days.slice(-20),historySessions:days,group:{symbol:'XLK'},line:'ema50',selectedDate:days.at(-1).date,onSelect:()=>{}}));
+ assert.match(html,/data-overlay="ema50"/);assert.match(html,/50 EMA · \$154.50/);assert.match(html,/data-overlay="volume-average"/);
+ assert.deepEqual([...html.matchAll(/data-volume-date="([^"]+)"/g)].map(m=>m[1]),days.slice(-20).map(d=>d.date));
+ const basket=renderToStaticMarkup(React.createElement(Daily,{bars,sessions:days.slice(-20),historySessions:days,group:{symbol:'XLK',kind:'basket'},onSelect:()=>{}}));
+ assert.doesNotMatch(basket,/data-volume-date|data-overlay="volume-average"/);assert.match(basket,/Basket volume is unavailable/);
+});
+test('volume average includes today, respects zeros, and restarts after missing data',()=>{
+ const {volumeSeries}=require(path.join(app,'app/dashboard/sector-rotation/volume.ts'));
+ const days=Array.from({length:7},(_,i)=>({date:String(i),cells:{}}));
+ const bars=[0,3,6,null,6,9,12].flatMap((volume,i)=>volume===null?[]:[{symbol:'X',trade_date:String(i),volume}]);
+ const v=volumeSeries(bars,days,'X',3);
+ assert.equal(v.get('0').volume,0);assert.equal(v.get('1').average,null);assert.equal(v.get('2').average,3);
+ assert.deepEqual(v.get('3'),{volume:null,average:null});assert.equal(v.get('5').average,null);assert.equal(v.get('6').average,9);
+ assert.throws(()=>volumeSeries([...bars,bars[0]],days,'X',3),/Duplicate/);
+});
+const eventFixture=(values,overrides={})=>values.map((v,i)=>({date:String(i).padStart(3,'0'),complete:true,cells:{X:{close:200-i,daily:v,relative:-v,rank:1,rankChange:v,...overrides}}}));
+const eventGroup=[{symbol:'X',name:'X',short:'X'}];
+test('EMA events count first day, consecutive markers, and reset at equality or missing metric',()=>{
+ const {dailyEvents}=require(path.join(app,'app/dashboard/sector-rotation/events.ts'));
+ const days=eventFixture(Array(55).fill(1));
+ let events=dailyEvents(days,eventGroup,'daily','ema50');
+ assert.equal(events[48].ema.length,0);assert.equal(events[49].ema[0].days,1);assert.equal(events[54].ema[0].days,6);
+ days[52].cells.X.daily=null;events=dailyEvents(days,eventGroup,'daily','ema50');assert.equal(events[52].ema.length,0);assert.equal(events[53].ema[0].days,1);
+ assert.ok(dailyEvents(days,eventGroup,'daily','none').every(d=>!d.ema.length));
+ const flat=days.map(d=>({...d,cells:{X:{...d.cells.X,close:100}}}));assert.ok(dailyEvents(flat,eventGroup,'daily','ema20').every(d=>!d.ema.length));
+});
+test('event averages exclude today and future, use the selected metric, and require valid warmup',()=>{
+ const {dailyEvents}=require(path.join(app,'app/dashboard/sector-rotation/events.ts'));
+ const days=eventFixture([...Array.from({length:60},(_,i)=>i%2?2:-1),3,-2,999]);
+ const events=dailyEvents(days,eventGroup,'daily','none');
+ assert.equal(events[59].averages.length,0);assert.deepEqual(events[60].averages,[{symbol:'X',side:'Long',value:3,average:2}]);
+ assert.deepEqual(events[61].averages,[{symbol:'X',side:'Short',value:-2,average:-1}]);
+ assert.equal(dailyEvents(days,eventGroup,'relative','none')[60].averages[0].side,'Short');
+ assert.deepEqual(events.slice(0,62),dailyEvents(days.slice(0,62),eventGroup,'daily','none'));
+ days[20].cells.X.daily=null;assert.equal(dailyEvents(days,eventGroup,'daily','none')[60].averages.length,0);
+ const equal=eventFixture(Array(61).fill(2));assert.equal(dailyEvents(equal,eventGroup,'daily','none')[60].averages.length,0);
+ const rank=eventFixture(Array(61).fill(1),{rank:2});rank[60].cells.X.rank=1;
+ assert.deepEqual(dailyEvents(rank,eventGroup,'rank','none')[60].averages,[{symbol:'X',side:'Long',value:1,average:2}]);
+});
+test('event streaks include the ending day, retain historical records, and rank movers include ties',()=>{
+ const {dailyEvents}=require(path.join(app,'app/dashboard/sector-rotation/events.ts'));
+ const days=eventFixture([1,1,-1,-1,-1,0,1,null,1,1]);
+ const events=dailyEvents(days,eventGroup,'daily','none');
+ assert.equal(events[4].streaks[0].red,3);assert.equal(events[4].streaks[0].longestRed,3);assert.equal(events[5].streaks[0].red,0);
+ assert.equal(events[7].streaks[0].green,0);assert.equal(events[9].streaks[0].green,2);assert.equal(events[9].streaks[0].longestGreen,2);
+ const groups=['A','B','C'].map(symbol=>({symbol,name:symbol,short:symbol}));
+ const row={date:'1',complete:true,cells:{A:{rankChange:2,daily:1},B:{rankChange:2,daily:1},C:{rankChange:-4,daily:-1}}};
+ const e=dailyEvents([row],groups,'daily','none')[0];assert.deepEqual(e.rankUp,{symbols:['A','B'],change:2});assert.deepEqual(e.rankDown,{symbols:['C'],change:-4});
+ assert.equal(dailyEvents([{...row,complete:false}],groups,'daily','none')[0].rankUp,null);
+});
+test('Event Log groups days with alternating shades and includes four day-end sections',()=>{
+ const EventLog=require(path.join(app,'app/dashboard/sector-rotation/EventLog.tsx')).default;
+ const days=eventFixture(Array(65).fill(-1));
+ const html=renderToStaticMarkup(React.createElement(EventLog,{sessions:days,visibleSessions:days.slice(-3),groups:eventGroup,metric:'daily',line:'ema50',onSelect:()=>{}}));
+ assert.equal((html.match(/data-event-date=/g)||[]).length,3);assert.match(html,/eventDayAlternate/);assert.match(html,/50E · Close below 50 EMA/);assert.match(html,/Day 16 in a row/);assert.match(html,/Beyond average/);assert.match(html,/Green \/ red streaks at day end/);assert.match(html,/Biggest rank movers/);
 });
