@@ -8,3 +8,12 @@ class StockContract(unittest.TestCase):
   for rows in [[],[{'trade_date':'2025-01-02'}],[{'trade_date':'2025-01-04'}]]:
    with self.assertRaises(ValueError):stock.validate_calendar(rows,{'2025-01-02','2025-01-03'})
  def test_stock_lane_is_isolated(self):self.assertEqual(stock.MWE_ID,'MWE-SECTOR-STOCKS-001')
+
+ def test_top50_members_are_all_collected_and_cash_is_excluded(self):
+  symbols=stock.index_symbols()
+  self.assertEqual(len(symbols),51)
+  self.assertIn('BRK.B',symbols)
+  self.assertIn('GOOG',symbols)
+  self.assertIn('GOOGL',symbols)
+  self.assertNotIn('AGPXX',symbols)
+  self.assertGreaterEqual(stock.MAX_SYMBOLS,len(symbols)+1)
