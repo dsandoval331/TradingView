@@ -5,7 +5,7 @@ import { formatValue } from './model';
 import { directionalMoveStats } from './normal-move';
 import styles from './tracker.module.css';
 const titles:Record<Metric,string>={relative:'Relative daily performance',daily:'Daily return',rank:'Daily rank',rankChange:'Rank change'};
-const units:Record<Metric,string>={relative:'Sector return minus SPY · percentage points',daily:'Close-to-close price return · %',rank:'Rank within this view · #1 is strongest',rankChange:'Change in rank · positive means improvement · places'};
+const units:Record<Metric,string>={relative:'Daily return minus SPY · percentage points',daily:'Close-to-close price return · %',rank:'Rank within this view · #1 is strongest',rankChange:'Change in rank · positive means improvement · places'};
 export default function RelativePerformance({sessions,timeline,symbol,selectedDate,metric='relative',onSelect,scrollRef,onScroll}:{sessions:readonly Session[];timeline:readonly Session[];symbol:string;selectedDate:string|undefined;metric?:Metric;onSelect:(date:string)=>void;scrollRef?:RefObject<HTMLDivElement|null>;onScroll?:UIEventHandler<HTMLDivElement>}) {
   const layout=chartLayout(timeline.length);
   const returns=metric==='relative'||metric==='daily';
