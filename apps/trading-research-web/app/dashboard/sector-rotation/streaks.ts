@@ -1,5 +1,5 @@
 import type { Session } from './model';
-type MeanStreak={mean:number|null;count:number};
+type MeanStreak={mean:number|null;count:number;longest:number|null};
 export type StreakStats={green:MeanStreak;red:MeanStreak;historySessions:number;missingSessions:number;lookback:number;startDate:string|null;endDate:string|null};
 export function streakStats(sessions:readonly Session[],symbol:string,date:string|undefined,measure:'daily'|'relative'='daily',lookback=60):StreakStats {
   if(!Number.isInteger(lookback)||lookback<1)throw new Error('Invalid streak window');
@@ -19,6 +19,6 @@ export function streakStats(sessions:readonly Session[],symbol:string,date:strin
     leftKnown=next===0?true:precedingKnown;
   }
   // The trailing run is still unfinished at the window end and is excluded.
-  const average=(runs:number[]):MeanStreak=>({mean:runs.length?runs.reduce((a,b)=>a+b,0)/runs.length:null,count:runs.length});
+  const average=(runs:number[]):MeanStreak=>({mean:runs.length?runs.reduce((a,b)=>a+b,0)/runs.length:null,count:runs.length,longest:runs.length?Math.max(...runs):null});
   return {green:average(lengths.green),red:average(lengths.red),historySessions:baseline.length,missingSessions,lookback,startDate:baseline[0]?.date??null,endDate:baseline.at(-1)?.date??null};
 }

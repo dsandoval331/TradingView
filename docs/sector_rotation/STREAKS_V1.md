@@ -26,3 +26,7 @@ plus render verification of two-decimal values and measure labels. The full
 suite before the final render addition passed 30 checks; the added render check
 also passes. Production build is required before deployment. Authenticated
 browser interaction remains unverified.
+
+The panel also reports the longest eligible completed green streak and red
+streak in whole days, using exactly the same sample and eligibility rules.
+No eligible streaks display a dash for both the mean and maximum.
