@@ -24,7 +24,7 @@ export default function Tracker({bars,updatedAt,latestSession,runStatus,error,gr
   const selected=filtered.find(d=>d.date===selectedDate)??newest;
   const cell=selected?.cells[symbol];
   const sector=groups.find(s=>s.symbol===symbol)!;
-  const timeline=filtered.slice(-20);
+  const timeline=[...filtered].reverse();
   const normal=directionalMoveStats(sessions,symbol,selected?.date,60,5,metric==='relative'?'relative':'daily');
   function download(){const blob=new Blob([exportCsv(filtered,groups)],{type:'text/csv;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`multiply-sector-history-${newest?.date??'empty'}.csv`;a.click();URL.revokeObjectURL(url);}
   return <div className={styles.tracker}>
