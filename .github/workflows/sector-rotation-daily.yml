@@ -1,0 +1,33 @@
+name: Sector Rotation Daily History
+on:
+  push:
+    branches: [main, work/sector-rotation-v1]
+    paths:
+      - 'scripts/sector_rotation/**'
+      - '.github/workflows/sector-rotation-daily.yml'
+  schedule:
+    # After midnight ET year-round; second run retries late data/provider outages.
+    - cron: '15 6,10 * * 2-6'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: sector-rotation-data
+  cancel-in-progress: false
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Validate collector with isolated synthetic fixtures
+        run: python3 -m unittest discover -s tests/sector_rotation -p 'test_*.py'
+      - name: Collect sector history under MWE-SECTOR-V1-001
+        env:
+          SUPABASE_URL: ${{ secrets.TR_SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.TR_SUPABASE_SECRET_KEY }}
+          MASSIVE_API_KEY: ${{ secrets.MASSIVE_API_KEY }}
+          TR_MASSIVE_API_KEY: ${{ secrets.TR_MASSIVE_API_KEY }}
+        run: python3 scripts/sector_rotation/collect.py
