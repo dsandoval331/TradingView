@@ -6,7 +6,7 @@ The shared tracker now includes Suggested Swing Trades (Beta), after Event Log, 
 
 ## Current scope
 
-The user is still gathering entry rules. The server-only `swing-data.ts` adapter deliberately returns no suggestions. Production displays empty Active and Archive tables, with no invented candidates or reasoning. There is no entry form, recommendation engine, broker integration, new collection job, database table, or live suggestion persistence in this release. Once entry rules are supplied, connect the loader to durable recorded suggestions rather than continuously recomputing old signals. Do not embed private records in code or public client bundles.
+Method #1 remains a draft. The user authorized a bounded retrospective Method #2 lookback on October 26, 2026. The server-only `swing-data.ts` adapter reads durable snapshots from `sector_swing_suggestions`, protected by the existing MULtipLY allowlist. See METHOD2_RECENT_BACKFILL.md for rules, counts and provenance. No broker integration or scheduled forward signal generation is included. Private records remain in the database and are passed only to authenticated tracker routes.
 
 Each suggestion requires a stable ID, symbol, suggestion date, Long/Short side, explicit entry price, and reasoning. Existing authenticated routes pass suggestions and a server-seeded New York market date to the client. The age/date refreshes while the page is open; daily prices refresh with page data.
 
@@ -31,4 +31,4 @@ Browser fixture used clearly labeled synthetic entries/prices, verified empty st
 
 ## Numbered methods
 
-See [SWING_METHODS_V1.md](SWING_METHODS_V1.md). Suggestions now require `methodId` (1 or 2), displayed in reasoning and Active/Archive tables. Method #1 captures the user-supplied Sector rotation framework with precise thresholds pending; #2 is a researched RSI(2) trend-pullback draft. The signal loader remains empty pending complete rules and validation.
+See [SWING_METHODS_V1.md](SWING_METHODS_V1.md). Suggestions now require `methodId` (1 or 2), displayed in reasoning and Active/Archive tables. Method #1 captures the user-supplied Sector rotation framework with precise thresholds pending; #2 is the RSI(2) trend-pullback screen, with authorized recent retrospective matches now recorded. Strategy validation and executable entry/exit rules remain separate work.

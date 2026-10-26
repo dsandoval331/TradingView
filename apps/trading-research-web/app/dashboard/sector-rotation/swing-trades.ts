@@ -1,11 +1,11 @@
 import type {Bar} from './model';
 export const SWING_METHODS=[
  {id:1,name:'Sector rotation',status:'Rules draft',description:'Compare the 11 sector ETFs against SPY for improving or established leadership. Look for sector ETF pullbacks or the top 2–3 stocks within a leading sector, with breakout or moving-average support confirmation and broad-market alignment. Exact lookbacks and trigger thresholds are pending.'},
- {id:2,name:'RSI(2) trend pullback',status:'Research draft',description:'Proposed Long setup: close above the 200-session SMA and RSI(2) below 5. Proposed Short setup: close below the 200-session SMA and RSI(2) above 95. A testable starting point; validation and entry/exit rules remain to be finalized.'},
+ {id:2,name:'RSI(2) trend pullback',status:'Retrospective screen',description:'Long screen: close above the 200-session SMA and RSI(2) below 5. Short screen: close below the 200-session SMA and RSI(2) above 95. Recent historical matches are recorded below. Closing prices are reference prices; strategy validation and executable entry/exit rules remain to be finalized.'},
 ] as const;
 export type SwingMethodId=typeof SWING_METHODS[number]['id'];
 export const swingMethodLabel=(id:SwingMethodId)=>{const method=SWING_METHODS.find(m=>m.id===id)!;return `#${method.id} · ${method.name}`;};
-export type SwingSuggestion={id:string;methodId:SwingMethodId;symbol:string;suggestedDate:string;side:'long'|'short';entryPrice:number;reason:string};
+export type SwingSuggestion={id:string;methodId:SwingMethodId;methodVersion?:string;signalMetrics?:{rsi2:number;sma200:number};origin?:'retrospective'|'recorded';recordedAt?:string;symbol:string;suggestedDate:string;side:'long'|'short';entryPrice:number;reason:string};
 const DAY=86400000;
 function utcDay(date:string){
  const time=Date.parse(date+'T00:00:00Z');
