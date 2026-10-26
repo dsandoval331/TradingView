@@ -17,3 +17,5 @@
 
 /* Identical date slots and gutters in both linked charts. */
 .alignedPlot,.alignedDates{gap:0}.alignedPlot button{flex:1 1 0;border-radius:0}.alignedDates time{flex:1 1 0;white-space:nowrap;overflow:visible}.chartScroll{scroll-behavior:auto;overflow-anchor:none}
+
+.chartLineControl{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin:16px 0}.chartLineControl label{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--muted)}.emaLegend{display:flex;align-items:center;gap:8px;font-size:12px;color:#69b7ff;font-variant-numeric:tabular-nums}.emaLegend i{width:24px;border-top:2px solid currentColor}
