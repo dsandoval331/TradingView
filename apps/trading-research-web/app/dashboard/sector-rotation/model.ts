@@ -1,3 +1,4 @@
+export type Group = {symbol:string;name:string;short:string;kind?:'etf'|'basket';members?:readonly string[];note?:string};
 export const SECTORS = [
   { symbol: 'XLK', name: 'Technology', short: 'Technology' },
   { symbol: 'XLV', name: 'Healthcare', short: 'Healthcare' },
@@ -16,7 +17,7 @@ export type Cell = { symbol: string; close: number | null; daily: number | null;
 export type Session = { date: string; spy: number | null; cells: Record<string, Cell>; complete: boolean; leader: string | null; laggard: string | null; spread: number | null };
 export type Metric = 'relative' | 'daily' | 'rank' | 'rankChange';
 const valid = (v: number) => Number.isFinite(v) && v > 0;
-export function buildSessions(bars: Bar[]): Session[] {
+export function buildSessions(bars: Bar[], groups: readonly Group[] = SECTORS): Session[] {
   const prices = new Map<string, Map<string, number>>();
   for (const bar of bars) {
     const value = Number(bar.close);
@@ -37,13 +38,13 @@ export function buildSessions(bars: Bar[]): Session[] {
   for (let i = 0; i < dates.length; i++) {
     const spy = change('SPY', i, 1);
     const cells: Record<string, Cell> = {};
-    for (const sector of SECTORS) {
+    for (const sector of groups) {
       const daily = change(sector.symbol, i, 1);
       const relative = daily === null || spy === null ? null : daily - spy;
       cells[sector.symbol] = { symbol: sector.symbol, close: prices.get(sector.symbol)?.get(dates[i]) ?? null, daily, relative, five: change(sector.symbol, i, 5), twenty: change(sector.symbol, i, 20), rank: null, rankChange: null };
     }
     const ordered = Object.values(cells).filter(c => c.daily !== null).sort((a,b) => b.daily! - a.daily! || a.symbol.localeCompare(b.symbol));
-    const complete = ordered.length === SECTORS.length;
+    const complete = ordered.length === groups.length;
     // Ranks require the complete universe; ties receive competition ranks.
     if (complete) for (const c of ordered) {
       c.rank = 1 + ordered.filter(other => other.daily! > c.daily! + 1e-10).length;
@@ -57,14 +58,14 @@ export function buildSessions(bars: Bar[]): Session[] {
   }
   return output;
 }
-export function leadershipNote(session: Session, previous?: Session): string {
+export function leadershipNote(session: Session, previous?: Session, groups: readonly Group[] = SECTORS): string {
   if (!session.complete) return 'Incomplete comparison — one or more sector returns are unavailable.';
   if (session.spread !== null && session.spread < 0.25) return 'Mixed leadership — sector returns were within 0.25 percentage points.';
   if (!session.leader) return 'Shared lead — multiple sectors tied for the strongest daily return.';
-  const name = SECTORS.find(s => s.symbol === session.leader)!.name;
+  const name = groups.find(s => s.symbol === session.leader)!.name;
   if (!previous?.complete || !previous.leader) return `${name} led the session.`;
   if (previous.leader === session.leader) return `${name} retained the daily lead.`;
-  const before = SECTORS.find(s => s.symbol === previous.leader)!.name;
+  const before = groups.find(s => s.symbol === previous.leader)!.name;
   return `${name} took the daily lead from ${before}.`;
 }
 export function metricValue(cell: Cell, metric: Metric): number | null { return cell[metric]; }
@@ -75,16 +76,16 @@ export function formatValue(value: number | null, metric: Metric): string {
   const rounded = Math.abs(value) < 0.005 ? 0 : value;
   return `${rounded > 0 ? '+' : ''}${rounded.toFixed(2)}${metric === 'relative' ? '' : '%'}`;
 }
-export function heat(value: number | null, metric: Metric): string {
+export function heat(value: number | null, metric: Metric, groupCount = 11): string {
   if (value === null) return 'rgba(148,163,184,.06)';
-  const score = metric === 'rank' ? (6-value)/3 : metric === 'rankChange' ? value/4 : value;
+  const score = metric === 'rank' ? ((groupCount+1)/2-value)/Math.max(1,groupCount/4) : metric === 'rankChange' ? value/4 : value;
   const strength = Math.min(Math.abs(score)/1.5, 1);
   if (Math.abs(score) < 0.05) return 'rgba(148,163,184,.10)';
   return score > 0 ? `rgba(31,171,137,${.13+.48*strength})` : `rgba(222,84,104,${.13+.48*strength})`;
 }
-export function exportCsv(sessions: Session[]): string {
+export function exportCsv(sessions: Session[], groups: readonly Group[] = SECTORS): string {
   const lines = ['date,symbol,sector,daily_return_pct,spy_return_pct,relative_return_pp,rank,rank_change,return_5_sessions_pct,return_20_sessions_pct'];
-  for (const day of sessions) for (const s of SECTORS) {
+  for (const day of sessions) for (const s of groups) {
     const c=day.cells[s.symbol];
     lines.push([day.date,s.symbol,s.name,c.daily,day.spy,c.relative,c.rank,c.rankChange,c.five,c.twenty].map(x=>x??'').join(','));
   }
