@@ -1,0 +1,398 @@
+{
+  "XLK": {
+    "asOf": "2026-10-22",
+    "reviewedOn": "2026-10-25",
+    "sourceName": "State Street · Fund Top Holdings",
+    "sourceUrl": "https://www.ssga.com/us/en/intermediary/etfs/state-street-technology-select-sector-spdr-etf-xlk",
+    "holdings": [
+      {
+        "symbol": "NVDA",
+        "name": "NVIDIA",
+        "weightPct": 15.41
+      },
+      {
+        "symbol": "AAPL",
+        "name": "Apple",
+        "weightPct": 15.25
+      },
+      {
+        "symbol": "MSFT",
+        "name": "Microsoft",
+        "weightPct": 11.61
+      },
+      {
+        "symbol": "AVGO",
+        "name": "Broadcom",
+        "weightPct": 4.61
+      },
+      {
+        "symbol": "AMD",
+        "name": "Advanced Micro Devices",
+        "weightPct": 4.5
+      }
+    ]
+  },
+  "XLV": {
+    "asOf": "2026-10-22",
+    "reviewedOn": "2026-10-25",
+    "sourceName": "State Street · Fund Top Holdings",
+    "sourceUrl": "https://www.ssga.com/us/en/intermediary/etfs/state-street-health-care-select-sector-spdr-etf-xlv",
+    "holdings": [
+      {
+        "symbol": "LLY",
+        "name": "Eli Lilly",
+        "weightPct": 15.89
+      },
+      {
+        "symbol": "JNJ",
+        "name": "Johnson & Johnson",
+        "weightPct": 9.8
+      },
+      {
+        "symbol": "ABBV",
+        "name": "AbbVie",
+        "weightPct": 7.66
+      },
+      {
+        "symbol": "UNH",
+        "name": "UnitedHealth Group",
+        "weightPct": 5.8
+      },
+      {
+        "symbol": "MRK",
+        "name": "Merck",
+        "weightPct": 5.52
+      }
+    ]
+  },
+  "XLP": {
+    "asOf": "2026-10-22",
+    "reviewedOn": "2026-10-25",
+    "sourceName": "State Street · Fund Top Holdings",
+    "sourceUrl": "https://www.ssga.com/us/en/intermediary/etfs/state-street-consumer-staples-select-sector-spdr-etf-xlp",
+    "holdings": [
+      {
+        "symbol": "WMT",
+        "name": "Walmart",
+        "weightPct": 10.85
+      },
+      {
+        "symbol": "COST",
+        "name": "Costco Wholesale",
+        "weightPct": 9.08
+      },
+      {
+        "symbol": "PG",
+        "name": "Procter & Gamble",
+        "weightPct": 7.69
+      },
+      {
+        "symbol": "KO",
+        "name": "Coca-Cola",
+        "weightPct": 7.42
+      },
+      {
+        "symbol": "PM",
+        "name": "Philip Morris International",
+        "weightPct": 6.32
+      }
+    ]
+  },
+  "XLY": {
+    "asOf": "2026-10-22",
+    "reviewedOn": "2026-10-25",
+    "sourceName": "State Street · Fund Top Holdings",
+    "sourceUrl": "https://www.ssga.com/us/en/intermediary/etfs/state-street-consumer-discretionary-select-sector-spdr-etf-xly",
+    "holdings": [
+      {
+        "symbol": "AMZN",
+        "name": "Amazon",
+        "weightPct": 22.27
+      },
+      {
+        "symbol": "TSLA",
+        "name": "Tesla",
+        "weightPct": 17.67
+      },
+      {
+        "symbol": "HD",
+        "name": "Home Depot",
+        "weightPct": 5.47
+      },
+      {
+        "symbol": "MCD",
+        "name": "McDonald’s",
+        "weightPct": 4.38
+      },
+      {
+        "symbol": "TJX",
+        "name": "TJX Companies",
+        "weightPct": 4.3
+      }
+    ]
+  },
+  "XLF": {
+    "asOf": "2026-10-22",
+    "reviewedOn": "2026-10-25",
+    "sourceName": "State Street · Fund Top Holdings",
+    "sourceUrl": "https://www.ssga.com/us/en/intermediary/etfs/state-street-financial-select-sector-spdr-etf-xlf",
+    "holdings": [
+      {
+        "symbol": "BRK.B",
+        "name": "Berkshire Hathaway · Class B",
+        "weightPct": 12.75
+      },
+      {
+        "symbol": "JPM",
+        "name": "JPMorgan Chase",
+        "weightPct": 11.2
+      },
+      {
+        "symbol": "V",
+        "name": "Visa · Class A",
+        "weightPct": 8.84
+      },
+      {
+        "symbol": "MA",
+        "name": "Mastercard · Class A",
+        "weightPct": 6.41
+      },
+      {
+        "symbol": "BAC",
+        "name": "Bank of America",
+        "weightPct": 4.16
+      }
+    ]
+  },
+  "XLI": {
+    "asOf": "2026-10-22",
+    "reviewedOn": "2026-10-25",
+    "sourceName": "State Street · Fund Top Holdings",
+    "sourceUrl": "https://www.ssga.com/us/en/intermediary/etfs/state-street-industrial-select-sector-spdr-etf-xli",
+    "holdings": [
+      {
+        "symbol": "CAT",
+        "name": "Caterpillar",
+        "weightPct": 6.1
+      },
+      {
+        "symbol": "GE",
+        "name": "GE Aerospace",
+        "weightPct": 5.75
+      },
+      {
+        "symbol": "RTX",
+        "name": "RTX",
+        "weightPct": 4.95
+      },
+      {
+        "symbol": "GEV",
+        "name": "GE Vernova",
+        "weightPct": 4.16
+      },
+      {
+        "symbol": "UNP",
+        "name": "Union Pacific",
+        "weightPct": 3.34
+      }
+    ]
+  },
+  "XLE": {
+    "asOf": "2026-10-22",
+    "reviewedOn": "2026-10-25",
+    "sourceName": "State Street · Fund Top Holdings",
+    "sourceUrl": "https://www.ssga.com/us/en/intermediary/etfs/state-street-energy-select-sector-spdr-etf-xle",
+    "holdings": [
+      {
+        "symbol": "XOM",
+        "name": "ExxonMobil Holdings",
+        "weightPct": 23.99
+      },
+      {
+        "symbol": "CVX",
+        "name": "Chevron",
+        "weightPct": 18.26
+      },
+      {
+        "symbol": "COP",
+        "name": "ConocoPhillips",
+        "weightPct": 7.13
+      },
+      {
+        "symbol": "MPC",
+        "name": "Marathon Petroleum",
+        "weightPct": 4.97
+      },
+      {
+        "symbol": "VLO",
+        "name": "Valero Energy",
+        "weightPct": 4.74
+      }
+    ]
+  },
+  "XLB": {
+    "asOf": "2026-10-22",
+    "reviewedOn": "2026-10-25",
+    "sourceName": "State Street · Fund Top Holdings",
+    "sourceUrl": "https://www.ssga.com/us/en/intermediary/etfs/state-street-materials-select-sector-spdr-etf-xlb",
+    "holdings": [
+      {
+        "symbol": "LIN",
+        "name": "Linde",
+        "weightPct": 13.02
+      },
+      {
+        "symbol": "NEM",
+        "name": "Newmont",
+        "weightPct": 6.66
+      },
+      {
+        "symbol": "FCX",
+        "name": "Freeport-McMoRan",
+        "weightPct": 5.13
+      },
+      {
+        "symbol": "SHW",
+        "name": "Sherwin-Williams",
+        "weightPct": 5.03
+      },
+      {
+        "symbol": "VMC",
+        "name": "Vulcan Materials",
+        "weightPct": 5.01
+      }
+    ]
+  },
+  "XLU": {
+    "asOf": "2026-10-22",
+    "reviewedOn": "2026-10-25",
+    "sourceName": "State Street · Fund Top Holdings",
+    "sourceUrl": "https://www.ssga.com/us/en/intermediary/etfs/state-street-utilities-select-sector-spdr-etf-xlu",
+    "holdings": [
+      {
+        "symbol": "NEE",
+        "name": "NextEra Energy",
+        "weightPct": 12.68
+      },
+      {
+        "symbol": "SO",
+        "name": "Southern Company",
+        "weightPct": 8.01
+      },
+      {
+        "symbol": "DUK",
+        "name": "Duke Energy",
+        "weightPct": 7.26
+      },
+      {
+        "symbol": "CEG",
+        "name": "Constellation Energy",
+        "weightPct": 6.24
+      },
+      {
+        "symbol": "AEP",
+        "name": "American Electric Power",
+        "weightPct": 5.28
+      }
+    ]
+  },
+  "XLRE": {
+    "asOf": "2026-10-22",
+    "reviewedOn": "2026-10-25",
+    "sourceName": "State Street · Fund Top Holdings",
+    "sourceUrl": "https://www.ssga.com/us/en/intermediary/etfs/state-street-real-estate-select-sector-spdr-etf-xlre",
+    "holdings": [
+      {
+        "symbol": "WELL",
+        "name": "Welltower",
+        "weightPct": 11.64
+      },
+      {
+        "symbol": "PLD",
+        "name": "Prologis",
+        "weightPct": 8.19
+      },
+      {
+        "symbol": "EQIX",
+        "name": "Equinix",
+        "weightPct": 6.39
+      },
+      {
+        "symbol": "AMT",
+        "name": "American Tower",
+        "weightPct": 5.76
+      },
+      {
+        "symbol": "PSA",
+        "name": "Public Storage",
+        "weightPct": 4.81
+      }
+    ]
+  },
+  "XLC": {
+    "asOf": "2026-10-22",
+    "reviewedOn": "2026-10-25",
+    "sourceName": "State Street · Fund Top Holdings",
+    "sourceUrl": "https://www.ssga.com/us/en/intermediary/etfs/state-street-communication-services-select-sector-spdr-etf-xlc",
+    "holdings": [
+      {
+        "symbol": "META",
+        "name": "Meta Platforms · Class A",
+        "weightPct": 21.63
+      },
+      {
+        "symbol": "GOOGL",
+        "name": "Alphabet · Class A",
+        "weightPct": 11.96
+      },
+      {
+        "symbol": "GOOG",
+        "name": "Alphabet · Class C",
+        "weightPct": 9.59
+      },
+      {
+        "symbol": "DIS",
+        "name": "Walt Disney",
+        "weightPct": 5.28
+      },
+      {
+        "symbol": "TTWO",
+        "name": "Take-Two Interactive",
+        "weightPct": 4.78
+      }
+    ]
+  },
+  "IGV": {
+    "asOf": "2026-10-23",
+    "reviewedOn": "2026-10-25",
+    "sourceName": "iShares · latest fund holdings CSV",
+    "sourceUrl": "https://www.ishares.com/us/products/239771/ishares-expanded-tech-software-sector-etf/latest-holdings.csv",
+    "holdings": [
+      {
+        "symbol": "PLTR",
+        "name": "Palantir Technologies · Class A",
+        "weightPct": 9.1
+      },
+      {
+        "symbol": "PANW",
+        "name": "Palo Alto Networks",
+        "weightPct": 8.9
+      },
+      {
+        "symbol": "MSFT",
+        "name": "Microsoft",
+        "weightPct": 8.36
+      },
+      {
+        "symbol": "CRWD",
+        "name": "CrowdStrike · Class A",
+        "weightPct": 8.3
+      },
+      {
+        "symbol": "ORCL",
+        "name": "Oracle",
+        "weightPct": 6.12
+      }
+    ]
+  }
+}
