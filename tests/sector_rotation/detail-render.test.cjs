@@ -228,7 +228,7 @@ test('swing trade age uses Day 0, weekdays only, and includes weekday holidays',
  assert.equal(addWeekdays('2026-10-23',15),'2026-11-13');assert.equal(addWeekdays('2026-10-23',16),'2026-11-16');
  assert.throws(()=>weekdaysSince('2026-02-30','2026-03-01'),/Invalid/);
 });
-const swingSuggestion={id:'test-only',symbol:'X',suggestedDate:'2026-10-23',side:'long',entryPrice:100,reason:'Synthetic test fixture; not a suggestion.'};
+const swingSuggestion={id:'test-only',methodId:1,symbol:'X',suggestedDate:'2026-10-23',side:'long',entryPrice:100,reason:'Synthetic test fixture; not a suggestion.'};
 const swingBars=[{symbol:'X',trade_date:'2026-10-23',close:100,high:999,low:1,volume:1},{symbol:'X',trade_date:'2026-10-26',close:105,high:110,low:95,volume:1},{symbol:'X',trade_date:'2026-10-27',close:90,high:108,low:85,volume:1},{symbol:'X',trade_date:'2026-11-13',close:107,high:112,low:99,volume:1},{symbol:'X',trade_date:'2026-11-16',close:1000,high:2000,low:.1,volume:1}];
 test('swing trade tracking excludes pre-entry highs/lows and future bars; handles Long and Short',()=>{
  const {trackSwingTrades}=require(path.join(app,'app/dashboard/sector-rotation/swing-trades.ts'));
@@ -281,4 +281,20 @@ test('single-stock heatmap offers RSI and Mansfield and the Event Log renders si
  const html=renderToStaticMarkup(React.createElement(Tracker,{bars,stocks:true,singleStock:true,groups:eventGroup,updatedAt:null,latestSession:bars.at(-1).trade_date,runStatus:'COMPLETE',error:null}));
  assert.match(html,/<option value="rsiRelative"/);assert.match(html,/<option value="mansfield"/);assert.doesNotMatch(html,/<option value="rank"/);
  const table=html.match(/<table[^>]*data-current-streaks[^>]*>([\s\S]*?)<\/table>/)[1];assert.equal((table.match(/<tr>/g)||[]).length,7);assert.match(table,/RSI vs SPY RSI/);assert.match(table,/Mansfield RS/);
+});
+
+test('numbered methods persist in Active and Archive and unidentified suggestions are rejected',()=>{
+ const {trackSwingTrades,SWING_METHODS}=require(path.join(app,'app/dashboard/sector-rotation/swing-trades.ts'));
+ const Swing=require(path.join(app,'app/dashboard/sector-rotation/SwingTrades.tsx')).default;
+ assert.deepEqual(SWING_METHODS.map(m=>m.id),[1,2]);
+ const suggestions=[swingSuggestion,{...swingSuggestion,id:'test-method-2',methodId:2}];
+ for(const date of ['2026-10-27','2026-11-16']){
+  assert.deepEqual(trackSwingTrades(suggestions,swingBars,date).map(row=>row.methodId),[1,2]);
+  const html=renderToStaticMarkup(React.createElement(Swing,{bars:swingBars,groups:[{symbol:'X',name:'Fixture',short:'Fixture'}],asOfDate:date,suggestions}));
+  assert.match(html,/#1 · Your method/);assert.match(html,/#2 · RSI\(2\) trend pullback/);
+  assert.match(html,/<th scope="col">Method<\/th>/);assert.match(html,/Research draft/);assert.match(html,/Awaiting your rules/);
+ }
+ assert.throws(()=>trackSwingTrades([{...swingSuggestion,methodId:3}],[], '2026-10-27'),/Invalid swing suggestion/);
+ const {methodId,...unidentified}=swingSuggestion;
+ assert.throws(()=>trackSwingTrades([unidentified],[], '2026-10-27'),/Invalid swing suggestion/);
 });

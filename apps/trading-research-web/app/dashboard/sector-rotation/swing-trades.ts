@@ -1,5 +1,11 @@
 import type {Bar} from './model';
-export type SwingSuggestion={id:string;symbol:string;suggestedDate:string;side:'long'|'short';entryPrice:number;reason:string};
+export const SWING_METHODS=[
+ {id:1,name:'Your method',status:'Awaiting your rules',description:'Entry conditions will be added from your supplied logic.'},
+ {id:2,name:'RSI(2) trend pullback',status:'Research draft',description:'Proposed Long setup: close above the 200-session SMA and RSI(2) below 5. Proposed Short setup: close below the 200-session SMA and RSI(2) above 95. A testable starting point; validation and entry/exit rules remain to be finalized.'},
+] as const;
+export type SwingMethodId=typeof SWING_METHODS[number]['id'];
+export const swingMethodLabel=(id:SwingMethodId)=>{const method=SWING_METHODS.find(m=>m.id===id)!;return `#${method.id} · ${method.name}`;};
+export type SwingSuggestion={id:string;methodId:SwingMethodId;symbol:string;suggestedDate:string;side:'long'|'short';entryPrice:number;reason:string};
 const DAY=86400000;
 function utcDay(date:string){
  const time=Date.parse(date+'T00:00:00Z');
@@ -24,7 +30,7 @@ export type SwingTradeRow=SwingSuggestion&{status:'active'|'archive';days:number
 export function trackSwingTrades(suggestions:readonly SwingSuggestion[],bars:readonly Bar[],asOfDate:string):SwingTradeRow[]{
  utcDay(asOfDate);const ids=new Set<string>();
  return suggestions.flatMap(s=>{
-  if(ids.has(s.id)||!s.id||!s.reason.trim()||!Number.isFinite(s.entryPrice)||s.entryPrice<=0||!['long','short'].includes(s.side)||!/^[A-Z][A-Z0-9.-]{0,9}$/.test(s.symbol))throw new Error('Invalid swing suggestion');
+  if(ids.has(s.id)||!s.id||!SWING_METHODS.some(m=>m.id===s.methodId)||!s.reason.trim()||!Number.isFinite(s.entryPrice)||s.entryPrice<=0||!['long','short'].includes(s.side)||!/^[A-Z][A-Z0-9.-]{0,9}$/.test(s.symbol))throw new Error('Invalid swing suggestion');
   ids.add(s.id);const age=weekdaysSince(s.suggestedDate,asOfDate);if(age<0)return [];
   const archived=age>15,end=archived?addWeekdays(s.suggestedDate,15):asOfDate;
   // Entries are recorded at the suggestion-day close. Never use that day's pre-entry high/low.
