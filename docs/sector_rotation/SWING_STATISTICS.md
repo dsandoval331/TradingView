@@ -27,3 +27,7 @@ See [METHOD1_CONFIGURABLE_SCREEN.md](METHOD1_CONFIGURABLE_SCREEN.md) for the app
 ## Method comparison filters
 
 Suggestions default to Both methods; Method 1 / Method 2 / Both filters apply to Active and Archive counts, rows and reasoning, alongside the existing direction filter. Statistics always show all three method populations for comparison, using the selected entry basis and current tracker scope. Combined means pool individual signals, not the two method means. Signals for the same symbol/date from different methods remain separate observations. Empty populations show zero counts and unavailable averages. Method 1 calculated results and Method 2 saved snapshots retain their existing provenance.
+
+## Method 3
+
+Method 3 adds a fourth statistics table: Method 1, Method 2, Method 3 and All methods. The method suggestion filter similarly offers each method plus All methods (the default). Existing Long/Short grouping, entry basis, pooling and missing-data rules are unchanged. See METHOD3_VOLUME_CONFIRMATION.md for rules and calculated-result provenance.
