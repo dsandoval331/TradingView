@@ -1,6 +1,6 @@
 # Swing play statistics and Method 1 inputs
 
-Play statistics appears directly above Archive. Rows always show Longs, Shorts and Both for the current tracker symbol scope, including both Active and Archive records. The Open/Close selection determines the entry basis; the direction filter does not hide statistical groups. Each saved signal contributes once per selected basis; Both is a pooled per-play mean, not an average of the two group means.
+Play statistics appears directly above Archive. Separate tables show Method 1, Method 2 and Both methods. Each table always shows Longs, Shorts and Both for the current tracker symbol scope, including both Active and Archive records. The Open/Close selection determines the entry basis; the method and direction suggestion filters do not hide statistical groups. Each signal contributes once per selected basis; Both is a pooled per-play mean, not an average of the two group means.
 
 Columns: Count, average MFE (dollars and entry-relative percent), average MAE (dollars and percent), average raw price change percent, average positive price change percent and average negative price change percent. Up/down excludes flat moves. Raw price signs match the suggestion table: price down can favor a Short. These are price-reference observations, not realized returns or side-adjusted P&L. Archived inputs use the existing Day 15 cap; active observations reflect latest available data and unequal ages.
 
@@ -23,3 +23,7 @@ Existing measures are recommended for implementation simplicity/auditability, no
 ## Method 1 implementation
 
 See [METHOD1_CONFIGURABLE_SCREEN.md](METHOD1_CONFIGURABLE_SCREEN.md) for the approved configurable defaults, global ranking and repeat labels. Method 1 now supplies calculated retrospective results; Method 2 saved snapshots remain separate.
+
+## Method comparison filters
+
+Suggestions default to Both methods; Method 1 / Method 2 / Both filters apply to Active and Archive counts, rows and reasoning, alongside the existing direction filter. Statistics always show all three method populations for comparison, using the selected entry basis and current tracker scope. Combined means pool individual signals, not the two method means. Signals for the same symbol/date from different methods remain separate observations. Empty populations show zero counts and unavailable averages. Method 1 calculated results and Method 2 saved snapshots retain their existing provenance.

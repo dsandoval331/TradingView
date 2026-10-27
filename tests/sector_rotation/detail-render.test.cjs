@@ -473,3 +473,32 @@ test('Method 1 tie ranking is deterministic, ETF-only scope excludes stocks and 
  const day=screenMethodOne(dual,map,[],{...config,setups:'both'},dates[56]).suggestions.filter(s=>s.suggestedDate===dates[56]);
  assert.deepEqual(day.filter(s=>s.symbol==='A').map(s=>s.setup).sort(),['breakout','pullback']);assert.equal(new Set(day.map(s=>s.symbol)).size,3);
 });
+
+test('method filters compose with direction and preserve separate active/archive signals',()=>{
+ const {filterSwingMethods}=require(path.join(app,'app/dashboard/sector-rotation/swing-statistics.ts'));
+ const rows=[{id:'a',methodId:1,side:'long',status:'active'},{id:'b',methodId:2,side:'long',status:'archive'},{id:'c',methodId:1,side:'short',status:'archive'},{id:'d',methodId:2,side:'short',status:'active'}];
+ assert.deepEqual(filterSwingMethods(rows,1).map(r=>r.id),['a','c']);
+ assert.deepEqual(filterSwingMethods(rows,2).map(r=>r.id),['b','d']);
+ assert.deepEqual(filterSwingMethods(rows,'both'),rows);
+ assert.deepEqual(filterSwingMethods(rows,2).filter(r=>r.side==='long').map(r=>r.id),['b']);
+ const Swing=require(path.join(app,'app/dashboard/sector-rotation/SwingTrades.tsx')).default;
+ const html=renderToStaticMarkup(React.createElement(Swing,{bars:[],groups:[],asOfDate:'2026-10-26'}));
+ assert.match(html,/aria-label="Method filter"><button[^>]*aria-pressed="false">Method 1<\/button><button[^>]*aria-pressed="false">Method 2<\/button><button[^>]*aria-pressed="true">Both<\/button>/);
+});
+test('method statistics isolate both methods, pool individual signals and render empty populations',()=>{
+ const {swingStatisticsByMethod}=require(path.join(app,'app/dashboard/sector-rotation/swing-statistics.ts'));
+ const base={methodId:1,side:'long',missingOHLC:0,mfa:4,mfaPercent:4,mae:2,maePercent:2,percentChange:10};
+ const [one,two,both]=swingStatisticsByMethod([base,{...base,percentChange:20},{...base,methodId:2,side:'short',percentChange:-6,mfa:10}]);
+ assert.deepEqual([one.method,two.method,both.method],[1,2,'both']);
+ assert.equal(one.groups[2].count,2);assert.equal(one.groups[2].change.value,15);
+ assert.equal(two.groups[2].count,1);assert.equal(two.groups[2].change.value,-6);
+ assert.equal(both.groups[2].count,3);assert.equal(both.groups[2].change.value,8);assert.equal(both.groups[2].mfe.value,6);
+ assert.equal(two.groups[0].change.value,null);assert.equal(one.groups[1].count,0);
+ const Stats=require(path.join(app,'app/dashboard/sector-rotation/SwingStats.tsx')).default;
+ for(const entryBasis of ['signal_close','next_open']){
+  const html=renderToStaticMarkup(React.createElement(Stats,{rows:[],entryBasis}));
+  assert.match(html,/<h4>Method 1<\/h4>/);assert.match(html,/<h4>Method 2<\/h4>/);assert.match(html,/<h4>Both methods<\/h4>/);
+  assert.equal((html.match(/>Longs<\/th>/g)||[]).length,3);assert.match(html,/Independent of suggestion filters/);
+  assert.match(html,entryBasis==='next_open'?/Next session open/:/Signal close/);
+ }
+});
