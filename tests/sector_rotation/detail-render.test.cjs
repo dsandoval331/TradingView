@@ -573,7 +573,7 @@ test('Method 3 participates in filters, independent method statistics, both entr
   assert.ok(trackSwingTrades(signals,bars,'2026-12-31',basis).every(r=>r.status==='archive'&&r.days===16));
  }
  const Swing=require(path.join(app,'app/dashboard/sector-rotation/SwingTrades.tsx')).default;
- const html=renderToStaticMarkup(React.createElement(Swing,{bars,groups,sessionDuration:20,asOfDate:dates.at(-1)}));assert.match(html,/#3 · Volume and SPY-relative confirmation/);assert.match(html,/<h4>Method 3<\/h4>/);assert.match(html,/Method #3: 3 calculated matches/);
+ const html=renderToStaticMarkup(React.createElement(Swing,{bars,groups,sessionDuration:20,asOfDate:dates.at(-1)}));assert.match(html,/#3 · Volume and SPY-relative confirmation/);assert.match(html,/<h4>Method 3 baseline · &gt;1.0×<\/h4>/);assert.match(html,/Method 3 selected/);assert.match(html,/Method #3: 3 calculated matches/);
 });
 
 test('Method 3 rejects opposite relative strength for either direction and accepts zero-volume history',()=>{
@@ -584,4 +584,15 @@ test('Method 3 rejects opposite relative strength for either direction and accep
   assert.equal(screenMethodThree(changed,groups,20,dates[20]).length,qualifies?1:0);
  }
  const zero=bars.map(b=>b.symbol==='X'&&b.trade_date<dates[20]?{...b,volume:0}:b);assert.equal(screenMethodThree(zero,groups,20,dates[20]).length,1);
+});
+
+test('Method 3 relative volume choices enforce inclusive tenths and strict baseline/over2 bounds',()=>{
+ const {METHOD_THREE_RVOL_OPTIONS,qualifiesRelativeVolume,screenMethodThree}=require(path.join(app,'app/dashboard/sector-rotation/method-three.ts'));
+ assert.deepEqual(METHOD_THREE_RVOL_OPTIONS.map(o=>o.value),['baseline','1.1','1.2','1.3','1.4','1.5','1.6','1.7','1.8','1.9','2.0','over2']);
+ for(let n=11;n<=20;n++){const setting=(n/10).toFixed(1);assert.equal(qualifiesRelativeVolume(n*10,100,setting),true);assert.equal(qualifiesRelativeVolume(n*10-.01,100,setting),false);}
+ assert.equal(qualifiesRelativeVolume(100,100,'baseline'),false);assert.equal(qualifiesRelativeVolume(200,100,'over2'),false);assert.equal(qualifiesRelativeVolume(201,100,'over2'),true);assert.equal(qualifiesRelativeVolume(1,0,'1.1'),false);assert.throws(()=>qualifiesRelativeVolume(200,100,'2.1'));
+ const {dates,bars,groups}=methodThreeFixture();const baseline=screenMethodThree(bars,groups,20,dates.at(-1));const selected=screenMethodThree(bars,groups,20,dates.at(-1),undefined,'2.0');assert.ok(selected.length<baseline.length);assert.ok(selected.every(s=>s.methodVersion.endsWith('rvol-2.0')));
+ const Stats=require(path.join(app,'app/dashboard/sector-rotation/SwingStats.tsx')).default;
+ const {trackSwingTrades}=require(path.join(app,'app/dashboard/sector-rotation/swing-trades.ts'));const props={entryBasis:'signal_close',rows:trackSwingTrades(selected,bars,dates.at(-1)),methodThreeBaseline:trackSwingTrades(baseline,bars,dates.at(-1)),relativeVolume:'≥2.0×'};
+ const html=renderToStaticMarkup(React.createElement(Stats,props));assert.match(html,/Method 3 baseline/);assert.match(html,/Method 3 selected · ≥2.0×/);assert.match(html,/All methods/);
 });
