@@ -258,7 +258,7 @@ test('Swing Trades has empty Active/Archive without fabricated suggestions and r
  const Swing=require(path.join(app,'app/dashboard/sector-rotation/SwingTrades.tsx')).default;
  const groups=[{symbol:'X',name:'X',short:'X'},{symbol:'HW',name:'Basket',short:'Basket',kind:'basket'}];
  const props={bars:swingBars,groups,asOfDate:'2026-10-27'};
- const empty=renderToStaticMarkup(React.createElement(Swing,props));assert.match(empty,/Suggested Swing Trades/);assert.match(empty,/Beta/);assert.match(empty,/No active suggestions yet/);assert.match(empty,/Archive \(0\)/);assert.doesNotMatch(empty,/test-only|Synthetic test/);
+ const empty=renderToStaticMarkup(React.createElement(Swing,props));assert.match(empty,/Suggested Swing Trades/);assert.match(empty,/Beta/);assert.match(empty,/No active suggestions match the current rules and filters/);assert.match(empty,/Archive \(0\)/);assert.doesNotMatch(empty,/test-only|Synthetic test/);
  const active=renderToStaticMarkup(React.createElement(Swing,{...props,suggestions:[swingSuggestion]}));assert.ok(active.indexOf(swingSuggestion.reason)<active.indexOf('<table'));assert.match(active,/Day 2/);assert.match(active,/MFA/);assert.match(active,/MAE/);assert.match(active,/As of 2026-10-27/);
  const archive=renderToStaticMarkup(React.createElement(Swing,{...props,asOfDate:'2026-11-16',suggestions:[swingSuggestion]}));assert.match(archive,/Archive \(1\)/);assert.match(archive,/Final price/);assert.match(archive,/Day 16/);
  const excluded=renderToStaticMarkup(React.createElement(Swing,{...props,suggestions:[{...swingSuggestion,symbol:'HW'}]}));assert.match(excluded,/No active suggestions match these filters/);
@@ -288,7 +288,7 @@ test('single-stock heatmap offers RSI and Mansfield and the Event Log renders si
 test('numbered methods persist in Active and Archive and unidentified suggestions are rejected',()=>{
  const {trackSwingTrades,SWING_METHODS}=require(path.join(app,'app/dashboard/sector-rotation/swing-trades.ts'));
  const Swing=require(path.join(app,'app/dashboard/sector-rotation/SwingTrades.tsx')).default;
- assert.deepEqual(SWING_METHODS.map(m=>m.id),[1,2]);
+ assert.deepEqual(SWING_METHODS.map(m=>m.id),[1,2,3]);
  const suggestions=[swingSuggestion,{...swingSuggestion,id:'test-method-2',methodId:2}];
  for(const date of ['2026-10-27','2026-11-16']){
   assert.deepEqual(trackSwingTrades(suggestions,swingBars,date).map(row=>row.methodId),[1,2]);
@@ -296,7 +296,7 @@ test('numbered methods persist in Active and Archive and unidentified suggestion
   assert.match(html,/#1 · Sector rotation/);assert.match(html,/#2 · RSI\(2\) trend pullback/);
   assert.match(html,/<th scope="col">Method<\/th>/);assert.match(html,/Retrospective screen/);assert.match(html,/Configurable screen/);
  }
- assert.throws(()=>trackSwingTrades([{...swingSuggestion,methodId:3}],[], '2026-10-27'),/Invalid swing suggestion/);
+ assert.throws(()=>trackSwingTrades([{...swingSuggestion,methodId:4}],[], '2026-10-27'),/Invalid swing suggestion/);
  const {methodId,...unidentified}=swingSuggestion;
  assert.throws(()=>trackSwingTrades([unidentified],[], '2026-10-27'),/Invalid swing suggestion/);
 });
@@ -483,13 +483,13 @@ test('method filters compose with direction and preserve separate active/archive
  assert.deepEqual(filterSwingMethods(rows,2).filter(r=>r.side==='long').map(r=>r.id),['b']);
  const Swing=require(path.join(app,'app/dashboard/sector-rotation/SwingTrades.tsx')).default;
  const html=renderToStaticMarkup(React.createElement(Swing,{bars:[],groups:[],asOfDate:'2026-10-26'}));
- assert.match(html,/aria-label="Method filter"><button[^>]*aria-pressed="false">Method 1<\/button><button[^>]*aria-pressed="false">Method 2<\/button><button[^>]*aria-pressed="true">Both<\/button>/);
+ assert.match(html,/aria-label="Method filter"><button[^>]*aria-pressed="false">Method 1<\/button><button[^>]*aria-pressed="false">Method 2<\/button><button[^>]*aria-pressed="false">Method 3<\/button><button[^>]*aria-pressed="true">All methods<\/button>/);
 });
 test('method statistics isolate both methods, pool individual signals and render empty populations',()=>{
  const {swingStatisticsByMethod}=require(path.join(app,'app/dashboard/sector-rotation/swing-statistics.ts'));
  const base={methodId:1,side:'long',missingOHLC:0,mfa:4,mfaPercent:4,mae:2,maePercent:2,percentChange:10};
- const [one,two,both]=swingStatisticsByMethod([base,{...base,percentChange:20},{...base,methodId:2,side:'short',percentChange:-6,mfa:10}]);
- assert.deepEqual([one.method,two.method,both.method],[1,2,'both']);
+ const [one,two,three,both]=swingStatisticsByMethod([base,{...base,percentChange:20},{...base,methodId:2,side:'short',percentChange:-6,mfa:10}]);
+ assert.deepEqual([one.method,two.method,three.method,both.method],[1,2,3,'both']);
  assert.equal(one.groups[2].count,2);assert.equal(one.groups[2].change.value,15);
  assert.equal(two.groups[2].count,1);assert.equal(two.groups[2].change.value,-6);
  assert.equal(both.groups[2].count,3);assert.equal(both.groups[2].change.value,8);assert.equal(both.groups[2].mfe.value,6);
@@ -497,8 +497,8 @@ test('method statistics isolate both methods, pool individual signals and render
  const Stats=require(path.join(app,'app/dashboard/sector-rotation/SwingStats.tsx')).default;
  for(const entryBasis of ['signal_close','next_open']){
   const html=renderToStaticMarkup(React.createElement(Stats,{rows:[],entryBasis}));
-  assert.match(html,/<h4>Method 1<\/h4>/);assert.match(html,/<h4>Method 2<\/h4>/);assert.match(html,/<h4>Both methods<\/h4>/);
-  assert.equal((html.match(/>Longs<\/th>/g)||[]).length,3);assert.match(html,/Independent of suggestion filters/);
+  assert.match(html,/<h4>Method 1<\/h4>/);assert.match(html,/<h4>Method 2<\/h4>/);assert.match(html,/<h4>All methods<\/h4>/);
+  assert.equal((html.match(/>Longs<\/th>/g)||[]).length,4);assert.match(html,/Independent of suggestion filters/);
   assert.match(html,entryBasis==='next_open'?/Next session open/:/Signal close/);
  }
 });
@@ -528,4 +528,60 @@ test('active reasoning shows today only and keeps prior reasoning in a closed di
  const none=renderToStaticMarkup(React.createElement(Swing,{...props,suggestions:suggestions.slice(1)}));
  assert.match(none,/No suggestions dated today match these filters/);assert.match(none,/Earlier active suggestion reasoning \(1\)/);
  const current=renderToStaticMarkup(React.createElement(Swing,{...props,suggestions:suggestions.slice(0,1)}));assert.doesNotMatch(current,/Earlier active suggestion reasoning/);
+});
+
+function methodThreeFixture(){
+ const dates=[];let date=new Date('2026-09-15T00:00:00Z');while(dates.length<24){if(date.getUTCDay()!==0&&date.getUTCDay()!==6)dates.push(date.toISOString().slice(0,10));date.setUTCDate(date.getUTCDate()+1);}
+ const closes=[...Array(20).fill(100),105,110,90,91],volumes=[...Array(20).fill(100),200,300,400,100];
+ const bars=dates.flatMap((trade_date,i)=>['X','SPY'].map(symbol=>({symbol,trade_date,close:symbol==='SPY'?100:closes[i],open:150,high:160,low:80,volume:symbol==='SPY'?100:volumes[i]})));
+ return {dates,bars,groups:[{symbol:'X',name:'Fixture',short:'Fixture'}]};
+}
+test('Method 3 requires above-average volume and aligned daily/SPY-relative signs for both directions',()=>{
+ const {screenMethodThree}=require(path.join(app,'app/dashboard/sector-rotation/method-three.ts'));
+ const {dates,bars,groups}=methodThreeFixture();const signals=screenMethodThree(bars,groups,20,dates.at(-1),'2026-01-01');
+ assert.deepEqual(signals.map(s=>[s.suggestedDate,s.side,s.consecutiveDays]),[[dates[22],'short',1],[dates[21],'long',2],[dates[20],'long',1]]);
+ assert.ok(signals.every(s=>s.methodId===3&&s.origin==='retrospective'&&s.calculated));
+ assert.match(signals.find(s=>s.suggestedDate===dates[20]).reason,/20 sessions average 105/); // (19*100+200)/20
+ assert.match(signals[1].reason,/Repeat: 2 consecutive sessions/);
+ // Open is deliberately above every close: Long is defined close-to-close, not by candle body.
+ assert.equal(signals.find(s=>s.side==='long').entryPrice,110);
+ // Zero relative return, mismatched signs, and flat daily close must not qualify.
+ for(const spyClose of [105,106]){const changed=bars.map(b=>b.symbol==='SPY'&&b.trade_date===dates[20]?{...b,close:spyClose}:b);assert.ok(!screenMethodThree(changed,groups,20,dates[20]).some(s=>s.suggestedDate===dates[20]));}
+ const flat=bars.map(b=>b.symbol==='X'&&b.trade_date===dates[20]?{...b,close:100}:b);assert.equal(screenMethodThree(flat,groups,20,dates[20]).length,0);
+ const low=bars.map(b=>b.symbol==='X'?{...b,volume:100}:b);assert.equal(screenMethodThree(low,groups,20,dates.at(-1)).length,0);
+});
+test('Method 3 uses Sessions history, excludes missing/future data and baskets, and preserves repeats before start',()=>{
+ const {screenMethodThree}=require(path.join(app,'app/dashboard/sector-rotation/method-three.ts'));
+ const {dates,bars,groups}=methodThreeFixture();
+ assert.equal(screenMethodThree(bars,groups,60,dates.at(-1)).length,0);assert.equal(screenMethodThree(bars,groups,120,dates.at(-1)).length,0);
+ assert.equal(screenMethodThree(bars,groups,'all',dates.at(-1)).length,3);
+ const full=screenMethodThree(bars,groups,20,dates.at(-1));const prefix=screenMethodThree(bars,groups,20,dates[20]);assert.deepEqual(prefix,full.filter(s=>s.suggestedDate<=dates[20]));
+ const range=screenMethodThree(bars,groups,20,dates.at(-1),dates[21]);assert.equal(range.find(s=>s.side==='long').consecutiveDays,2);
+ for(const bad of [null,-1,NaN]){const missing=bars.map(b=>b.symbol==='X'&&b.trade_date===dates[19]?{...b,volume:bad}:b);assert.equal(screenMethodThree(missing,groups,20,dates.at(-1)).length,0);}
+ const missingClose=bars.filter(b=>!(b.symbol==='X'&&b.trade_date===dates[21]));assert.deepEqual(screenMethodThree(missingClose,groups,'all',dates.at(-1)).map(s=>s.suggestedDate),[dates[20]]);
+ assert.equal(screenMethodThree(bars,groups.map(g=>({...g,kind:'basket'})),20,dates.at(-1)).length,0);
+ assert.throws(()=>screenMethodThree([...bars,bars[0]],groups,20,dates.at(-1)),/Duplicate/);
+});
+test('Method 3 participates in filters, independent method statistics, both entry bases and Archive',()=>{
+ const {screenMethodThree}=require(path.join(app,'app/dashboard/sector-rotation/method-three.ts'));
+ const {filterSwingMethods,swingStatisticsByMethod}=require(path.join(app,'app/dashboard/sector-rotation/swing-statistics.ts'));
+ const {trackSwingTrades}=require(path.join(app,'app/dashboard/sector-rotation/swing-trades.ts'));
+ const {dates,bars,groups}=methodThreeFixture();const signals=screenMethodThree(bars,groups,20,dates.at(-1));
+ for(const basis of ['signal_close','next_open']){
+  const rows=trackSwingTrades(signals,bars,dates.at(-1),basis);assert.equal(filterSwingMethods(rows,3).length,3);assert.equal(filterSwingMethods(rows,1).length,0);
+  const stats=swingStatisticsByMethod(rows);assert.equal(stats[2].groups[2].count,3);assert.equal(stats[3].groups[2].count,3);
+  assert.ok(trackSwingTrades(signals,bars,'2026-12-31',basis).every(r=>r.status==='archive'&&r.days===16));
+ }
+ const Swing=require(path.join(app,'app/dashboard/sector-rotation/SwingTrades.tsx')).default;
+ const html=renderToStaticMarkup(React.createElement(Swing,{bars,groups,sessionDuration:20,asOfDate:dates.at(-1)}));assert.match(html,/#3 · Volume and SPY-relative confirmation/);assert.match(html,/<h4>Method 3<\/h4>/);assert.match(html,/Method #3: 3 calculated matches/);
+});
+
+test('Method 3 rejects opposite relative strength for either direction and accepts zero-volume history',()=>{
+ const {screenMethodThree}=require(path.join(app,'app/dashboard/sector-rotation/method-three.ts'));
+ const {dates,bars,groups}=methodThreeFixture();
+ for(const [close,spy,qualifies] of [[102,103,false],[102,101.99,false],[98,98.01,false],[98,97,false],[98,98,false],[100,99,false],[102,101,true],[98,99,true]]){
+  const changed=bars.map(b=>b.trade_date===dates[20]?{...b,close:b.symbol==='SPY'?spy:close}:b);
+  assert.equal(screenMethodThree(changed,groups,20,dates[20]).length,qualifies?1:0);
+ }
+ const zero=bars.map(b=>b.symbol==='X'&&b.trade_date<dates[20]?{...b,volume:0}:b);assert.equal(screenMethodThree(zero,groups,20,dates[20]).length,1);
 });

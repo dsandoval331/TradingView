@@ -103,11 +103,12 @@ export function formatValue(value: number | null, metric: Metric): string {
   const rounded = Math.abs(value) < 0.005 ? 0 : value;
   return `${rounded > 0 ? '+' : ''}${rounded.toFixed(2)}${metric === 'relative'||metric==='rsiRelative' ? '' : '%'}`;
 }
+export const HEAT_NEUTRAL_THRESHOLD=0.05;
 export function heat(value: number | null, metric: Metric, groupCount = 11): string {
   if (value === null) return 'rgba(148,163,184,.06)';
   const score = metric === 'rank' ? ((groupCount+1)/2-value)/Math.max(1,groupCount/4) : metric === 'rankChange' ? value/4 : metric==='rsiRelative'?value/10:metric==='mansfield'?value/5:value;
   const strength = Math.min(Math.abs(score)/1.5, 1);
-  if (Math.abs(score) < 0.05) return 'rgba(148,163,184,.10)';
+  if (Math.abs(score) < HEAT_NEUTRAL_THRESHOLD) return 'rgba(148,163,184,.10)';
   return score > 0 ? `rgba(31,171,137,${.13+.48*strength})` : `rgba(222,84,104,${.13+.48*strength})`;
 }
 export function exportCsv(sessions: Session[], groups: readonly Group[] = SECTORS): string {
