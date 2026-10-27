@@ -596,3 +596,37 @@ test('Method 3 relative volume choices enforce inclusive tenths and strict basel
  const {trackSwingTrades}=require(path.join(app,'app/dashboard/sector-rotation/swing-trades.ts'));const props={entryBasis:'signal_close',rows:trackSwingTrades(selected,bars,dates.at(-1)),methodThreeBaseline:trackSwingTrades(baseline,bars,dates.at(-1)),relativeVolume:'≥2.0×'};
  const html=renderToStaticMarkup(React.createElement(Stats,props));assert.match(html,/Method 3 baseline/);assert.match(html,/Method 3 selected · ≥2.0×/);assert.match(html,/All methods/);
 });
+
+function sectorWinnerFixture(){
+ const {SECTORS}=require(path.join(app,'app/dashboard/sector-rotation/model.ts'));
+ const dates=[];let date=new Date('2026-06-01T00:00:00Z');while(dates.length<80){if(date.getUTCDay()!==0&&date.getUTCDay()!==6)dates.push(date.toISOString().slice(0,10));date.setUTCDate(date.getUTCDate()+1);}
+ const bars=dates.flatMap((trade_date,i)=>['SPY',...SECTORS.map(g=>g.symbol)].map((symbol,j)=>{const close=symbol==='SPY'?100:100+i*j;return {symbol,trade_date,close,open:close-1,high:close+2,low:close-2,volume:100+i};}));return {dates,bars};
+}
+test('sector winners cap Top 1/2/3, require green complete comparisons, and use deterministic ties',()=>{
+ const {sectorWinnerHistory}=require(path.join(app,'app/dashboard/sector-rotation/sector-winners.ts'));const {dates,bars}=sectorWinnerFixture();
+ for(const n of [1,2,3]){const h=sectorWinnerHistory(bars,20,n,dates.at(-1));assert.equal(h.days.at(-1).winners.length,n);assert.equal(h.observations.filter(o=>o.date===dates.at(-1)).length,11);assert.ok(h.days.at(-1).winners.every(o=>o.cell.daily>=.05));}
+ const prior=new Map(bars.filter(b=>b.trade_date===dates.at(-2)).map(b=>[b.symbol,b.close]));
+ const changed=bars.map(b=>b.trade_date===dates.at(-1)&&b.symbol!=='SPY'?{...b,close:prior.get(b.symbol)*(b.symbol==='XLK'?1.01:.99)}:b);
+ assert.deepEqual(sectorWinnerHistory(changed,20,3,dates.at(-1)).days.at(-1).winners.map(o=>o.symbol),['XLK']);
+ const tied=bars.map(b=>b.trade_date===dates.at(-1)&&b.symbol!=='SPY'?{...b,close:prior.get(b.symbol)*2}:b);assert.deepEqual(sectorWinnerHistory(tied,20,2,dates.at(-1)).days.at(-1).winners.map(o=>o.symbol),['XLB','XLC']);
+ const missing=bars.filter(b=>!(b.symbol==='XLK'&&b.trade_date===dates.at(-1)));const day=sectorWinnerHistory(missing,20,3,dates.at(-1)).days.at(-1);assert.equal(day.complete,false);assert.equal(day.winners.length,0);
+ const neutral=bars.map(b=>b.trade_date===dates.at(-1)&&b.symbol!=='SPY'?{...b,close:prior.get(b.symbol)*1.0001}:b);assert.equal(sectorWinnerHistory(neutral,20,3,dates.at(-1)).days.at(-1).winners.length,0);
+ assert.throws(()=>sectorWinnerHistory(bars,20,4,dates.at(-1)));
+});
+test('winner characteristics preserve prior timing, full-history streaks, missing values and future exclusion',()=>{
+ const {sectorWinnerHistory,winnerFeatureFrequency,winnerCsv}=require(path.join(app,'app/dashboard/sector-rotation/sector-winners.ts'));const {dates,bars}=sectorWinnerFixture();
+ const full=sectorWinnerHistory(bars,20,3,dates.at(-1));const prefix=sectorWinnerHistory(bars,20,3,dates[65]);assert.deepEqual(prefix.days,full.days.slice(0,66));assert.deepEqual(prefix.observations,full.observations.filter(o=>o.date<=dates[65]));
+ const o=full.days.at(-1).winners[0];assert.equal(o.priorStreaks.daily.green,78);assert.equal(o.streaks.daily.green,79);assert.ok(o.rvol>o.priorRvol-.01);assert.equal(o.cell.mansfield,null);assert.equal(o.positiveAverage!==null,true);
+ const index=bars.find(b=>b.symbol===o.symbol&&b.trade_date===dates.at(-1)),prev=bars.find(b=>b.symbol===o.symbol&&b.trade_date===dates.at(-2));assert.ok(Math.abs(o.gap-(index.open/prev.close-1)*100)<1e-9);
+ const oneDay=full.observations.filter(o=>o.date===dates.at(-1));const freq=winnerFeatureFrequency(oneDay);assert.equal(freq.find(f=>f.key==='volume').winners.total,3);assert.equal(freq.find(f=>f.key==='volume').others.total,8);
+ const first=full.days[1].winners[0];assert.equal(first.rvol,null);assert.equal(first.ema20,null);assert.equal(first.positiveAverage,null);
+ const csv=winnerCsv([o]);assert.match(csv,/daily_prior_green_streak/);assert.match(csv,/opening_gap_pct/);assert.equal(csv.split('\n').length,2);
+});
+test('Sector Winners renders history and comparator and is confined to the main sector tracker',()=>{
+ const Winners=require(path.join(app,'app/dashboard/sector-rotation/SectorWinners.tsx')).default;const {buildSessions,SECTORS}=require(path.join(app,'app/dashboard/sector-rotation/model.ts'));const {dates,bars}=sectorWinnerFixture();
+ const sessions=buildSessions(bars,SECTORS);const html=renderToStaticMarkup(React.createElement(Winners,{bars,visibleSessions:sessions.slice(-7),sessionDuration:20,asOfDate:dates.at(-1),onSelect:()=>{}}));
+ assert.match(html,/Reverse Engineering Sector Daily Winners/);assert.match(html,/Top 1/);assert.match(html,/Top 2/);assert.match(html,/Top 3/);assert.match(html,/7 visible sessions \/ 7 winner observations/);assert.match(html,/winners versus other sectors/);assert.match(html,/Before winning session/);assert.match(html,/Export winner characteristics CSV/);assert.equal((html.match(/<details open=""/g)||[]).length,5);
+ const Tracker=require(path.join(app,'app/dashboard/sector-rotation/Tracker.tsx')).default;const props={bars,groups:SECTORS,updatedAt:null,latestSession:dates.at(-1),runStatus:'COMPLETE',error:null,asOfDate:dates.at(-1)};
+ assert.match(renderToStaticMarkup(React.createElement(Tracker,props)),/Reverse Engineering Sector Daily Winners/);
+ for(const flags of [{stocks:true},{tech:true}])assert.doesNotMatch(renderToStaticMarkup(React.createElement(Tracker,{...props,...flags})),/Reverse Engineering Sector Daily Winners/);
+});

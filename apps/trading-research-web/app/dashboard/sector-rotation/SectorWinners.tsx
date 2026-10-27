@@ -1,0 +1,43 @@
+'use client';
+import {useMemo,useState} from 'react';
+import type {Bar,Metric,Session} from './model';
+import {sectorWinnerHistory,winnerFeatureFrequency,winnerCsv,WINNER_MEASURES,type WinnerObservation} from './sector-winners';
+import {windowLabel,type SessionWindow} from './session-window';
+import styles from './tracker.module.css';
+const labels:Record<Metric,string>={daily:'Daily return',relative:'Relative to SPY',rank:'Daily rank',rankChange:'Rank change',rsiRelative:'RSI vs SPY',mansfield:'Mansfield RS'};
+const value=(v:number|null|undefined,suffix='')=>v==null?'N/A':`${v>0?'+':''}${v.toFixed(2)}${suffix}`;
+const ratio=(v:number|null)=>v===null?'N/A':`${v.toFixed(2)}×`;
+export default function SectorWinners({bars,visibleSessions,sessionDuration,asOfDate,onSelect}:{bars:readonly Bar[];visibleSessions:readonly Session[];sessionDuration:SessionWindow;asOfDate:string;onSelect:(symbol:string,date:string)=>void}){
+ const [topN,setTopN]=useState(1);
+ const history=useMemo(()=>sectorWinnerHistory(bars,sessionDuration,topN,asOfDate),[bars,sessionDuration,topN,asOfDate]);
+ const visible=new Set(visibleSessions.map(s=>s.date));
+ const days=history.days.filter(d=>visible.has(d.date)).toReversed();
+ const observations=history.observations.filter(o=>visible.has(o.date));
+ const winners=observations.filter(o=>o.selected);
+ const frequencies=winnerFeatureFrequency(observations);
+ function download(){const url=URL.createObjectURL(new Blob([winnerCsv(winners)],{type:'text/csv;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download=`sector-daily-winners-top-${topN}.csv`;a.click();URL.revokeObjectURL(url);}
+ const table=(o:WinnerObservation)=><article className={styles.winnerCard} key={o.symbol}><h4><button className={styles.eventSymbol} onClick={()=>onSelect(o.symbol,o.date)}>{o.symbol}</button> · #{o.rank} · {value(o.cell.daily,'%')} · {o.weekday}</h4>
+ <p className={styles.relativeMeta}>Positive characteristics observed: {frequencies.filter(f=>o.features[f.key]===true).map(f=>`${f.timing}: ${f.label}`).join(' · ')||'None with sufficient history.'}</p>
+ <div className={styles.eventTableScroll}><table><caption>Prior session characteristics and winning-day observations · N/A = unavailable</caption><thead><tr><th scope="col">Characteristic</th><th scope="col">Before winning session (prior close)</th><th scope="col">Winning session</th></tr></thead><tbody>
+ <tr><th scope="row">Daily return</th><td>{value(o.prior?.daily,'%')}</td><td>{value(o.cell.daily,'%')}</td></tr>
+ <tr><th scope="row">Relative to SPY</th><td>{value(o.prior?.relative,' pp')}</td><td>{value(o.cell.relative,' pp')} · SPY {value(o.spy,'%')}</td></tr>
+ <tr><th scope="row">Volume / {windowLabel(sessionDuration)} average</th><td>{ratio(o.priorRvol)}</td><td>{ratio(o.rvol)}</td></tr>
+ <tr><th scope="row">Opening gap vs preceding close</th><td>{value(o.priorGap,'%')}</td><td>{value(o.gap,'%')}</td></tr>
+ <tr><th scope="row">Daily rank / rank change</th><td>{o.prior?.rank??'N/A'} / {value(o.prior?.rankChange,' places')}</td><td>{o.rank} / {value(o.cell.rankChange,' places')}</td></tr>
+ <tr><th scope="row">RSI14 / difference vs SPY</th><td>{value(o.prior?.rsi)} / {value(o.prior?.rsiRelative,' pts')}</td><td>{value(o.cell.rsi)} / {value(o.cell.rsiRelative,' pts')}</td></tr>
+ <tr><th scope="row">Mansfield RS200</th><td>{value(o.prior?.mansfield,'%')}</td><td>{value(o.cell.mansfield,'%')}</td></tr>
+ <tr><th scope="row">5 / 20-session return</th><td>{value(o.prior?.five,'%')} / {value(o.prior?.twenty,'%')}</td><td>{value(o.cell.five,'%')} / {value(o.cell.twenty,'%')}</td></tr>
+ <tr><th scope="row">Prior 60-session positive daily average</th><td>{value(o.positiveAverage,'%')}</td><td>{o.positiveAverage===null?'N/A':o.cell.daily!>o.positiveAverage?'Above average':'At/below average'}</td></tr>
+ <tr><th scope="row">Close vs EMA20 / EMA50</th><td>{o.features.priorEma20===null?'N/A':o.features.priorEma20?'Above':'At/below'} / {o.features.priorEma50===null?'N/A':o.features.priorEma50?'Above':'At/below'}</td><td>{o.ema20===null?'N/A':o.cell.close!>o.ema20?'Above':'At/below'} / {o.ema50===null?'N/A':o.cell.close!>o.ema50?'Above':'At/below'}</td></tr>
+ <tr><th scope="row">Close position within high/low range</th><td>N/A</td><td>{o.closePosition===null?'N/A':`${(o.closePosition*100).toFixed(1)}% (0% low; 100% high)`}</td></tr>
+ {WINNER_MEASURES.map(m=><tr key={m}><th scope="row">{labels[m]} streak · green / red</th><td>{o.priorStreaks[m].green} / {o.priorStreaks[m].red}</td><td>{o.streaks[m].green} / {o.streaks[m].red}</td></tr>)}
+ </tbody></table></div></article>;
+ return <section className={styles.eventLog} aria-label="Reverse Engineering Sector Daily Winners"><p className={styles.eyebrow}>HISTORICAL WINNER CHARACTERISTICS</p><h2>Reverse Engineering Sector Daily Winners</h2>
+ <div className={styles.filters}><label>Sector winners per day<select value={topN} onChange={e=>setTopN(Number(e.target.value))}>{[1,2,3].map(n=><option key={n} value={n}>Top {n}</option>)}</select></label><button type="button" className={styles.export} disabled={!winners.length} onClick={download}>Export winner characteristics CSV</button></div>
+ <p className={styles.relativeMeta}>11 S&amp;P sector ETFs · Ranked by close-to-close daily return · Green only (at least +0.05%, matching heatmap shading) · Default Top 1 · {days.length} visible sessions / {winners.length} winner observations. Sessions and date filters above apply; volume uses {windowLabel(sessionDuration)}.</p>
+ <details className={styles.eventRules}><summary>Definitions and interpretation</summary><p>Only complete 11-sector return comparisons are ranked. Fewer than the selected count can qualify; flat/red/neutral sectors never fill empty places. Exact return ties are ordered by ticker to cap selections at the chosen count; displayed competition ranks can tie. Days with missing comparisons remain visible as unavailable.</p><p>Before-session values use only the prior published session. Winning-day volume, return, SPY comparison, gap, range position and ending streaks are observations of that day, not advance predictors. Volume averages include the session being measured. Gap means open versus the preceding session close; the prior-gap column uses the previous day’s open and its preceding close. Positive daily averages use the prior 60 valid returns, excluding the winning day, with at least five positive observations.</p><p>All six streak measures follow Event Log sign rules: positive/negative define green/red; rank is better/worse than the 11-sector midpoint of 6. Flat/missing values reset runs. Streak sign rules differ from heatmap neutral shading. Warmup and missing metrics remain N/A; streak counters are observed runs and may start at the beginning of available history.</p><p>Frequency denominators exclude unavailable values. Other sectors means every nonselected sector on the same complete comparison dates, including negative sectors. Winners were selected using their daily return, so winning-day characteristics can reflect the selection itself. Overlapping sectors/dates are not independent; these descriptive comparisons do not establish causation, predictive value or a trading edge. History is calculated from currently published adjusted bars; revisions can restate it. No new signal generation or immutable event snapshots are added.</p></details>
+ <details className={styles.eventRules}><summary>Characteristic frequency · winners versus other sectors</summary><div className={styles.eventTableScroll}><table><caption>Current Top {topN} and visible date selection · true / available observations</caption><thead><tr><th scope="col">Timing / characteristic</th><th scope="col">Winners</th><th scope="col">Other sectors</th></tr></thead><tbody>{frequencies.map(f=><tr key={f.key}><th scope="row">{f.timing} · {f.label}</th>{[f.winners,f.others].map((c,i)=><td key={i}>{c.percent===null?'N/A':`${c.percent.toFixed(1)}%`} ({c.yes}/{c.total})</td>)}</tr>)}</tbody></table></div></details>
+ {!days.length&&<p>No sessions match these dates.</p>}
+ {days.map((day,i)=><details key={day.date} open={i<5} className={`${styles.eventDay} ${i%2?styles.eventDayAlternate:''}`}><summary className={styles.winnerDaySummary}>{day.date} · {day.winners.length} {day.winners.length===1?'winner':'winners'}{!day.complete?' · Comparison unavailable':''}</summary>{!day.complete?<p>Missing one or more sector returns; no winner assigned.</p>:!day.winners.length?<p>No green sectors qualified.</p>:day.winners.map(table)}</details>)}
+ </section>;
+}
