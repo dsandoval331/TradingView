@@ -10,7 +10,7 @@ Missing/nonfinite values are excluded, never replaced with zeros. Incomplete OHL
 
 ## Method 1 clarification
 
-User selected ETFs AND stocks and BOTH pullback and breakout setups. The user subsequently selected existing measures for Method 1 leadership. Official RRG will be researched for possible later implementation; this roadmap note is shown in the page’s Methods section. Exact leadership thresholds remain unapproved; no generator is activated by this choice.
+User selected ETFs AND stocks and BOTH pullback and breakout setups. The user subsequently selected existing measures for Method 1 leadership. Official RRG will be researched for possible later implementation; this roadmap note is shown in the page’s Methods section. The subsequently approved defaults and calculated screen are specified in METHOD1_CONFIGURABLE_SCREEN.md.
 
 Existing-measure implementation: define explicit relative-performance windows, momentum/change rules, ranks and/or EMA confirmation using current price history. Existing daily-return differences, RSI14 differences, Mansfield200 and daily ranks are distinct indicators; none is official RRG. A possible multi-week price-ratio screen would be a new explicitly specified rule using those prices, not an existing official RRG input.
 
@@ -19,3 +19,7 @@ Official RRG: JdK RS-Ratio measures relative trend and JdK RS-Momentum measures 
 Primary reference checked October 26, 2026: https://chartschool.stockcharts.com/table-of-contents/chart-analysis/chart-types/relative-rotation-graphs-rrg-charts
 
 Existing measures are recommended for implementation simplicity/auditability, not claimed trading superiority. Remaining choices include leadership rules and thresholds, stock-to-sector mapping and candidate ranking, market confirmation, exact pullback and breakout triggers, permitted Long/Short directions, repeat-signal behavior, and stops/exits. The current next-open reference and Day 15 tracking horizon are display assumptions, not a complete execution or exit strategy.
+
+## Method 1 implementation
+
+See [METHOD1_CONFIGURABLE_SCREEN.md](METHOD1_CONFIGURABLE_SCREEN.md) for the approved configurable defaults, global ranking and repeat labels. Method 1 now supplies calculated retrospective results; Method 2 saved snapshots remain separate.

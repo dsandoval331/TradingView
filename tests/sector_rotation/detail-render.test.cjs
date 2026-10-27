@@ -8,6 +8,8 @@ const appRequire=createRequire(path.join(app,'package.json'));
 const ts=appRequire('typescript');
 require.extensions['.tsx']=require.extensions['.ts']=(m,f)=>m._compile(ts.transpileModule(fs.readFileSync(f,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX,esModuleInterop:true,target:ts.ScriptTarget.ES2022}}).outputText,f);
 require.extensions['.css']=(m)=>{m.exports=new Proxy({},{get:(_,k)=>k==='__esModule'?false:String(k)});};
+const ModuleForActions=require('node:module'),originalActionLoad=ModuleForActions._load;
+ModuleForActions._load=function(request,parent,isMain){if(request==='./method-one-action')return {runMethodOne:async()=>{throw new Error('Server action must be explicitly mocked in render fixtures');}};return originalActionLoad.call(this,request,parent,isMain);};
 const React=appRequire('react');
 const {renderToStaticMarkup}=appRequire('react-dom/server');
 const Chart=require(path.join(app,'app/dashboard/sector-rotation/RelativePerformance.tsx')).default;
@@ -292,7 +294,7 @@ test('numbered methods persist in Active and Archive and unidentified suggestion
   assert.deepEqual(trackSwingTrades(suggestions,swingBars,date).map(row=>row.methodId),[1,2]);
   const html=renderToStaticMarkup(React.createElement(Swing,{bars:swingBars,groups:[{symbol:'X',name:'Fixture',short:'Fixture'}],asOfDate:date,suggestions}));
   assert.match(html,/#1 · Sector rotation/);assert.match(html,/#2 · RSI\(2\) trend pullback/);
-  assert.match(html,/<th scope="col">Method<\/th>/);assert.match(html,/Retrospective screen/);assert.match(html,/Rules draft/);
+  assert.match(html,/<th scope="col">Method<\/th>/);assert.match(html,/Retrospective screen/);assert.match(html,/Configurable screen/);
  }
  assert.throws(()=>trackSwingTrades([{...swingSuggestion,methodId:3}],[], '2026-10-27'),/Invalid swing suggestion/);
  const {methodId,...unidentified}=swingSuggestion;
@@ -395,4 +397,79 @@ test('stats appear before Archive with all groups and the selected entry basis',
  assert.match(html,/Avg MFE/);assert.match(html,/Avg MAE/);assert.match(html,/Avg price up/);assert.match(html,/Avg price down/);
  const stats=html.slice(html.indexOf('aria-label="Play statistics"'),html.indexOf('<summary>Archive'));
  assert.match(stats,/>Longs<\/th>/);assert.match(stats,/>Shorts<\/th>/);assert.match(stats,/>Both<\/th>/);assert.match(stats,/Next session open/);
+});
+
+function methodOneFixture(short=false){
+ const dates=[];let date=new Date('2026-01-01T00:00:00Z');while(dates.length<60){if(date.getUTCDay()!==0&&date.getUTCDay()!==6)dates.push(date.toISOString().slice(0,10));date.setUTCDate(date.getUTCDate()+1);}
+ const bars=dates.flatMap((trade_date,i)=>['SPY','XLK','A','B','C','D','UNKNOWN'].map((symbol,j)=>{const sector=100*Math.exp((short?-1:1)*i*i*.0005),close=symbol==='SPY'?100:symbol==='XLK'?sector:sector*Math.exp((short?-1:1)*i*(.014-j*.002));return {symbol,trade_date,close,open:close,high:close+.01,low:close-.01,volume:1};}));
+ const config={...require(path.join(app,'app/dashboard/sector-rotation/method-one.ts')).METHOD_ONE_DEFAULTS,instruments:'stocks',direction:short?'short':'long',setups:'breakout',relativePeriod:3,momentumPeriod:1,mansfieldPeriod:3,fastEma:2,slowEma:3,breakoutPeriod:2,marketFilter:'none',rankPeriod:3,tiePeriod:1,startDate:dates[55]};
+ return {dates,bars,config,map:{A:'XLK',B:'XLK',C:'XLK',D:'XLK'}};
+}
+test('Method 1 ranks globally after qualification, emits top 3 and computes repeat history before the display start',()=>{
+ const {screenMethodOne}=require(path.join(app,'app/dashboard/sector-rotation/method-one.ts'));
+ const {dates,bars,config,map}=methodOneFixture();const result=screenMethodOne(bars,map,[],config,dates.at(-1));
+ assert.equal(result.suggestions.length,15);assert.deepEqual(result.unmapped,['UNKNOWN']);
+ assert.deepEqual(result.suggestions.filter(s=>s.suggestedDate===dates.at(-1)).map(s=>[s.symbol,s.sectorRank]),[['A',1],['B',2],['C',3]]);
+ assert.ok(result.suggestions.every(s=>s.consecutiveDays>1&&s.methodId===1&&s.calculated&&s.setup==='breakout'));
+ const prefix=screenMethodOne(bars,map,[],config,dates[55]);assert.deepEqual(prefix.suggestions,result.suggestions.filter(s=>s.suggestedDate===dates[55]));
+ const shorts=methodOneFixture(true);const down=screenMethodOne(shorts.bars,shorts.map,[],shorts.config,shorts.dates.at(-1));assert.equal(down.suggestions.length,15);assert.ok(down.suggestions.every(s=>s.side==='short'));
+ assert.equal(screenMethodOne(bars,map,[],{...config,marketFilter:'stack'},dates.at(-1)).suggestions.length,0);
+ assert.equal(screenMethodOne(bars,map,['B'],{...config,universe:'top50'},dates.at(-1)).suggestions.length,5);
+ assert.equal(screenMethodOne(bars,map,[],{...config,repeats:'first'},dates.at(-1)).suggestions.length,0);
+ const first=screenMethodOne(bars,map,[],{...config,repeats:'first',startDate:dates[0]},dates.at(-1));assert.equal(first.suggestions.length,3);assert.ok(first.suggestions.every(s=>s.consecutiveDays===1));
+});
+test('Method 1 missing sessions break repeats; pullback is a new closing cross and breakout excludes today',()=>{
+ const {screenMethodOne}=require(path.join(app,'app/dashboard/sector-rotation/method-one.ts'));
+ const {dates,bars,config,map}=methodOneFixture();
+ const missing=bars.filter(b=>!(b.symbol==='A'&&b.trade_date===dates[55]));
+ const result=screenMethodOne(missing,map,[],config,dates.at(-1));assert.equal(result.suggestions.find(s=>s.symbol==='A'&&s.suggestedDate===dates[59]).consecutiveDays,1);
+ const huge=bars.map(b=>b.symbol==='A'&&b.trade_date===dates[55]?{...b,high:999999}:b);
+ assert.ok(screenMethodOne(huge,map,[],config,dates[55]).suggestions.some(s=>s.symbol==='A'));
+ const reclaim=bars.map(b=>{if(b.symbol!=='A')return b;const value=b.trade_date===dates[55]?100:b.trade_date===dates[56]?1000:b.trade_date===dates[57]?1005:b.close;return {...b,close:value,high:value+1,low:value-1};});
+ const signals=screenMethodOne(reclaim,map,[],{...config,setups:'pullback'},dates[57]).suggestions.filter(s=>s.symbol==='A');assert.deepEqual(signals.map(s=>s.suggestedDate),[dates[56]]);assert.equal(signals[0].consecutiveDays,1);
+ assert.throws(()=>screenMethodOne([...bars,bars[0]],map,[],config,dates.at(-1)),/Duplicate/);
+});
+test('Method 1 configuration validates bounds and changes identity; repeat metadata survives entry comparisons',()=>{
+ const {validateMethodOne,methodOneKey,METHOD_ONE_DEFAULTS}=require(path.join(app,'app/dashboard/sector-rotation/method-one.ts'));
+ assert.deepEqual(validateMethodOne(METHOD_ONE_DEFAULTS),METHOD_ONE_DEFAULTS);
+ for(const update of [{topN:0},{rankPeriod:261},{fastEma:50},{leadership:'rrg'},{startDate:'2026-02-30'},{unexpected:1}])assert.throws(()=>validateMethodOne({...METHOD_ONE_DEFAULTS,...update}));
+ assert.notEqual(methodOneKey(METHOD_ONE_DEFAULTS),methodOneKey({...METHOD_ONE_DEFAULTS,topN:2}));
+ const {trackSwingTrades}=require(path.join(app,'app/dashboard/sector-rotation/swing-trades.ts'));
+ for(const basis of ['signal_close','next_open']){const row=trackSwingTrades([{...swingSuggestion,methodId:1,consecutiveDays:3,setup:'breakout',calculated:true}],swingBars,'2026-10-26',basis)[0];assert.equal(row.consecutiveDays,3);assert.equal(row.setup,'breakout');}
+});
+
+test('Method 1 server action rejects unauthenticated and non-allowlisted requests before price reads',async()=>{
+ const Module=require('node:module'),original=Module._load;let signedIn=false,allowed=false,reads=0,created=0;
+ const client={auth:{getClaims:async()=>({data:{claims:signedIn?{claims:{sub:'fixture'}}:null},error:null})},rpc:async()=>({data:allowed,error:null}),from(){reads++;throw new Error('Price reads not expected');}};
+ Module._load=function(request,parent,isMain){if(request==='../../../lib/supabase/server')return {createClient:async()=>{created++;return client;}};return original.call(this,request,parent,isMain);};
+ let action;try{action=require(path.join(app,'app/dashboard/sector-rotation/method-one-action.ts')).runMethodOne;}finally{Module._load=original;}
+ const {METHOD_ONE_DEFAULTS}=require(path.join(app,'app/dashboard/sector-rotation/method-one.ts'));
+ await assert.rejects(action({}),/settings/);assert.equal(created,0);
+ await assert.rejects(action(METHOD_ONE_DEFAULTS),/Sign in/);signedIn=true;
+ await assert.rejects(action(METHOD_ONE_DEFAULTS),/access unavailable/);assert.equal(reads,0);
+});
+
+test('Method 1 server action reads the complete stock and sector views and returns a global calculation',async()=>{
+ const Module=require('node:module'),original=Module._load,{dates,bars,config}=methodOneFixture();
+ const names={A:'NVDA',B:'AMD',C:'MSFT',D:'QCOM'};
+ const renamed=bars.filter(b=>b.symbol!=='UNKNOWN').map(b=>({...b,symbol:names[b.symbol]??b.symbol}));
+ const views=[];let fail=false;
+ const client={auth:{getClaims:async()=>({data:{claims:{claims:{sub:'fixture'}}},error:null})},rpc:async()=>({data:true,error:null}),from(view){views.push(view);return {select(){return this;},lte(){return this;},order(){return this;},async range(){return fail?{error:{message:'fixture error'},data:null}:{error:null,data:renamed.filter(b=>view==='v_stock_daily_latest'?b.symbol!=='XLK':b.symbol==='XLK'||b.symbol==='SPY')};}};}};
+ Module._load=function(request,parent,isMain){if(request==='../../../lib/supabase/server')return {createClient:async()=>client};return original.call(this,request,parent,isMain);};
+ let action;try{const file=path.join(app,'app/dashboard/sector-rotation/method-one-action.ts');delete require.cache[require.resolve(file)];action=require(file).runMethodOne;}finally{Module._load=original;}
+ const result=await action(config);assert.equal(result.stockCount,4);assert.deepEqual(result.unmapped,[]);assert.deepEqual(new Set(views),new Set(['v_stock_daily_latest','v_sector_daily_latest']));assert.ok(result.suggestions.some(s=>s.symbol==='NVDA'&&s.sectorRank===1));
+ fail=true;await assert.rejects(action(config),/could not be loaded/);
+});
+
+test('Method 1 tie ranking is deterministic, ETF-only scope excludes stocks and dual setups share stock slots',()=>{
+ const {screenMethodOne}=require(path.join(app,'app/dashboard/sector-rotation/method-one.ts'));
+ const {dates,bars,config,map}=methodOneFixture();
+ const a=new Map(bars.filter(b=>b.symbol==='A').map(b=>[b.trade_date,b]));
+ const equal=bars.map(b=>map[b.symbol]?{...a.get(b.trade_date),symbol:b.symbol}:b);
+ const tied=screenMethodOne(equal,map,[],{...config,ranking:'mansfield'},dates.at(-1));
+ assert.deepEqual(tied.suggestions.filter(s=>s.suggestedDate===dates.at(-1)).map(s=>[s.symbol,s.sectorRank]),[['A',1],['B',2],['C',3]]);
+ const etfs=screenMethodOne(bars,map,[],{...config,instruments:'etfs'},dates.at(-1));assert.equal(etfs.stockCount,0);assert.deepEqual(etfs.unmapped,[]);assert.equal(etfs.suggestions.length,5);assert.ok(etfs.suggestions.every(s=>s.symbol==='XLK'));
+ const dual=bars.map(b=>{if(b.symbol!=='A')return b;const close=b.trade_date===dates[55]?100:b.trade_date===dates[56]?1000:b.close;return {...b,close,high:close+.01,low:close-.01};});
+ const day=screenMethodOne(dual,map,[],{...config,setups:'both'},dates[56]).suggestions.filter(s=>s.suggestedDate===dates[56]);
+ assert.deepEqual(day.filter(s=>s.symbol==='A').map(s=>s.setup).sort(),['breakout','pullback']);assert.equal(new Set(day.map(s=>s.symbol)).size,3);
 });
