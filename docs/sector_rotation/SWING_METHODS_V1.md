@@ -43,3 +43,7 @@ Archive at Day 16 is a tracking horizon, not an instruction to exit a position. 
 ## Verification
 
 68 Node checks and a clean Next.js production build/typecheck passed. After the user supplied Method 1 during deployment, its draft name/description and expectations were updated and the same 68 checks passed again; tracker calculations were unchanged. The first build encountered a stale local Turbopack persistence cache; moving the generated cache aside and rebuilding succeeded without source changes. Browser QA used clearly labeled synthetic records to verify both methods in the numbered list, reasoning cards, Active table and expanded Archive. Synthetic records are absent from production sources. No authenticated production data access was bypassed.
+
+## Method 1 implementation
+
+See [METHOD1_CONFIGURABLE_SCREEN.md](METHOD1_CONFIGURABLE_SCREEN.md) for the approved configurable defaults, global ranking and repeat labels. Method 1 now supplies calculated retrospective results; Method 2 saved snapshots remain separate.

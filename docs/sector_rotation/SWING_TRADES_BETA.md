@@ -6,7 +6,7 @@ The shared tracker now includes Suggested Swing Trades (Beta), after Event Log, 
 
 ## Current scope
 
-Method #1 remains a draft. The user authorized a bounded retrospective Method #2 lookback on October 26, 2026. The server-only `swing-data.ts` adapter reads durable snapshots from `sector_swing_suggestions`, protected by the existing MULtipLY allowlist. See METHOD2_RECENT_BACKFILL.md for rules, counts and provenance. No broker integration or scheduled forward signal generation is included. Private records remain in the database and are passed only to authenticated tracker routes.
+Method #1 now provides a configurable calculated screen; see METHOD1_CONFIGURABLE_SCREEN.md. The user authorized a bounded retrospective Method #2 lookback on October 26, 2026. The server-only `swing-data.ts` adapter reads durable snapshots from `sector_swing_suggestions`, protected by the existing MULtipLY allowlist. See METHOD2_RECENT_BACKFILL.md for rules, counts and provenance. No broker integration or scheduled forward signal generation is included. Private records remain in the database and are passed only to authenticated tracker routes.
 
 Each suggestion requires a stable ID, symbol, suggestion date, Long/Short side, explicit entry price, and reasoning. Existing authenticated routes pass suggestions and a server-seeded New York market date to the client. The age/date refreshes while the page is open; daily prices refresh with page data.
 
@@ -36,3 +36,7 @@ See [SWING_METHODS_V1.md](SWING_METHODS_V1.md). Suggestions now require `methodI
 ## Entry comparisons
 
 See [OPEN_ENTRY_COMPARISON.md](OPEN_ENTRY_COMPARISON.md). Each signal has Signal close and Next session open rows, with an explicit Long/Short Strategy column and entry reference dates. Pending next opens remain unavailable; age and archive timing stay anchored to the signal.
+
+## Method 1 implementation
+
+See [METHOD1_CONFIGURABLE_SCREEN.md](METHOD1_CONFIGURABLE_SCREEN.md) for the approved configurable defaults, global ranking and repeat labels. Method 1 now supplies calculated retrospective results; Method 2 saved snapshots remain separate.
