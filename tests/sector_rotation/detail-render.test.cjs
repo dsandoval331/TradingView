@@ -377,3 +377,22 @@ test('swing table defaults to Longs and Open, shows Day count and keeps one reas
  const table=html.slice(html.indexOf('<tbody>'),html.indexOf('</tbody>'));assert.equal((table.match(/<tr>/g)||[]).length,1);
  assert.doesNotMatch(table,/Signal close/);assert.match(table,/Next session open/);assert.match(html,/>Day count<\/th>/);assert.match(html,/aria-pressed="true">Longs/);assert.match(html,/aria-pressed="true">Open/);
 });
+
+test('swing statistics weight individual plays and exclude missing or incomplete measurements',()=>{
+ const {swingStatistics}=require(path.join(app,'app/dashboard/sector-rotation/swing-statistics.ts'));
+ const base={side:'long',missingOHLC:0,mfa:4,mfaPercent:4,mae:2,maePercent:2,percentChange:10};
+ const rows=[base,{...base,percentChange:-2},{...base,side:'short',percentChange:-6,mfa:8,mfaPercent:8},{...base,side:'short',percentChange:0},{...base,percentChange:null,mfa:null,mfaPercent:null,mae:null,maePercent:null},{...base,side:'short',percentChange:3,missingOHLC:1,mfa:999,mfaPercent:999}];
+ const [long,short,both]=swingStatistics(rows);
+ assert.equal(long.count,3);assert.equal(long.pricedCount,2);assert.equal(long.change.value,4);assert.equal(long.up.value,10);assert.equal(long.down.value,-2);
+ assert.equal(short.change.value,-1);assert.equal(short.mfe.value,6);assert.equal(short.mfe.count,2);
+ assert.equal(both.count,6);assert.equal(both.change.value,1);assert.equal(both.change.count,5);assert.equal(both.up.value,6.5);assert.equal(both.down.value,-4);assert.equal(both.mfe.value,5);assert.equal(both.mfe.count,4);
+ for(const stat of swingStatistics([])){assert.equal(stat.count,0);assert.equal(stat.change.value,null);assert.equal(stat.mfe.value,null);}
+});
+test('stats appear before Archive with all groups and the selected entry basis',()=>{
+ const Swing=require(path.join(app,'app/dashboard/sector-rotation/SwingTrades.tsx')).default;
+ const html=renderToStaticMarkup(React.createElement(Swing,{bars:swingBars,groups:[{symbol:'X',name:'Fixture',short:'Fixture'}],asOfDate:'2026-10-26',suggestions:[swingSuggestion]}));
+ assert.ok(html.indexOf('aria-label="Play statistics"')<html.indexOf('<summary>Archive'));
+ assert.match(html,/Avg MFE/);assert.match(html,/Avg MAE/);assert.match(html,/Avg price up/);assert.match(html,/Avg price down/);
+ const stats=html.slice(html.indexOf('aria-label="Play statistics"'),html.indexOf('<summary>Archive'));
+ assert.match(stats,/>Longs<\/th>/);assert.match(stats,/>Shorts<\/th>/);assert.match(stats,/>Both<\/th>/);assert.match(stats,/Next session open/);
+});
