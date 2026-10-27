@@ -27,3 +27,9 @@ Results are calculated at page load and when Sessions changes. They are not immu
 ## Verification
 
 Synthetic tests cover Long/Short rules, volume and return equalities, mismatched price/relative signs, missing data, warmup and Sessions alternatives, future exclusion, repeat boundaries, basket exclusion, duplicate rejection, Open/Close tracking, Archive, method filters and separate/pooled statistics. Production build/typecheck and browser checks validate integration. No thresholds were tuned to observed market outcomes.
+
+## Relative-volume selector
+
+The original strict >1.0× rule remains the default. Additional options are ≥1.1× through ≥2.0×, in 0.1 steps, plus strict >2.0×. Ratios use volume divided by the Sessions average, including the signal session. A zero average cannot qualify. Threshold choices apply to both directions and recalculate repeat histories; calculated signal identities include non-default thresholds.
+
+Play statistics retains a Method 3 baseline (>1.0×) table and adds a Method 3 selected table labeled with the current threshold. Both show Longs, Shorts and Both, use the selected Open/Close entry reference, and include Active plus Archive within this tracker. Other method tables remain unchanged. All methods pools the selected Method 3 population with Methods 1 and 2; baseline signals are not added a second time. The suggestion tables and reasoning use the selected threshold. This control is local to the mounted page and does not alter saved Method 2 records or the volume averaging period.
