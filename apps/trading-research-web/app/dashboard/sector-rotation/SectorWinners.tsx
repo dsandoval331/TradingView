@@ -3,11 +3,13 @@ import {useMemo,useState} from 'react';
 import type {Bar,Metric,Session} from './model';
 import {sectorWinnerHistory,commonWinnerCharacteristics,commonWinnerCombinations,winnerFeatureFrequency,winnerCsv,WINNER_MEASURES,type WinnerObservation} from './sector-winners';
 import {windowLabel,type SessionWindow} from './session-window';
+import SectorForecasts from './SectorForecasts';
+import type {SectorForecast} from './sector-forecast-types';
 import styles from './tracker.module.css';
 const labels:Record<Metric,string>={daily:'Daily return',relative:'Relative to SPY',rank:'Daily rank',rankChange:'Rank change',rsiRelative:'RSI vs SPY',mansfield:'Mansfield RS'};
 const value=(v:number|null|undefined,suffix='')=>v==null?'N/A':`${v>0?'+':''}${v.toFixed(2)}${suffix}`;
 const ratio=(v:number|null)=>v===null?'N/A':`${v.toFixed(2)}×`;
-export default function SectorWinners({bars,visibleSessions,sessionDuration,asOfDate,onSelect}:{bars:readonly Bar[];visibleSessions:readonly Session[];sessionDuration:SessionWindow;asOfDate:string;onSelect:(symbol:string,date:string)=>void}){
+export default function SectorWinners({bars,visibleSessions,sessionDuration,asOfDate,onSelect,forecasts=[],forecastError=null}:{bars:readonly Bar[];visibleSessions:readonly Session[];sessionDuration:SessionWindow;asOfDate:string;onSelect:(symbol:string,date:string)=>void;forecasts?:readonly SectorForecast[];forecastError?:string|null}){
  const [topN,setTopN]=useState(1);
  const history=useMemo(()=>sectorWinnerHistory(bars,sessionDuration,topN,asOfDate),[bars,sessionDuration,topN,asOfDate]);
  const visible=new Set(visibleSessions.map(s=>s.date));
@@ -35,6 +37,7 @@ export default function SectorWinners({bars,visibleSessions,sessionDuration,asOf
  {WINNER_MEASURES.map(m=><tr key={m}><th scope="row">{labels[m]} streak · green / red</th><td>{o.priorStreaks[m].green} / {o.priorStreaks[m].red}</td><td>{o.streaks[m].green} / {o.streaks[m].red}</td></tr>)}
  </tbody></table></div></article>;
  return <section className={styles.eventLog} aria-label="Reverse Engineering Sector Daily Winners"><p className={styles.eyebrow}>HISTORICAL WINNER CHARACTERISTICS</p><h2>Reverse Engineering Sector Daily Winners</h2>
+ <SectorForecasts forecasts={forecasts} error={forecastError}/>
  <div className={styles.filters}><label>Sector winners per day<select value={topN} onChange={e=>setTopN(Number(e.target.value))}>{[1,2,3].map(n=><option key={n} value={n}>Top {n}</option>)}</select></label><button type="button" className={styles.export} disabled={!winners.length} onClick={download}>Export winner characteristics CSV</button></div>
  <p className={styles.relativeMeta}>11 S&amp;P sector ETFs · Ranked by close-to-close daily return · Green only (at least +0.05%, matching heatmap shading) · Default Top 1 · {days.length} visible sessions / {winners.length} winner observations. Sessions and date filters above apply; volume uses {windowLabel(sessionDuration)}. Latest three visible days expanded; older days can be opened below.</p>
  <div className={styles.winnerHighlights} aria-label="Most common winner characteristics"><h3>Most common winner characteristics</h3><p className={styles.relativeMeta}>Top three positive characteristics in each timing group, ranked by number of matching winner observations. Typical values are medians among winners matching that characteristic, not exact modes or entry thresholds. Updates with Top N, Sessions and dates.</p>

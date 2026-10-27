@@ -1,5 +1,6 @@
 import {loadSwingSuggestions} from './swing-data';
 import {marketDate} from './swing-trades';
+import {loadSectorForecasts} from './sector-forecast-data';
 import TrackerNav from './TrackerNav';
 import { redirect } from 'next/navigation';
 import { createClient } from '../../../lib/supabase/server';
@@ -26,5 +27,6 @@ export default async function SectorRotationPage() {
       if ((result.data?.length??0)<1000) break;
     }
   }
-  return <main><TrackerNav/><Tracker swingSuggestions={await loadSwingSuggestions()} asOfDate={marketDate()} bars={bars} updatedAt={latest?.completed_at??null} latestSession={latest?.latest_session??null} runStatus={runs?.[0]?.status??'NOT_STARTED'} error={error}/></main>;
+  const forecastData=await loadSectorForecasts();
+  return <main><TrackerNav/><Tracker winnerForecasts={forecastData.rows} winnerForecastError={forecastData.error} swingSuggestions={await loadSwingSuggestions()} asOfDate={marketDate()} bars={bars} updatedAt={latest?.completed_at??null} latestSession={latest?.latest_session??null} runStatus={runs?.[0]?.status??'NOT_STARTED'} error={error}/></main>;
 }
