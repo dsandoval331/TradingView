@@ -10,7 +10,7 @@ Missing/nonfinite values are excluded, never replaced with zeros. Incomplete OHL
 
 ## Method 1 clarification
 
-User selected ETFs AND stocks and BOTH pullback and breakout setups. Leadership remains undecided; user requested details before choosing. Do not infer acceptance of suggested leadership thresholds or activate a generator.
+User selected ETFs AND stocks and BOTH pullback and breakout setups. The user subsequently selected existing measures for Method 1 leadership. Official RRG will be researched for possible later implementation; this roadmap note is shown in the page’s Methods section. Exact leadership thresholds remain unapproved; no generator is activated by this choice.
 
 Existing-measure implementation: define explicit relative-performance windows, momentum/change rules, ranks and/or EMA confirmation using current price history. Existing daily-return differences, RSI14 differences, Mansfield200 and daily ranks are distinct indicators; none is official RRG. A possible multi-week price-ratio screen would be a new explicitly specified rule using those prices, not an existing official RRG input.
 
