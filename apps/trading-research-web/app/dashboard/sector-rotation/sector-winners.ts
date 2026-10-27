@@ -98,3 +98,26 @@ export function commonWinnerCharacteristics(observations:readonly WinnerObservat
  const weekdays=[...counts].sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]));const max=weekdays[0]?.[1]??0;
  return {groups,winnerCount:winners.length,weekdays:weekdays.filter(([,n])=>n===max).map(([day,count])=>({day,count,percent:100*count/winners.length}))};
 }
+
+/** Conjunctions of distinct documented positive conditions, ranked by observed winner count. */
+export function commonWinnerCombinations(observations:readonly WinnerObservation[],limit=3){
+ const winnerCount=observations.filter(o=>o.selected).length;
+ const combinations=(size:2|3)=>{
+  const sets:WinnerFeature[][]=[];
+  for(let i=0;i<WINNER_FEATURES.length;i++)for(let j=i+1;j<WINNER_FEATURES.length;j++){
+   if(size===2)sets.push([WINNER_FEATURES[i],WINNER_FEATURES[j]]);
+   else for(let k=j+1;k<WINNER_FEATURES.length;k++)sets.push([WINNER_FEATURES[i],WINNER_FEATURES[j],WINNER_FEATURES[k]]);
+  }
+  return sets.map(features=>{
+   const available=observations.filter(o=>features.every(f=>o.features[f.key]!=null));
+   const matching=available.filter(o=>features.every(f=>o.features[f.key]===true));
+   const count=(selected:boolean)=>{const total=available.filter(o=>o.selected===selected).length,yes=matching.filter(o=>o.selected===selected).length;return {yes,total,percent:total?100*yes/total:null};};
+   const winners=count(true),others=count(false),timings=new Set(features.map(f=>f.timing));
+   return {key:features.map(f=>f.key).join('+'),features,timing:timings.size===1?features[0].timing:'Mixed timing',winners,others,matchingWinners:matching.filter(o=>o.selected)};
+  }).filter(c=>c.winners.yes>0).sort((a,b)=>b.winners.yes-a.winners.yes||b.winners.percent!-a.winners.percent!||a.key.localeCompare(b.key)).slice(0,limit).map(({matchingWinners,...combo})=>{
+   const typical=commonWinnerCharacteristics(matchingWinners,WINNER_FEATURES.length).groups.flatMap(g=>g.items);
+   return {...combo,values:combo.features.map(f=>({key:f.key,label:f.label,timing:f.timing,typical:typical.find(t=>t.key===f.key)?.typical??'N/A'}))};
+  });
+ };
+ return {winnerCount,pairs:combinations(2),triples:combinations(3)};
+}

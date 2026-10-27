@@ -638,3 +638,16 @@ test('common winner highlights rank observed counts, summarize matching values a
  assert.deepEqual(result.weekdays.map(w=>[w.day,w.count]),[['Monday',2],['Tuesday',2]]);assert.equal(commonWinnerCharacteristics([]).groups[0].items.length,0);assert.equal(commonWinnerCharacteristics([]).weekdays.length,0);
  const nonwinner={...rows[0],selected:false,priorRvol:99};assert.equal(commonWinnerCharacteristics([...rows,nonwinner],1).groups[0].items[0].typical,'1.40×');
 });
+
+test('winner pairs and triples count same-observation conjunctions, missing data and joint medians',()=>{
+ const {sectorWinnerHistory,commonWinnerCombinations,WINNER_FEATURES}=require(path.join(app,'app/dashboard/sector-rotation/sector-winners.ts'));const {dates,bars}=sectorWinnerFixture();const base=sectorWinnerHistory(bars,20,1,dates.at(-1)).observations[0];
+ const patterns=[[true,true,true],[true,true,false],[true,false,true],[false,true,true],[null,true,true]];
+ const rows=patterns.map((flags,i)=>({...base,selected:true,rvol:1.2+i*.2,gap:i+.1,cell:{...base.cell,relative:i+.1},features:{...Object.fromEntries(WINNER_FEATURES.map(f=>[f.key,false])),volume:flags[0],relative:flags[1],gap:flags[2]}}));
+ const other={...rows[0],selected:false,rvol:99};const result=commonWinnerCombinations([...rows,other]);assert.equal(result.winnerCount,5);assert.equal(result.pairs.length,3);assert.equal(result.triples.length,1);
+ const first=result.pairs[0];assert.deepEqual(first.features.map(f=>f.key),['relative','gap']);assert.deepEqual(first.winners,{yes:3,total:5,percent:60});assert.equal(first.others.percent,100);
+ const pair=result.pairs.find(c=>c.features.some(f=>f.key==='volume')&&c.features.some(f=>f.key==='relative'));assert.equal(pair.values.find(v=>v.key==='volume').typical,'1.30×');assert.equal(pair.winners.total,4);
+ assert.deepEqual(result.triples[0].winners,{yes:1,total:4,percent:25});assert.equal(result.triples[0].values.find(v=>v.key==='volume').typical,'1.20×');
+ assert.equal(commonWinnerCombinations(rows,1).pairs.length,1);assert.deepEqual(commonWinnerCombinations([]),{winnerCount:0,pairs:[],triples:[]});
+ for(const c of [...result.pairs,...result.triples])assert.equal(new Set(c.features.map(f=>f.key)).size,c.features.length);
+ const Winners=require(path.join(app,'app/dashboard/sector-rotation/SectorWinners.tsx')).default;const {buildSessions,SECTORS}=require(path.join(app,'app/dashboard/sector-rotation/model.ts'));const sessions=buildSessions(bars,SECTORS);const html=renderToStaticMarkup(React.createElement(Winners,{bars,visibleSessions:sessions.slice(-5),sessionDuration:20,asOfDate:dates.at(-1),onSelect:()=>{}}));assert.match(html,/Two-characteristic combinations/);assert.match(html,/Three-characteristic combinations/);assert.match(html,/Seen together in/);
+});
