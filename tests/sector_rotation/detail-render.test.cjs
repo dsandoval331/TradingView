@@ -625,8 +625,16 @@ test('winner characteristics preserve prior timing, full-history streaks, missin
 test('Sector Winners renders history and comparator and is confined to the main sector tracker',()=>{
  const Winners=require(path.join(app,'app/dashboard/sector-rotation/SectorWinners.tsx')).default;const {buildSessions,SECTORS}=require(path.join(app,'app/dashboard/sector-rotation/model.ts'));const {dates,bars}=sectorWinnerFixture();
  const sessions=buildSessions(bars,SECTORS);const html=renderToStaticMarkup(React.createElement(Winners,{bars,visibleSessions:sessions.slice(-7),sessionDuration:20,asOfDate:dates.at(-1),onSelect:()=>{}}));
- assert.match(html,/Reverse Engineering Sector Daily Winners/);assert.match(html,/Top 1/);assert.match(html,/Top 2/);assert.match(html,/Top 3/);assert.match(html,/7 visible sessions \/ 7 winner observations/);assert.match(html,/winners versus other sectors/);assert.match(html,/Before winning session/);assert.match(html,/Export winner characteristics CSV/);assert.equal((html.match(/<details open=""/g)||[]).length,5);
+ assert.match(html,/Reverse Engineering Sector Daily Winners/);assert.match(html,/Top 1/);assert.match(html,/Top 2/);assert.match(html,/Top 3/);assert.match(html,/7 visible sessions \/ 7 winner observations/);assert.match(html,/winners versus other sectors/);assert.match(html,/Before winning session/);assert.match(html,/Export winner characteristics CSV/);assert.equal((html.match(/<details open=""/g)||[]).length,0);assert.match(html,/Most common winner characteristics/);
  const Tracker=require(path.join(app,'app/dashboard/sector-rotation/Tracker.tsx')).default;const props={bars,groups:SECTORS,updatedAt:null,latestSession:dates.at(-1),runStatus:'COMPLETE',error:null,asOfDate:dates.at(-1)};
  assert.match(renderToStaticMarkup(React.createElement(Tracker,props)),/Reverse Engineering Sector Daily Winners/);
  for(const flags of [{stocks:true},{tech:true}])assert.doesNotMatch(renderToStaticMarkup(React.createElement(Tracker,{...props,...flags})),/Reverse Engineering Sector Daily Winners/);
+});
+
+test('common winner highlights rank observed counts, summarize matching values and preserve missing denominators',()=>{
+ const {sectorWinnerHistory,commonWinnerCharacteristics,WINNER_FEATURES}=require(path.join(app,'app/dashboard/sector-rotation/sector-winners.ts'));const {dates,bars}=sectorWinnerFixture();const base=sectorWinnerHistory(bars,20,1,dates.at(-1)).observations[0];
+ const rows=[0,1,2,3].map(i=>({...base,selected:true,weekday:i<2?'Monday':'Tuesday',priorRvol:[1.2,1.4,1.8,null][i],features:{...Object.fromEntries(WINNER_FEATURES.map(f=>[f.key,false])),priorVolume:i<3?true:null,priorDaily:i===0?true:null,volume:i<2}}));
+ const result=commonWinnerCharacteristics(rows,1);assert.equal(result.groups[0].items.length,1);const top=result.groups[0].items[0];assert.equal(top.key,'priorVolume');assert.equal(top.typical,'1.40×');assert.equal(top.winners.yes,3);assert.equal(top.winners.total,3);assert.equal(top.coverage,75);assert.equal(top.others.percent,null);
+ assert.deepEqual(result.weekdays.map(w=>[w.day,w.count]),[['Monday',2],['Tuesday',2]]);assert.equal(commonWinnerCharacteristics([]).groups[0].items.length,0);assert.equal(commonWinnerCharacteristics([]).weekdays.length,0);
+ const nonwinner={...rows[0],selected:false,priorRvol:99};assert.equal(commonWinnerCharacteristics([...rows,nonwinner],1).groups[0].items[0].typical,'1.40×');
 });

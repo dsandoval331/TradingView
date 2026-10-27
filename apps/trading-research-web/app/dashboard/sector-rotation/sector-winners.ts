@@ -68,3 +68,33 @@ export function winnerCsv(rows:readonly WinnerObservation[]){
  const escape=(v:unknown)=>'"'+String(v??'').replaceAll('"','""')+'"';
  return [headers,...rows.map(o=>[o.date,o.weekday,o.symbol,o.rank,o.cell.daily,o.cell.relative,o.spy,o.rvol,o.priorRvol,o.gap,o.priorGap,o.prior?.daily,o.prior?.relative,o.ema20,o.ema50,o.cell.rsi,o.cell.rsiRelative,o.cell.mansfield,o.cell.rankChange,o.cell.five,o.cell.twenty,o.positiveAverage,o.closePosition,...WINNER_MEASURES.flatMap(m=>[o.priorStreaks[m].green,o.priorStreaks[m].red,o.streaks[m].green,o.streaks[m].red])])].map(row=>row.map(escape).join(',')).join('\n');
 }
+
+/** Most frequent positive conditions; typical values describe matching winners, not all winners. */
+export function commonWinnerCharacteristics(observations:readonly WinnerObservation[],limit=3){
+ const winners=observations.filter(o=>o.selected);
+ const numericValue=(key:string,o:WinnerObservation):number|null=>{
+  switch(key){
+   case 'priorVolume':return o.priorRvol;
+   case 'priorDaily':return o.prior?.daily??null;
+   case 'priorRelative':return o.prior?.relative??null;
+   case 'priorStreak':return Math.max(...WINNER_MEASURES.map(m=>o.priorStreaks[m].green));
+   case 'volume':return o.rvol;
+   case 'relative':return o.cell.relative;
+   case 'gap':return o.gap;
+   case 'aboveAverage':return o.positiveAverage!==null&&o.positiveAverage>0?o.cell.daily!/o.positiveAverage:null;
+   case 'closeHigh':return o.closePosition===null?null:100*o.closePosition;
+   default:return null;
+  }
+ };
+ const summary=winnerFeatureFrequency(observations).filter(f=>f.winners.yes>0).map(f=>{
+  const matches=winners.filter(o=>o.features[f.key]===true);
+  const values=matches.map(o=>numericValue(f.key,o)).filter((v):v is number=>v!==null&&Number.isFinite(v)).sort((a,b)=>a-b);
+  const median=values.length?(values[Math.floor((values.length-1)/2)]+values[Math.floor(values.length/2)])/2:null;
+  const typical=f.key==='priorEma20'?'Above EMA20':f.key==='priorEma50'?'Above EMA50':median===null?'N/A':`${median.toFixed(2)}${['volume','priorVolume','aboveAverage'].includes(f.key)?'×':f.key==='priorStreak'?' sessions':f.key==='relative'||f.key==='priorRelative'?' pp':'%'}`;
+  return {...f,typical,median,typicalCount:values.length,coverage:winners.length?100*f.winners.total/winners.length:0};
+ });
+ const groups=(['Before session','During session'] as const).map(timing=>({timing,items:summary.filter(f=>f.timing===timing).sort((a,b)=>b.winners.yes-a.winners.yes||b.winners.percent!-a.winners.percent!||a.key.localeCompare(b.key)).slice(0,limit)}));
+ const counts=new Map<string,number>();for(const o of winners)counts.set(o.weekday,(counts.get(o.weekday)??0)+1);
+ const weekdays=[...counts].sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]));const max=weekdays[0]?.[1]??0;
+ return {groups,winnerCount:winners.length,weekdays:weekdays.filter(([,n])=>n===max).map(([day,count])=>({day,count,percent:100*count/winners.length}))};
+}
