@@ -40,3 +40,9 @@ See [OPEN_ENTRY_COMPARISON.md](OPEN_ENTRY_COMPARISON.md). Each signal has Signal
 ## Method 1 implementation
 
 See [METHOD1_CONFIGURABLE_SCREEN.md](METHOD1_CONFIGURABLE_SCREEN.md) for the approved configurable defaults, global ranking and repeat labels. Method 1 now supplies calculated retrospective results; Method 2 saved snapshots remain separate.
+
+## Compact daily review
+
+Active reasoning paragraphs dated the page's current New York market date remain visible. Earlier active reasoning is grouped under a closed-by-default disclosure with a count; it still follows the method/direction filters. If today has no matching suggestions, an explicit empty message appears. The Active table continues showing every filtered active signal, with statistics and Archive unchanged. No latest-historical-date substitution is used for today.
+
+Event Log initially expands the newest five matching session days. Older days sit in a closed disclosure, with each older day's observations independently expandable. Each recent day can also be collapsed individually. The existing 120-day rolling limit and heatmap date filters still apply.
