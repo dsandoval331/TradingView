@@ -651,3 +651,22 @@ test('winner pairs and triples count same-observation conjunctions, missing data
  for(const c of [...result.pairs,...result.triples])assert.equal(new Set(c.features.map(f=>f.key)).size,c.features.length);
  const Winners=require(path.join(app,'app/dashboard/sector-rotation/SectorWinners.tsx')).default;const {buildSessions,SECTORS}=require(path.join(app,'app/dashboard/sector-rotation/model.ts'));const sessions=buildSessions(bars,SECTORS);const html=renderToStaticMarkup(React.createElement(Winners,{bars,visibleSessions:sessions.slice(-5),sessionDuration:20,asOfDate:dates.at(-1),onSelect:()=>{}}));assert.match(html,/Two-characteristic combinations/);assert.match(html,/Three-characteristic combinations/);assert.match(html,/Seen together in/);
 });
+
+test('forward sector suggestion retains recorded reasoning beside appended results and explicit pending/error states',()=>{
+ const Forecasts=require(path.join(app,'app/dashboard/sector-rotation/SectorForecasts.tsx')).default;
+ const plan={id:'fixture',version:'sector-next-v1',source_date:'2026-10-26',recorded_at:'2026-10-27T06:15:00Z',payload:{symbol:'XLK',reason:'RECORDED REASON',pattern:{traits:['Volume >60-session average'],wins:5,observations:30,dates:12},training_sessions:120}};
+ const render=props=>renderToStaticMarkup(React.createElement(Forecasts,props));
+ assert.match(render({forecasts:[]}),/No forward suggestion recorded yet/);
+ assert.match(render({forecasts:[],error:'Fixture unavailable'}),/role="alert"/);
+ const pending=render({forecasts:[plan]});assert.match(pending,/RECORDED REASON/);assert.match(pending,/Awaiting the next trading session/);assert.match(pending,/XLK · Long/);
+ const completed=render({forecasts:[{...plan,result:{target_date:'2026-10-27',recorded_at:'2026-10-28T06:15:00Z',payload:{symbol:'XLK',rank:2,top1_green:false,open:100,close:102,open_close_pct:2,mfe_pct:3,mae_pct:1,winner:'XLV'}}}]});
+ assert.match(completed,/RECORDED REASON/);assert.match(completed,/Results for 2026-10-27/);assert.match(completed,/\+2.00%/);assert.match(completed,/Observed winner: XLV/);
+});
+
+test('recorded sector suggestion loader blocks unauthenticated reads and reports service failures',async()=>{
+ const Module=require('node:module'),original=Module._load;let signedIn=false,allowed=false,reads=0,fail=false;
+ const client={auth:{getClaims:async()=>({data:{claims:signedIn?{sub:'fixture'}:null},error:null})},rpc:async()=>({data:allowed,error:null}),from(table){reads++;return {select(){return this;},order(){return this;},async range(){return fail?{data:null,error:{message:'fixture'}}:{data:[],error:null};}};}};
+ Module._load=function(request,parent,isMain){if(request==='server-only')return {};if(request==='../../../lib/supabase/server')return {createClient:async()=>client};return original.call(this,request,parent,isMain);};
+ let load;try{load=require(path.join(app,'app/dashboard/sector-rotation/sector-forecast-data.ts')).loadSectorForecasts;}finally{Module._load=original;}
+ assert.match((await load()).error,/Sign in/);signedIn=true;assert.match((await load()).error,/access unavailable/);assert.equal(reads,0);allowed=true;assert.deepEqual(await load(),{rows:[],error:null});fail=true;assert.match((await load()).error,/could not be loaded/);
+});

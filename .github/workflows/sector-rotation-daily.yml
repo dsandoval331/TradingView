@@ -31,3 +31,8 @@ jobs:
           MASSIVE_API_KEY: ${{ secrets.MASSIVE_API_KEY }}
           TR_MASSIVE_API_KEY: ${{ secrets.TR_MASSIVE_API_KEY }}
         run: python3 scripts/sector_rotation/collect.py
+      - name: Record next-session sector forecast and append matured results
+        env:
+          SUPABASE_URL: ${{ secrets.TR_SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.TR_SUPABASE_SECRET_KEY }}
+        run: python3 scripts/sector_rotation/forecast.py
