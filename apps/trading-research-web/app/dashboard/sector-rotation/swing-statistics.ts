@@ -4,7 +4,11 @@ function mean(values:readonly (number|null)[]):Mean{
  const valid=values.filter((v):v is number=>v!==null&&Number.isFinite(v));
  return {value:valid.length?valid.reduce((sum,value)=>sum+value,0)/valid.length:null,count:valid.length};
 }
-/** Equal-weight per saved signal for one selected entry basis. Price returns retain their raw sign. */
+export type SwingMethodFilter=1|2|'both';
+export function filterSwingMethods<T extends {methodId:1|2}>(rows:readonly T[],method:SwingMethodFilter):T[]{
+ return rows.filter(row=>method==='both'||row.methodId===method);
+}
+/** Equal-weight per signal for one selected entry basis. Price returns retain their raw sign. */
 export function swingStatistics(rows:readonly SwingTradeRow[]){
  return (['long','short','both'] as const).map(group=>{
   const plays=rows.filter(row=>group==='both'||row.side===group);
@@ -15,4 +19,9 @@ export function swingStatistics(rows:readonly SwingTradeRow[]){
    mae:mean(complete.map(row=>row.mae)),maePercent:mean(complete.map(row=>row.maePercent)),
    change:mean(returns),up:mean(returns.filter(n=>n>0)),down:mean(returns.filter(n=>n<0))};
  });
+}
+
+/** Pool individual signals directly; a signal matching both methods contributes once per method. */
+export function swingStatisticsByMethod(rows:readonly SwingTradeRow[]){
+ return ([1,2,'both'] as const).map(method=>({method,groups:swingStatistics(filterSwingMethods(rows,method))}));
 }
