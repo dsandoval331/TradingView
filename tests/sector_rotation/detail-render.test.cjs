@@ -502,3 +502,30 @@ test('method statistics isolate both methods, pool individual signals and render
   assert.match(html,entryBasis==='next_open'?/Next session open/:/Signal close/);
  }
 });
+
+test('Event Log expands the latest five matching days and groups older days closed',()=>{
+ const EventLog=require(path.join(app,'app/dashboard/sector-rotation/EventLog.tsx')).default;
+ const sessions=eventFixture(Array(65).fill(-1));
+ for(const count of [0,3,5,8]){
+  const visibleSessions=count?sessions.slice(-count):[];
+  const html=renderToStaticMarkup(React.createElement(EventLog,{sessions,visibleSessions,groups:eventGroup,metric:'daily',line:'ema50',onSelect:()=>{}}));
+  assert.equal((html.match(/data-event-date=/g)||[]).length,count);
+  assert.equal((html.match(/aria-expanded="true"/g)||[]).length,Math.min(5,count));
+  if(count>5){assert.match(html,/<details class="eventRules"><summary>Older Event Log days \(3\)<\/summary>/);assert.equal((html.match(/aria-expanded="false"/g)||[]).length,3);}
+  else assert.doesNotMatch(html,/Older Event Log days/);
+ }
+});
+test('active reasoning shows today only and keeps prior reasoning in a closed disclosure',()=>{
+ const Swing=require(path.join(app,'app/dashboard/sector-rotation/SwingTrades.tsx')).default;
+ const props={bars:swingBars,groups:[{symbol:'X',name:'Fixture',short:'Fixture'}],asOfDate:'2026-10-26'};
+ const suggestions=[{...swingSuggestion,id:'today',suggestedDate:'2026-10-26',reason:'TODAY REASON'},{...swingSuggestion,id:'earlier',suggestedDate:'2026-10-23',reason:'EARLIER REASON'}];
+ const html=renderToStaticMarkup(React.createElement(Swing,{...props,suggestions}));
+ const reasoning=html.slice(html.indexOf('aria-label="Active suggestion reasoning"'),html.indexOf('<caption>Active suggestions'));
+ const disclosure=reasoning.indexOf('<details');
+ assert.ok(reasoning.indexOf('TODAY REASON')<disclosure);assert.ok(reasoning.indexOf('EARLIER REASON')>disclosure);
+ assert.match(reasoning,/<details class="eventRules"><summary>Earlier active suggestion reasoning \(1\)<\/summary>/);
+ assert.equal((html.match(/TODAY REASON/g)||[]).length,1);assert.equal((html.match(/EARLIER REASON/g)||[]).length,1);
+ const none=renderToStaticMarkup(React.createElement(Swing,{...props,suggestions:suggestions.slice(1)}));
+ assert.match(none,/No suggestions dated today match these filters/);assert.match(none,/Earlier active suggestion reasoning \(1\)/);
+ const current=renderToStaticMarkup(React.createElement(Swing,{...props,suggestions:suggestions.slice(0,1)}));assert.doesNotMatch(current,/Earlier active suggestion reasoning/);
+});
