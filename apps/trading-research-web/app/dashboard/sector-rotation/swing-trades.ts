@@ -1,6 +1,6 @@
 import type {Bar} from './model';
 export const SWING_METHODS=[
- {id:1,name:'Sector rotation',status:'Rules draft',description:'Compare the 11 sector ETFs against SPY for improving or established leadership. Look for sector ETF pullbacks or the top 2–3 stocks within a leading sector, with breakout or moving-average support confirmation and broad-market alignment. Exact lookbacks and trigger thresholds are pending.'},
+ {id:1,name:'Sector rotation',status:'Rules draft',description:'Use existing measures—relative performance versus SPY, Mansfield relative strength, ranks and EMAs—to define sector leadership. Screen sector ETFs and stocks for both pullback and breakout setups with broad-market alignment. Exact lookbacks, ranking and entry/exit thresholds are pending.'},
  {id:2,name:'RSI(2) trend pullback',status:'Retrospective screen',description:'Long screen: close above the 200-session SMA and RSI(2) below 5. Short screen: close below the 200-session SMA and RSI(2) above 95. Recent historical matches are recorded below. Closing prices are reference prices; strategy validation and executable entry/exit rules remain to be finalized.'},
 ] as const;
 export type SwingMethodId=typeof SWING_METHODS[number]['id'];
