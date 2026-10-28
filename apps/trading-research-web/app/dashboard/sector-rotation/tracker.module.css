@@ -37,3 +37,15 @@
 .winnerHighlights{border:1px solid #354b58;border-radius:9px;padding:18px;margin:16px 0;background:#142633}.winnerHighlights h3{margin:0 0 10px}.winnerHighlights h4{color:#f2b84b;margin:18px 0 10px}.winnerHighlights ul{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:12px;list-style:none;margin:0;padding:0}.winnerHighlights li{border:1px solid #354254;border-radius:7px;background:#111d2b;padding:14px;display:flex;flex-direction:column;gap:9px;line-height:1.5;font-size:13px}.winnerHighlights small{color:#9eacbe}
 
 .top3Section .eventTableScroll td{color:inherit}.top3Section .eventDay>h3,.top3Section .eventDay>p{margin:12px 18px}.top3Section .eventTableScroll caption{padding:8px 12px}.top3Section h5{margin:8px 0;font-size:13px}.top3Section summary:focus-visible{outline:2px solid #f2b84b;outline-offset:-3px}
+
+/* Page sections share one set of filters; mounted panels retain local controls. */
+.pageTabs{display:flex;flex-wrap:wrap;gap:8px;margin:24px 0 16px;padding:8px;background:#111d2b;border:1px solid var(--border);border-radius:10px}
+.pageTabs button{border:1px solid transparent;border-radius:7px;background:transparent;color:#bec9d7;padding:12px 18px;font-size:13px;min-height:44px}
+.pageTabs button:hover{background:#1c2b3d}
+.pageTabs button[aria-selected=true]{color:var(--amber);background:#332e22;border-color:#756136;font-weight:700}
+.sharedFilters{background:#111d2b;border:1px solid var(--border);border-radius:10px;margin-bottom:20px}
+.sharedFilters p{color:var(--muted);font-size:11px;line-height:1.6;padding:0 18px 14px;margin:0}
+.pagePanel{min-width:0;scroll-margin-top:20px}
+.pagePanel[hidden]{display:none}
+.pagePanel:focus-visible{outline:2px solid var(--amber);outline-offset:4px}
+@media(max-width:600px){.pageTabs{gap:5px}.pageTabs button{flex:1 1 auto;padding:10px;font-size:12px}}
