@@ -30,5 +30,5 @@ export default async function SectorRotationPage() {
     }
   }
   const [forecastData,top3Data,swingSuggestions]=await Promise.all([loadSectorForecasts(),loadDailyTop3(),loadSwingSuggestions()]);
-  return <main><TrackerNav/><Tracker winnerForecasts={forecastData.rows} winnerForecastError={forecastData.error} swingSuggestions={swingSuggestions} asOfDate={marketDate()} bars={bars} updatedAt={latest?.completed_at??null} latestSession={latest?.latest_session??null} runStatus={runs?.[0]?.status??'NOT_STARTED'} error={error}/><DailyTop3Predictions predictions={top3Data.predictions} results={top3Data.results} error={top3Data.error} asOfDate={marketDate()}/></main>;
+  return <main><TrackerNav/><Tracker dailyPredictions={<DailyTop3Predictions predictions={top3Data.predictions} results={top3Data.results} error={top3Data.error} asOfDate={marketDate()}/>} winnerForecasts={forecastData.rows} winnerForecastError={forecastData.error} swingSuggestions={swingSuggestions} asOfDate={marketDate()} bars={bars} updatedAt={latest?.completed_at??null} latestSession={latest?.latest_session??null} runStatus={runs?.[0]?.status??'NOT_STARTED'} error={error}/></main>;
 }
