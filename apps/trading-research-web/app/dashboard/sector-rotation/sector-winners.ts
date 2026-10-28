@@ -100,7 +100,7 @@ export function commonWinnerCharacteristics(observations:readonly WinnerObservat
 }
 
 /** Conjunctions of distinct documented positive conditions, ranked by observed winner count. */
-export function commonWinnerCombinations(observations:readonly WinnerObservation[],limit=3){
+export function commonWinnerCombinations(observations:readonly WinnerObservation[],limit=3,timing:WinnerFeature['timing']|'Any session'='Any session'){
  const winnerCount=observations.filter(o=>o.selected).length;
  const combinations=(size:2|3)=>{
   const sets:WinnerFeature[][]=[];
@@ -108,7 +108,7 @@ export function commonWinnerCombinations(observations:readonly WinnerObservation
    if(size===2)sets.push([WINNER_FEATURES[i],WINNER_FEATURES[j]]);
    else for(let k=j+1;k<WINNER_FEATURES.length;k++)sets.push([WINNER_FEATURES[i],WINNER_FEATURES[j],WINNER_FEATURES[k]]);
   }
-  return sets.map(features=>{
+  return sets.filter(features=>timing==='Any session'||features.every(f=>f.timing===timing)).map(features=>{
    const available=observations.filter(o=>features.every(f=>o.features[f.key]!=null));
    const matching=available.filter(o=>features.every(f=>o.features[f.key]===true));
    const count=(selected:boolean)=>{const total=available.filter(o=>o.selected===selected).length,yes=matching.filter(o=>o.selected===selected).length;return {yes,total,percent:total?100*yes/total:null};};
