@@ -25,6 +25,7 @@ jobs:
       - name: Validate collector with isolated synthetic fixtures
         run: python3 -m unittest discover -s tests/sector_rotation -p 'test_*.py'
       - name: Collect sector history under MWE-SECTOR-V1-001
+        id: collect_prices
         env:
           SUPABASE_URL: ${{ secrets.TR_SUPABASE_URL }}
           SUPABASE_SECRET_KEY: ${{ secrets.TR_SUPABASE_SECRET_KEY }}
@@ -36,3 +37,9 @@ jobs:
           SUPABASE_URL: ${{ secrets.TR_SUPABASE_URL }}
           SUPABASE_SECRET_KEY: ${{ secrets.TR_SUPABASE_SECRET_KEY }}
         run: python3 scripts/sector_rotation/forecast.py
+      - name: Append closing ranks for daily Top 3 predictions
+        if: ${{ !cancelled() && steps.collect_prices.outcome == 'success' }}
+        env:
+          SUPABASE_URL: ${{ secrets.TR_SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.TR_SUPABASE_SECRET_KEY }}
+        run: python3 scripts/sector_rotation/top_three.py
