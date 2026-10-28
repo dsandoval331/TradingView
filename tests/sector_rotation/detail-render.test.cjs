@@ -683,3 +683,28 @@ test('recorded sector suggestion loader blocks unauthenticated reads and reports
  let load;try{load=require(path.join(app,'app/dashboard/sector-rotation/sector-forecast-data.ts')).loadSectorForecasts;}finally{Module._load=original;}
  assert.match((await load()).error,/Sign in/);signedIn=true;assert.match((await load()).error,/access unavailable/);assert.equal(reads,0);allowed=true;assert.deepEqual(await load(),{rows:[],error:null});fail=true;assert.match((await load()).error,/could not be loaded/);
 });
+
+test('daily Top3 shows today/yesterday open, older closed, immutable stages and results',()=>{
+ const View=require(path.join(app,'app/dashboard/sector-rotation/DailyTop3Predictions.tsx')).default;
+ const p={target_date:'2026-10-28',stage:'overnight',symbol:'XLE',recorded_at:'2026-10-28T06:00:00Z',data_as_of:'2026-10-28T05:00:00Z',top3:25,middle:35,bottom3:40,confidence:'Low',reason:'ORIGINAL OVERNIGHT REASON',sources:[{label:'bad URL',url:'javascript:alert(1)'}],methodology:'judgment-v1',availability:'researched'};
+ const predictions=[p,{...p,stage:'premarket',recorded_at:'2026-10-28T13:26:00Z',reason:'PREMARKET REASON'}, {...p,target_date:'2026-10-27'},{...p,target_date:'2026-10-26'}];
+ const render=results=>renderToStaticMarkup(React.createElement(View,{predictions,results,asOfDate:'2026-10-28'}));
+ const pending=render([]);assert.equal((pending.match(/<details open=""/g)||[]).length,2);assert.match(pending,/Earlier day · 2026-10-26/);assert.match(pending,/Before market open/);assert.match(pending,/ORIGINAL OVERNIGHT REASON/);assert.match(pending,/No forecast recorded for this ETF/);assert.doesNotMatch(pending,/href="javascript:/);
+ const result={target_date:'2026-10-28',recorded_at:'2026-10-29T06:30:00Z',payload:{ranks:[{symbol:'XLE',rank:2,daily:-.2,bucket:'Top 3'}],ranking_rule:'Fixture ordinal ranks',price_sha256:'fixture'}};
+ const completed=render([result]);assert.match(completed,/#2 · -0.20%/);assert.match(completed,/Top 3 occurred/);assert.match(completed,/ORIGINAL OVERNIGHT REASON/);assert.match(completed,/Assigned Top 3 probability: 25%/);
+ const empty=renderToStaticMarkup(React.createElement(View,{predictions:[],results:[],asOfDate:'2026-10-28'}));assert.match(empty,/Yesterday · 2026-10-27/);assert.match(empty,/Historical predictions are not backfilled/);
+ assert.match(renderToStaticMarkup(React.createElement(View,{predictions:[],results:[],asOfDate:'2026-10-28',error:'READ FAILED'})),/role="alert">READ FAILED/);
+});
+
+test('daily Top3 dates and most likely buckets preserve calendar boundaries and ties',()=>{
+ const {priorCalendarDate,mostLikely}=require(path.join(app,'app/dashboard/sector-rotation/top-three-types.ts'));
+ assert.equal(priorCalendarDate('2026-11-01'),'2026-10-31');assert.equal(priorCalendarDate('2027-01-01'),'2026-12-31');assert.deepEqual(mostLikely({top3:40,middle:40,bottom3:20}),['Top 3','Middle']);
+});
+
+test('daily Top3 loader authorizes before reads and preserves read failures',async()=>{
+ const Module=require('node:module'),original=Module._load;let signedIn=false,allowed=false,reads=0,fail=false;
+ const client={auth:{getClaims:async()=>({data:{claims:signedIn?{sub:'fixture'}:null},error:null})},rpc:async()=>({data:allowed,error:null}),from(){reads++;return {select(){return this;},order(){return this;},async range(){return fail?{data:null,error:{message:'fixture'}}:{data:[],error:null};}};}};
+ Module._load=function(request,parent,isMain){if(request==='server-only')return {};if(request==='../../../lib/supabase/server')return {createClient:async()=>client};return original.call(this,request,parent,isMain);};
+ let load;try{load=require(path.join(app,'app/dashboard/sector-rotation/top-three-data.ts')).loadDailyTop3;}finally{Module._load=original;}
+ assert.match((await load()).error,/Sign in/);signedIn=true;assert.match((await load()).error,/access unavailable/);assert.equal(reads,0);allowed=true;assert.deepEqual(await load(),{predictions:[],results:[],error:null});fail=true;assert.match((await load()).error,/could not be loaded/);
+});
