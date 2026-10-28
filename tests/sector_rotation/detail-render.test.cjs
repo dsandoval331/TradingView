@@ -652,6 +652,19 @@ test('winner pairs and triples count same-observation conjunctions, missing data
  const Winners=require(path.join(app,'app/dashboard/sector-rotation/SectorWinners.tsx')).default;const {buildSessions,SECTORS}=require(path.join(app,'app/dashboard/sector-rotation/model.ts'));const sessions=buildSessions(bars,SECTORS);const html=renderToStaticMarkup(React.createElement(Winners,{bars,visibleSessions:sessions.slice(-5),sessionDuration:20,asOfDate:dates.at(-1),onSelect:()=>{}}));assert.match(html,/Two-characteristic combinations/);assert.match(html,/Three-characteristic combinations/);assert.match(html,/Seen together in/);
 });
 
+test('winner combinations rank before and during independently; any includes mixed timing',()=>{
+ const {sectorWinnerHistory,commonWinnerCombinations,WINNER_FEATURES}=require(path.join(app,'app/dashboard/sector-rotation/sector-winners.ts'));const {dates,bars}=sectorWinnerFixture();const base=sectorWinnerHistory(bars,20,1,dates.at(-1)).observations[0];
+ const rows=[0,1,2,3].map(i=>({...base,selected:true,features:{...Object.fromEntries(WINNER_FEATURES.map(f=>[f.key,false])),priorVolume:i===0?true:i===1?null:false,priorDaily:i===0,priorRelative:i===0,volume:true,relative:true,gap:true}}));
+ const before=commonWinnerCombinations(rows,3,'Before session'),during=commonWinnerCombinations(rows,3,'During session'),any=commonWinnerCombinations(rows,1000,'Any session');
+ assert.equal(before.pairs.length,3);assert.equal(before.triples.length,1);assert.equal(before.triples[0].winners.yes,1);assert.equal(before.triples[0].winners.total,3);
+ for(const c of [...before.pairs,...before.triples])assert.ok(c.features.every(f=>f.timing==='Before session'));
+ for(const c of [...during.pairs,...during.triples]){assert.ok(c.features.every(f=>f.timing==='During session'));assert.equal(c.winners.yes,4);}
+ assert.ok([...any.pairs,...any.triples].some(c=>c.timing==='Mixed timing'));assert.deepEqual(commonWinnerCombinations(rows),commonWinnerCombinations(rows,3,'Any session'));
+ assert.equal(commonWinnerCombinations(rows,1,'Before session').pairs.length,1);assert.equal(commonWinnerCombinations(rows.slice(2),3,'Before session').pairs.length,0);
+ const Winners=require(path.join(app,'app/dashboard/sector-rotation/SectorWinners.tsx')).default;const {buildSessions,SECTORS}=require(path.join(app,'app/dashboard/sector-rotation/model.ts'));const html=renderToStaticMarkup(React.createElement(Winners,{bars,visibleSessions:buildSessions(bars,SECTORS).slice(-5),sessionDuration:20,asOfDate:dates.at(-1),onSelect:()=>{}}));
+ for(const timing of ['Before session','During session','Any session'])assert.ok(html.includes(`aria-label="${timing} combinations"`));assert.equal((html.match(/<h5>Two-characteristic combinations<\/h5>/g)||[]).length,3);assert.equal((html.match(/<h5>Three-characteristic combinations<\/h5>/g)||[]).length,3);
+});
+
 test('forward sector suggestion retains recorded reasoning beside appended results and explicit pending/error states',()=>{
  const Forecasts=require(path.join(app,'app/dashboard/sector-rotation/SectorForecasts.tsx')).default;
  const plan={id:'fixture',version:'sector-next-v1',source_date:'2026-10-26',recorded_at:'2026-10-27T06:15:00Z',payload:{symbol:'XLK',reason:'RECORDED REASON',pattern:{traits:['Volume >60-session average'],wins:5,observations:30,dates:12},training_sessions:120}};
