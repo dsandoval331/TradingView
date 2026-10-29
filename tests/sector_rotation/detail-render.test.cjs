@@ -58,7 +58,7 @@ test('daily candles sit after Sector Detail and use every filtered heatmap sessi
  const html=renderToStaticMarkup(React.createElement(Tracker,{bars,updatedAt:null,latestSession:bars.at(-1).trade_date,runStatus:'COMPLETE',error:null}));
  const dates=[...html.split('<thead>')[1].split('</thead>')[0].matchAll(/<small>(\d{4}-\d{2}-\d{2})<\/small>/g)].map(m=>m[1]);
  const candleDates=[...html.matchAll(/data-candle-date="([^"]+)"/g)].map(m=>m[1]);
- assert.deepEqual(candleDates,[...dates].reverse());assert.ok(html.indexOf('DAILY PRICE HISTORY')>html.indexOf('</aside>'));
+ assert.deepEqual(candleDates,[...dates].reverse());assert.ok(html.indexOf('DAILY PRICE HISTORY')>html.indexOf('</aside>'));assert.ok(html.indexOf('class="relativeChart"')>html.indexOf('DAILY PRICE HISTORY'));assert.doesNotMatch(html.slice(html.indexOf('<aside'),html.indexOf('</aside>')),/class="relativeChart"/);
  assert.match(html,/Open \$230.00/);assert.match(html,/60 of 60 sessions available/);
 });
 test('basket chart is close-only, keeps missing gaps, and custom windows have no extra sessions',()=>{
@@ -636,10 +636,10 @@ test('winner characteristics preserve prior timing, full-history streaks, missin
 test('Sector Winners renders history and comparator and is confined to the main sector tracker',()=>{
  const Winners=require(path.join(app,'app/dashboard/sector-rotation/SectorWinners.tsx')).default;const {buildSessions,SECTORS}=require(path.join(app,'app/dashboard/sector-rotation/model.ts'));const {dates,bars}=sectorWinnerFixture();
  const sessions=buildSessions(bars,SECTORS);const html=renderToStaticMarkup(React.createElement(Winners,{bars,visibleSessions:sessions.slice(-7),sessionDuration:20,asOfDate:dates.at(-1),onSelect:()=>{}}));
- assert.match(html,/Reverse Engineering Sector Daily Winners/);assert.match(html,/Top 1/);assert.match(html,/Top 2/);assert.match(html,/Top 3/);assert.match(html,/7 visible sessions \/ 7 winner observations/);assert.match(html,/winners versus other sectors/);assert.match(html,/Before winning session/);assert.match(html,/Export winner characteristics CSV/);const {weekDisplayDates}=require(path.join(app,'app/dashboard/sector-rotation/week-display.ts'));assert.equal((html.match(/<details open=""/g)||[]).length,sessions.slice(-7).filter(day=>weekDisplayDates(dates.at(-1)).includes(day.date)).length);assert.match(html,/Older daily winner days/);assert.match(html,/Most common winner characteristics/);
+ assert.match(html,/Reverse Engineering Sector Daily Leaders/);assert.match(html,/Top 1/);assert.match(html,/Top 2/);assert.match(html,/Top 3/);assert.match(html,/7 visible sessions \/ 7 leader observations/);assert.match(html,/leaders versus other sectors/);assert.match(html,/Before leading session/);assert.match(html,/Export leader characteristics CSV/);const {weekDisplayDates}=require(path.join(app,'app/dashboard/sector-rotation/week-display.ts'));assert.equal((html.match(/<details open=""/g)||[]).length,sessions.slice(-7).filter(day=>weekDisplayDates(dates.at(-1)).includes(day.date)).length);assert.match(html,/Older daily leader days/);assert.match(html,/Most common leader characteristics/);
  const Tracker=require(path.join(app,'app/dashboard/sector-rotation/Tracker.tsx')).default;const props={bars,groups:SECTORS,updatedAt:null,latestSession:dates.at(-1),runStatus:'COMPLETE',error:null,asOfDate:dates.at(-1)};
- assert.match(renderToStaticMarkup(React.createElement(Tracker,props)),/Reverse Engineering Sector Daily Winners/);
- for(const flags of [{stocks:true},{tech:true}])assert.doesNotMatch(renderToStaticMarkup(React.createElement(Tracker,{...props,...flags})),/Reverse Engineering Sector Daily Winners/);
+ assert.match(renderToStaticMarkup(React.createElement(Tracker,props)),/Reverse Engineering Sector Daily Leaders/);
+ for(const flags of [{stocks:true},{tech:true}])assert.doesNotMatch(renderToStaticMarkup(React.createElement(Tracker,{...props,...flags})),/Reverse Engineering Sector Daily Leaders/);
 });
 
 test('common winner highlights rank observed counts, summarize matching values and preserve missing denominators',()=>{
@@ -684,7 +684,7 @@ test('forward sector suggestion retains recorded reasoning beside appended resul
  assert.match(render({forecasts:[],error:'Fixture unavailable'}),/role="alert"/);
  const pending=render({forecasts:[plan]});assert.match(pending,/RECORDED REASON/);assert.match(pending,/Awaiting the next trading session/);assert.match(pending,/XLK · Long/);
  const completed=render({forecasts:[{...plan,result:{target_date:'2026-10-27',recorded_at:'2026-10-28T06:15:00Z',payload:{symbol:'XLK',rank:2,top1_green:false,open:100,close:102,open_close_pct:2,mfe_pct:3,mae_pct:1,winner:'XLV'}}}]});
- assert.match(completed,/RECORDED REASON/);assert.match(completed,/Results for 2026-10-27/);assert.match(completed,/\+2.00%/);assert.match(completed,/Observed winner: XLV/);
+ assert.match(completed,/RECORDED REASON/);assert.match(completed,/Results for 2026-10-27/);assert.match(completed,/\+2.00%/);assert.match(completed,/Observed leader: XLV/);
 });
 
 test('recorded sector suggestion loader blocks unauthenticated reads and reports service failures',async()=>{
@@ -718,4 +718,22 @@ test('daily Top3 loader authorizes before reads and preserves read failures',asy
  Module._load=function(request,parent,isMain){if(request==='server-only')return {};if(request==='../../../lib/supabase/server')return {createClient:async()=>client};return original.call(this,request,parent,isMain);};
  let load;try{load=require(path.join(app,'app/dashboard/sector-rotation/top-three-data.ts')).loadDailyTop3;}finally{Module._load=original;}
  assert.match((await load()).error,/Sign in/);signedIn=true;assert.match((await load()).error,/access unavailable/);assert.equal(reads,0);allowed=true;assert.deepEqual(await load(),{predictions:[],results:[],error:null});fail=true;assert.match((await load()).error,/could not be loaded/);
+});
+
+test('symbol references lead every secondary tab, with three ETFs only in predictions',()=>{
+ const Tracker=require(path.join(app,'app/dashboard/sector-rotation/Tracker.tsx')).default;
+ const {SECTORS}=require(path.join(app,'app/dashboard/sector-rotation/model.ts'));
+ const {bars,dates}=sectorWinnerFixture();
+ const html=renderToStaticMarkup(React.createElement(Tracker,{bars,updatedAt:null,latestSession:dates.at(-1),runStatus:'COMPLETE',error:null,asOfDate:dates.at(-1),dailyPredictions:React.createElement('p',null,'Forecast fixture')}));
+ const panel=id=>html.split(`id="tracker-panel-${id}"`)[1].split(/<div id="tracker-panel-/)[0];
+ assert.doesNotMatch(panel('overview'),/class="symbolReference"/);
+ for(const id of ['events','winners','swing']){
+  const reference=panel(id).split('class="symbolReference"')[1].split('</section>')[0];
+  assert.equal((reference.match(/<dt>/g)||[]).length,11);
+  for(const group of SECTORS){assert.ok(reference.includes(`<dt>${group.symbol}</dt>`));assert.ok(reference.includes(`<dd>${group.name}</dd>`));}
+ }
+ const predictionReference=panel('predictions').split('class="symbolReference"')[1].split('</section>')[0];
+ assert.equal((predictionReference.match(/<dt>/g)||[]).length,3);
+ for(const symbol of ['XLE','XLV','XLK'])assert.ok(predictionReference.includes(`<dt>${symbol}</dt>`));
+ assert.match(html,/>Daily leaders<\/button>/);
 });
