@@ -163,8 +163,8 @@ test('event streaks include the ending day, retain historical records, and rank 
 });
 test('Event Log groups days with alternating shades and includes four day-end sections',()=>{
  const EventLog=require(path.join(app,'app/dashboard/sector-rotation/EventLog.tsx')).default;
- const days=eventFixture(Array(65).fill(-1));
- const html=renderToStaticMarkup(React.createElement(EventLog,{sessions:days,visibleSessions:days.slice(-3),groups:eventGroup,metric:'daily',line:'ema50',onSelect:()=>{}}));
+ const days=eventFixture(Array(65).fill(-1)).map((day,i)=>({...day,date:new Date(Date.UTC(2026,7,25+i)).toISOString().slice(0,10)}));
+ const html=renderToStaticMarkup(React.createElement(EventLog,{asOfDate:'2026-10-28',sessions:days,visibleSessions:days.slice(-3),groups:eventGroup,metric:'daily',line:'ema50',onSelect:()=>{}}));
  assert.equal((html.match(/data-event-date=/g)||[]).length,3);assert.match(html,/eventDayAlternate/);assert.match(html,/50E · Close below 50 EMA/);assert.match(html,/Day 16 in a row/);assert.match(html,/Beyond average/);assert.match(html,/Current Longest Streaks/);assert.match(html,/Biggest rank movers/);
 });
 test('volume average follows 20/60/120 Sessions and All expands without future data',()=>{
@@ -211,8 +211,8 @@ test('current longest winners cover all measures, include ties and ignore histor
 });
 test('Event Log groups Long and Short and shows winners for every measure with N/A',()=>{
  const EventLog=require(path.join(app,'app/dashboard/sector-rotation/EventLog.tsx')).default;
- const days=eventFixture(Array(65).fill(-1));
- const html=renderToStaticMarkup(React.createElement(EventLog,{sessions:days,visibleSessions:days.slice(-3),groups:eventGroup,metric:'daily',line:'ema50',sessionDuration:20,onSelect:()=>{}}));
+ const days=eventFixture(Array(65).fill(-1)).map((day,i)=>({...day,date:new Date(Date.UTC(2026,7,25+i)).toISOString().slice(0,10)}));
+ const html=renderToStaticMarkup(React.createElement(EventLog,{asOfDate:'2026-10-28',sessions:days,visibleSessions:days.slice(-3),groups:eventGroup,metric:'daily',line:'ema50',sessionDuration:20,onSelect:()=>{}}));
  assert.match(html,/Average streak \(20 sessions\):/);assert.match(html,/data-event-side="Long"/);assert.match(html,/data-event-side="Short"/);
  assert.ok(html.indexOf('data-event-side="Long"')<html.indexOf('data-event-side="Short"'));
  const table=html.match(/<table[^>]*data-current-streaks[^>]*>([\s\S]*?)<\/table>/)[1];
@@ -280,7 +280,7 @@ test('new indicator chart modes show their units without return-average or rank-
 test('single-stock heatmap offers RSI and Mansfield and the Event Log renders six measure rows',()=>{
  const Tracker=require(path.join(app,'app/dashboard/sector-rotation/Tracker.tsx')).default;
  const bars=Array.from({length:220},(_,i)=>['SPY','X'].map(symbol=>({symbol,trade_date:new Date(Date.UTC(2025,0,1+i)).toISOString().slice(0,10),close:symbol==='SPY'?100:100+i,volume:1}))).flat();
- const html=renderToStaticMarkup(React.createElement(Tracker,{bars,stocks:true,singleStock:true,groups:eventGroup,updatedAt:null,latestSession:bars.at(-1).trade_date,runStatus:'COMPLETE',error:null}));
+ const html=renderToStaticMarkup(React.createElement(Tracker,{bars,asOfDate:bars.at(-1).trade_date,stocks:true,singleStock:true,groups:eventGroup,updatedAt:null,latestSession:bars.at(-1).trade_date,runStatus:'COMPLETE',error:null}));
  assert.match(html,/<option value="rsiRelative"/);assert.match(html,/<option value="mansfield"/);assert.doesNotMatch(html,/<option value="rank"/);
  const table=html.match(/<table[^>]*data-current-streaks[^>]*>([\s\S]*?)<\/table>/)[1];assert.equal((table.match(/<tr>/g)||[]).length,7);assert.match(table,/RSI vs SPY RSI/);assert.match(table,/Mansfield RS/);
 });
@@ -503,17 +503,28 @@ test('method statistics isolate both methods, pool individual signals and render
  }
 });
 
-test('Event Log expands the latest five matching days and groups older days closed',()=>{
+test('calendar display opens current week, Monday includes Friday, and weekends retain the week',()=>{
+ const {weekDisplayDates}=require(path.join(app,'app/dashboard/sector-rotation/week-display.ts'));
+ assert.deepEqual(weekDisplayDates('2026-10-26'),['2026-10-23','2026-10-26']);
+ assert.deepEqual(weekDisplayDates('2026-10-27'),['2026-10-26','2026-10-27']);
+ const full=['2026-10-26','2026-10-27','2026-10-28','2026-10-29','2026-10-30'];
+ for(const day of ['2026-10-30','2026-10-31','2026-11-01'])assert.deepEqual(weekDisplayDates(day),full);
+ assert.deepEqual(weekDisplayDates('2027-01-04'),['2027-01-01','2027-01-04']);
+ assert.throws(()=>weekDisplayDates('2026-02-30'),/Invalid/);
+});
+test('Event Log opens calendar dates without substituting unavailable days',()=>{
  const EventLog=require(path.join(app,'app/dashboard/sector-rotation/EventLog.tsx')).default;
- const sessions=eventFixture(Array(65).fill(-1));
- for(const count of [0,3,5,8]){
-  const visibleSessions=count?sessions.slice(-count):[];
-  const html=renderToStaticMarkup(React.createElement(EventLog,{sessions,visibleSessions,groups:eventGroup,metric:'daily',line:'ema50',onSelect:()=>{}}));
-  assert.equal((html.match(/data-event-date=/g)||[]).length,count);
-  assert.equal((html.match(/aria-expanded="true"/g)||[]).length,Math.min(5,count));
-  if(count>5){assert.match(html,/<details class="eventRules"><summary>Older Event Log days \(3\)<\/summary>/);assert.equal((html.match(/aria-expanded="false"/g)||[]).length,3);}
-  else assert.doesNotMatch(html,/Older Event Log days/);
- }
+ const sessions=eventFixture(Array(65).fill(-1)).map((day,i)=>({...day,date:new Date(Date.UTC(2026,7,25+i)).toISOString().slice(0,10)}));
+ const render=(asOfDate,visibleSessions=sessions.slice(-8))=>renderToStaticMarkup(React.createElement(EventLog,{asOfDate,sessions,visibleSessions,groups:eventGroup,metric:'daily',line:'ema50',onSelect:()=>{}}));
+ const opened=html=>[...html.matchAll(/data-event-date="([^"]+)"[\s\S]*?aria-expanded="(true|false)"/g)].filter(m=>m[2]==='true').map(m=>m[1]);
+ assert.deepEqual(opened(render('2026-10-26')),['2026-10-26','2026-10-23']);
+ assert.deepEqual(opened(render('2026-10-27')),['2026-10-27','2026-10-26']);
+ assert.deepEqual(opened(render('2026-10-28')),['2026-10-28','2026-10-27','2026-10-26']);
+ assert.deepEqual(opened(render('2026-11-03')),[]);
+ assert.match(render('2026-11-03'),/No current-week sessions/);
+ assert.match(render('2026-10-28'),/Older Event Log days \(5\)/);
+ assert.equal((render('2026-10-28').match(/data-event-date=/g)||[]).length,8);
+ assert.doesNotMatch(render('2026-10-28',[]),/Older Event Log days/);
 });
 test('active reasoning shows today only and keeps prior reasoning in a closed disclosure',()=>{
  const Swing=require(path.join(app,'app/dashboard/sector-rotation/SwingTrades.tsx')).default;
@@ -625,7 +636,7 @@ test('winner characteristics preserve prior timing, full-history streaks, missin
 test('Sector Winners renders history and comparator and is confined to the main sector tracker',()=>{
  const Winners=require(path.join(app,'app/dashboard/sector-rotation/SectorWinners.tsx')).default;const {buildSessions,SECTORS}=require(path.join(app,'app/dashboard/sector-rotation/model.ts'));const {dates,bars}=sectorWinnerFixture();
  const sessions=buildSessions(bars,SECTORS);const html=renderToStaticMarkup(React.createElement(Winners,{bars,visibleSessions:sessions.slice(-7),sessionDuration:20,asOfDate:dates.at(-1),onSelect:()=>{}}));
- assert.match(html,/Reverse Engineering Sector Daily Winners/);assert.match(html,/Top 1/);assert.match(html,/Top 2/);assert.match(html,/Top 3/);assert.match(html,/7 visible sessions \/ 7 winner observations/);assert.match(html,/winners versus other sectors/);assert.match(html,/Before winning session/);assert.match(html,/Export winner characteristics CSV/);assert.equal((html.match(/<details open=""/g)||[]).length,3);assert.match(html,/Most common winner characteristics/);
+ assert.match(html,/Reverse Engineering Sector Daily Winners/);assert.match(html,/Top 1/);assert.match(html,/Top 2/);assert.match(html,/Top 3/);assert.match(html,/7 visible sessions \/ 7 winner observations/);assert.match(html,/winners versus other sectors/);assert.match(html,/Before winning session/);assert.match(html,/Export winner characteristics CSV/);const {weekDisplayDates}=require(path.join(app,'app/dashboard/sector-rotation/week-display.ts'));assert.equal((html.match(/<details open=""/g)||[]).length,sessions.slice(-7).filter(day=>weekDisplayDates(dates.at(-1)).includes(day.date)).length);assert.match(html,/Older daily winner days/);assert.match(html,/Most common winner characteristics/);
  const Tracker=require(path.join(app,'app/dashboard/sector-rotation/Tracker.tsx')).default;const props={bars,groups:SECTORS,updatedAt:null,latestSession:dates.at(-1),runStatus:'COMPLETE',error:null,asOfDate:dates.at(-1)};
  assert.match(renderToStaticMarkup(React.createElement(Tracker,props)),/Reverse Engineering Sector Daily Winners/);
  for(const flags of [{stocks:true},{tech:true}])assert.doesNotMatch(renderToStaticMarkup(React.createElement(Tracker,{...props,...flags})),/Reverse Engineering Sector Daily Winners/);
@@ -684,12 +695,12 @@ test('recorded sector suggestion loader blocks unauthenticated reads and reports
  assert.match((await load()).error,/Sign in/);signedIn=true;assert.match((await load()).error,/access unavailable/);assert.equal(reads,0);allowed=true;assert.deepEqual(await load(),{rows:[],error:null});fail=true;assert.match((await load()).error,/could not be loaded/);
 });
 
-test('daily Top3 shows today/yesterday open, older closed, immutable stages and results',()=>{
+test('daily Top3 shows current week open, older grouped closed, immutable stages and results',()=>{
  const View=require(path.join(app,'app/dashboard/sector-rotation/DailyTop3Predictions.tsx')).default;
  const p={target_date:'2026-10-28',stage:'overnight',symbol:'XLE',recorded_at:'2026-10-28T06:00:00Z',data_as_of:'2026-10-28T05:00:00Z',top3:25,middle:35,bottom3:40,confidence:'Low',reason:'ORIGINAL OVERNIGHT REASON',sources:[{label:'bad URL',url:'javascript:alert(1)'}],methodology:'judgment-v1',availability:'researched'};
- const predictions=[p,{...p,stage:'premarket',recorded_at:'2026-10-28T13:26:00Z',reason:'PREMARKET REASON'}, {...p,target_date:'2026-10-27'},{...p,target_date:'2026-10-26'}];
+ const predictions=[p,{...p,stage:'premarket',recorded_at:'2026-10-28T13:26:00Z',reason:'PREMARKET REASON'}, {...p,target_date:'2026-10-27'},{...p,target_date:'2026-10-26'},{...p,target_date:'2026-10-23'}];
  const render=results=>renderToStaticMarkup(React.createElement(View,{predictions,results,asOfDate:'2026-10-28'}));
- const pending=render([]);assert.equal((pending.match(/<details open=""/g)||[]).length,2);assert.match(pending,/Earlier day · 2026-10-26/);assert.match(pending,/Before market open/);assert.match(pending,/ORIGINAL OVERNIGHT REASON/);assert.match(pending,/No forecast recorded for this ETF/);assert.doesNotMatch(pending,/href="javascript:/);
+ const pending=render([]);assert.equal((pending.match(/<details open=""/g)||[]).length,3);assert.match(pending,/Older daily predictions \(1\)/);assert.match(pending,/Earlier day · 2026-10-26/);assert.match(pending,/Before market open/);assert.match(pending,/ORIGINAL OVERNIGHT REASON/);assert.match(pending,/No forecast recorded for this ETF/);assert.doesNotMatch(pending,/href="javascript:/);
  const result={target_date:'2026-10-28',recorded_at:'2026-10-29T06:30:00Z',payload:{ranks:[{symbol:'XLE',rank:2,daily:-.2,bucket:'Top 3'}],ranking_rule:'Fixture ordinal ranks',price_sha256:'fixture'}};
  const completed=render([result]);assert.match(completed,/#2 · -0.20%/);assert.match(completed,/Top 3 occurred/);assert.match(completed,/ORIGINAL OVERNIGHT REASON/);assert.match(completed,/Assigned Top 3 probability: 25%/);
  const empty=renderToStaticMarkup(React.createElement(View,{predictions:[],results:[],asOfDate:'2026-10-28'}));assert.match(empty,/Yesterday · 2026-10-27/);assert.match(empty,/Historical predictions are not backfilled/);

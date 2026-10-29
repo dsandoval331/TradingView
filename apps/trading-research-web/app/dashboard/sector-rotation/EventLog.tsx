@@ -5,16 +5,21 @@ import {emaPeriod,type ChartLine} from './chart-lines';
 import {dailyEvents,rollingEventDays,EVENT_LOG_MAX_DAYS,type StreakWinner} from './events';
 import {windowLabel,type SessionWindow} from './session-window';
 import styles from './tracker.module.css';
+import {weekDisplayDates,WEEK_DISPLAY_NOTE} from './week-display';
+import {marketDate} from './swing-trades';
 const labels:Record<Metric,string>={relative:'Relative to SPY',daily:'Daily return',rank:'Daily rank',rankChange:'Rank change',rsiRelative:'RSI vs SPY RSI',mansfield:'Mansfield RS'};
 const valueLabel=(value:number,metric:Metric)=>`${metric==='rank'?'#':value>0?'+':''}${value.toFixed(2)}${metric==='daily'||metric==='mansfield'?'%':metric==='relative'?' pp':metric==='rsiRelative'?' RSI pts':metric==='rankChange'?' places':''}`;
-export default function EventLog({sessions,visibleSessions,groups,metric,line,singleStock=false,sessionDuration=60,onSelect}:{sessions:readonly Session[];visibleSessions:readonly Session[];groups:readonly Group[];metric:Metric;line:ChartLine;singleStock?:boolean;sessionDuration?:SessionWindow;onSelect:(symbol:string,date:string)=>void}){
+export default function EventLog({sessions,visibleSessions,groups,metric,line,singleStock=false,sessionDuration=60,asOfDate=marketDate(),onSelect}:{sessions:readonly Session[];visibleSessions:readonly Session[];groups:readonly Group[];metric:Metric;line:ChartLine;singleStock?:boolean;sessionDuration?:SessionWindow;asOfDate?:string;onSelect:(symbol:string,date:string)=>void}){
  const history=useMemo(()=>dailyEvents(sessions,groups,metric,line,sessionDuration),[sessions,groups,metric,line,sessionDuration]);
  const visible=new Set(visibleSessions.map(s=>s.date));
  const days=rollingEventDays(history,visible);
  const [expanded,setExpanded]=useState<Record<string,boolean>>({});
+ const currentDates=new Set(weekDisplayDates(asOfDate));
+ const currentDays=days.filter(day=>currentDates.has(day.date));
+ const olderDays=days.filter(day=>!currentDates.has(day.date));
  const period=emaPeriod(line);
  const pick=(symbol:string,date:string)=><button className={styles.eventSymbol} onClick={()=>onSelect(symbol,date)} title={`Show ${symbol} on ${date}`}>{symbol}</button>;
- const renderDay=(day:(typeof days)[number],i:number)=>{const open=expanded[day.date]??i<5;return <article key={day.date} data-event-date={day.date} className={`${styles.eventDay} ${i%2?styles.eventDayAlternate:''}`}>
+ const renderDay=(day:(typeof days)[number],i:number)=>{const open=expanded[day.date]??currentDates.has(day.date);return <article key={day.date} data-event-date={day.date} className={`${styles.eventDay} ${i%2?styles.eventDayAlternate:''}`}>
    <h3><button className={styles.eventDayToggle} aria-expanded={open} aria-controls={`events-${day.date}`} onClick={()=>setExpanded(previous=>({...previous,[day.date]:!open}))}><time>{day.date}</time><span>{day.ema.length} EMA events · {day.averages.length} beyond average</span><span>{open?'−':'+'}</span></button></h3>
    {open&&<div id={`events-${day.date}`} className={styles.eventBody}>
     <div><h4>{period?`${period}E · Close below ${period} EMA`:'EMA events'}</h4>{!period?<p>Choose 20 EMA or 50 EMA in the heatmap to enable these events.</p>:day.ema.length?<ul>{day.ema.map(e=><li key={e.symbol}>{pick(e.symbol,day.date)} <strong>{e.days===1?'First day':`Day ${e.days} in a row`}</strong> · Close {e.close.toFixed(2)} &lt; EMA {e.ema.toFixed(2)} · Average streak ({windowLabel(sessionDuration)}): <strong>{e.averageStreak===null?'N/A':`${e.averageStreak.toFixed(2)} days`}</strong> ({e.completedStreaks} completed)</li>)}</ul>:<p>No EMA superscripts for this day.</p>}</div>
@@ -24,10 +29,11 @@ export default function EventLog({sessions,visibleSessions,groups,metric,line,si
    </div>}
   </article>;};
  return <section className={styles.eventLog} aria-label="Event Log"><p className={styles.eyebrow}>DAILY OBSERVATIONS</p><h2>Event Log</h2>
-  <p className={styles.relativeMeta}>Newest day first · Rolling limit: {EVENT_LOG_MAX_DAYS} trading days · Heatmap date filters apply · {labels[metric]} · {period?`${period} EMA`:'EMA events off'}. Latest five days expanded by default; older days are grouped below. Expand a day to review its closing observations; select a symbol to update the detail and charts.</p>
+  <p className={styles.relativeMeta}>Newest day first · Rolling limit: {EVENT_LOG_MAX_DAYS} trading days · Heatmap date filters apply · {labels[metric]} · {period?`${period} EMA`:'EMA events off'}. {WEEK_DISPLAY_NOTE} Expand a day to review its closing observations; select a symbol to update the detail and charts.</p>
   <details className={styles.eventRules}><summary>Event definitions</summary><p>EMA events match visible superscripts and count consecutive trading sessions, including that day. The first available marker is labeled First day. A missing datapoint or a close at/above the EMA resets the count. The Event Log shows at most the newest 120 matching session dates; a new day displaces the oldest. It is derived from price history, not a growing stored event table. None disables EMA events. Average streak uses completed, fully observed below-EMA runs in the Sessions window ending that day; ongoing, missing-boundary and window-truncated runs are excluded. All available uses history through that day.</p><p>Long/Short are descriptive threshold labels. Daily return, relative return, rank change, RSI difference and Mansfield events compare against their same-direction arithmetic averages over the prior 60 sessions, excluding that day, with at least five matching-direction observations. A move must be strictly beyond its average. Daily rank uses the prior 60-session mean: a lower rank is Long context; a higher rank is Short context.</p><p>Current Longest Streaks compares ongoing runs ending that day, across all six measures and all displayed symbols. Each color lists only the longest run and every tie; N/A means no current run exceeds one session. Positive/negative values define green/red; rank uses better/worse than the universe midpoint. Flat or missing values break a run. Historical records never use later sessions. Rank movers require complete comparisons and include every tie.</p></details>
   {!days.length&&<p>No sessions match these dates.</p>}
-  {days.slice(0,5).map((day,i)=>renderDay(day,i))}
-  {days.length>5&&<details className={styles.eventRules}><summary>Older Event Log days ({days.length-5})</summary>{days.slice(5).map((day,i)=>renderDay(day,i+5))}</details>}
+  {days.length>0&&!currentDays.length&&<p>No current-week sessions are available in this selection.</p>}
+  {currentDays.map((day,i)=>renderDay(day,i))}
+  {olderDays.length>0&&<details className={styles.eventRules}><summary>Older Event Log days ({olderDays.length})</summary>{olderDays.map((day,i)=>renderDay(day,i+currentDays.length))}</details>}
  </section>;
 }
