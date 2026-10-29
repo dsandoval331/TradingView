@@ -55,3 +55,15 @@
 .swingTableScroll .compactSwingTable thead th{font-size:10px}
 .swingTableScroll .compactSwingTable small{max-width:none;font-size:10px;line-height:1.4}
 .swingTableScroll .compactSwingTable td:nth-child(5)>span{display:block}
+
+.symbolReference{border:1px solid var(--border);border-radius:10px;padding:18px 22px;margin-bottom:20px;background:#111d2b}
+.symbolReference h2{margin:0 0 14px;font-size:16px}
+.symbolReference dl{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:10px 20px;margin:0;font-size:12px;line-height:1.5}
+.symbolReference dl>div{display:flex;gap:12px;align-items:baseline;min-width:0}
+.symbolReference dt{font-weight:700;color:var(--amber);min-width:40px}
+.symbolReference dd{margin:0;color:#bec9d7;overflow-wrap:anywhere}
+.performancePanel{border:1px solid var(--border);border-radius:12px;padding:22px;margin-top:22px;background:#111d2b;min-width:0}
+.performancePanel .relativeChart{margin-top:0}
+@media(max-width:600px){.symbolReference,.performancePanel{padding:14px}}
+
+.performancePanel>h2{font-size:22px;letter-spacing:-.5px;margin:0 0 16px}
