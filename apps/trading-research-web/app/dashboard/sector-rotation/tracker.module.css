@@ -49,3 +49,9 @@
 .pagePanel[hidden]{display:none}
 .pagePanel:focus-visible{outline:2px solid var(--amber);outline-offset:4px}
 @media(max-width:600px){.pageTabs{gap:5px}.pageTabs button{flex:1 1 auto;padding:10px;font-size:12px}}
+/* Compact suggestion rows fit desktop content width; phones retain table scrolling. */
+.swingTableScroll .compactSwingTable{table-layout:fixed;min-width:940px;white-space:normal;font-size:11px}
+.swingTableScroll .compactSwingTable th,.swingTableScroll .compactSwingTable td{padding:11px 7px;overflow-wrap:anywhere}
+.swingTableScroll .compactSwingTable thead th{font-size:10px}
+.swingTableScroll .compactSwingTable small{max-width:none;font-size:10px;line-height:1.4}
+.swingTableScroll .compactSwingTable td:nth-child(5)>span{display:block}
