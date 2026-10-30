@@ -720,20 +720,38 @@ test('daily Top3 loader authorizes before reads and preserves read failures',asy
  assert.match((await load()).error,/Sign in/);signedIn=true;assert.match((await load()).error,/access unavailable/);assert.equal(reads,0);allowed=true;assert.deepEqual(await load(),{predictions:[],results:[],error:null});fail=true;assert.match((await load()).error,/could not be loaded/);
 });
 
-test('symbol references lead every secondary tab, with three ETFs only in predictions',()=>{
+test('symbol reference is first after tabs and before configuration on every secondary tab',()=>{
  const Tracker=require(path.join(app,'app/dashboard/sector-rotation/Tracker.tsx')).default;
  const {SECTORS}=require(path.join(app,'app/dashboard/sector-rotation/model.ts'));
  const {bars,dates}=sectorWinnerFixture();
- const html=renderToStaticMarkup(React.createElement(Tracker,{bars,updatedAt:null,latestSession:dates.at(-1),runStatus:'COMPLETE',error:null,asOfDate:dates.at(-1),dailyPredictions:React.createElement('p',null,'Forecast fixture')}));
- const panel=id=>html.split(`id="tracker-panel-${id}"`)[1].split(/<div id="tracker-panel-/)[0];
- assert.doesNotMatch(panel('overview'),/class="symbolReference"/);
- for(const id of ['events','winners','swing']){
-  const reference=panel(id).split('class="symbolReference"')[1].split('</section>')[0];
-  assert.equal((reference.match(/<dt>/g)||[]).length,11);
-  for(const group of SECTORS){assert.ok(reference.includes(`<dt>${group.symbol}</dt>`));assert.ok(reference.includes(`<dd>${group.name}</dd>`));}
- }
- const predictionReference=panel('predictions').split('class="symbolReference"')[1].split('</section>')[0];
- assert.equal((predictionReference.match(/<dt>/g)||[]).length,3);
- for(const symbol of ['XLE','XLV','XLK'])assert.ok(predictionReference.includes(`<dt>${symbol}</dt>`));
- assert.match(html,/>Daily leaders<\/button>/);
+ const props={bars,updatedAt:null,latestSession:dates.at(-1),runStatus:'COMPLETE',error:null,asOfDate:dates.at(-1),dailyPredictions:React.createElement('p',null,'Forecast fixture')};
+ const original=React.useState;
+ try{
+  for(const tab of ['overview','events','winners','swing','predictions']){
+   React.useState=initial=>{const state=original(initial);return initial==='overview'?[tab,state[1]]:state;};
+   const html=renderToStaticMarkup(React.createElement(Tracker,props));
+   if(tab==='overview'){assert.doesNotMatch(html,/class="symbolReference"/);continue;}
+   const tabsEnd=html.indexOf('</div>',html.indexOf('aria-label="Tracker sections"'));
+   const referenceStart=html.indexOf('<section class="symbolReference"');
+   assert.equal(referenceStart,tabsEnd+6);assert.ok(referenceStart<html.indexOf('aria-label="Shared tracker filters"'));
+   assert.equal((html.match(/class="symbolReference"/g)||[]).length,1);
+   const reference=html.slice(referenceStart).split('</section>')[0];
+   const expected=tab==='predictions'?SECTORS.filter(g=>['XLE','XLV','XLK'].includes(g.symbol)):SECTORS;
+   assert.equal((reference.match(/<dt>/g)||[]).length,expected.length);
+   for(const group of expected){assert.ok(reference.includes(`<dt>${group.symbol}</dt>`));assert.ok(reference.includes(`<dd>${group.name}</dd>`));}
+  }
+ }finally{React.useState=original;}
+});
+
+
+test('all-history suggestion counts distinguish pending, no-pick and positive/negative/flat outcomes',()=>{
+ const Forecasts=require(path.join(app,'app/dashboard/sector-rotation/SectorForecasts.tsx')).default;
+ const base={version:'sector-next-v1',source_date:'2026-10-26',recorded_at:'2026-10-27T06:15:00Z',payload:{symbol:'XLB',reason:'Saved original reasoning'}};
+ const forecasts=[{...base,id:'pending'},{...base,id:'no-pick',payload:{reason:'No supported pattern'}},...[2,-1,0,null].map((value,i)=>({...base,id:`done-${i}`,result:{target_date:'2026-10-27',recorded_at:'2026-10-28T06:15:00Z',payload:{rank:i+1,open_close_pct:value}}}))];
+ const html=renderToStaticMarkup(React.createElement(Forecasts,{forecasts}));
+ assert.match(html,/6 recorded entries · 5 Long picks · 1 no-pick entries · 4 completed picks · 1 pending picks/);
+ assert.match(html,/1 positive · 1 negative · 1 unchanged · 1 unavailable/);
+ assert.match(html,/Top 3 finishes: 3\/4 ranked results/);
+ assert.equal((html.match(/Saved original reasoning/g)||[]).length,5);
+ assert.match(html,/Earlier next-session suggestions \(5\)/);
 });
