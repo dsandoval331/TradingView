@@ -17,7 +17,7 @@ export default function TimeAnalysis({signals}: {signals:Signal[]}) {
   const rows = timeRows(signals);
   return <section className={styles.panel} aria-labelledby="time-analysis-title">
     <h2 id="time-analysis-title">Time Analysis</h2>
-    <p>5-Minute Entry Time Analysis · Central Time. All 78 regular-session intervals are shown, from 8:30 AM to 3:00 PM CT, with exclusive end times. Current analysis filters apply.</p>
+    <p>5-Minute Entry Time Analysis · Central Time. Each alert is assigned to the closest five-minute increment at or before its signal timestamp (8:35:40 → 8:35; 8:40:00 → 8:40). All 78 regular-session intervals are shown, from 8:30 AM to 3:00 PM CT, with exclusive end times. Current analysis filters apply.</p>
     <p>Ranked by favorable rate, using the existing processed-outcome definition. Ties sort by earliest interval. Empty or unresolved-only intervals are unranked. With fewer than eight ranked intervals, top and bottom lists can overlap. These synthetic test results do not establish trading performance.</p>
     <div className={styles.timeCards}>{(['long','short'] as const).flatMap(side => [false,true].map(bottom => {
       const ranked=rankedTimes(rows,side,bottom);
