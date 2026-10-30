@@ -45,3 +45,13 @@ export function slotGradeRows(signals: Signal[], slot = '08:35') {
     grade, side, ...summarize(selected.filter(s => s.grade === grade && s.side === side))
   })));
 }
+
+export const sessionSections = [
+  {name: 'Open', start: '08:30', end: '10:00', description: '8:30–10:00 AM CT · First 90 Minutes'},
+  {name: 'Mid-Day', start: '10:00', end: '13:30', description: '10:00 AM–1:30 PM CT'},
+  {name: 'Close', start: '13:30', end: '15:00', description: '1:30–3:00 PM CT · Last 90 Minutes'}
+] as const;
+export function sessionForTime(time: string | null) {
+  const slot = reportingSlot(time);
+  return sessionSections.find(s => slot >= s.start && slot < s.end)?.name ?? null;
+}
