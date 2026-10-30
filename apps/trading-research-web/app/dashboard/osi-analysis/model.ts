@@ -32,3 +32,16 @@ export function summarize(signals: Signal[]) {
 export function breakdown(signals: Signal[], field: 'grade' | 'side' | 'bucket') {
   return [...new Set(signals.map(s => s[field]))].sort().map(label => ({label, ...summarize(signals.filter(s => s[field] === label))}));
 }
+
+/** Floor alert time to the preceding five-minute reporting slot. */
+export function reportingSlot(time: string | null, zone = 'America/Chicago') {
+  const interval = timeBucket(time, zone);
+  return interval === 'Unknown Time' ? interval : interval.split('–')[0];
+}
+export function slotGradeRows(signals: Signal[], slot = '08:35') {
+  const selected = signals.filter(s => reportingSlot(s.time) === slot);
+  const grades = [...new Set(selected.map(s => s.grade))].sort();
+  return grades.flatMap(grade => ['Long', 'Short'].map(side => ({
+    grade, side, ...summarize(selected.filter(s => s.grade === grade && s.side === side))
+  })));
+}
