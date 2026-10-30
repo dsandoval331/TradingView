@@ -108,6 +108,8 @@ def settle(forecast,history):
     cell=day['cells'][symbol];bar=cell['bar']; op=number(bar.get('open'));hi=number(bar.get('high'));lo=number(bar.get('low'));close=cell['close']
     op=op if op is not None and op>0 else None
     valid=op is not None and op>0 and hi is not None and lo is not None and lo>0 and hi>=max(op,close) and lo<=min(op,close)
+    # Results are append-only: wait for the complete path rather than freezing null excursions.
+    if not valid:return None
     rank=1+sum(c['daily']>cell['daily']+1e-10 for c in day['cells'].values())
     return {'target_date':day['date'],'payload':{'symbol':symbol,'rank':rank,'winner':day['winner'],'top1_green':day['winner']==symbol,'daily':cell['daily'],'relative':cell['relative'],'open':op,'close':close,'open_close_pct':(close/op-1)*100 if op and op>0 else None,'mfe_pct':max(0,hi-op)/op*100 if valid else None,'mae_pct':max(0,op-lo)/op*100 if valid else None}}
 
