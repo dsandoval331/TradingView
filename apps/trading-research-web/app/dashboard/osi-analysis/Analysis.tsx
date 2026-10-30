@@ -5,7 +5,11 @@ import {buildSignals, breakdown, summarize, type WebhookEvent} from './model';
 import styles from './analysis.module.css';
 
 const pct = (v: number | null) => v == null ? '—' : `${v.toFixed(2)}%`;
-const timestamp = (v: unknown) => typeof v === 'string' && Number.isFinite(Date.parse(v)) ? new Intl.DateTimeFormat('en-US', {timeZone: 'America/New_York',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit',timeZoneName:'short'}).format(new Date(v)) : '—';
+const timestamp = (v: unknown) => {
+  if (typeof v !== 'string') return '—';
+  const normalized = v.replace(' ', 'T').replace(/\+(\d{2})$/, '+$1:00');
+  return Number.isFinite(Date.parse(normalized)) ? new Intl.DateTimeFormat('en-US', {timeZone: 'America/New_York',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit',timeZoneName:'short'}).format(new Date(normalized)) : '—';
+};
 
 function Breakdown({title, rows}: {title: string; rows: ReturnType<typeof breakdown>}) {
   return <section className={styles.panel}><h2>{title}</h2><div className={styles.scroll}><table><thead><tr>{['Group','Signals','Processed Outcomes','Favorable','Adverse','Both','Unresolved','No Accepted Outcome','Failed Events','Favorable Rate','Avg MFE','Avg MAE'].map(h => <th key={h} scope="col">{h}</th>)}</tr></thead><tbody>{rows.map(r => <tr key={r.label}><th scope="row">{r.label}</th><td>{r.signals}</td><td>{r.accepted}</td><td>{r.favorable}</td><td>{r.adverse}</td><td>{r.both}</td><td>{r.unresolved}</td><td>{r.noAccepted}</td><td>{r.failed}</td><td>{pct(r.favorableRate)}</td><td>{pct(r.mfe)}</td><td>{pct(r.mae)}</td></tr>)}</tbody></table>{!rows.length && <p>No signals match these filters.</p>}</div></section>;
