@@ -47,3 +47,16 @@ test('direction filter narrows signal rollups and full event details together',(
  const html=renderToStaticMarkup(React.createElement(Analysis,{events}));assert.ok(html.includes('#10 ·'));assert.ok(!html.includes('#11 ·'));assert.ok(!html.includes('#1 ·'));assert.ok(html.includes('1 of 4 signals'));
  }finally{React.useState=original;}
 });
+test('time analysis includes 78 closed intervals and honest sparse rankings',()=>{
+ const React=appRequire('react'),{renderToStaticMarkup}=appRequire('react-dom/server');
+ const {default:TimeAnalysis,timeRows,rankedTimes,intervals}=require(path.join(route,'TimeAnalysis.tsx'));
+ assert.equal(intervals.length,78);assert.equal(intervals[0],'08:30–08:35');assert.equal(intervals.at(-1),'14:55–15:00');
+ const signals=buildSignals(events),rows=timeRows(signals);
+ assert.equal(rows[0].long.signals,1);assert.equal(rows[0].long.favorableRate,100);
+ assert.equal(rankedTimes(rows,'long')[0].label,'08:30–08:35');assert.equal(rankedTimes(rows,'long',true)[0].label,'09:00–09:05');
+ assert.equal(rankedTimes(rows,'long').length,2);assert.equal(rankedTimes(rows,'short').length,1);assert.equal(rankedTimes(timeRows([]),'long').length,0);
+ const html=renderToStaticMarkup(React.createElement(TimeAnalysis,{signals}));
+ assert.equal((html.match(/<details/g)||[]).length,78);assert.ok(!/<details[^>]*\bopen[=> ]/.test(html));
+ for(const text of ['Top 4 Long Times','Bottom 4 Long Times','Top 4 Short Times','Bottom 4 Short Times','No signals in this interval.'])assert.ok(html.includes(text),text);
+ assert.equal(timeBucket('2026-12-02T14:35:00Z','America/Chicago'),'08:35–08:40');
+});
