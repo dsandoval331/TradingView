@@ -67,3 +67,8 @@
 @media(max-width:600px){.symbolReference,.performancePanel{padding:14px}}
 
 .performancePanel>h2{font-size:22px;letter-spacing:-.5px;margin:0 0 16px}
+
+/* Consistent title capitalization across tracker tabs and section headings. */
+.tracker :is(h1,h2,h3,h4,h5,h6,summary,caption,thead th,dt),
+.pageTabs button,.tabs button,.miniTitle,.cards article>span{ text-transform:capitalize; }
+.miniTitle>span{ text-transform:none; }
