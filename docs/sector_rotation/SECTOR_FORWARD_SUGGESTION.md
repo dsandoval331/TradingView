@@ -31,3 +31,12 @@ Both tables have RLS and authenticated SELECT only under the existing MULtipLY a
 Python tests verify prefix invariance, training support, duplicate rejection, missing data, pre-open/freshness guards, first-next-session settlement, missing-benchmark deferral, idempotent job retries and append-without-rewrite outcomes. Node tests cover authorization/error boundaries and pending/completed UI rendering. Database role/permission checks and a rolled-back linked snapshot/result insert verified persistence and unauthorized read denial. The new tables are absent from security-advisor findings; preexisting unrelated findings were not changed.
 
 Initial deployment during daytime intentionally does not create a pick from an already stale session. The first eligible overnight collection is expected to populate the first forward record. Collection outages, stale/incomplete source data or jobs delayed past the cutoff can leave no new record. Existing job logs report forecast_created, results_appended, latest_source and preopen_window; failures fail the workflow without printing keys or provider bodies. Earlier dates are not invented as forward predictions. No automatic strategy promotion or model tuning is included.
+
+
+## Results completeness and reference layout — 2026-10-29
+
+The ETF reference now immediately follows the tracker tabs, ahead of shared filters. Market overview omits the reference; Daily predictions uses only XLE, XLV and XLK. The other tabs retain their current universe.
+
+Every saved suggestion is included in the forward-results summary, independent of Sessions/date/Top N display settings. The summary distinguishes Long picks, no-pick entries, completed/pending picks, positive/negative/unchanged Open-to-Close outcomes (with unavailable separately), and Top 3 finishes. Earlier records remain expandable. Rank, daily return, SPY-relative return, opening/closing references, Open-to-Close, MFE and MAE remain attached to each original suggestion. All measures retain their one-session horizon.
+
+New settlements defer when the selected ETF's Open/High/Low/Close path is missing or invalid, avoiding an immutable result with unavailable excursion fields. Retries settle that same first next session when complete. No historical prediction or existing result is overwritten. Selection rules and model version are unchanged.

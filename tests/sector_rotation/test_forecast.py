@@ -35,6 +35,19 @@ class ForecastTests(unittest.TestCase):
         self.assertIsNone(forecast.settle(f,h[:-1]));result=forecast.settle(f,h);self.assertEqual(result['target_date'],target);self.assertGreater(result['payload']['mfe_pct'],0)
         f['recorded_at']=target+'T20:00:00+00:00';self.assertIsNone(forecast.settle(f,h))
         f['recorded_at']=source+'T23:00:00+00:00';h[-1]['complete']=False;self.assertIsNone(forecast.settle(f,h))
+    def test_result_waits_for_complete_ohlc_and_retries_same_session(self):
+        import copy
+        h=forecast.series(self.bars());source=h[-2]['date'];target=h[-1]['date']
+        f={'source_date':source,'recorded_at':source+'T23:00:00+00:00','payload':{'symbol':'XLY'}}
+        expected=forecast.settle(f,h)
+        for field,value in [('open',None),('high',None),('low',None),('open',0),('high',1),('low',99999)]:
+            incomplete=copy.deepcopy(h);incomplete[-1]['cells']['XLY']['bar'][field]=value
+            self.assertIsNone(forecast.settle(f,incomplete),(field,value))
+        actual=forecast.settle(f,h)
+        self.assertEqual(actual,expected);self.assertEqual(actual['target_date'],target)
+        self.assertTrue(all(actual['payload'][key] is not None for key in ('rank','daily','relative','open','close','open_close_pct','mfe_pct','mae_pct')))
+        no_pick={**f,'payload':{'symbol':None}}
+        self.assertTrue(forecast.settle(no_pick,h)['payload']['no_pick'])
     def test_features_missing_and_lagged(self):
         h=forecast.series(self.bars());c=h[-1]['cells']['XLY'];self.assertTrue(c['features'][0]);self.assertTrue(c['features'][3]);self.assertTrue(c['features'][5]);self.assertEqual(c['daily_streak'],209)
         bars=self.bars();last=h[-1]['date']
