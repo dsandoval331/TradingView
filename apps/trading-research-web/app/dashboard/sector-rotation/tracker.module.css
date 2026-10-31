@@ -75,8 +75,10 @@
 
 /* Forecast stages share one heading style and independent native disclosure controls. */
 .predictionStage{margin:12px 0;border-top:1px solid #354254}
-.predictionStageTitle{cursor:pointer;padding:16px 18px;color:#eef3f8;font:inherit}
-.predictionStageTitle h3{display:inline;font-size:1.17em;font-weight:700;color:inherit;margin:0}
+.predictionStageTitle{cursor:pointer;padding:16px 18px;color:var(--amber);font:inherit}
+.predictionStageTitle h3{display:inline;font-size:1em;font-weight:700;color:inherit;margin:0}
 .predictionMeta,.predictionShared{margin:12px 18px}
 .predictionMeta{font-size:11px;line-height:1.7;color:var(--muted)}
 .predictionReason{font-size:13px;line-height:1.7;overflow-wrap:anywhere;white-space:pre-wrap}
+
+.top3Section .eventDay :is(h3,h4,h5,h6){color:var(--amber)}
