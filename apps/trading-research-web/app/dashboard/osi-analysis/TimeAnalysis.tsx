@@ -37,16 +37,17 @@ export default function TimeAnalysis({signals}: {signals:Signal[]}) {
     {sessionSections.map(section => {
       const sectionRows = rows.filter(r => r.label.slice(0,5) >= section.start && r.label.slice(0,5) < section.end);
       const entries = sectionRows.flatMap(r => r.entries);
-      return <section className={styles.panel} key={section.name} aria-label={section.name}>
-        <h3>{section.name}</h3>
-        <p>{section.description} · {sectionRows.length} Five-Minute Intervals</p>
+      const total = summarize(entries);
+      return <details className={styles.event} key={section.name}>
+        <summary><strong>{section.name}</strong><span>{section.description}</span><span>{total.signals} signals · {pct(total.favorableRate)} favorable rate</span></summary>
+        <p>{sectionRows.length} Five-Minute Intervals</p>
         <SessionStats entries={entries}/>
         <p>Statistics combine distinct signals across this section using the current analysis filters. Start times are inclusive and end times exclusive; session rates and excursion averages are calculated from underlying observations, not averages of interval rates.</p>
         {sectionRows.map(r=><details className={styles.event} key={r.label}><summary><strong>{r.label} CT</strong><span>{r.long.signals} Long · {r.short.signals} Short</span><span>Favorable Rate: Long {pct(r.long.favorableRate)} · Short {pct(r.short.favorableRate)}</span></summary>
       <div className={styles.scroll}><table><thead><tr>{['Direction','Signals','Processed Outcomes','Favorable','Adverse','Both','Unresolved','No Accepted Outcome','Failed Events','Favorable Rate','Avg MFE','Avg MAE'].map(h=><th key={h} scope="col">{h}</th>)}</tr></thead><tbody>{(['long','short'] as const).map(side=>{const s=r[side];return <tr key={side}><th scope="row">{side==='long'?'Long':'Short'}</th>{[s.signals,s.accepted,s.favorable,s.adverse,s.both,s.unresolved,s.noAccepted,s.failed,pct(s.favorableRate),pct(s.mfe),pct(s.mae)].map((v,i)=><td key={i}>{v}</td>)}</tr>;})}</tbody></table></div>
       {r.entries.length ? <ul className={styles.timeSignals}>{r.entries.map(s=><li key={s.key}>{s.key} · {s.side} · {s.grade} · {String(s.outcome?.primary_outcome ?? 'No Accepted Outcome')}</li>)}</ul> : <p>No signals in this interval.</p>}
     </details>)}
-      </section>;
+      </details>;
     })}
   </section>;
 }
