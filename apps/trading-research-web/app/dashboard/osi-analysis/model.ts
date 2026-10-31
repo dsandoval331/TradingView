@@ -67,7 +67,18 @@ export function rolling25Rows(signals: Signal[]) {
     return {start, end, slots, long:summarize(entries.filter(s=>s.side==='Long')), short:summarize(entries.filter(s=>s.side==='Short'))};
   });
 }
-export function rankRolling25(rows: ReturnType<typeof rolling25Rows>, side:'long'|'short', bottom=false) {
-  return rows.filter(r=>r[side].favorableRate!==null)
-    .sort((a,b)=>(bottom?1:-1)*((a[side].favorableRate??0)-(b[side].favorableRate??0)) || a.start.localeCompare(b.start)).slice(0,4);
+export type WindowOverlapMode = 'allow-all' | 'exclude-3' | 'exclude-any';
+export function rankRolling25(rows: ReturnType<typeof rolling25Rows>, side:'long'|'short', bottom=false, overlap:WindowOverlapMode='allow-all') {
+  const ranked = rows.filter(r=>r[side].favorableRate!==null)
+    .sort((a,b)=>(bottom?1:-1)*((a[side].favorableRate??0)-(b[side].favorableRate??0)) || a.start.localeCompare(b.start));
+  const selected: typeof ranked = [];
+  for (const candidate of ranked) {
+    const conflict = overlap !== 'allow-all' && selected.some(prior => {
+      const shared = candidate.slots.filter(slot => prior.slots.includes(slot)).length;
+      return overlap === 'exclude-3' ? shared >= 3 : shared > 0;
+    });
+    if (!conflict) selected.push(candidate);
+    if (selected.length === 4) break;
+  }
+  return selected;
 }

@@ -36,9 +36,10 @@ export default function Analysis({events}: {events: WebhookEvent[]}) {
   const stats = summarize(filtered);
   function exportEvents() {const url = URL.createObjectURL(new Blob([JSON.stringify(filteredEvents,null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='osi-analysis-events.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
   return <div className={styles.analysis}>
-    <details className={`${styles.panel} ${styles.event}`}>
+    <header className={styles.header}><div><p className="eyebrow">MULtipLY · Signal Research</p><h1>OSI Analysis</h1><p>Explore signal quality, direction, entry timing, and outcome delivery.</p></div></header>
+    <details className={`${styles.panel} ${styles.event}`} open>
       <summary><strong>Overview &amp; Configuration</strong></summary>
-    <header className={styles.header}><div><p className="eyebrow">MULtipLY · Signal Research</p><h1>OSI Analysis</h1><p>Explore signal quality, direction, entry timing, and outcome delivery.</p></div><button className="secondaryButton" onClick={exportEvents}>Export Filtered Events</button></header>
+<button className="secondaryButton" onClick={exportEvents}>Export Filtered Events</button>
     <aside className={styles.notice}><strong>Synthetic Test Data · Six Webhook Events</strong><p>Database snapshot captured October 30, 2026. All records use TEST; no live performance is implied. This template does not automatically refresh from Supabase.</p></aside>
     <section className={styles.filters} aria-label="Analysis Filters">
       <label>Grade<select value={grade} onChange={e=>setGrade(e.target.value)}><option value="">All Grades</option>{[...new Set(all.map(s=>s.grade))].sort().map(v=><option key={v}>{v}</option>)}</select></label>
