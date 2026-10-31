@@ -778,3 +778,22 @@ test('prediction stages collapse independently and shared context preserves ETF-
  const divergent=renderToStaticMarkup(React.createElement(View,{predictions:different,results:[],asOfDate:'2026-10-30'}));
  assert.equal((divergent.match(/class="predictionMeta">Recorded/g)||[]).length,3);
 });
+
+test('Event Log begins each day with the matching Leadership Log and full-history prior session',()=>{
+ const EventLog=require(path.join(app,'app/dashboard/sector-rotation/EventLog.tsx')).default;
+ const {buildSessions,leadershipNote}=require(path.join(app,'app/dashboard/sector-rotation/model.ts'));
+ const groups=[{symbol:'A',name:'Alpha',short:'Alpha'},{symbol:'B',name:'Beta',short:'Beta'}];
+ const dates=['2026-10-26','2026-10-27','2026-10-28'];
+ const closes={SPY:[100,101,102],A:[100,103,104],B:[100,101,105]};
+ const bars=dates.flatMap((trade_date,i)=>Object.entries(closes).map(([symbol,prices])=>({symbol,trade_date,close:prices[i]})));
+ const sessions=buildSessions(bars,groups);
+ const props={sessions,visibleSessions:sessions.slice(-1),groups,metric:'daily',line:'none',asOfDate:'2026-10-28',onSelect:()=>{}};
+ const html=renderToStaticMarkup(React.createElement(EventLog,props));
+ assert.match(html,/Beta took the daily lead from Alpha\./);
+ assert.ok(html.includes(leadershipNote(sessions[2],sessions[1],groups)));
+ assert.match(html,/SPY \+0.99%/);assert.match(html,/3.96%/);assert.match(html,/Laggard <button[^>]*>A<\/button>/);
+ assert.ok(html.indexOf('<h4>Leadership Log</h4>')<html.indexOf('<h4>EMA events</h4>'));
+ assert.doesNotMatch(renderToStaticMarkup(React.createElement(EventLog,{...props,singleStock:true})),/<h4>Leadership Log<\/h4>/);
+ const incomplete=sessions.map((s,i)=>i===2?{...s,complete:false,leader:null,laggard:null}:s);
+ assert.match(renderToStaticMarkup(React.createElement(EventLog,{...props,sessions:incomplete})),/Incomplete comparison/);
+});
