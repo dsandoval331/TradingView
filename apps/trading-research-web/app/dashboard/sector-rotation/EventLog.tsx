@@ -1,6 +1,6 @@
 'use client';
 import {useMemo,useState} from 'react';
-import type {Group,Metric,Session} from './model';
+import {leadershipNote,type Group,type Metric,type Session} from './model';
 import {emaPeriod,type ChartLine} from './chart-lines';
 import {dailyEvents,rollingEventDays,EVENT_LOG_MAX_DAYS,type StreakWinner} from './events';
 import {windowLabel,type SessionWindow} from './session-window';
@@ -11,6 +11,8 @@ const labels:Record<Metric,string>={relative:'Relative to SPY',daily:'Daily retu
 const valueLabel=(value:number,metric:Metric)=>`${metric==='rank'?'#':value>0?'+':''}${value.toFixed(2)}${metric==='daily'||metric==='mansfield'?'%':metric==='relative'?' pp':metric==='rsiRelative'?' RSI pts':metric==='rankChange'?' places':''}`;
 export default function EventLog({sessions,visibleSessions,groups,metric,line,singleStock=false,sessionDuration=60,asOfDate=marketDate(),onSelect}:{sessions:readonly Session[];visibleSessions:readonly Session[];groups:readonly Group[];metric:Metric;line:ChartLine;singleStock?:boolean;sessionDuration?:SessionWindow;asOfDate?:string;onSelect:(symbol:string,date:string)=>void}){
  const history=useMemo(()=>dailyEvents(sessions,groups,metric,line,sessionDuration),[sessions,groups,metric,line,sessionDuration]);
+ const sessionByDate=useMemo(()=>new Map(sessions.map((session,index)=>[session.date,{session,previous:sessions[index-1]}])),[sessions]);
+ const percent=(value:number|null|undefined)=>value==null?'—':`${value>0?'+':''}${value.toFixed(2)}%`;
  const visible=new Set(visibleSessions.map(s=>s.date));
  const days=rollingEventDays(history,visible);
  const [expanded,setExpanded]=useState<Record<string,boolean>>({});
@@ -19,9 +21,10 @@ export default function EventLog({sessions,visibleSessions,groups,metric,line,si
  const olderDays=days.filter(day=>!currentDates.has(day.date));
  const period=emaPeriod(line);
  const pick=(symbol:string,date:string)=><button className={styles.eventSymbol} onClick={()=>onSelect(symbol,date)} title={`Show ${symbol} on ${date}`}>{symbol}</button>;
- const renderDay=(day:(typeof days)[number],i:number)=>{const open=expanded[day.date]??currentDates.has(day.date);return <article key={day.date} data-event-date={day.date} className={`${styles.eventDay} ${i%2?styles.eventDayAlternate:''}`}>
+ const renderDay=(day:(typeof days)[number],i:number)=>{const open=expanded[day.date]??currentDates.has(day.date),context=sessionByDate.get(day.date);return <article key={day.date} data-event-date={day.date} className={`${styles.eventDay} ${i%2?styles.eventDayAlternate:''}`}>
    <h3><button className={styles.eventDayToggle} aria-expanded={open} aria-controls={`events-${day.date}`} onClick={()=>setExpanded(previous=>({...previous,[day.date]:!open}))}><time>{day.date}</time><span>{day.ema.length} EMA events · {day.averages.length} beyond average</span><span>{open?'−':'+'}</span></button></h3>
    {open&&<div id={`events-${day.date}`} className={styles.eventBody}>
+    {!singleStock&&context&&<div><h4>Leadership Log</h4><p><strong>{leadershipNote(context.session,context.previous,groups)}</strong></p><p>{context.session.leader&&<>{pick(context.session.leader,day.date)} {percent(context.session.cells[context.session.leader]?.daily)} · </>}SPY {percent(context.session.spy)}{context.session.laggard&&<> · Laggard {pick(context.session.laggard,day.date)}</>}</p></div>}
     <div><h4>{period?`${period}E · Close below ${period} EMA`:'EMA events'}</h4>{!period?<p>Choose 20 EMA or 50 EMA in the heatmap to enable these events.</p>:day.ema.length?<ul>{day.ema.map(e=><li key={e.symbol}>{pick(e.symbol,day.date)} <strong>{e.days===1?'First day':`Day ${e.days} in a row`}</strong> · Close {e.close.toFixed(2)} &lt; EMA {e.ema.toFixed(2)} · Average streak ({windowLabel(sessionDuration)}): <strong>{e.averageStreak===null?'N/A':`${e.averageStreak.toFixed(2)} days`}</strong> ({e.completedStreaks} completed)</li>)}</ul>:<p>No EMA superscripts for this day.</p>}</div>
     <div><h4>{labels[metric]} · Beyond average</h4><div className={styles.eventSides}>{(['Long','Short'] as const).map(side=>{const entries=day.averages.filter(e=>e.side===side);return <div key={side} data-event-side={side}><h5 className={side==='Long'?styles.averageUp:styles.averageDown}>{side}</h5>{entries.length?<ul>{entries.map(e=><li key={e.symbol}>{pick(e.symbol,day.date)} · {valueLabel(e.value,metric)} {e.value>e.average?'above':'below'} prior average {valueLabel(e.average,metric)}</li>)}</ul>:<p>No qualifying {side.toLowerCase()} events.</p>}</div>;})}</div>{day.baselineUnavailable>0&&<p className={styles.relativeMeta}>{day.baselineUnavailable} {day.baselineUnavailable===1?'datapoint lacks':'datapoints lack'} sufficient valid history for the average comparison.</p>}</div>
     <div><h4>Current Longest Streaks</h4><div className={styles.eventTableScroll}><table data-current-streaks><caption>Ongoing runs at {day.date} · Longest per color, including ties · N/A when no run exceeds 1</caption><thead><tr><th scope="col">Measure</th><th scope="col">Green</th><th scope="col">Red</th></tr></thead><tbody>{day.currentLongest.map(m=>{const renderWinner=(winner:StreakWinner)=>winner?<>{winner.symbols.map((symbol,i)=><span key={symbol}>{i?', ':''}{pick(symbol,day.date)}</span>)} · {winner.days} days</>:'N/A';return <tr key={m.metric}><th scope="row">{labels[m.metric]}</th><td>{renderWinner(m.green)}</td><td>{renderWinner(m.red)}</td></tr>;})}</tbody></table></div></div>
