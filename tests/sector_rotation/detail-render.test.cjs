@@ -792,8 +792,8 @@ test('Event Log begins each day with the matching Leadership Log and full-histor
  assert.match(html,/Beta took the daily lead from Alpha\./);
  assert.ok(html.includes(leadershipNote(sessions[2],sessions[1],groups)));
  assert.match(html,/SPY \+0.99%/);assert.match(html,/3.96%/);assert.match(html,/Laggard <button[^>]*>A<\/button>/);
- assert.ok(html.indexOf('<h4>Leadership Log</h4>')<html.indexOf('<h4>EMA events</h4>'));
- assert.doesNotMatch(renderToStaticMarkup(React.createElement(EventLog,{...props,singleStock:true})),/<h4>Leadership Log<\/h4>/);
+ assert.ok(html.indexOf('<strong>Leadership Log:</strong>')<html.indexOf('<h4>EMA events</h4>'));
+ assert.doesNotMatch(renderToStaticMarkup(React.createElement(EventLog,{...props,singleStock:true})),/<strong>Leadership Log:<\/strong>/);
  const incomplete=sessions.map((s,i)=>i===2?{...s,complete:false,leader:null,laggard:null}:s);
  assert.match(renderToStaticMarkup(React.createElement(EventLog,{...props,sessions:incomplete})),/Incomplete comparison/);
 });
