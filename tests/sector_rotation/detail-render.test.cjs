@@ -768,7 +768,7 @@ test('prediction stages collapse independently and shared context preserves ETF-
  const predictions=[...rows,...rows.map(r=>({...r,stage:'premarket'})),...rows.map(r=>({...r,stage:'overnight'}))];
  const html=renderToStaticMarkup(React.createElement(View,{predictions,results:[],asOfDate:'2026-10-30'}));
  assert.equal((html.match(/class="predictionStageTitle"/g)||[]).length,3);
- assert.equal((html.match(/<details class="predictionStage" open=""/g)||[]).length,1);
+ assert.equal((html.match(/<details class="predictionStage" open=""/g)||[]).length,0);
  assert.match(html,/Current Prediction · 30 minutes after open/);
  assert.match(html,/<h3>Before market open<\/h3>/);assert.match(html,/<h3>Overnight outlook<\/h3>/);
  assert.equal((html.match(/Shared Research Context · All ETFs In This Forecast/g)||[]).length,3);
