@@ -700,10 +700,10 @@ test('daily Top3 shows current week open, older grouped closed, immutable stages
  const p={target_date:'2026-10-28',stage:'overnight',symbol:'XLE',recorded_at:'2026-10-28T06:00:00Z',data_as_of:'2026-10-28T05:00:00Z',top3:25,middle:35,bottom3:40,confidence:'Low',reason:'ORIGINAL OVERNIGHT REASON',sources:[{label:'bad URL',url:'javascript:alert(1)'}],methodology:'judgment-v1',availability:'researched'};
  const predictions=[p,{...p,stage:'premarket',recorded_at:'2026-10-28T13:26:00Z',reason:'PREMARKET REASON'}, {...p,target_date:'2026-10-27'},{...p,target_date:'2026-10-26'},{...p,target_date:'2026-10-23'}];
  const render=results=>renderToStaticMarkup(React.createElement(View,{predictions,results,asOfDate:'2026-10-28'}));
- const pending=render([]);assert.equal((pending.match(/<details open=""/g)||[]).length,3);assert.match(pending,/Older daily predictions \(1\)/);assert.match(pending,/Earlier day · 2026-10-26/);assert.match(pending,/Before market open/);assert.match(pending,/ORIGINAL OVERNIGHT REASON/);assert.match(pending,/No forecast recorded for this ETF/);assert.doesNotMatch(pending,/href="javascript:/);
+ const pending=render([]);assert.equal((pending.match(/<details open="" class="eventDay/g)||[]).length,3);assert.match(pending,/Older daily predictions \(1\)/);assert.match(pending,/2026-10-26 ·/);assert.doesNotMatch(pending,/Yesterday|Earlier day/);assert.match(pending,/Before market open/);assert.match(pending,/ORIGINAL OVERNIGHT REASON/);assert.match(pending,/No forecast recorded for this ETF/);assert.doesNotMatch(pending,/href="javascript:/);
  const result={target_date:'2026-10-28',recorded_at:'2026-10-29T06:30:00Z',payload:{ranks:[{symbol:'XLE',rank:2,daily:-.2,bucket:'Top 3'}],ranking_rule:'Fixture ordinal ranks',price_sha256:'fixture'}};
- const completed=render([result]);assert.match(completed,/#2 · -0.20%/);assert.match(completed,/Top 3 occurred/);assert.match(completed,/ORIGINAL OVERNIGHT REASON/);assert.match(completed,/Assigned Top 3 probability: 25%/);
- const empty=renderToStaticMarkup(React.createElement(View,{predictions:[],results:[],asOfDate:'2026-10-28'}));assert.match(empty,/Yesterday · 2026-10-27/);assert.match(empty,/Historical predictions are not backfilled/);
+ const completed=render([result]);assert.match(completed,/#2 · -0.20%/);assert.match(completed,/Top 3: Yes/);assert.match(completed,/ORIGINAL OVERNIGHT REASON/);assert.match(completed,/<td>25%<\/td>/);
+ const empty=renderToStaticMarkup(React.createElement(View,{predictions:[],results:[],asOfDate:'2026-10-28'}));assert.match(empty,/2026-10-27 ·/);assert.match(empty,/Historical predictions are not backfilled/);
  assert.match(renderToStaticMarkup(React.createElement(View,{predictions:[],results:[],asOfDate:'2026-10-28',error:'READ FAILED'})),/role="alert">READ FAILED/);
 });
 
@@ -754,4 +754,27 @@ test('all-history suggestion counts distinguish pending, no-pick and positive/ne
  assert.match(html,/Top 3 finishes: 3\/4 ranked results/);
  assert.equal((html.match(/Saved original reasoning/g)||[]).length,5);
  assert.match(html,/Earlier next-session suggestions \(5\)/);
+});
+
+test('prediction stages collapse independently and shared context preserves ETF-specific research',()=>{
+ const {default:View,sharedResearchPrefix}=require(path.join(app,'app/dashboard/sector-rotation/DailyTop3Predictions.tsx'));
+ const common='Forecasts rank all eleven sectors by closing return. '+'Shared verified history and source quality apply to all three ETFs. '.repeat(4);
+ const p={target_date:'2026-10-30',symbol:'XLE',recorded_at:'2026-10-30T14:00:00Z',data_as_of:'2026-10-30T13:59:00Z',top3:45,middle:30,bottom3:25,confidence:'Low',sources:[],methodology:'judgment-v1',availability:'baseline_only'};
+ const rows=['XLE','XLV','XLK'].map(symbol=>({...p,stage:'open30',symbol,reason:common+symbol+' specific catalyst. Unverified quotes did not change the baseline.'}));
+ assert.equal(sharedResearchPrefix(rows),common.trim());
+ assert.equal(sharedResearchPrefix([rows[0]]),'');
+ assert.equal(sharedResearchPrefix([{...rows[0],reason:'Short shared. XLE'}, {...rows[1],reason:'Short shared. XLV'}]),'');
+ assert.equal(sharedResearchPrefix(rows.map(r=>({...r,reason:common}))),common);
+ const predictions=[...rows,...rows.map(r=>({...r,stage:'premarket'})),...rows.map(r=>({...r,stage:'overnight'}))];
+ const html=renderToStaticMarkup(React.createElement(View,{predictions,results:[],asOfDate:'2026-10-30'}));
+ assert.equal((html.match(/class="predictionStageTitle"/g)||[]).length,3);
+ assert.equal((html.match(/<details class="predictionStage" open=""/g)||[]).length,1);
+ assert.match(html,/Current Prediction · 30 minutes after open/);
+ assert.match(html,/<h3>Before market open<\/h3>/);assert.match(html,/<h3>Overnight outlook<\/h3>/);
+ assert.equal((html.match(/Shared Research Context · All ETFs In This Forecast/g)||[]).length,3);
+ for(const r of rows){assert.ok(html.includes(r.reason));assert.match(html,new RegExp('<p class="predictionReason">'+r.symbol+' specific catalyst'));}
+ assert.doesNotMatch(html,/Earlier forecasts for this day|Yesterday|Earlier day/);
+ const different=rows.map((r,i)=>({...r,recorded_at:`2026-10-30T14:0${i}:00Z`}));
+ const divergent=renderToStaticMarkup(React.createElement(View,{predictions:different,results:[],asOfDate:'2026-10-30'}));
+ assert.equal((divergent.match(/class="predictionMeta">Recorded/g)||[]).length,3);
 });
