@@ -4,6 +4,7 @@ import {useState} from 'react';
 import {buildSignals, breakdown, summarize, type WebhookEvent} from './model';
 import styles from './analysis.module.css';
 import TimeAnalysis from './TimeAnalysis';
+import Rolling25Analysis from './Rolling25Analysis';
 import FirstSlotAnalysis from './FirstSlotAnalysis';
 
 const pct = (v: number | null) => v == null ? '—' : `${v.toFixed(2)}%`;
@@ -52,6 +53,7 @@ export default function Analysis({events}: {events: WebhookEvent[]}) {
     </details>
     <FirstSlotAnalysis signals={all.filter(s => !side || s.side === side)}/>
     <TimeAnalysis signals={filtered}/>
+    <Rolling25Analysis signals={filtered}/>
     <section className={styles.panel}><h2>Signal Results</h2><div className={styles.scroll}><table><thead><tr>{['Signal Key','Direction','Grade','Entry Interval · CT','Events','Processed Outcome','Received Outcome','MFE','MAE'].map(h=><th scope="col" key={h}>{h}</th>)}</tr></thead><tbody>{filtered.map(s=>{const received=s.events.find(e=>e.event_type==='OSI_OUTCOME');return <tr key={s.key}><th scope="row">{s.key}</th><td>{s.side}</td><td>{s.grade}</td><td>{s.bucket}</td><td>{s.events.length}</td><td>{String(s.outcome?.primary_outcome??'None')}</td><td>{received?`${received.payload.primary_outcome} · ${received.processing_status}`:'None'}</td><td>{pct(typeof s.outcome?.final_mfe_pct==='number'?s.outcome.final_mfe_pct:null)}</td><td>{pct(typeof s.outcome?.final_mae_pct==='number'?s.outcome.final_mae_pct:null)}</td></tr>;})}</tbody></table></div></section>
     <section className={styles.panel}><h2>All Webhook Data</h2><p>Expand any event to inspect every payload and database metadata field. Delivery filters below affect this list only.</p><div className={styles.filters}><label>Event Type<select value={eventType} onChange={e=>setEventType(e.target.value)}><option value="">All Types</option>{['OSI_SIGNAL','OSI_CHECKPOINT','OSI_OUTCOME'].map(v=><option key={v}>{v}</option>)}</select></label><label>Delivery Status<select value={eventStatus} onChange={e=>setEventStatus(e.target.value)}><option value="">All Statuses</option><option>PROCESSED</option><option>FAILED</option></select></label><span>{visibleEvents.length} events shown</span></div>
       {visibleEvents.map(event=><details className={styles.event} key={event.id}><summary><strong>#{event.id} · {event.event_type}</strong><span>{String(event.payload.symbol)} · {event.payload.direction==='BEAR'?'Short':'Long'}</span><span className={event.processing_status==='FAILED'?styles.failed:styles.processed}>{event.processing_status}</span><time>{timestamp(event.received_at)}</time></summary><p className={styles.key}>{event.signal_key}</p>{event.error_message && <p className={styles.failed}>Recorded Error: {event.error_message}</p>}<h3>Payload</h3><Fields value={event.payload}/><details><summary>Database Metadata</summary><Fields value={Object.fromEntries(Object.entries(event).filter(([key])=>key!=='payload'))}/></details><details><summary>Full Original Row · JSON</summary><pre>{JSON.stringify(event,null,2)}</pre></details></details>)}

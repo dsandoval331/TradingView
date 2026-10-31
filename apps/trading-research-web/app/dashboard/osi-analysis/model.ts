@@ -55,3 +55,19 @@ export function sessionForTime(time: string | null) {
   const slot = reportingSlot(time);
   return sessionSections.find(s => slot >= s.start && slot < s.end)?.name ?? null;
 }
+
+/** All rolling sets of five consecutive five-minute slots in the regular session. */
+export function rolling25Rows(signals: Signal[]) {
+  const clock = (m: number) => `${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`;
+  const timed = signals.map(signal => ({signal, slot: reportingSlot(signal.time)}));
+  return Array.from({length:74}, (_,i) => {
+    const startMinute=510+i*5, start=clock(startMinute), end=clock(startMinute+25);
+    const slots=Array.from({length:5},(_,j)=>clock(startMinute+j*5));
+    const entries=timed.filter(s=>s.slot>=start && s.slot<end).map(s=>s.signal);
+    return {start, end, slots, long:summarize(entries.filter(s=>s.side==='Long')), short:summarize(entries.filter(s=>s.side==='Short'))};
+  });
+}
+export function rankRolling25(rows: ReturnType<typeof rolling25Rows>, side:'long'|'short', bottom=false) {
+  return rows.filter(r=>r[side].favorableRate!==null)
+    .sort((a,b)=>(bottom?1:-1)*((a[side].favorableRate??0)-(b[side].favorableRate??0)) || a.start.localeCompare(b.start)).slice(0,4);
+}
