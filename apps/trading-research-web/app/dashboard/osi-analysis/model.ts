@@ -1,7 +1,7 @@
 export type Payload = Record<string, unknown>;
 export type WebhookEvent = { id: number; signal_key: string; event_type: string; processing_status: string; received_at: string; error_message: string | null; payload: Payload; [key: string]: unknown };
 export type Signal = { key: string; side: string; grade: string; time: string | null; bucket: string; events: WebhookEvent[]; outcome: Payload | null; failed: number };
-export function timeBucket(time: string | null, zone = 'America/New_York'): string {
+export function timeBucket(time: string | null, zone = 'America/Chicago'): string {
   if (!time || !Number.isFinite(Date.parse(time))) return 'Unknown Time';
   const parts = new Intl.DateTimeFormat('en-US', {timeZone: zone, hour: '2-digit', minute: '2-digit', hourCycle: 'h23'}).formatToParts(new Date(time));
   const h = Number(parts.find(p => p.type === 'hour')?.value);

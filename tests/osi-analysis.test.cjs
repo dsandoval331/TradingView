@@ -24,12 +24,12 @@ test('grade and direction breakdowns preserve missing grades and signal denomina
  const sides=breakdown(signals,'side');assert.equal(sides.find(s=>s.label==='Long').signals,3);assert.equal(sides.find(s=>s.label==='Short').signals,1);assert.equal(sides.find(s=>s.label==='Long').accepted,2);
  assert.equal(summarize([]).favorableRate,null);assert.equal(summarize([]).mfe,null);
 });
-test('five minute entry windows use Eastern time with exclusive end boundaries',()=>{
- assert.equal(timeBucket('2026-09-02T09:34:59-04:00'),'09:30–09:35');
- assert.equal(timeBucket('2026-09-02T09:35:00-04:00'),'09:35–09:40');
- assert.equal(timeBucket('2026-12-02T14:31:00Z'),'09:30–09:35');
+test('five minute entry windows use Central time with exclusive end boundaries',()=>{
+ assert.equal(timeBucket('2026-09-02T09:34:59-04:00'),'08:30–08:35');
+ assert.equal(timeBucket('2026-09-02T09:35:00-04:00'),'08:35–08:40');
+ assert.equal(timeBucket('2026-12-02T14:31:00Z'),'08:30–08:35');
  assert.equal(timeBucket(null),'Unknown Time');
- assert.deepEqual(breakdown(buildSignals(events),'bucket').map(s=>s.label),['09:30–09:35','10:00–10:05','10:10–10:15','10:20–10:25']);
+ assert.deepEqual(breakdown(buildSignals(events),'bucket').map(s=>s.label),['08:30–08:35','09:00–09:05','09:10–09:15','09:20–09:25']);
 });
 test('render includes all six complete rows and the three requested breakdowns',()=>{
  const React=appRequire('react'),{renderToStaticMarkup}=appRequire('react-dom/server');
@@ -56,7 +56,7 @@ test('time analysis includes 78 closed intervals and honest sparse rankings',()=
  assert.equal(rankedTimes(rows,'long')[0].label,'08:30–08:35');assert.equal(rankedTimes(rows,'long',true)[0].label,'09:00–09:05');
  assert.equal(rankedTimes(rows,'long').length,2);assert.equal(rankedTimes(rows,'short').length,1);assert.equal(rankedTimes(timeRows([]),'long').length,0);
  const html=renderToStaticMarkup(React.createElement(TimeAnalysis,{signals}));
- assert.equal((html.match(/<details/g)||[]).length,78);assert.ok(!/<details[^>]*\bopen[=> ]/.test(html));
+ assert.equal((html.match(/<details/g)||[]).length,81);assert.ok(!/<details[^>]*\bopen[=> ]/.test(html));
  for(const text of ['Top 4 Long Times','Bottom 4 Long Times','Top 4 Short Times','Bottom 4 Short Times','No signals in this interval.'])assert.ok(html.includes(text),text);
  assert.equal(timeBucket('2026-12-02T14:35:00Z','America/Chicago'),'08:35–08:40');
 });
