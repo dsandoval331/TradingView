@@ -702,7 +702,7 @@ test('daily Top3 shows all dates collapsed, older grouped closed, immutable stag
  const render=results=>renderToStaticMarkup(React.createElement(View,{predictions,results,asOfDate:'2026-10-28'}));
  const pending=render([]);assert.equal((pending.match(/<details open="" class="eventDay/g)||[]).length,0);assert.match(pending,/Older daily predictions \(1\)/);assert.match(pending,/2026-10-26 ·/);assert.doesNotMatch(pending,/Yesterday|Earlier day/);assert.match(pending,/Before market open/);assert.match(pending,/ORIGINAL OVERNIGHT REASON/);assert.match(pending,/No forecast recorded for this ETF/);assert.doesNotMatch(pending,/href="javascript:/);
  const result={target_date:'2026-10-28',recorded_at:'2026-10-29T06:30:00Z',payload:{ranks:[{symbol:'XLE',rank:2,daily:-.2,bucket:'Top 3'}],ranking_rule:'Fixture ordinal ranks',price_sha256:'fixture'}};
- const completed=render([result]);assert.match(completed,/#2 · -0.20%/);assert.match(completed,/Top 3: Yes/);assert.match(completed,/ORIGINAL OVERNIGHT REASON/);assert.match(completed,/<td>25%<\/td>/);
+ const completed=render([result]);assert.match(completed,/<td>#2<\/td><td>-0.20%<\/td><td>Top 3<\/td><td>Yes<\/td>/);assert.match(completed,/ORIGINAL OVERNIGHT REASON/);assert.match(completed,/<td>25%<\/td>/);
  const empty=renderToStaticMarkup(React.createElement(View,{predictions:[],results:[],asOfDate:'2026-10-28'}));assert.match(empty,/2026-10-27 ·/);assert.match(empty,/Historical predictions are not backfilled/);
  assert.match(renderToStaticMarkup(React.createElement(View,{predictions:[],results:[],asOfDate:'2026-10-28',error:'READ FAILED'})),/role="alert">READ FAILED/);
 });
