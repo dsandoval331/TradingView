@@ -26,6 +26,40 @@ function ResearchNote({text}:{text:string}){
  const preview=boundary!==undefined?text.slice(0,boundary+1):text.slice(0,300).replace(/\s+\S*$/,'')+'…';
  return <><p className={styles.predictionReason}>{preview}</p><details className={styles.eventRules}><summary>More ETF Analysis</summary><p className={styles.predictionReason}>{text}</p></details></>;
 }
+type AccuracyCount={completed:number;correct:number;incorrect:number;pending:number;tied:number};
+export function predictionAccuracy(predictions:readonly DailyTop3Prediction[],results:readonly DailyTop3Result[],asOfDate:string){
+ const empty=():AccuracyCount=>({completed:0,correct:0,incorrect:0,pending:0,tied:0});
+ const overall=empty(),byStage:Record<PredictionStage,AccuracyCount>={overnight:empty(),premarket:empty(),open30:empty()};
+ const resultsByDate=new Map(results.map(result=>[result.target_date,result]));
+ const recorded=predictions.filter(p=>p.target_date<=asOfDate);
+ const completedDates=new Set<string>();
+ for(const p of recorded){
+  const actual=resultsByDate.get(p.target_date)?.payload.ranks.find(row=>row.symbol===p.symbol);
+  const completed=actual!==undefined&&Number.isInteger(actual.rank)&&actual.rank>=1&&actual.rank<=11;
+  const likely=mostLikely(p);
+  const bucket=completed?(actual.rank<=3?'Top 3':actual.rank<=8?'Middle':'Bottom 3'):null;
+  for(const count of [overall,byStage[p.stage]]){
+   if(!completed){count.pending++;continue;}
+   count.completed++;
+   if(likely.includes(bucket!))count.correct++;else count.incorrect++;
+   if(likely.length>1)count.tied++;
+  }
+  if(completed)completedDates.add(p.target_date);
+ }
+ const dates=recorded.map(p=>p.target_date).sort();
+ return {overall,byStage,firstDate:dates[0]??null,lastDate:dates.at(-1)??null,completedDates:completedDates.size};
+}
+function PredictionStatistics({predictions,results,asOfDate,error}:{predictions:readonly DailyTop3Prediction[];results:readonly DailyTop3Result[];asOfDate:string;error?:string|null}){
+ const stats=predictionAccuracy(predictions,results,asOfDate);
+ const rows=[{label:'Overall',count:stats.overall},...(['overnight','premarket','open30'] as const).map(stage=>({label:{overnight:'Overnight Outlook',premarket:'Before Market Open',open30:'30 Minutes After Open'}[stage],count:stats.byStage[stage]}))];
+ return <section className={`${styles.eventLog} ${styles.top3Section}`} aria-label="Prediction Statistics"><p className={styles.eyebrow}>ALL-HISTORY FORECAST SCORECARD</p><h2>Prediction Statistics</h2>
+ {error?<p>Statistics are unavailable while prediction data cannot be loaded.</p>:<>
+ <p className={styles.relativeMeta}>{stats.firstDate?`${stats.firstDate} through ${stats.lastDate} · ${stats.completedDates} ${stats.completedDates===1?'date':'dates'} with scored forecasts`:'No forecasts recorded yet.'} · Independent of Sessions and date filters.</p>
+ <div className={styles.eventTableScroll}><table><caption>Success = actual finishing group matches a highest-probability group</caption><thead><tr><th scope="col">Prediction Time</th><th scope="col">Completed</th><th scope="col">Correct</th><th scope="col">Incorrect</th><th scope="col">Pending</th><th scope="col">Success Rate</th></tr></thead><tbody>{rows.map(({label,count})=><tr key={label}><th scope="row">{label}</th><td>{count.completed}</td><td>{count.correct}</td><td>{count.incorrect}</td><td>{count.pending}</td><td>{count.completed?`${(100*count.correct/count.completed).toFixed(1)}%`:'—'}</td></tr>)}</tbody></table></div>
+ <details className={styles.eventRules}><summary>How Success Is Counted</summary><p>Each ETF, target date and forecast time is one prediction. Overall pools all three times; it counts correct forecasts divided by completed forecasts, rather than averaging their percentages. Overnight, before-open and after-open forecasts for the same ETF/day are scored separately.</p><p>Top 3 means ranks 1–3; Middle means ranks 4–8; Bottom 3 means ranks 9–11. A forecast is correct when the actual group matches a group with the highest recorded probability. Tied highest estimates accept any tied group; {stats.overall.tied} completed {stats.overall.tied===1?'forecast had':'forecasts had'} a tie. Missing closing ranks remain pending and do not reduce accuracy.</p><p>Includes all saved forecasts, including baseline-only estimates. This measures finishing-group accuracy, not trade profitability or probability calibration. Results update when verified closing data arrives; original forecasts stay fixed.</p></details>
+ </>}
+ </section>;
+}
 function Snapshot({rows,result}:{rows:readonly DailyTop3Prediction[];result?:DailyTop3Result}){
  const shared=sharedResearchPrefix(rows);
  const sameMetadata=rows.every(p=>p.recorded_at===rows[0].recorded_at&&p.data_as_of===rows[0].data_as_of&&p.methodology===rows[0].methodology);
@@ -39,7 +73,7 @@ export default function DailyTop3Predictions({predictions,results,asOfDate,error
  const currentDates=new Set(weekDisplayDates(asOfDate));
  const dates=[...new Set([...currentDates,...predictions.map(p=>p.target_date).filter(d=>d<=asOfDate)])].sort().reverse();
  const renderDay=(date:string,i:number)=>{const rows=predictions.filter(p=>p.target_date===date),result=results.find(r=>r.target_date===date),available=stages.filter(stage=>rows.some(p=>p.stage===stage));return <details key={date} className={`${styles.eventDay} ${i%2?styles.eventDayAlternate:''}`}><summary className={styles.winnerDaySummary}>{date} · {rows.length?result?'Results available':'Awaiting results':'No forecast recorded'}</summary>{!rows.length?<p>No forecast was recorded for this date. Historical predictions are not backfilled.</p>:<>{!result&&<p role="status">Awaiting this session’s verified closing results.</p>}{result&&<p className={styles.relativeMeta}>Closing results recorded {timestamp(result.recorded_at)}. {result.payload.ranking_rule}</p>}{available.map((stage,index)=><details key={stage} className={styles.predictionStage}><summary className={styles.predictionStageTitle}><h3>{index===0?'Current Prediction · ':''}{STAGE_LABELS[stage]}</h3></summary><Snapshot rows={rows.filter(p=>p.stage===stage)} result={result}/></details>)}</>}</details>;};
- return <section id="predicting-daily-top-3-sectors" className={`${styles.eventLog} ${styles.top3Section}`} aria-label="Predicting Daily Top 3 Sectors"><p className={styles.eyebrow}>RECORDED FORECASTS &amp; CLOSING RESULTS</p><h2>Predicting Daily Top 3 Sectors <span className={styles.swingBeta}>(Beta)</span></h2><p>XLE, XLV and XLK each compete against all 11 sector ETFs. Top 3 = ranks 1–3; Middle = 4–8; Bottom 3 = 9–11, ranked by close versus the previous session’s close. Negative returns can still finish Top 3.</p><p className={styles.relativeMeta}>Research checks: 8:25 AM CT before open and 9:00 AM CT after 30 minutes, on market weekdays. Each snapshot remains separate. Results and analysis append after the verified overnight price refresh, rather than live at the closing bell. Independent of heatmap filters. Current week listed first; Monday also includes the previous Friday. All dates start collapsed and remain available to expand.</p><p className={styles.relativeMeta}>Probabilities are uncalibrated analyst judgments, not measured model accuracy. Confidence describes evidence quality. One day cannot validate a probability; a Top 3 finish does not establish a profitable trade.</p>
+ return <><PredictionStatistics predictions={predictions} results={results} asOfDate={asOfDate} error={error}/><section id="predicting-daily-top-3-sectors" className={`${styles.eventLog} ${styles.top3Section}`} aria-label="Predicting Daily Top 3 Sectors"><p className={styles.eyebrow}>RECORDED FORECASTS &amp; CLOSING RESULTS</p><h2>Predicting Daily Top 3 Sectors <span className={styles.swingBeta}>(Beta)</span></h2><p>XLE, XLV and XLK each compete against all 11 sector ETFs. Top 3 = ranks 1–3; Middle = 4–8; Bottom 3 = 9–11, ranked by close versus the previous session’s close. Negative returns can still finish Top 3.</p><p className={styles.relativeMeta}>Research checks: 8:25 AM CT before open and 9:00 AM CT after 30 minutes, on market weekdays. Each snapshot remains separate. Results and analysis append after the verified overnight price refresh, rather than live at the closing bell. Independent of heatmap filters. Current week listed first; Monday also includes the previous Friday. All dates start collapsed and remain available to expand.</p><p className={styles.relativeMeta}>Probabilities are uncalibrated analyst judgments, not measured model accuracy. Confidence describes evidence quality. One day cannot validate a probability; a Top 3 finish does not establish a profitable trade.</p>
  {error?<p role="alert">{error}</p>:<>{dates.filter(date=>currentDates.has(date)).map(renderDay)}{dates.some(date=>!currentDates.has(date))&&<details className={styles.eventRules}><summary>Older daily predictions ({dates.filter(date=>!currentDates.has(date)).length})</summary>{dates.filter(date=>!currentDates.has(date)).map((date,i)=>renderDay(date,i+currentDates.size))}</details>}</>}
- </section>;
+ </section></>;
 }
