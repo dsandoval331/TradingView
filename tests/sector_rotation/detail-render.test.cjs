@@ -864,3 +864,33 @@ test('predicted Bottom 3 metrics score exact group outcomes and keep unmatched r
  assert.match(html,/Success By Predicted Group/);assert.match(html,/Group Success By Prediction Time/);
  assert.match(html,/<th scope="row">Bottom 3<\/th><td>2<\/td><td>1<\/td><td>1<\/td><td>1<\/td><td>50.0%<\/td>/);
 });
+
+test('broken streaks require more than two prior sessions and a confirmed color or flat change',()=>{
+ const {dailyEvents}=require(path.join(app,'app/dashboard/sector-rotation/events.ts'));
+ const days=eventFixture([1,1,1,-1,-1,-1,0,1,1,-1,1,1,1,null,-1,-1,-1,NaN,1]);
+ const events=dailyEvents(days,eventGroup,'daily','none');
+ const daily=i=>events[i].brokenStreaks.filter(e=>e.metric==='daily');
+ assert.deepEqual(daily(3),[{symbol:'X',metric:'daily',color:'green',days:3,endedOn:days[2].date,nextColor:'Red'}]);
+ assert.deepEqual(daily(6),[{symbol:'X',metric:'daily',color:'red',days:3,endedOn:days[5].date,nextColor:'Flat'}]);
+ for(const i of [2,4,9,13,14,17,18])assert.deepEqual(daily(i),[]);
+ assert.deepEqual(events.slice(0,7),dailyEvents(days.slice(0,7),eventGroup,'daily','none'));
+});
+test('broken streaks cover every measure and symbol regardless of selected measure',()=>{
+ const {dailyEvents,EVENT_MEASURES}=require(path.join(app,'app/dashboard/sector-rotation/events.ts'));
+ const groups=['A','B','C'].map(symbol=>({symbol,name:symbol,short:symbol}));
+ const days=Array.from({length:4},(_,i)=>({date:`2026-10-${26+i}`,complete:true,cells:Object.fromEntries(groups.map(g=>[g.symbol,Object.fromEntries(EVENT_MEASURES.map(m=>[m,m==='rank'?(i<3?1:3):(i<3?1:-1)]))]))}));
+ const a=dailyEvents(days,groups,'daily','none').at(-1).brokenStreaks;
+ assert.equal(a.length,18);assert.ok(a.every(e=>e.days===3&&e.color==='green'&&e.nextColor==='Red'));
+ assert.deepEqual(a,dailyEvents(days,groups,'relative','none').at(-1).brokenStreaks);
+ days[3].cells.A.rank=2;
+ assert.equal(dailyEvents(days,groups,'daily','none').at(-1).brokenStreaks.find(e=>e.symbol==='A'&&e.metric==='rank').nextColor,'Flat');
+});
+test('Event Log renders broken streaks on break date using history outside visible dates',()=>{
+ const EventLog=require(path.join(app,'app/dashboard/sector-rotation/EventLog.tsx')).default;
+ const days=eventFixture([1,1,1,-1]).map((d,i)=>({...d,date:`2026-10-${26+i}`}));
+ const html=renderToStaticMarkup(React.createElement(EventLog,{sessions:days,visibleSessions:days.slice(-1),groups:eventGroup,metric:'relative',line:'none',asOfDate:'2026-10-29',onSelect:()=>{}}));
+ assert.match(html,/<h4>Broken Streaks<\/h4>/);assert.match(html,/data-broken-streaks/);
+ assert.match(html,/Daily return<\/td><td><span class="averageUp">Green · 3 sessions/);
+ assert.match(html,/<td>2026-10-28<\/td><td>Red<\/td>/);
+ assert.equal((html.match(/data-event-date=/g)||[]).length,1);
+});
