@@ -12,7 +12,7 @@ export default function DailyRankHistory({timeline,symbol,name,universeSize,sele
  const format=(rank:number|null)=>rank===null?'—':`#${rank}`;
  // Separate path segments preserve gaps instead of implying ranks across missing comparisons.
  const path=ranks.map((rank,i)=>rank===null?'':`${i===0||ranks[i-1]===null?'M':'L'} ${(i+.5)*layout.slot} ${y(rank)}`).join(' ');
- const ticks=Array.from(new Set([1,Math.ceil(universeSize/2),universeSize]));
+ const ticks=Array.from({length:universeSize},(_,i)=>i+1);
  return <section className={styles.performancePanel} aria-label="Daily Rank History">
   <h2>Daily Rank History</h2><h3>{symbol} · {name}</h3>
   <p className={styles.relativeMeta}>{timeline.length} selected sessions · Oldest to newest → · #1 is strongest · Independent of the Measure setting</p>
