@@ -720,7 +720,7 @@ test('daily Top3 loader authorizes before reads and preserves read failures',asy
  assert.match((await load()).error,/Sign in/);signedIn=true;assert.match((await load()).error,/access unavailable/);assert.equal(reads,0);allowed=true;assert.deepEqual(await load(),{predictions:[],results:[],error:null});fail=true;assert.match((await load()).error,/could not be loaded/);
 });
 
-test('symbol reference is first after tabs and before configuration on every secondary tab',()=>{
+test('symbol reference stays first and each tab exposes only functional shared controls',()=>{
  const Tracker=require(path.join(app,'app/dashboard/sector-rotation/Tracker.tsx')).default;
  const {SECTORS}=require(path.join(app,'app/dashboard/sector-rotation/model.ts'));
  const {bars,dates}=sectorWinnerFixture();
@@ -730,10 +730,23 @@ test('symbol reference is first after tabs and before configuration on every sec
   for(const tab of ['overview','events','winners','swing','predictions']){
    React.useState=initial=>{const state=original(initial);return initial==='overview'?[tab,state[1]]:state;};
    const html=renderToStaticMarkup(React.createElement(Tracker,props));
+   const filtersStart=html.indexOf('aria-label="Shared tracker filters"');
+   if(tab==='predictions')assert.equal(filtersStart,-1);
+   else{
+    assert.ok(filtersStart>=0);
+    const controls=html.slice(filtersStart).split('</div>')[0];
+    assert.match(controls,/>Sessions<select/);
+    const market=tab==='overview'||tab==='events',dates=market||tab==='winners';
+    assert.equal(controls.includes('>Measure<select'),market);
+    assert.equal(controls.includes('aria-label="Chart line"'),market);
+    assert.equal(controls.includes('aria-label="From date"'),dates);
+    assert.equal(controls.includes('aria-label="To date"'),dates);
+    assert.equal(controls.includes('>Reset</button>'),dates);
+   }
    if(tab==='overview'){assert.doesNotMatch(html,/class="symbolReference"/);continue;}
    const tabsEnd=html.indexOf('</div>',html.indexOf('aria-label="Tracker sections"'));
    const referenceStart=html.indexOf('<section class="symbolReference"');
-   assert.equal(referenceStart,tabsEnd+6);assert.ok(referenceStart<html.indexOf('aria-label="Shared tracker filters"'));
+   assert.equal(referenceStart,tabsEnd+6);if(filtersStart>=0)assert.ok(referenceStart<filtersStart);
    assert.equal((html.match(/class="symbolReference"/g)||[]).length,1);
    const reference=html.slice(referenceStart).split('</section>')[0];
    const expected=tab==='predictions'?SECTORS.filter(g=>['XLE','XLV','XLK'].includes(g.symbol)):SECTORS;
@@ -826,8 +839,9 @@ test('prediction statistics show no success percentage without results and repor
  const View=require(path.join(app,'app/dashboard/sector-rotation/DailyTop3Predictions.tsx')).default;
  const empty=renderToStaticMarkup(React.createElement(View,{predictions:[],results:[],asOfDate:'2026-10-31'}));
  const scorecard=empty.split('id="predicting-daily-top-3-sectors"')[0];
- assert.equal((scorecard.match(/<details class="predictionStage">/g)||[]).length,4);assert.doesNotMatch(scorecard,/<details[^>]* open=/);
- for(const title of ['Success By Prediction Time','Success By Predicted Group','Group Success By Prediction Time','How Success Is Counted'])assert.ok(scorecard.includes('<summary class="predictionStageTitle"><h3>'+title+'</h3></summary>'));
+ assert.equal((scorecard.match(/<details class="predictionStage">/g)||[]).length,3);assert.doesNotMatch(scorecard,/<details[^>]* open=/);
+ for(const title of ['Success By Prediction Time','Success By Predicted Group','Group Success By Prediction Time'])assert.ok(scorecard.includes('<summary class="predictionStageTitle"><h3>'+title+'</h3></summary>'));
+ assert.ok(scorecard.includes('<details class="eventRules notation"><summary>How Success Is Counted</summary>'));assert.doesNotMatch(scorecard,/<h3>How Success Is Counted<\/h3>/);
  assert.match(scorecard,/No forecasts recorded yet/);assert.doesNotMatch(scorecard,/0.0%/);assert.match(scorecard,/<th scope="row">Overall<\/th><td>0<\/td><td>0<\/td><td>0<\/td><td>0<\/td><td>—<\/td>/);
  const error=renderToStaticMarkup(React.createElement(View,{predictions:[],results:[],asOfDate:'2026-10-31',error:'READ FAILED'}));
  assert.match(error,/Statistics are unavailable/);assert.match(error,/role="alert">READ FAILED/);
