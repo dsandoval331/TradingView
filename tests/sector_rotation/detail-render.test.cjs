@@ -767,7 +767,7 @@ test('prediction stages collapse independently and shared context preserves ETF-
  assert.equal(sharedResearchPrefix(rows.map(r=>({...r,reason:common}))),common);
  const predictions=[...rows,...rows.map(r=>({...r,stage:'premarket'})),...rows.map(r=>({...r,stage:'overnight'}))];
  const html=renderToStaticMarkup(React.createElement(View,{predictions,results:[],asOfDate:'2026-10-30'}));
- assert.equal((html.match(/class="predictionStageTitle"/g)||[]).length,3);
+ assert.equal((html.split('id="predicting-daily-top-3-sectors"')[1].match(/class="predictionStageTitle"/g)||[]).length,3);
  assert.equal((html.match(/<details class="predictionStage" open=""/g)||[]).length,0);
  assert.match(html,/Current Prediction · 30 minutes after open/);
  assert.match(html,/<h3>Before market open<\/h3>/);assert.match(html,/<h3>Overnight outlook<\/h3>/);
@@ -826,6 +826,8 @@ test('prediction statistics show no success percentage without results and repor
  const View=require(path.join(app,'app/dashboard/sector-rotation/DailyTop3Predictions.tsx')).default;
  const empty=renderToStaticMarkup(React.createElement(View,{predictions:[],results:[],asOfDate:'2026-10-31'}));
  const scorecard=empty.split('id="predicting-daily-top-3-sectors"')[0];
+ assert.equal((scorecard.match(/<details class="predictionStage">/g)||[]).length,4);assert.doesNotMatch(scorecard,/<details[^>]* open=/);
+ for(const title of ['Success By Prediction Time','Success By Predicted Group','Group Success By Prediction Time','How Success Is Counted'])assert.ok(scorecard.includes('<summary class="predictionStageTitle"><h3>'+title+'</h3></summary>'));
  assert.match(scorecard,/No forecasts recorded yet/);assert.doesNotMatch(scorecard,/0.0%/);assert.match(scorecard,/<th scope="row">Overall<\/th><td>0<\/td><td>0<\/td><td>0<\/td><td>0<\/td><td>—<\/td>/);
  const error=renderToStaticMarkup(React.createElement(View,{predictions:[],results:[],asOfDate:'2026-10-31',error:'READ FAILED'}));
  assert.match(error,/Statistics are unavailable/);assert.match(error,/role="alert">READ FAILED/);
