@@ -26,10 +26,14 @@ function ResearchNote({text}:{text:string}){
  const preview=boundary!==undefined?text.slice(0,boundary+1):text.slice(0,300).replace(/\s+\S*$/,'')+'…';
  return <><p className={styles.predictionReason}>{preview}</p><details className={styles.eventRules}><summary>More ETF Analysis</summary><p className={styles.predictionReason}>{text}</p></details></>;
 }
+const finishGroups=['Top 3','Middle','Bottom 3'] as const;
+type FinishGroup=typeof finishGroups[number];
 type AccuracyCount={completed:number;correct:number;incorrect:number;pending:number;tied:number};
 export function predictionAccuracy(predictions:readonly DailyTop3Prediction[],results:readonly DailyTop3Result[],asOfDate:string){
  const empty=():AccuracyCount=>({completed:0,correct:0,incorrect:0,pending:0,tied:0});
  const overall=empty(),byStage:Record<PredictionStage,AccuracyCount>={overnight:empty(),premarket:empty(),open30:empty()};
+ const emptyGroups=():Record<FinishGroup,AccuracyCount>=>({'Top 3':empty(),Middle:empty(),'Bottom 3':empty()});
+ const byGroup=emptyGroups(),byStageGroup:Record<PredictionStage,Record<FinishGroup,AccuracyCount>>={overnight:emptyGroups(),premarket:emptyGroups(),open30:emptyGroups()};
  const resultsByDate=new Map(results.map(result=>[result.target_date,result]));
  const recorded=predictions.filter(p=>p.target_date<=asOfDate);
  const completedDates=new Set<string>();
@@ -44,10 +48,21 @@ export function predictionAccuracy(predictions:readonly DailyTop3Prediction[],re
    if(likely.includes(bucket!))count.correct++;else count.incorrect++;
    if(likely.length>1)count.tied++;
   }
+  for(const group of finishGroups.filter(group=>likely.includes(group))){
+   for(const count of [byGroup[group],byStageGroup[p.stage][group]]){
+    if(!completed){count.pending++;continue;}
+    count.completed++;
+    if(bucket===group)count.correct++;else count.incorrect++;
+    if(likely.length>1)count.tied++;
+   }
+  }
   if(completed)completedDates.add(p.target_date);
  }
  const dates=recorded.map(p=>p.target_date).sort();
- return {overall,byStage,firstDate:dates[0]??null,lastDate:dates.at(-1)??null,completedDates:completedDates.size};
+ return {overall,byStage,byGroup,byStageGroup,firstDate:dates[0]??null,lastDate:dates.at(-1)??null,completedDates:completedDates.size};
+}
+function AccuracyTable({rows,heading,caption}:{rows:readonly {label:string;count:AccuracyCount}[];heading:string;caption:string}){
+ return <div className={styles.eventTableScroll}><table><caption>{caption}</caption><thead><tr><th scope="col">{heading}</th><th scope="col">Completed</th><th scope="col">Correct</th><th scope="col">Incorrect</th><th scope="col">Pending</th><th scope="col">Success Rate</th></tr></thead><tbody>{rows.map(({label,count})=><tr key={label}><th scope="row">{label}</th><td>{count.completed}</td><td>{count.correct}</td><td>{count.incorrect}</td><td>{count.pending}</td><td>{count.completed?`${(100*count.correct/count.completed).toFixed(1)}%`:'—'}</td></tr>)}</tbody></table></div>;
 }
 function PredictionStatistics({predictions,results,asOfDate,error}:{predictions:readonly DailyTop3Prediction[];results:readonly DailyTop3Result[];asOfDate:string;error?:string|null}){
  const stats=predictionAccuracy(predictions,results,asOfDate);
@@ -55,7 +70,11 @@ function PredictionStatistics({predictions,results,asOfDate,error}:{predictions:
  return <section className={`${styles.eventLog} ${styles.top3Section}`} aria-label="Prediction Statistics"><p className={styles.eyebrow}>ALL-HISTORY FORECAST SCORECARD</p><h2>Prediction Statistics</h2>
  {error?<p>Statistics are unavailable while prediction data cannot be loaded.</p>:<>
  <p className={styles.relativeMeta}>{stats.firstDate?`${stats.firstDate} through ${stats.lastDate} · ${stats.completedDates} ${stats.completedDates===1?'date':'dates'} with scored forecasts`:'No forecasts recorded yet.'} · Independent of Sessions and date filters.</p>
- <div className={styles.eventTableScroll}><table><caption>Success = actual finishing group matches a highest-probability group</caption><thead><tr><th scope="col">Prediction Time</th><th scope="col">Completed</th><th scope="col">Correct</th><th scope="col">Incorrect</th><th scope="col">Pending</th><th scope="col">Success Rate</th></tr></thead><tbody>{rows.map(({label,count})=><tr key={label}><th scope="row">{label}</th><td>{count.completed}</td><td>{count.correct}</td><td>{count.incorrect}</td><td>{count.pending}</td><td>{count.completed?`${(100*count.correct/count.completed).toFixed(1)}%`:'—'}</td></tr>)}</tbody></table></div>
+ <AccuracyTable rows={rows} heading="Prediction Time" caption="Success = actual finishing group matches a highest-probability group"/>
+ <h3>Success By Predicted Group</h3>
+ <AccuracyTable rows={finishGroups.map(group=>({label:group,count:stats.byGroup[group]}))} heading="Predicted Group" caption="Top 3, Middle, and Bottom 3 forecast accuracy"/>
+ <p className={styles.relativeMeta}>Each group includes forecasts assigning it the highest probability. Success requires finishing in that exact group. Tied forecasts appear in each tied group, so group totals can exceed the overall total.</p>
+ <details className={styles.eventRules}><summary>Group Success By Prediction Time</summary>{(['overnight','premarket','open30'] as const).map(stage=><div key={stage}><h4>{STAGE_LABELS[stage]}</h4><AccuracyTable rows={finishGroups.map(group=>({label:group,count:stats.byStageGroup[stage][group]}))} heading="Predicted Group" caption={`${STAGE_LABELS[stage]} · Group accuracy`}/></div>)}</details>
  <details className={styles.eventRules}><summary>How Success Is Counted</summary><p>Each ETF, target date and forecast time is one prediction. Overall pools all three times; it counts correct forecasts divided by completed forecasts, rather than averaging their percentages. Overnight, before-open and after-open forecasts for the same ETF/day are scored separately.</p><p>Top 3 means ranks 1–3; Middle means ranks 4–8; Bottom 3 means ranks 9–11. A forecast is correct when the actual group matches a group with the highest recorded probability. Tied highest estimates accept any tied group; {stats.overall.tied} completed {stats.overall.tied===1?'forecast had':'forecasts had'} a tie. Missing closing ranks remain pending and do not reduce accuracy.</p><p>Includes all saved forecasts, including baseline-only estimates. This measures finishing-group accuracy, not trade profitability or probability calibration. Results update when verified closing data arrives; original forecasts stay fixed.</p></details>
  </>}
  </section>;
