@@ -8,7 +8,8 @@ export type AverageEvent={symbol:string;side:'Long'|'Short';value:number;average
 export const EVENT_MEASURES=['relative','daily','rank','rankChange','rsiRelative','mansfield'] as const;
 export type StreakWinner={days:number;symbols:string[]}|null;
 export type MeasureLeaders={metric:Metric;green:StreakWinner;red:StreakWinner};
-export type DailyEvents={date:string;ema:{symbol:string;days:number;close:number;ema:number;averageStreak:number|null;completedStreaks:number}[];averages:AverageEvent[];streaks:EventStreak[];currentLongest:MeasureLeaders[];rankUp:{symbols:string[];change:number}|null;rankDown:{symbols:string[];change:number}|null;baselineUnavailable:number};
+export type BrokenStreak={symbol:string;metric:Metric;color:'green'|'red';days:number;endedOn:string;nextColor:'Green'|'Red'|'Flat'};
+export type DailyEvents={date:string;ema:{symbol:string;days:number;close:number;ema:number;averageStreak:number|null;completedStreaks:number}[];averages:AverageEvent[];streaks:EventStreak[];currentLongest:MeasureLeaders[];brokenStreaks:BrokenStreak[];rankUp:{symbols:string[];change:number}|null;rankDown:{symbols:string[];change:number}|null;baselineUnavailable:number};
 /** End-of-day observations only. Future rows never enter baselines, runs, or records. */
 export function dailyEvents(sessions:readonly Session[],groups:readonly Group[],metric:Metric,line:ChartLine,sessionDuration:SessionWindow=60):DailyEvents[]{
  const period=emaPeriod(line);
@@ -17,7 +18,7 @@ export function dailyEvents(sessions:readonly Session[],groups:readonly Group[],
  const allRuns=new Map<string,{green:number;red:number}>();
  const runs=new Map<string,{ema:number;green:number;red:number;longestGreen:number;longestRed:number}>();
  return sessions.map((day,index)=>{
-  const event:DailyEvents={date:day.date,ema:[],averages:[],streaks:[],currentLongest:[],rankUp:null,rankDown:null,baselineUnavailable:0};
+  const event:DailyEvents={date:day.date,ema:[],averages:[],streaks:[],currentLongest:[],brokenStreaks:[],rankUp:null,rankDown:null,baselineUnavailable:0};
   for(const group of groups){
    const symbol=group.symbol,c=day.cells[symbol];
    const state=runs.get(symbol)??{ema:0,green:0,red:0,longestGreen:0,longestRed:0};runs.set(symbol,state);
@@ -53,6 +54,13 @@ export function dailyEvents(sessions:readonly Session[],groups:readonly Group[],
     const key=`${measure}:${g.symbol}`,state=allRuns.get(key)??{green:0,red:0};
     const raw=day.cells[g.symbol]?.[measure];
     const signal=raw==null||!Number.isFinite(raw)?null:measure==='rank'?(groups.length+1)/2-raw:raw;
+    // Missing observations reset continuity but cannot confirm a market streak break.
+    if(signal!==null){
+     const nextColor=signal>EPS?'Green':signal< -EPS?'Red':'Flat';
+     for(const color of ['green','red'] as const){
+      if(state[color]>2&&(color==='green'?signal<=EPS:signal>= -EPS))event.brokenStreaks.push({symbol:g.symbol,metric:measure,color,days:state[color],endedOn:sessions[index-1].date,nextColor});
+     }
+    }
     state.green=signal!==null&&signal>EPS?state.green+1:0;state.red=signal!==null&&signal< -EPS?state.red+1:0;allRuns.set(key,state);
     return {symbol:g.symbol,...state};
    });
