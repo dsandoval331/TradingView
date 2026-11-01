@@ -797,3 +797,31 @@ test('Event Log begins each day with the matching Leadership Log and full-histor
  const incomplete=sessions.map((s,i)=>i===2?{...s,complete:false,leader:null,laggard:null}:s);
  assert.match(renderToStaticMarkup(React.createElement(EventLog,{...props,sessions:incomplete})),/Incomplete comparison/);
 });
+
+test('prediction accuracy scores all history by forecast stage and excludes pending/future outcomes',()=>{
+ const {default:View,predictionAccuracy}=require(path.join(app,'app/dashboard/sector-rotation/DailyTop3Predictions.tsx'));
+ const p={target_date:'2026-10-28',stage:'overnight',symbol:'XLE',recorded_at:'2026-10-28T06:00:00Z',data_as_of:'2026-10-28T05:00:00Z',top3:60,middle:30,bottom3:10,confidence:'Low',reason:'Fixture reasoning',sources:[],methodology:'judgment-v1',availability:'baseline_only'};
+ const predictions=[p,{...p,symbol:'XLV'},{...p,stage:'premarket',top3:20,middle:70},{...p,stage:'open30'},{...p,stage:'open30',symbol:'XLV',top3:40,middle:40,bottom3:20},{...p,stage:'premarket',symbol:'XLK'},{...p,target_date:'2026-09-01'},{...p,target_date:'2026-11-02'}];
+ const result={target_date:'2026-10-28',recorded_at:'2026-10-29T06:00:00Z',payload:{ranks:[{symbol:'XLE',rank:2,daily:1,bucket:'Top 3'},{symbol:'XLV',rank:5,daily:.5,bucket:'Middle'}],ranking_rule:'Fixture ranks',price_sha256:'fixture'}};
+ const stats=predictionAccuracy(predictions,[result],'2026-10-31');
+ assert.deepEqual(stats.overall,{completed:5,correct:3,incorrect:2,pending:2,tied:1});
+ assert.deepEqual(stats.byStage.overnight,{completed:2,correct:1,incorrect:1,pending:1,tied:0});
+ assert.deepEqual(stats.byStage.premarket,{completed:1,correct:0,incorrect:1,pending:1,tied:0});
+ assert.deepEqual(stats.byStage.open30,{completed:2,correct:2,incorrect:0,pending:0,tied:1});
+ assert.equal(stats.firstDate,'2026-09-01');assert.equal(stats.lastDate,'2026-10-28');assert.equal(stats.completedDates,1);
+ const html=renderToStaticMarkup(React.createElement(View,{predictions,results:[result],asOfDate:'2026-10-31'}));
+ assert.ok(html.indexOf('aria-label="Prediction Statistics"')<html.indexOf('id="predicting-daily-top-3-sectors"'));
+ assert.match(html,/<th scope="row">Overall<\/th><td>5<\/td><td>3<\/td><td>2<\/td><td>2<\/td><td>60.0%<\/td>/);
+ assert.match(html,/1 completed forecast had a tie/);
+ const original=JSON.stringify(predictions);predictionAccuracy(predictions,[result],'2026-10-31');assert.equal(JSON.stringify(predictions),original);
+ const invalid={...result,payload:{...result.payload,ranks:[{symbol:'XLE',rank:0,daily:1,bucket:'Top 3'}]}};
+ assert.equal(predictionAccuracy([p],[invalid],'2026-10-31').overall.pending,1);
+});
+test('prediction statistics show no success percentage without results and report read failures',()=>{
+ const View=require(path.join(app,'app/dashboard/sector-rotation/DailyTop3Predictions.tsx')).default;
+ const empty=renderToStaticMarkup(React.createElement(View,{predictions:[],results:[],asOfDate:'2026-10-31'}));
+ const scorecard=empty.split('id="predicting-daily-top-3-sectors"')[0];
+ assert.match(scorecard,/No forecasts recorded yet/);assert.doesNotMatch(scorecard,/0.0%/);assert.equal((scorecard.match(/<td>—<\/td>/g)||[]).length,4);
+ const error=renderToStaticMarkup(React.createElement(View,{predictions:[],results:[],asOfDate:'2026-10-31',error:'READ FAILED'}));
+ assert.match(error,/Statistics are unavailable/);assert.match(error,/role="alert">READ FAILED/);
+});
