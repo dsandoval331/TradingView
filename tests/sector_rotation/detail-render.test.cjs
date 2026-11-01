@@ -829,7 +829,11 @@ test('prediction accuracy scores all history by forecast stage and excludes pend
  assert.equal(stats.firstDate,'2026-09-01');assert.equal(stats.lastDate,'2026-10-28');assert.equal(stats.completedDates,1);
  const html=renderToStaticMarkup(React.createElement(View,{predictions,results:[result],asOfDate:'2026-10-31'}));
  assert.ok(html.indexOf('aria-label="Prediction Statistics"')<html.indexOf('id="predicting-daily-top-3-sectors"'));
- assert.match(html,/<th scope="row">Overall<\/th><td>5<\/td><td>3<\/td><td>2<\/td><td>2<\/td><td>60.0%<\/td>/);
+ const cards=html.split('aria-label="Overall Prediction Statistics"')[1].split('</div>')[0];
+ assert.equal((cards.match(/<article>/g)||[]).length,5);
+ for(const [label,value] of [['Completed','5'],['Correct','3'],['Incorrect','2'],['Pending','2'],['Success Rate','60.0%']])assert.ok(cards.includes('<span>'+label+'</span><strong>'+value+'</strong>'));
+ assert.ok(html.indexOf('aria-label="Overall Prediction Statistics"')<html.indexOf('<h3>Success By Prediction Time</h3>'));
+ assert.doesNotMatch(html,/<th scope="row">Overall<\/th>/);
  assert.match(html,/1 completed forecast had a tie/);
  const original=JSON.stringify(predictions);predictionAccuracy(predictions,[result],'2026-10-31');assert.equal(JSON.stringify(predictions),original);
  const invalid={...result,payload:{...result.payload,ranks:[{symbol:'XLE',rank:0,daily:1,bucket:'Top 3'}]}};
@@ -842,7 +846,7 @@ test('prediction statistics show no success percentage without results and repor
  assert.equal((scorecard.match(/<details class="predictionStage">/g)||[]).length,3);assert.doesNotMatch(scorecard,/<details[^>]* open=/);
  for(const title of ['Success By Prediction Time','Success By Predicted Group','Group Success By Prediction Time'])assert.ok(scorecard.includes('<summary class="predictionStageTitle"><h3>'+title+'</h3></summary>'));
  assert.ok(scorecard.includes('<details class="eventRules notation"><summary>How Success Is Counted</summary>'));assert.doesNotMatch(scorecard,/<h3>How Success Is Counted<\/h3>/);
- assert.match(scorecard,/No forecasts recorded yet/);assert.doesNotMatch(scorecard,/0.0%/);assert.match(scorecard,/<th scope="row">Overall<\/th><td>0<\/td><td>0<\/td><td>0<\/td><td>0<\/td><td>—<\/td>/);
+ assert.match(scorecard,/No forecasts recorded yet/);assert.doesNotMatch(scorecard,/0.0%/);assert.match(scorecard,/<span>Completed<\/span><strong>0<\/strong>/);assert.match(scorecard,/<span>Success Rate<\/span><strong>—<\/strong>/);
  const error=renderToStaticMarkup(React.createElement(View,{predictions:[],results:[],asOfDate:'2026-10-31',error:'READ FAILED'}));
  assert.match(error,/Statistics are unavailable/);assert.match(error,/role="alert">READ FAILED/);
 });
