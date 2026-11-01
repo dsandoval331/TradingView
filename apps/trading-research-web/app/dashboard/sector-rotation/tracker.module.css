@@ -89,3 +89,11 @@
 .tracker :is(.relativeMeta,.normalNote,.holdingsNote,.method,.notation) a{color:var(--note-color)}
 .notation,.notation>summary{font-size:var(--note-size);color:var(--note-color)}
 .notation>summary{font-weight:400;cursor:pointer;padding:0}
+
+/* Overall prediction totals remain visible in one five-card row. */
+.overallPredictionTitle{font-size:16px;color:var(--amber);margin:18px 0 12px}
+.overallPredictionScroll{overflow-x:auto;padding:3px 1px 10px}
+.overallPredictionCards{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;min-width:600px}
+.overallPredictionCards article{border:1px solid var(--border);border-radius:10px;background:#142130;min-height:110px;padding:18px;display:flex;flex-direction:column;justify-content:space-between;gap:12px}
+.overallPredictionCards span{font-size:12px;color:var(--muted)}
+.overallPredictionCards strong{font-size:28px;font-variant-numeric:tabular-nums;line-height:1.1;color:#eef3f8}
