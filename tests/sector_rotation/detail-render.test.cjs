@@ -905,10 +905,13 @@ test('Daily Rank History keeps strongest ranks at top, selected dates, ties and 
  assert.match(html,/Best Visible Rank<\/span><strong>#1/);assert.match(html,/Worst Visible Rank<\/span><strong>#11/);
  const pathData=html.match(/data-rank-line="true" d="([^"]*)"/)[1];
  assert.equal((pathData.match(/M /g)||[]).length,2);assert.equal((pathData.match(/L /g)||[]).length,2);
- assert.match(pathData,/M [\d.]+ 14 L [\d.]+ 206/);
+ assert.match(pathData,/M [\d.]+ 14 L [\d.]+ 261/);
  assert.match(html,/2026-10-28: X daily rank —/);
  assert.equal((html.match(/<button/g)||[]).length,5);assert.equal((html.match(/aria-pressed="true"/g)||[]).length,1);
  assert.match(html,/Independent of the Measure setting/);
+ assert.match(html,/height:275px/);assert.equal((html.match(/data-rank-band=/g)||[]).length,3);
+ for(const group of ['Top 3','Middle','Bottom 3'])assert.ok(html.includes(`data-rank-band="${group}"`));
+ assert.match(html,/#1–#3/);assert.match(html,/#4–#8/);assert.match(html,/#9–#11/);
  const empty=renderToStaticMarkup(React.createElement(Rank,{timeline:[],symbol:'X',name:'Example',universeSize:11,onSelect:()=>{}}));assert.match(empty,/No sessions match these dates/);
  const missing=renderToStaticMarkup(React.createElement(Rank,{timeline:[{date:'2026-10-30',cells:{}}],symbol:'X',name:'Example',universeSize:11,onSelect:()=>{}}));assert.match(missing,/No complete rank comparisons/);
 });
