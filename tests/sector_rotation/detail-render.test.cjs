@@ -808,6 +808,11 @@ test('prediction accuracy scores all history by forecast stage and excludes pend
  assert.deepEqual(stats.byStage.overnight,{completed:2,correct:1,incorrect:1,pending:1,tied:0});
  assert.deepEqual(stats.byStage.premarket,{completed:1,correct:0,incorrect:1,pending:1,tied:0});
  assert.deepEqual(stats.byStage.open30,{completed:2,correct:2,incorrect:0,pending:0,tied:1});
+ assert.deepEqual(stats.byGroup['Top 3'],{completed:4,correct:2,incorrect:2,pending:2,tied:1});
+ assert.deepEqual(stats.byGroup.Middle,{completed:2,correct:1,incorrect:1,pending:0,tied:1});
+ assert.deepEqual(stats.byGroup['Bottom 3'],{completed:0,correct:0,incorrect:0,pending:0,tied:0});
+ assert.deepEqual(stats.byStageGroup.open30['Top 3'],{completed:2,correct:1,incorrect:1,pending:0,tied:1});
+ assert.deepEqual(stats.byStageGroup.open30.Middle,{completed:1,correct:1,incorrect:0,pending:0,tied:1});
  assert.equal(stats.firstDate,'2026-09-01');assert.equal(stats.lastDate,'2026-10-28');assert.equal(stats.completedDates,1);
  const html=renderToStaticMarkup(React.createElement(View,{predictions,results:[result],asOfDate:'2026-10-31'}));
  assert.ok(html.indexOf('aria-label="Prediction Statistics"')<html.indexOf('id="predicting-daily-top-3-sectors"'));
@@ -821,7 +826,21 @@ test('prediction statistics show no success percentage without results and repor
  const View=require(path.join(app,'app/dashboard/sector-rotation/DailyTop3Predictions.tsx')).default;
  const empty=renderToStaticMarkup(React.createElement(View,{predictions:[],results:[],asOfDate:'2026-10-31'}));
  const scorecard=empty.split('id="predicting-daily-top-3-sectors"')[0];
- assert.match(scorecard,/No forecasts recorded yet/);assert.doesNotMatch(scorecard,/0.0%/);assert.equal((scorecard.match(/<td>—<\/td>/g)||[]).length,4);
+ assert.match(scorecard,/No forecasts recorded yet/);assert.doesNotMatch(scorecard,/0.0%/);assert.match(scorecard,/<th scope="row">Overall<\/th><td>0<\/td><td>0<\/td><td>0<\/td><td>0<\/td><td>—<\/td>/);
  const error=renderToStaticMarkup(React.createElement(View,{predictions:[],results:[],asOfDate:'2026-10-31',error:'READ FAILED'}));
  assert.match(error,/Statistics are unavailable/);assert.match(error,/role="alert">READ FAILED/);
+});
+
+test('predicted Bottom 3 metrics score exact group outcomes and keep unmatched results pending',()=>{
+ const {default:View,predictionAccuracy}=require(path.join(app,'app/dashboard/sector-rotation/DailyTop3Predictions.tsx'));
+ const p={target_date:'2026-10-30',stage:'premarket',symbol:'XLE',recorded_at:'2026-10-30T13:00:00Z',data_as_of:'2026-10-30T12:59:00Z',top3:10,middle:20,bottom3:70,confidence:'Low',reason:'Fixture',sources:[],methodology:'judgment-v1',availability:'researched'};
+ const predictions=[p,{...p,symbol:'XLV'},{...p,symbol:'XLK'}];
+ const results=[{target_date:p.target_date,recorded_at:'2026-10-31T06:00:00Z',payload:{ranks:[{symbol:'XLE',rank:10,daily:-1,bucket:'Bottom 3'},{symbol:'XLV',rank:7,daily:-.5,bucket:'Middle'}],ranking_rule:'Fixture',price_sha256:'fixture'}}];
+ const stats=predictionAccuracy(predictions,results,'2026-10-31');
+ assert.deepEqual(stats.byGroup['Bottom 3'],{completed:2,correct:1,incorrect:1,pending:1,tied:0});
+ assert.deepEqual(stats.byStageGroup.premarket['Bottom 3'],stats.byGroup['Bottom 3']);
+ assert.equal(stats.byStageGroup.overnight['Bottom 3'].completed,0);
+ const html=renderToStaticMarkup(React.createElement(View,{predictions,results,asOfDate:'2026-10-31'}));
+ assert.match(html,/Success By Predicted Group/);assert.match(html,/Group Success By Prediction Time/);
+ assert.match(html,/<th scope="row">Bottom 3<\/th><td>2<\/td><td>1<\/td><td>1<\/td><td>1<\/td><td>50.0%<\/td>/);
 });
