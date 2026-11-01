@@ -39,7 +39,8 @@ test('tracker performance chart reverses heatmap chronology to match daily candl
  const heatmap=html.split('<thead>')[1].split('</thead>')[0];
  const dates=[...heatmap.matchAll(/<small>(\d{4}-\d{2}-\d{2})<\/small>/g)].map(m=>m[1]);
  const chartDates=[...html.matchAll(/<time dateTime="(\d{4}-\d{2}-\d{2})"/g)].map(m=>m[1]);
- assert.equal(dates.length,60);assert.deepEqual(chartDates,[...dates].reverse());
+ assert.equal(dates.length,60);assert.deepEqual(chartDates,[...dates].reverse().concat([...dates].reverse()));
+ assert.ok(html.indexOf('aria-label="Daily Rank History"')>html.indexOf('aria-label="Relative daily performance"'));
  const large=renderToStaticMarkup(React.createElement(Chart,{...props,timeline:Array.from({length:120},(_,i)=>({...sessions[0],date:new Date(Date.UTC(2025,0,1+i)).toISOString().slice(0,10)})).reverse()}));
  assert.equal((large.match(/<button/g)||[]).length,120);assert.equal((large.match(/<time dateTime=/g)||[]).length,120);
 });
@@ -893,4 +894,21 @@ test('Event Log renders broken streaks on break date using history outside visib
  assert.match(html,/Daily return<\/td><td><span class="averageUp">Green · 3 sessions/);
  assert.match(html,/<td>2026-10-28<\/td><td>Red<\/td>/);
  assert.equal((html.match(/data-event-date=/g)||[]).length,1);
+});
+
+
+test('Daily Rank History keeps strongest ranks at top, selected dates, ties and missing gaps',()=>{
+ const Rank=require(path.join(app,'app/dashboard/sector-rotation/DailyRankHistory.tsx')).default;
+ const timeline=[1,11,null,4,4].map((rank,i)=>({date:`2026-10-${26+i}`,cells:{X:{rank}}}));
+ const html=renderToStaticMarkup(React.createElement(Rank,{timeline,symbol:'X',name:'Example',universeSize:11,selectedDate:'2026-10-29',onSelect:()=>{}}));
+ assert.match(html,/Selected · 2026-10-29<\/span><strong>#4/);
+ assert.match(html,/Best Visible Rank<\/span><strong>#1/);assert.match(html,/Worst Visible Rank<\/span><strong>#11/);
+ const pathData=html.match(/data-rank-line="true" d="([^"]*)"/)[1];
+ assert.equal((pathData.match(/M /g)||[]).length,2);assert.equal((pathData.match(/L /g)||[]).length,2);
+ assert.match(pathData,/M [\d.]+ 14 L [\d.]+ 206/);
+ assert.match(html,/2026-10-28: X daily rank —/);
+ assert.equal((html.match(/<button/g)||[]).length,5);assert.equal((html.match(/aria-pressed="true"/g)||[]).length,1);
+ assert.match(html,/Independent of the Measure setting/);
+ const empty=renderToStaticMarkup(React.createElement(Rank,{timeline:[],symbol:'X',name:'Example',universeSize:11,onSelect:()=>{}}));assert.match(empty,/No sessions match these dates/);
+ const missing=renderToStaticMarkup(React.createElement(Rank,{timeline:[{date:'2026-10-30',cells:{}}],symbol:'X',name:'Example',universeSize:11,onSelect:()=>{}}));assert.match(missing,/No complete rank comparisons/);
 });
