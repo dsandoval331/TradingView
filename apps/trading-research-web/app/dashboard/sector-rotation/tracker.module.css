@@ -82,3 +82,10 @@
 .predictionReason{font-size:13px;line-height:1.7;overflow-wrap:anywhere;white-space:pre-wrap}
 
 .top3Section .eventDay :is(h3,h4,h5,h6){color:var(--amber)}
+
+/* Supporting notes use the MULtipLY brand green without changing metric or alert colors. */
+.tracker{--note-color:var(--accent,#7ee2b8);--note-size:11px}
+.tracker :is(.relativeMeta,.normalMeta,.normalNote,.holdingsMeta,.holdingsNote,.detailNote,.predictionMeta,.predictionReason,.normalMessage,.tableFooter,.footer,.sharedFilters>p,.method p,.method>summary,.eventRules p,.eventRules li,.eventRules>summary,.swingMethods p,.swingReasons p,.winnerHighlights small,.swingTableScroll small,.cards small,.miniTitle>span,.normalAssessment span,.methodOnePanel p,.notice:not([role]),.eventTableScroll caption,.swingTableScroll caption,.top3Section>p:not(.eyebrow):not([role])){font-size:var(--note-size)!important;color:var(--note-color)!important;line-height:1.7}
+.tracker :is(.relativeMeta,.normalNote,.holdingsNote,.method,.notation) a{color:var(--note-color)}
+.notation,.notation>summary{font-size:var(--note-size);color:var(--note-color)}
+.notation>summary{font-weight:400;cursor:pointer;padding:0}
