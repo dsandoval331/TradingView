@@ -66,10 +66,13 @@ function AccuracyTable({rows,heading,caption}:{rows:readonly {label:string;count
 }
 function PredictionStatistics({predictions,results,asOfDate,error}:{predictions:readonly DailyTop3Prediction[];results:readonly DailyTop3Result[];asOfDate:string;error?:string|null}){
  const stats=predictionAccuracy(predictions,results,asOfDate);
- const rows=[{label:'Overall',count:stats.overall},...(['overnight','premarket','open30'] as const).map(stage=>({label:{overnight:'Overnight Outlook',premarket:'Before Market Open',open30:'30 Minutes After Open'}[stage],count:stats.byStage[stage]}))];
+ const rows=(['overnight','premarket','open30'] as const).map(stage=>({label:{overnight:'Overnight Outlook',premarket:'Before Market Open',open30:'30 Minutes After Open'}[stage],count:stats.byStage[stage]}));
+ const overallCards=[{label:'Completed',value:stats.overall.completed},{label:'Correct',value:stats.overall.correct},{label:'Incorrect',value:stats.overall.incorrect},{label:'Pending',value:stats.overall.pending},{label:'Success Rate',value:stats.overall.completed?`${(100*stats.overall.correct/stats.overall.completed).toFixed(1)}%`:'—'}];
  return <section className={`${styles.eventLog} ${styles.top3Section}`} aria-label="Prediction Statistics"><p className={styles.eyebrow}>ALL-HISTORY FORECAST SCORECARD</p><h2>Prediction Statistics</h2>
  {error?<p>Statistics are unavailable while prediction data cannot be loaded.</p>:<>
  <p className={styles.relativeMeta}>{stats.firstDate?`${stats.firstDate} through ${stats.lastDate} · ${stats.completedDates} ${stats.completedDates===1?'date':'dates'} with scored forecasts`:'No forecasts recorded yet.'} · Independent of Sessions and date filters.</p>
+ <h3 className={styles.overallPredictionTitle}>Overall Prediction Statistics</h3>
+ <div className={styles.overallPredictionScroll}><div className={styles.overallPredictionCards} role="group" aria-label="Overall Prediction Statistics">{overallCards.map(card=><article key={card.label}><span>{card.label}</span><strong>{card.value}</strong></article>)}</div></div>
  <details className={styles.predictionStage}><summary className={styles.predictionStageTitle}><h3>Success By Prediction Time</h3></summary><AccuracyTable rows={rows} heading="Prediction Time" caption="Success = actual finishing group matches a highest-probability group"/></details>
  <details className={styles.predictionStage}><summary className={styles.predictionStageTitle}><h3>Success By Predicted Group</h3></summary>
  <AccuracyTable rows={finishGroups.map(group=>({label:group,count:stats.byGroup[group]}))} heading="Predicted Group" caption="Top 3, Middle, and Bottom 3 forecast accuracy"/>
