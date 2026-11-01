@@ -97,3 +97,29 @@
 .overallPredictionCards article{border:1px solid var(--border);border-radius:10px;background:#142130;min-height:110px;padding:18px;display:flex;flex-direction:column;justify-content:space-between;gap:12px}
 .overallPredictionCards span{font-size:12px;color:var(--muted)}
 .overallPredictionCards strong{font-size:28px;font-variant-numeric:tabular-nums;line-height:1.1;color:#eef3f8}
+
+/* Shared typography template for all tracker tabs, based on Daily Predictions. */
+.tracker{--section-size:24px;--subsection-size:16px;--detail-heading-size:14px;--body-size:13px;--table-size:12px;--label-size:12px;--card-value-size:28px;--heading-color:#eef3f8;font-size:var(--body-size);line-height:1.6}
+.tracker h2{font-size:var(--section-size);line-height:1.3;font-weight:700;color:var(--heading-color)}
+.tracker h3{font-size:var(--subsection-size);line-height:1.4;font-weight:700;color:var(--amber)}
+.tracker h4{font-size:var(--detail-heading-size);line-height:1.4;font-weight:700;color:var(--amber)}
+.tracker h5{font-size:var(--body-size);line-height:1.4;font-weight:700;color:var(--amber)}
+.tracker h6{font-size:var(--label-size);line-height:1.4;font-weight:700;color:var(--amber)}
+.tracker .symbolReference h2{font-size:var(--subsection-size);color:var(--amber)}
+.tracker .winnerDaySummary,.tracker .eventDayToggle{font-size:var(--subsection-size);font-weight:600;color:var(--heading-color)}
+.tracker .eventDayToggle>span{font-size:var(--note-size);color:var(--note-color);font-weight:400}
+.tracker .predictionStageTitle{font-size:var(--subsection-size);color:var(--amber)}
+.tracker .predictionStageTitle h3{font:inherit;font-weight:700;color:inherit}
+.tracker .miniTitle{font-size:var(--subsection-size);font-weight:700;color:var(--amber)}
+.tracker .miniTitle>span{font-weight:400}
+.tracker :is(.eventTableScroll table,.swingTableScroll table,.holdings table,.normalMove table){font-size:var(--table-size)}
+.tracker :is(.eventTableScroll,.swingTableScroll,.holdings,.normalMove) thead th{font-size:11px;font-weight:700;color:var(--heading-color)}
+.tracker :is(.filters label,.swingFilterLabel,.methodOneGrid label){font-size:var(--label-size);letter-spacing:0;text-transform:none;color:var(--muted)}
+.tracker :is(.filters select,.filters input,.methodOneGrid select,.methodOneGrid input){font-size:var(--label-size);background:#182636;border:1px solid #354254;border-radius:5px;min-height:36px}
+.tracker :is(.pageTabs button,.tabs button,.swingToggleGroup button){font-size:var(--body-size)}
+.tracker :is(.cards article,.overallPredictionCards article){padding:18px;min-height:110px;gap:12px;border:1px solid var(--border);border-radius:10px;background:#142130}
+.tracker :is(.cards article>span,.overallPredictionCards span){font-size:var(--label-size);color:var(--muted)}
+.tracker :is(.cards strong,.overallPredictionCards strong){font-size:var(--card-value-size);line-height:1.1;font-variant-numeric:tabular-nums;color:var(--heading-color)}
+
+.tracker .overallPredictionCards{min-width:700px}
+.tracker .swingMethods li>strong{font-size:var(--detail-heading-size);color:var(--amber)}
