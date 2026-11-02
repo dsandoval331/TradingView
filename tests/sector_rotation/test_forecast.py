@@ -26,7 +26,8 @@ class ForecastTests(unittest.TestCase):
     def test_window(self):
         et=ZoneInfo('America/New_York')
         self.assertTrue(forecast.eligible_creation('2026-10-26',datetime(2026,10,27,2,tzinfo=et)))
-        self.assertFalse(forecast.eligible_creation('2026-10-26',datetime(2026,10,27,8,tzinfo=et)))
+        self.assertTrue(forecast.eligible_creation('2026-10-26',datetime(2026,10,27,9,24,59,tzinfo=et)))
+        self.assertFalse(forecast.eligible_creation('2026-10-26',datetime(2026,10,27,9,25,tzinfo=et)))
         self.assertFalse(forecast.eligible_creation('2026-10-26',datetime(2026,10,26,2,tzinfo=et)))
         self.assertFalse(forecast.eligible_creation('2026-10-20',datetime(2026,10,27,2,tzinfo=et)))
     def test_outcome_uses_first_next_session_and_preopen_record(self):

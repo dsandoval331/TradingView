@@ -63,7 +63,7 @@ def series(bars):
 
 def eligible_creation(source,now):
     local=now.astimezone(ET); age=(local.date()-datetime.fromisoformat(source).date()).days
-    return 1<=age<=4 and local.time()<time(8)
+    return 1<=age<=4 and local.time()<time(9,25)
 
 def choose_forecast(history):
     current=history[-1] if history else None
