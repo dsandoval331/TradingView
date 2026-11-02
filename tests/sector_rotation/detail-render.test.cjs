@@ -39,7 +39,7 @@ test('tracker performance chart reverses heatmap chronology to match daily candl
  const heatmap=html.split('<thead>')[1].split('</thead>')[0];
  const dates=[...heatmap.matchAll(/<small>(\d{4}-\d{2}-\d{2})<\/small>/g)].map(m=>m[1]);
  const chartDates=[...html.matchAll(/<time dateTime="(\d{4}-\d{2}-\d{2})"/g)].map(m=>m[1]);
- assert.equal(dates.length,60);assert.deepEqual(chartDates,[...dates].reverse().concat([...dates].reverse()));
+ assert.equal(dates.length,60);assert.deepEqual(chartDates,[...dates].reverse().concat([...dates].reverse(),[...dates].reverse()));
  assert.ok(html.indexOf('aria-label="Daily Rank History"')>html.indexOf('aria-label="Relative daily performance"'));
  const large=renderToStaticMarkup(React.createElement(Chart,{...props,timeline:Array.from({length:120},(_,i)=>({...sessions[0],date:new Date(Date.UTC(2025,0,1+i)).toISOString().slice(0,10)})).reverse()}));
  assert.equal((large.match(/<button/g)||[]).length,120);assert.equal((large.match(/<time dateTime=/g)||[]).length,120);
@@ -942,4 +942,19 @@ test('suggestion scorecard uses five cards and excludes missed and no-pick entri
  for(const [label,value] of [['Completed','2'],['Correct','1'],['Incorrect','1'],['Pending','1'],['Success Rate','50.0%']])assert.ok(cards.includes(`<span>${label}</span><strong>${value}</strong>`));
  assert.match(html,/<details class="predictionStage"><summary class="predictionStageTitle"><span>Success By Outcome/);
  assert.match(html,/<details class="predictionStage"><summary class="predictionStageTitle"><span>Suggestion Coverage/);
+});
+
+test('all ETF rank chart has distinct lines, independent controls and fixed universe ranks',()=>{
+ const View=require(path.join(app,'app/dashboard/sector-rotation/AllEtfRankHistory.tsx')).default;
+ const {SECTORS}=require(path.join(app,'app/dashboard/sector-rotation/model.ts'));
+ const timeline=[0,1,2].map((n)=>({date:`2026-10-${28+n}`,cells:Object.fromEntries(SECTORS.map((g,i)=>[g.symbol,{rank:n===1&&i===0?null:((i+n)%11)+1}]))}));
+ const props={timeline,groups:SECTORS,selectedDate:'2026-10-30',onSelect:()=>{}};
+ const html=renderToStaticMarkup(React.createElement(View,props));
+ assert.equal((html.match(/data-etf-series=/g)||[]).length,11);assert.equal((html.match(/type="checkbox"/g)||[]).length,11);
+ assert.equal(new Set([...html.matchAll(/<path[^>]*stroke="([^"]+)"/g)].map(m=>m[1])).size,11);
+ assert.match(html,/height:412.5px/);assert.match(html,/XLK: unavailable/);
+ const state=React.useState;
+ try{React.useState=()=>[{XLK:true},()=>{}];const hidden=renderToStaticMarkup(React.createElement(View,props));assert.doesNotMatch(hidden,/data-etf-series="XLK"/);assert.match(hidden,/data-etf-series="XLV"/);assert.match(hidden,/all 11 ETFs/);
+ React.useState=()=>[Object.fromEntries(SECTORS.map(g=>[g.symbol,true])),()=>{}];assert.match(renderToStaticMarkup(React.createElement(View,props)),/All ETFs are hidden/);
+ }finally{React.useState=state;}
 });
