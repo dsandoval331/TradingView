@@ -763,7 +763,7 @@ test('all-history suggestion counts distinguish pending, no-pick and positive/ne
  const base={version:'sector-next-v1',source_date:'2026-10-26',recorded_at:'2026-10-27T06:15:00Z',payload:{symbol:'XLB',reason:'Saved original reasoning'}};
  const forecasts=[{...base,id:'pending'},{...base,id:'no-pick',payload:{reason:'No supported pattern'}},...[2,-1,0,null].map((value,i)=>({...base,id:`done-${i}`,result:{target_date:'2026-10-27',recorded_at:'2026-10-28T06:15:00Z',payload:{rank:i+1,open_close_pct:value}}}))];
  const html=renderToStaticMarkup(React.createElement(Forecasts,{forecasts}));
- assert.match(html,/6 recorded entries · 5 Long picks · 1 no-pick entries · 4 completed picks · 1 pending picks/);
+ assert.match(html,/6 recorded entries · 5 Long picks · 1 no-pick entries · 0 missed entries · 4 completed picks · 1 pending picks/);
  assert.match(html,/1 positive · 1 negative · 1 unchanged · 1 unavailable/);
  assert.match(html,/Top 3 finishes: 3\/4 ranked results/);
  assert.equal((html.match(/Saved original reasoning/g)||[]).length,5);
@@ -914,4 +914,19 @@ test('Daily Rank History keeps strongest ranks at top, selected dates, ties and 
  assert.match(html,/#1–#3/);assert.match(html,/#4–#8/);assert.match(html,/#9–#11/);
  const empty=renderToStaticMarkup(React.createElement(Rank,{timeline:[],symbol:'X',name:'Example',universeSize:11,onSelect:()=>{}}));assert.match(empty,/No sessions match these dates/);
  const missing=renderToStaticMarkup(React.createElement(Rank,{timeline:[{date:'2026-10-30',cells:{}}],symbol:'X',name:'Example',universeSize:11,onSelect:()=>{}}));assert.match(missing,/No complete rank comparisons/);
+});
+
+
+test('missed forecasts use verified trading dates without inflating prediction statistics',()=>{
+ const {withMissedForecasts}=require(path.join(app,'app/dashboard/sector-rotation/sector-forecast-types.ts'));
+ const View=require(path.join(app,'app/dashboard/sector-rotation/SectorForecasts.tsx')).default;
+ const plans=[{id:'one',source_date:'2026-10-27',recorded_at:'2026-10-28T06:00:00Z',version:'v1',payload:{symbol:'XLB',reason:'Fixture'}}];
+ const dates=['2026-10-27','2026-10-28','2026-10-29','2026-10-30'];
+ const rows=withMissedForecasts(plans,dates,new Date('2026-11-01T15:00:00Z'));
+ assert.equal(rows.length,3);assert.deepEqual(rows.filter(r=>r.payload.missed_target_date).map(r=>r.payload.missed_target_date),['2026-10-30','2026-10-29']);
+ const html=renderToStaticMarkup(React.createElement(View,{forecasts:rows}));assert.match(html,/1 recorded entries · 1 Long picks · 0 no-pick entries · 2 missed entries/);assert.match(html,/Missed Suggestion · 2026-10-30/);
+ assert.equal(withMissedForecasts(plans,dates,new Date('2026-10-29T13:24:59Z')).length,1);
+ assert.equal(withMissedForecasts(plans,dates,new Date('2026-10-29T13:25:00Z')).length,2);
+ assert.equal(withMissedForecasts(plans,['2026-10-27','2026-10-28','2026-11-02'],new Date('2026-11-01T15:00:00Z')).length,1);
+ assert.deepEqual(withMissedForecasts([],dates),[]);
 });
