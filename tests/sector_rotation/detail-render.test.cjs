@@ -39,7 +39,7 @@ test('tracker performance chart reverses heatmap chronology to match daily candl
  const heatmap=html.split('<thead>')[1].split('</thead>')[0];
  const dates=[...heatmap.matchAll(/<small>(\d{4}-\d{2}-\d{2})<\/small>/g)].map(m=>m[1]);
  const chartDates=[...html.matchAll(/<time dateTime="(\d{4}-\d{2}-\d{2})"/g)].map(m=>m[1]);
- assert.equal(dates.length,60);assert.deepEqual(chartDates,[...dates].reverse().slice(-20).concat([...dates].reverse(),[...dates].reverse()));
+ assert.equal(dates.length,60);assert.deepEqual(chartDates,[...dates].reverse().slice(-5).concat([...dates].reverse(),[...dates].reverse()));
  assert.ok(html.indexOf('aria-label="Daily Rank History"')>html.indexOf('aria-label="Relative daily performance"'));
  const large=renderToStaticMarkup(React.createElement(Chart,{...props,timeline:Array.from({length:120},(_,i)=>({...sessions[0],date:new Date(Date.UTC(2025,0,1+i)).toISOString().slice(0,10)})).reverse()}));
  assert.equal((large.match(/<button/g)||[]).length,120);assert.equal((large.match(/<time dateTime=/g)||[]).length,120);
@@ -961,7 +961,7 @@ test('all ETF rank chart has distinct lines, independent controls and fixed univ
 });
 
 
-test('all ETF rank history defaults to 20 sessions with independent 60, 120 and all ranges',()=>{
+test('all ETF rank history defaults to 5 sessions with independent alternate ranges',()=>{
  const View=require(path.join(app,'app/dashboard/sector-rotation/AllEtfRankHistory.tsx')).default;
  const timeline=Array.from({length:140},(_,i)=>({date:new Date(Date.UTC(2026,0,1+i)).toISOString().slice(0,10),cells:{X:{rank:1}}}));
  const props={timeline,groups:[{symbol:'X',name:'Example',short:'Example'}],selectedDate:undefined,onSelect:()=>{}};
