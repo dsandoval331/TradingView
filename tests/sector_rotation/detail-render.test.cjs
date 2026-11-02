@@ -763,9 +763,9 @@ test('all-history suggestion counts distinguish pending, no-pick and positive/ne
  const base={version:'sector-next-v1',source_date:'2026-10-26',recorded_at:'2026-10-27T06:15:00Z',payload:{symbol:'XLB',reason:'Saved original reasoning'}};
  const forecasts=[{...base,id:'pending'},{...base,id:'no-pick',payload:{reason:'No supported pattern'}},...[2,-1,0,null].map((value,i)=>({...base,id:`done-${i}`,result:{target_date:'2026-10-27',recorded_at:'2026-10-28T06:15:00Z',payload:{rank:i+1,open_close_pct:value}}}))];
  const html=renderToStaticMarkup(React.createElement(Forecasts,{forecasts}));
- assert.match(html,/6 recorded entries · 5 Long picks · 1 no-pick entries · 0 missed entries · 4 completed picks · 1 pending picks/);
+ assert.match(html,/aria-label="Overall Suggestion Statistics"/);assert.match(html,/Recorded Entries<\/th><td>6/);assert.match(html,/Long Picks<\/th><td>5/);assert.match(html,/Pending Picks<\/th><td>1/);
  assert.match(html,/1 positive · 1 negative · 1 unchanged · 1 unavailable/);
- assert.match(html,/Top 3 finishes: 3\/4 ranked results/);
+ assert.match(html,/Top 3 Finish<\/th><td>4<\/td><td>3<\/td><td>1<\/td><td>75.0%/);
  assert.equal((html.match(/Saved original reasoning/g)||[]).length,5);
  assert.match(html,/Earlier next-session suggestions \(5\)/);
 });
@@ -924,9 +924,22 @@ test('missed forecasts use verified trading dates without inflating prediction s
  const dates=['2026-10-27','2026-10-28','2026-10-29','2026-10-30'];
  const rows=withMissedForecasts(plans,dates,new Date('2026-11-01T15:00:00Z'));
  assert.equal(rows.length,3);assert.deepEqual(rows.filter(r=>r.payload.missed_target_date).map(r=>r.payload.missed_target_date),['2026-10-30','2026-10-29']);
- const html=renderToStaticMarkup(React.createElement(View,{forecasts:rows}));assert.match(html,/1 recorded entries · 1 Long picks · 0 no-pick entries · 2 missed entries/);assert.match(html,/Missed Suggestion · 2026-10-30/);
+ const html=renderToStaticMarkup(React.createElement(View,{forecasts:rows}));assert.match(html,/Recorded Entries<\/th><td>1/);assert.match(html,/Missed Entries<\/th><td>2/);assert.match(html,/Missed Suggestion · 2026-10-30/);
  assert.equal(withMissedForecasts(plans,dates,new Date('2026-10-29T13:24:59Z')).length,1);
  assert.equal(withMissedForecasts(plans,dates,new Date('2026-10-29T13:25:00Z')).length,2);
  assert.equal(withMissedForecasts(plans,['2026-10-27','2026-10-28','2026-11-02'],new Date('2026-11-01T15:00:00Z')).length,1);
  assert.deepEqual(withMissedForecasts([],dates),[]);
+});
+
+test('suggestion scorecard uses five cards and excludes missed and no-pick entries from target accuracy',()=>{
+ const View=require(path.join(app,'app/dashboard/sector-rotation/SectorForecasts.tsx')).default;
+ const base={source_date:'2026-10-27',recorded_at:'2026-10-28T06:00:00Z',version:'v1',payload:{symbol:'XLB',reason:'Fixture'}};
+ const outcome=top1_green=>({target_date:'2026-10-28',recorded_at:'2026-10-29T06:00:00Z',payload:{top1_green,rank:top1_green?1:4,open_close_pct:1}});
+ const forecasts=[{...base,id:'yes',result:outcome(true)},{...base,id:'no',result:outcome(false)},{...base,id:'pending'},{...base,id:'no-pick',payload:{reason:'No match'}},{...base,id:'missed',recorded_at:'',payload:{reason:'Missed',missed_target_date:'2026-10-30'}}];
+ const html=renderToStaticMarkup(React.createElement(View,{forecasts}));
+ const cards=html.match(/aria-label="Overall Suggestion Statistics">([\s\S]*?)<\/div>/)[1];
+ assert.equal((cards.match(/<article/g)||[]).length,5);
+ for(const [label,value] of [['Completed','2'],['Correct','1'],['Incorrect','1'],['Pending','1'],['Success Rate','50.0%']])assert.ok(cards.includes(`<span>${label}</span><strong>${value}</strong>`));
+ assert.match(html,/<details class="predictionStage"><summary class="predictionStageTitle"><span>Success By Outcome/);
+ assert.match(html,/<details class="predictionStage"><summary class="predictionStageTitle"><span>Suggestion Coverage/);
 });
