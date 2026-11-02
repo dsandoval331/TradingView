@@ -123,3 +123,8 @@
 
 .tracker .overallPredictionCards{min-width:700px}
 .tracker .swingMethods li>strong{font-size:var(--detail-heading-size);color:var(--amber)}
+
+/* Broken streak outcomes follow their values rather than column position. */
+.eventTableScroll [data-broken-streaks] td:nth-child(5){color:inherit}
+.eventTableScroll [data-broken-streaks] td.averageUp{color:#52d9aa}
+.eventTableScroll [data-broken-streaks] td.averageDown{color:#ff8496}

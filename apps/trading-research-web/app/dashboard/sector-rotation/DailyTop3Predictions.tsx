@@ -82,6 +82,40 @@ function PredictionStatistics({predictions,results,asOfDate,error}:{predictions:
  </>}
  </section>;
 }
+function ImprovingPredictions({predictions,results,asOfDate,error}:{predictions:readonly DailyTop3Prediction[];results:readonly DailyTop3Result[];asOfDate:string;error?:string|null}){
+ const stats=predictionAccuracy(predictions,results,asOfDate);
+ const byDate=new Map(results.map(result=>[result.target_date,result]));
+ const scored=predictions.filter(p=>p.target_date<=asOfDate).flatMap(p=>{
+  const rank=byDate.get(p.target_date)?.payload.ranks.find(row=>row.symbol===p.symbol)?.rank;
+  if(rank===undefined||!Number.isInteger(rank)||rank<1||rank>11)return [];
+  const group=rank<=3?'Top 3':rank<=8?'Middle':'Bottom 3';
+  return [{prediction:p,group,correct:mostLikely(p).includes(group)}];
+ });
+ const rate=(wins:number,total:number)=>total?`${(100*wins/total).toFixed(1)}% (${wins}/${total})`:'Awaiting results';
+ const perEtf=TOP3_SYMBOLS.map(symbol=>{const rows=scored.filter(row=>row.prediction.symbol===symbol);return {symbol,rows,correct:rows.filter(row=>row.correct).length,middle:rows.filter(row=>row.group==='Middle').length};});
+ const stagePairs=new Map<string,Partial<Record<PredictionStage,typeof scored[number]>>>();
+ for(const row of scored){const key=`${row.prediction.target_date}:${row.prediction.symbol}`;const pair=stagePairs.get(key)??{};pair[row.prediction.stage]=row;stagePairs.set(key,pair);}
+ const pairs=[...stagePairs.values()].filter(pair=>pair.premarket&&pair.open30);
+ const improved=pairs.filter(pair=>!pair.premarket!.correct&&pair.open30!.correct).length;
+ const worsened=pairs.filter(pair=>pair.premarket!.correct&&!pair.open30!.correct).length;
+ const availability=[{label:'Baseline-only estimates',rows:scored.filter(row=>row.prediction.availability==='baseline_only')},{label:'Estimates with additional inputs',rows:scored.filter(row=>row.prediction.availability!=='baseline_only')}];
+ return <section className={`${styles.eventLog} ${styles.top3Section}`} aria-label="Improving Predictions"><h2>Improving Predictions</h2>
+ {error?<p>Learning summaries are unavailable while prediction data cannot be loaded.</p>:<>
+ <p className={styles.relativeMeta}>Updated from verified recorded outcomes · {stats.completedDates} scored trading dates · {scored.length} ETF/time forecasts. Multiple forecasts on one date are related observations. These are exploratory comparisons; no prediction rules change automatically.</p>
+ <h3>Where Forecasts Need Improvement</h3>
+ <div className={styles.eventTableScroll}><table><caption>Same scored forecasts for each ETF; the comparison always predicts Middle</caption><thead><tr><th scope="col">ETF</th><th scope="col">Completed</th><th scope="col">Forecast Success</th><th scope="col">Always-Middle Comparison</th></tr></thead><tbody>{perEtf.map(row=><tr key={row.symbol}><th scope="row">{row.symbol}</th><td>{row.rows.length}</td><td>{rate(row.correct,row.rows.length)}</td><td>{rate(row.middle,row.rows.length)}</td></tr>)}</tbody></table></div>
+ <p className={styles.relativeMeta}>Middle covers five ranks; Top 3 and Bottom 3 each cover three. Comparing against an always-Middle forecast helps reveal whether accuracy exceeds a simple alternative on these same observations. It is a historical comparison, not an expected future success rate.</p>
+ <h3>Does The After-Open Update Help?</h3>
+ <p>{pairs.length} matched ETF/date pairs with verified before-open and after-open forecasts: {improved} changed from incorrect to correct; {worsened} changed from correct to incorrect; {pairs.length-improved-worsened} had unchanged correctness.</p>
+ <p className={styles.relativeMeta}>Only matched ETF/date pairs enter this comparison. Net additional correct forecasts: {improved-worsened}. This measures changes in finishing-group accuracy, not trade returns or a proven benefit from waiting.</p>
+ <h3>Baseline Estimates Versus Additional Inputs</h3>
+ <div className={styles.eventTableScroll}><table><caption>Input availability as recorded with the original forecast</caption><thead><tr><th scope="col">Forecast Type</th><th scope="col">Completed</th><th scope="col">Success</th></tr></thead><tbody>{availability.map(row=><tr key={row.label}><th scope="row">{row.label}</th><td>{row.rows.length}</td><td>{rate(row.rows.filter(r=>r.correct).length,row.rows.length)}</td></tr>)}</tbody></table></div>
+ <p className={styles.relativeMeta}>Different dates, ETFs and prediction times can explain differences between these groups. Small samples do not establish that additional inputs improve forecasts. Pending results are excluded throughout.</p>
+ <h3>What We Are Learning To Check Next</h3>
+ <ul><li>Track accuracy by ETF, prediction time and predicted group together, rather than optimizing only overall success.</li><li>Check whether probability estimates match actual finishing frequencies as more verified dates accumulate; highest-group accuracy alone does not validate the percentages.</li><li>Test candidate changes on later dates excluded from development. Eventual closing rank is an outcome and cannot be used as an opening-time predictor.</li></ul>
+ </>}
+ </section>;
+}
 function Snapshot({rows,result}:{rows:readonly DailyTop3Prediction[];result?:DailyTop3Result}){
  const shared=sharedResearchPrefix(rows);
  const sameMetadata=rows.every(p=>p.recorded_at===rows[0].recorded_at&&p.data_as_of===rows[0].data_as_of&&p.methodology===rows[0].methodology);
@@ -97,5 +131,5 @@ export default function DailyTop3Predictions({predictions,results,asOfDate,error
  const renderDay=(date:string,i:number)=>{const rows=predictions.filter(p=>p.target_date===date),result=results.find(r=>r.target_date===date),available=stages.filter(stage=>rows.some(p=>p.stage===stage));return <details key={date} className={`${styles.eventDay} ${i%2?styles.eventDayAlternate:''}`}><summary className={styles.winnerDaySummary}>{date} · {rows.length?result?'Results available':'Awaiting results':'No forecast recorded'}</summary>{!rows.length?<p>No forecast was recorded for this date. Historical predictions are not backfilled.</p>:<>{!result&&<p role="status">Awaiting this session’s verified closing results.</p>}{result&&<p className={styles.relativeMeta}>Closing results recorded {timestamp(result.recorded_at)}. {result.payload.ranking_rule}</p>}{available.map((stage,index)=><details key={stage} className={styles.predictionStage}><summary className={styles.predictionStageTitle}><h3>{index===0?'Current Prediction · ':''}{STAGE_LABELS[stage]}</h3></summary><Snapshot rows={rows.filter(p=>p.stage===stage)} result={result}/></details>)}</>}</details>;};
  return <><PredictionStatistics predictions={predictions} results={results} asOfDate={asOfDate} error={error}/><section id="predicting-daily-top-3-sectors" className={`${styles.eventLog} ${styles.top3Section}`} aria-label="Predicting Daily Top 3 Sectors"><p className={styles.eyebrow}>RECORDED FORECASTS &amp; CLOSING RESULTS</p><h2>Predicting Daily Top 3 Sectors <span className={styles.swingBeta}>(Beta)</span></h2><p>XLE, XLV and XLK each compete against all 11 sector ETFs. Top 3 = ranks 1–3; Middle = 4–8; Bottom 3 = 9–11, ranked by close versus the previous session’s close. Negative returns can still finish Top 3.</p><p className={styles.relativeMeta}>Research checks: 8:25 AM CT before open and 9:00 AM CT after 30 minutes, on market weekdays. Each snapshot remains separate. Results and analysis append after the verified overnight price refresh, rather than live at the closing bell. Independent of heatmap filters. Current week listed first; Monday also includes the previous Friday. All dates start collapsed and remain available to expand.</p><p className={styles.relativeMeta}>Probabilities are uncalibrated analyst judgments, not measured model accuracy. Confidence describes evidence quality. One day cannot validate a probability; a Top 3 finish does not establish a profitable trade.</p>
  {error?<p role="alert">{error}</p>:<>{dates.filter(date=>currentDates.has(date)).map(renderDay)}{dates.some(date=>!currentDates.has(date))&&<details className={styles.eventRules}><summary>Older daily predictions ({dates.filter(date=>!currentDates.has(date)).length})</summary>{dates.filter(date=>!currentDates.has(date)).map((date,i)=>renderDay(date,i+currentDates.size))}</details>}</>}
- </section></>;
+ </section><ImprovingPredictions predictions={predictions} results={results} asOfDate={asOfDate} error={error}/></>;
 }
