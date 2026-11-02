@@ -892,7 +892,8 @@ test('Event Log renders broken streaks on break date using history outside visib
  const html=renderToStaticMarkup(React.createElement(EventLog,{sessions:days,visibleSessions:days.slice(-1),groups:eventGroup,metric:'relative',line:'none',asOfDate:'2026-10-29',onSelect:()=>{}}));
  assert.match(html,/<h4>Broken Streaks<\/h4>/);assert.match(html,/data-broken-streaks/);
  assert.match(html,/Daily return<\/td><td><span class="averageUp">Green · 3 sessions/);
- assert.match(html,/<td>2026-10-28<\/td><td>Red<\/td>/);
+ assert.match(html,/<td>2026-10-28<\/td><td class="averageDown">Red<\/td>/);
+ assert.match(html,/<td class="averageUp">Green<\/td>/);
  assert.equal((html.match(/data-event-date=/g)||[]).length,1);
 });
 
@@ -971,4 +972,19 @@ test('all ETF rank history defaults to 20 sessions with independent 60, 120 and 
  assert.equal((html.match(/<time dateTime=/g)||[]).length,count);assert.ok(html.includes(timeline.at(-1).date));
  assert.match(html,/Independent of the page’s Sessions, date range, and Measure settings/);
  }}finally{React.useState=state;}
+});
+
+test('prediction learning uses matched scored pairs and excludes pending and future forecasts',()=>{
+ const View=require(path.join(app,'app/dashboard/sector-rotation/DailyTop3Predictions.tsx')).default;
+ const base={target_date:'2026-10-30',symbol:'XLE',recorded_at:'2026-10-30T14:00:00Z',data_as_of:'2026-10-30T13:59:00Z',top3:60,middle:30,bottom3:10,confidence:'Low',sources:[],methodology:'judgment-v1',availability:'baseline_only',reason:'Fixture'};
+ const predictions=[{...base,stage:'premarket'},{...base,stage:'open30',top3:20,middle:70,availability:'research_adjusted'},{...base,stage:'overnight',symbol:'XLK'},{...base,stage:'premarket',target_date:'2026-11-02'},{...base,stage:'open30',target_date:'2026-11-03'}];
+ const results=[{target_date:'2026-10-30',recorded_at:base.recorded_at,payload:{ranks:[{symbol:'XLE',rank:5,daily:1,bucket:'Middle'}],ranking_rule:'Fixture'}}];
+ const html=renderToStaticMarkup(React.createElement(View,{predictions,results,asOfDate:'2026-11-02'})).split('aria-label="Improving Predictions"')[1];
+ assert.match(html,/1 scored trading dates · 2 ETF\/time forecasts/);
+ assert.match(html,/1 matched ETF\/date pairs.*1 changed from incorrect to correct; 0 changed from correct to incorrect/);
+ assert.match(html,/XLE<\/th><td>2<\/td><td>50.0% \(1\/2\)<\/td><td>100.0% \(2\/2\)/);
+ assert.match(html,/Baseline-only estimates<\/th><td>1<\/td><td>0.0% \(0\/1\)/);
+ assert.match(html,/Estimates with additional inputs<\/th><td>1<\/td><td>100.0% \(1\/1\)/);
+ const empty=renderToStaticMarkup(React.createElement(View,{predictions:[],results:[],asOfDate:'2026-11-02'}));
+ assert.match(empty,/Awaiting results/);assert.doesNotMatch(empty,/NaN|Infinity/);
 });
