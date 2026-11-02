@@ -3,17 +3,21 @@ import {useState} from 'react';
 import type {Group,Session} from './model';
 import {chartLayout} from './chart-layout';
 import styles from './tracker.module.css';
+import {sessionWindow} from './session-window';
 const COLORS=['#5ee6b0','#ffb454','#73b7ff','#ff84b7','#c4a0ff','#f6ed78','#4edbe8','#ff8067','#b8df85','#d6bba3','#a5aaff'];
-export default function AllEtfRankHistory({timeline,groups,selectedDate,onSelect}:{timeline:readonly Session[];groups:readonly Group[];selectedDate:string|undefined;onSelect:(date:string)=>void}){
+export default function AllEtfRankHistory({timeline:history,groups,selectedDate,onSelect}:{timeline:readonly Session[];groups:readonly Group[];selectedDate:string|undefined;onSelect:(date:string)=>void}){
+ const [range,setRange]=useState('20');
+ const duration=sessionWindow(range),timeline=duration==='all'?history:history.slice(-duration);
  const [hidden,setHidden]=useState<Record<string,boolean>>({});
  const layout=chartLayout(timeline.length),height=412.5,padding=14;
  const y=(rank:number)=>padding+(rank-1)/Math.max(1,groups.length-1)*(height-padding*2);
  const series=groups.map((g,i)=>{const ranks=timeline.map(day=>{const r=day.cells[g.symbol]?.rank;return r!=null&&Number.isFinite(r)&&r>=1&&r<=groups.length?r:null;});return {...g,color:COLORS[i%COLORS.length],ranks,path:ranks.map((r,j)=>r===null?'':`${j===0||ranks[j-1]===null?'M':'L'} ${(j+.5)*layout.slot} ${y(r)}`).join(' ')};});
  const visible=series.filter(g=>!hidden[g.symbol]);
  return <section className={styles.performancePanel} aria-label="All ETF Daily Rank History"><h2>All ETF Daily Rank History</h2>
-  <p className={styles.relativeMeta}>{timeline.length} selected sessions · Oldest to newest → · #1 is strongest · Follows Sessions and date filters; independent of Measure</p>
+  <div className={styles.methodOneGrid}><label>Rank History Range<select aria-label="All ETF rank history range" value={range} onChange={event=>setRange(event.target.value)}><option value="20">Last 20 Sessions</option><option value="60">Last 60 Sessions</option><option value="120">Last 120 Sessions</option><option value="all">All Available</option></select></label></div>
+  <p className={styles.relativeMeta}>{timeline.length} trading sessions · Oldest to newest → · #1 is strongest · Independent of the page’s Sessions, date range, and Measure settings</p>
   <fieldset style={{border:'1px solid #354254',borderRadius:8,padding:14,margin:'14px 0'}}><legend>ETF Legend And Visibility</legend><div style={{display:'flex',flexWrap:'wrap',gap:'12px 24px'}}>{series.map(g=><label key={g.symbol} style={{display:'flex',alignItems:'center',gap:8,cursor:'pointer',fontSize:13}} title={g.name}><input type="checkbox" checked={!hidden[g.symbol]} aria-label={`Show ${g.symbol}`} onChange={()=>setHidden(previous=>({...previous,[g.symbol]:!previous[g.symbol]}))} style={{accentColor:g.color,width:16,height:16}}/><span aria-hidden="true" style={{width:24,borderTop:`3px solid ${g.color}`}}/><span style={{color:g.color}}>{g.symbol}</span><span className={styles.srOnly}>{g.name}</span></label>)}</div></fieldset>
-  {!timeline.length?<p>No sessions match these dates.</p>:<>
+  {!timeline.length?<p>No rank history is available.</p>:<>
    {!visible.length&&<p role="status">All ETFs are hidden. Enable an ETF above to display its rank history.</p>}
    {visible.length>0&&!visible.some(g=>g.ranks.some(r=>r!==null))&&<p>No complete rank comparisons are available in this range.</p>}
    <div className={styles.chartScroll} tabIndex={0} role="region" aria-label="Scrollable all ETF daily rank history"><div data-chart-width={layout.width} style={{width:layout.width,paddingLeft:layout.left,paddingRight:layout.right}}>
