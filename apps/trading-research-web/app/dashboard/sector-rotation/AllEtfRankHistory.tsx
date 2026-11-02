@@ -5,7 +5,7 @@ import {chartLayout} from './chart-layout';
 import styles from './tracker.module.css';
 const COLORS=['#5ee6b0','#ffb454','#73b7ff','#ff84b7','#c4a0ff','#f6ed78','#4edbe8','#ff8067','#b8df85','#d6bba3','#a5aaff'];
 export default function AllEtfRankHistory({timeline:history,groups,selectedDate,onSelect}:{timeline:readonly Session[];groups:readonly Group[];selectedDate:string|undefined;onSelect:(date:string)=>void}){
- const [range,setRange]=useState('20');
+ const [range,setRange]=useState('5');
  const duration=range==='all'?'all':Number(range),timeline=duration==='all'?history:history.slice(-duration);
  const [hidden,setHidden]=useState<Record<string,boolean>>({});
  const layout=chartLayout(timeline.length),height=618.75,padding=14;
