@@ -952,7 +952,7 @@ test('all ETF rank chart has distinct lines, independent controls and fixed univ
  const html=renderToStaticMarkup(React.createElement(View,props));
  assert.equal((html.match(/data-etf-series=/g)||[]).length,11);assert.equal((html.match(/type="checkbox"/g)||[]).length,11);
  assert.equal(new Set([...html.matchAll(/<path[^>]*stroke="([^"]+)"/g)].map(m=>m[1])).size,11);
- assert.match(html,/height:412.5px/);assert.match(html,/XLK: unavailable/);
+ assert.match(html,/height:618.75px/);assert.match(html,/XLK: unavailable/);
  const state=React.useState;
  try{React.useState=initial=>[typeof initial==='string'?initial:{XLK:true},()=>{}];const hidden=renderToStaticMarkup(React.createElement(View,props));assert.doesNotMatch(hidden,/data-etf-series="XLK"/);assert.match(hidden,/data-etf-series="XLV"/);assert.match(hidden,/all 11 ETFs/);
  React.useState=initial=>[typeof initial==='string'?initial:Object.fromEntries(SECTORS.map(g=>[g.symbol,true])),()=>{}];assert.match(renderToStaticMarkup(React.createElement(View,props)),/All ETFs are hidden/);
@@ -965,7 +965,7 @@ test('all ETF rank history defaults to 20 sessions with independent 60, 120 and 
  const timeline=Array.from({length:140},(_,i)=>({date:new Date(Date.UTC(2026,0,1+i)).toISOString().slice(0,10),cells:{X:{rank:1}}}));
  const props={timeline,groups:[{symbol:'X',name:'Example',short:'Example'}],selectedDate:undefined,onSelect:()=>{}};
  const state=React.useState;
- try{for(const [range,count] of [['20',20],['60',60],['120',120],['all',140]]){
+ try{for(const [range,count] of [['5',5],['10',10],['15',15],['20',20],['60',60],['120',120],['all',140]]){
  React.useState=initial=>[typeof initial==='string'?range:initial,()=>{}];
  const html=renderToStaticMarkup(React.createElement(View,props));
  assert.equal((html.match(/<time dateTime=/g)||[]).length,count);assert.ok(html.includes(timeline.at(-1).date));
