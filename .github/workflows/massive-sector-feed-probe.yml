@@ -1,0 +1,52 @@
+name: Massive Sector Feed Probe
+on:
+  push:
+    branches: [work/massive-sector-feed-probe-20261103]
+    paths: [.github/workflows/massive-sector-feed-probe.yml]
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    env:
+      MASSIVE_API_KEY: ${{ secrets.MASSIVE_API_KEY }}
+      TR_MASSIVE_API_KEY: ${{ secrets.TR_MASSIVE_API_KEY }}
+    steps:
+      - name: Check current-day bars without writing data
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          from datetime import datetime, time
+          from urllib.error import HTTPError, URLError
+          from urllib.request import Request, urlopen
+          from zoneinfo import ZoneInfo
+
+          ct = ZoneInfo("America/Chicago")
+          now = datetime.now(ct)
+          cutoff = datetime.combine(now.date(), time(8, 5), ct)
+          start = datetime.combine(now.date(), time(3), ct)
+          key = os.getenv("MASSIVE_API_KEY") or os.getenv("TR_MASSIVE_API_KEY")
+          if not key:
+              raise SystemExit("Collector credential unavailable")
+
+          print("Observed at", now.isoformat())
+          for symbol in ("XLE", "XLV", "XLK"):
+              url = f"https://api.massive.com/v2/aggs/ticker/{symbol}/range/1/minute/{int(start.timestamp()*1000)}/{int(now.timestamp()*1000)}?limit=5000"
+              request = Request(url, headers={"Authorization": f"Bearer {key}"})
+              try:
+                  with urlopen(request, timeout=10) as response:
+                      bars = json.load(response).get("results", [])
+                      status = response.status
+              except HTTPError as error:
+                  print(symbol, "HTTP", error.code)
+                  continue
+              except (URLError, TimeoutError, ValueError):
+                  print(symbol, "request failed")
+                  continue
+              stamps = [datetime.fromtimestamp(bar["t"]/1000, ct) for bar in bars]
+              eligible = [stamp for stamp in stamps if stamp < cutoff]
+              print(symbol, "HTTP", status, "latest", max(stamps, default=None),
+                    "latest completed by 08:05 CT", max(eligible, default=None))
+          PY
