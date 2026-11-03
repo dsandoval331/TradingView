@@ -6,3 +6,5 @@
 .card:focus-visible{outline:3px solid #f2b84b;outline-offset:2px}
 @media(max-width:1000px){.row{gap:12px}.card{gap:14px}.card span{font-size:13px}}
 @media(prefers-reduced-motion:reduce){.card{transition:none}}
+
+@media(max-width:640px){.row{grid-template-columns:minmax(0,1fr);overflow-x:visible;gap:16px}.card{width:100%;max-width:260px;justify-self:center;gap:20px}.card span{font-size:15px}}
