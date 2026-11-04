@@ -1,7 +1,7 @@
 name: TFM Trading Scan
 on:
   push:
-    branches: [feature/sector-tfm-work]
+    branches: [main, feature/sector-tfm-work]
     paths:
       - 'scripts/tfm/**'
       - 'tests/tfm/**'
