@@ -65,3 +65,7 @@ Primary deterministic computation runs directly on existing Supabase Postgres us
 All 72 actual symbols have all 25 eligible weeks (1,800 complete triplets). Reference bars before May 4 are retained solely to score the first target week. Five-year coverage is still unverified. Forward tracking remains separate and starts only when setups are actually recorded before the target session.
 
 Routine scans begin at the earliest already-recorded Friday when records exist. They settle/append forward records without silently expanding the authorized six-month historical cohort. Any older backfill remains a separate operation.
+
+## Monthly instances and release authorization
+
+User explicitly authorized production/main release and showing the October 29–30 / November 2 historical instances in the current month. Monthly assignment now uses the nominal Monday (Friday + 3 days), including when the observed outcome is on holiday Tuesday. Thus May 31 Monday / June 1 Tuesday belongs to May. Monthly tracking starts with Monday 2026-11-02. Those imported historical records remain immutable HISTORICAL and stay out of forward-only lifetime statistics; they remain visible in the monthly archive after the month rolls over. Older backtest instances remain aggregate-only.

@@ -20,11 +20,19 @@ export function partitions(rows:Setup[],asOf:string) {
  return {current:candidates.filter(r=>r.target_date>=asOf),previous:candidates.filter(r=>r.friday===previousDate),archive:candidates.filter(r=>r.target_date<asOf&&r.friday!==previousDate)};
 }
 
+// Monthly tracking begins with the user-requested October 29–30 / November 2 week.
+export const MONTHLY_TRACKING_START='2026-11-02';
+export function mondayDate(row:Pick<Setup,'friday'>){
+ const d=new Date(row.friday+'T12:00:00Z');d.setUTCDate(d.getUTCDate()+3);
+ return d.toISOString().slice(0,10);
+}
+export function trackingMonth(row:Pick<Setup,'friday'>){return mondayDate(row).slice(0,7);}
 export function trackingSections(rows:Setup[],asOf:string){
  const live=rows.filter(r=>r.origin==='PROSPECTIVE');
+ const tracked=rows.filter(r=>r.origin==='PROSPECTIVE'||mondayDate(r)>=MONTHLY_TRACKING_START);
  const month=asOf.slice(0,7);
- return {live,historical:rows.filter(r=>r.origin==='HISTORICAL'),current:live.filter(r=>r.qualifies&&r.target_date.slice(0,7)===month),older:live.filter(r=>r.target_date.slice(0,7)<month)};
+ return {live,historical:rows.filter(r=>r.origin==='HISTORICAL'),current:tracked.filter(r=>r.qualifies&&trackingMonth(r)===month),older:tracked.filter(r=>trackingMonth(r)<month)};
 }
 export function monthGroups(rows:Setup[]){
- return [...new Set(rows.map(r=>r.target_date.slice(0,7)))].sort().reverse().map(month=>({month,rows:rows.filter(r=>r.target_date.startsWith(month))}));
+ return [...new Set(rows.map(trackingMonth))].sort().reverse().map(month=>({month,rows:rows.filter(r=>trackingMonth(r)===month)}));
 }
