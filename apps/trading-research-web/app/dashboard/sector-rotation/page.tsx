@@ -1,3 +1,6 @@
+import TFMDashboard from './tfm/TFMDashboard';
+import {loadTFM} from './tfm/data';
+import {SECTORS} from './model';
 import DailyTop3Predictions from './DailyTop3Predictions';
 import {loadDailyTop3} from './top-three-data';
 import {loadSwingSuggestions} from './swing-data';
@@ -11,7 +14,8 @@ import { Bar } from './model';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Sector Rotation | MULtipLY' };
-export default async function SectorRotationPage() {
+export default async function SectorRotationPage({searchParams}:{searchParams:Promise<{tab?:string}>}) {
+  const initialTab=(await searchParams).tab;
   const supabase = await createClient();
   const {data:claims,error:authError} = await supabase.auth.getClaims();
   if (authError || !claims?.claims) redirect('/login');
@@ -29,6 +33,6 @@ export default async function SectorRotationPage() {
       if ((result.data?.length??0)<1000) break;
     }
   }
-  const [forecastData,top3Data,swingSuggestions]=await Promise.all([loadSectorForecasts(),loadDailyTop3(),loadSwingSuggestions()]);
-  return <main><TrackerNav/><Tracker dailyPredictions={<DailyTop3Predictions predictions={top3Data.predictions} results={top3Data.results} error={top3Data.error} asOfDate={marketDate()}/>} winnerForecasts={forecastData.rows} winnerForecastError={forecastData.error} swingSuggestions={swingSuggestions} asOfDate={marketDate()} bars={bars} updatedAt={latest?.completed_at??null} latestSession={latest?.latest_session??null} runStatus={runs?.[0]?.status??'NOT_STARTED'} error={error}/></main>;
+  const [forecastData,top3Data,swingSuggestions,tfm]=await Promise.all([loadSectorForecasts(),loadDailyTop3(),loadSwingSuggestions(),loadTFM(supabase,SECTORS.map(g=>g.symbol))]);
+  return <main><TrackerNav/><Tracker initialTab={initialTab} tfmPanel={<TFMDashboard {...tfm} asOf={marketDate()} scopeLabel="Sector ETFs"/>} dailyPredictions={<DailyTop3Predictions predictions={top3Data.predictions} results={top3Data.results} error={top3Data.error} asOfDate={marketDate()}/>} winnerForecasts={forecastData.rows} winnerForecastError={forecastData.error} swingSuggestions={swingSuggestions} asOfDate={marketDate()} bars={bars} updatedAt={latest?.completed_at??null} latestSession={latest?.latest_session??null} runStatus={runs?.[0]?.status??'NOT_STARTED'} error={error}/></main>;
 }
