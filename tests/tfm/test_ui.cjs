@@ -18,5 +18,6 @@ for(const scopeLabel of ['Sector ETFs','Tech & AI','S&P 500 Top 50']){
  assert.match(html,/<details[^>]*><summary>Previous months/);
  assert.ok(html.indexOf('Live results')<html.indexOf('Historical results'));
  assert.ok(!html.includes('Current candidates'));
+ assert.ok(!html.includes('<input')&&!html.includes('<select'),'Symbol search and target-session controls must be absent');
 }
 console.log('TFM SSR: three scopes, current-month live rows, collapsed prior months, aggregate-only history PASS');
