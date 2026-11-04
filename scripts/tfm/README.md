@@ -55,3 +55,11 @@ Each page has independent **Live results** (prospective origin only) and **Histo
 V1's frozen database contract remains unchanged; the explicitly requested extra Tech & AI universe is recorded as tfm-bearish-v2. Initial backfill remains historical; only setups recorded before their target open can enter live tracking.
 
 Additional check: `node tests/tfm/test_ui.cjs` verifies SSR visibility with synthetic fixtures after app dependencies are installed.
+
+## Authorized six-month load, 2026-11-04
+
+User requested target sessions May 4–November 3, 2026 and a separate check of October 29–30. The actual source boundary is November 2, covering the latest target session. No website merge or publication is required for this data load.
+
+Primary deterministic computation runs directly on existing Supabase Postgres using `backfill_20261104_six_months.sql` (DIRECT GOVERNED EXECUTION). `prepare_sql_backfill.py` independently verifies the full exchange calendar, source OHLC and response hashes, SPY EMA category, strict pattern/gap booleans and excursion formulas, then packages the existing atomic publication RPC. JSON integral-float canonicalization makes equivalent SQL/REST numbers produce stable hashes; the frozen rule contract hash is unchanged. All loaded instances are HISTORICAL. No market-provider requests, paid resources or live brokerage actions are involved.
+
+All 72 actual symbols have all 25 eligible weeks (1,800 complete triplets). Reference bars before May 4 are retained solely to score the first target week. Five-year coverage is still unverified. Forward tracking remains separate and starts only when setups are actually recorded before the target session.

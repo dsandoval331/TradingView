@@ -18,6 +18,9 @@ def sample():
 NOW=datetime(2026,11,3,12,tzinfo=ET)
 
 class EngineTests(unittest.TestCase):
+    def test_price_hash_survives_equivalent_json_numeric_types(self):
+        self.assertEqual(digest({"prices":[100.0,100.25]}),digest({"prices":[100,100.25]}))
+
     def test_strict_hit_and_excursions(self):
         s,r,_=evaluate(sample(),NOW)
         self.assertTrue(s[0]['qualifies']);self.assertTrue(r[0]['hit'])

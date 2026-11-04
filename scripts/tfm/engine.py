@@ -17,7 +17,14 @@ SYMBOLS = SECTORS + TECH_ETFS + STOCKS
 
 
 def digest(value):
-    return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(',', ':'), allow_nan=False).encode()).hexdigest()
+    # JSON transports may serialize 100.0 as 100. Canonicalize integral floats
+    # so SQL- and REST-delivered identical prices retain the same provenance hash.
+    def canonical(v):
+        if isinstance(v, float) and v.is_integer():return int(v)
+        if isinstance(v, dict):return {k:canonical(x) for k,x in v.items()}
+        if isinstance(v, (list, tuple)):return [canonical(x) for x in v]
+        return v
+    return hashlib.sha256(json.dumps(canonical(value), sort_keys=True, separators=(',', ':'), allow_nan=False).encode()).hexdigest()
 
 
 def nth_weekday(year, month, weekday, n):
