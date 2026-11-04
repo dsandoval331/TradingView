@@ -6,7 +6,7 @@ import os
 import re
 import sys
 import uuid
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'sector_rotation'))
 from collect import request_json
@@ -51,13 +51,16 @@ def scan(db, sha, external_id=None, now=None):
             rows.extend(source_rows)
         # Require provenance for every bar, never accept untraceable observations.
         if any(not r.get('run_id') or not re.fullmatch('[a-f0-9]{64}',r.get('response_sha256','')) for r in rows):raise ValueError('SOURCE_PROVENANCE_MISSING')
-        setups,results,coverage=evaluate(rows,now)
-        existing_setups=load('tfm_setups?select=setup_key,setup_sha256,run_id&rule_version=eq.'+VERSION+'&order=setup_key')
+        existing_setups=load('tfm_setups?select=setup_key,setup_sha256,run_id,friday&rule_version=eq.'+VERSION+'&order=setup_key')
         existing_results=load('tfm_outcomes?select=setup_key,result_sha256,run_id&order=setup_key')
         # A partial publication must not be mistaken for a successful prior run.
         runs=load('tfm_runs?select=run_id,status&rule_version=eq.'+VERSION+'&order=run_id')
         published={r['run_id'] for r in runs if r['status']=='COMPLETE'}
         if any(r['run_id'] not in published for r in existing_setups+existing_results):raise ValueError('PARTIAL_PUBLICATION_REQUIRES_RECOVERY')
+        # Preserve the authorized loaded history boundary on routine scans.
+        # Older backfills require a separate explicit operation, not an automatic expansion.
+        first_friday=min((r['friday'] for r in existing_setups),default=None)
+        setups,results,coverage=evaluate(rows,now,start=date.fromisoformat(first_friday) if first_friday else None)
         additions,new_results,corrections=reconcile(setups,results,existing_setups,existing_results)
         setup_rows=[{**{k:s[k] for k in ('setup_key','rule_version','symbol','friday','target_date','cohort','qualifies','origin','setup_sha256')},'run_id':run_id,'payload':s} for s in additions]
         result_rows=[{'setup_key':r['setup_key'],'run_id':run_id,'setup_sha256':r['setup_sha256'],'result_sha256':r['result_sha256'],'payload':r} for r in new_results]
