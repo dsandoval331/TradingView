@@ -76,7 +76,7 @@ class EngineTests(unittest.TestCase):
         self.assertFalse(new);self.assertFalse(results);self.assertEqual(diag['reference_corrections'],1)
     def test_universe_does_not_include_unrequested_or_leveraged(self):
         from engine import SYMBOLS
-        self.assertEqual(len(SYMBOLS),62);self.assertNotIn('TQQQ',SYMBOLS);self.assertNotIn('SPY',SYMBOLS)
+        self.assertEqual(len(SYMBOLS),len(set(SYMBOLS)));self.assertIn('IGV',SYMBOLS);self.assertIn('VRT',SYMBOLS);self.assertNotIn('TQQQ',SYMBOLS);self.assertNotIn('SPY',SYMBOLS)
 
 class ScannerIntegrationTests(unittest.TestCase):
     def test_atomic_publication_and_no_provider_calls(self):

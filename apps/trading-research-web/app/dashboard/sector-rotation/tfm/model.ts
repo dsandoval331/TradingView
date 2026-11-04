@@ -1,6 +1,6 @@
-export const RULE_VERSION = 'tfm-bearish-v1';
+export const RULE_VERSION = 'tfm-bearish-v2';
 export type SourceBar = {symbol:string;trade_date:string;open:number;high:number;low:number;close:number;run_id:string;response_sha256:string;source_view:string};
-export type SetupPayload = {asset_class:'SECTOR_ETF'|'STOCK';market_condition:string;thursday_high:number;friday_high:number;friday_low:number;friday_close:number;reference_bars:SourceBar[]};
+export type SetupPayload = {asset_class:'SECTOR_ETF'|'ETF'|'STOCK';market_condition:string;thursday_high:number;friday_high:number;friday_low:number;friday_close:number;reference_bars:SourceBar[]};
 export type OutcomePayload = {hit:boolean;gap_through:boolean;mfe_pct:number;mae_pct:number;close_return_pct:number;target_bar:SourceBar};
 export type Setup = {setup_key:string;symbol:string;friday:string;target_date:string;cohort:'MONDAY'|'TUESDAY_HOLIDAY';qualifies:boolean;origin:'HISTORICAL'|'PROSPECTIVE';recorded_at:string;payload:SetupPayload;outcome:OutcomePayload|null};
 export type Coverage = {source_first?:string;source_last?:string;requested_start?:string;five_year_complete?:boolean;invalid_bars?:number;missing_setup_pairs?:number;missing_matured_outcomes?:number;history_label?:string;symbols?:Record<string,{bars:number;first:string|null;last:string|null}>};
@@ -18,4 +18,13 @@ export function partitions(rows:Setup[],asOf:string) {
  const candidates=rows.filter(r=>r.qualifies);
  const previousDate=candidates.filter(r=>r.target_date<asOf).map(r=>r.friday).sort().at(-1);
  return {current:candidates.filter(r=>r.target_date>=asOf),previous:candidates.filter(r=>r.friday===previousDate),archive:candidates.filter(r=>r.target_date<asOf&&r.friday!==previousDate)};
+}
+
+export function trackingSections(rows:Setup[],asOf:string){
+ const live=rows.filter(r=>r.origin==='PROSPECTIVE');
+ const month=asOf.slice(0,7);
+ return {live,historical:rows.filter(r=>r.origin==='HISTORICAL'),current:live.filter(r=>r.qualifies&&r.target_date.slice(0,7)===month),older:live.filter(r=>r.target_date.slice(0,7)<month)};
+}
+export function monthGroups(rows:Setup[]){
+ return [...new Set(rows.map(r=>r.target_date.slice(0,7)))].sort().reverse().map(month=>({month,rows:rows.filter(r=>r.target_date.startsWith(month))}));
 }

@@ -1,14 +1,14 @@
-# TFM Trading — MWE-SECTOR-TFM-001
+# TFM Trading v2 — MWE-SECTOR-TFM-001
 
 Canonical thread: **Tool: Sector Rotation Tracker**. Authority: E1. Cost policy: ZERO_INCREMENTAL_COST_FIRST.
 
 ## Contract
 
-`rules.json` is frozen in `public.tfm_rules` before the first real outcome evaluation. Canonical sorted JSON SHA-256: `3a63191b150b428782b29d3c375c0b80d98fea0af3c2ddee0f4c3907b7e61426`.
+`rules.json` is frozen in `public.tfm_rules` before the first real outcome evaluation. Canonical sorted JSON SHA-256: `86ed9d54dfc225da2869da5b53c126ef4a325243b79796ca8881d17222f8ae19`.
 
 The strict bearish pattern is Friday high below Thursday high; Monday low below Friday low is a hit. Exact equality fails. An actual Monday exchange holiday substitutes Tuesday, with an independent UI cohort. Missing symbol/benchmark bars do not imply holidays. Literal Thursday and Friday must both be sessions. Early closes are included. Calendar: 2021–2027, including the January 9, 2025 extraordinary closure; outside this horizon fails closed.
 
-Universe: all 11 sector ETFs plus the **51 share classes** in the app's existing Top 50 snapshot dated 2026-10-23. SPY is context only. Frozen current membership is subject to survivorship bias; this does not represent historical index membership. No protected research tables are read or modified.
+Universe: all 11 sector ETFs, the **51 share classes** in the app's existing Top 50 snapshot dated 2026-10-23, and the IGV ETF plus actual Tech & AI member stocks. Overlapping stocks are counted once. Synthetic baskets are never scored from invented OHLC. SPY is context only. Frozen current membership is subject to survivorship bias; this does not represent historical index membership. No protected research tables are read or modified.
 
 ### Metrics
 
@@ -45,3 +45,13 @@ The repository is public and the workflow uses standard `ubuntu-latest`, with no
 - `npm ci --ignore-scripts --no-audit --no-fund` then `npm run build` in `apps/trading-research-web`
 
 Deployment/authenticated UI verification, first real run results and five-year data-source feasibility must be reported with their actual status; none is implied by a build passing.
+
+## Revised page layout (user request)
+
+TFM Trading is a sibling tab of Market Overview, Event Log and Swing Trades on Main Sectors, Tech & AI detail and S&P 500 Top 50 Index. Main Sectors is restricted to the 11 sector ETFs; other pages load only their own actual tradable symbols. The old standalone route redirects to the Main Sectors TFM tab.
+
+Each page has independent **Live results** (prospective origin only) and **Historical results** (historical origin only) aggregates. Live lifetime statistics include prior months. Only the current target-session month shows instance rows initially; older months are retained in a collapsed archive with per-month statistics. Historical individual occurrences are never rendered. Target-month grouping means an October Friday with a November Monday belongs in November.
+
+V1's frozen database contract remains unchanged; the explicitly requested extra Tech & AI universe is recorded as tfm-bearish-v2. Initial backfill remains historical; only setups recorded before their target open can enter live tracking.
+
+Additional check: `node tests/tfm/test_ui.cjs` verifies SSR visibility with synthetic fixtures after app dependencies are installed.

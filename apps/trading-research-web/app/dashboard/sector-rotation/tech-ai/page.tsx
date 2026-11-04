@@ -1,3 +1,5 @@
+import TFMDashboard from '../tfm/TFMDashboard';
+import {loadTFM} from '../tfm/data';
 import {loadSwingSuggestions} from '../swing-data';
 import {marketDate} from '../swing-trades';
 import TrackerNav from '../TrackerNav';
@@ -9,7 +11,8 @@ import { TECH_GROUPS, buildTechBars } from './model';
 
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Tech & AI Rotation | MULtipLY' };
-export default async function TechAIPage() {
+export default async function TechAIPage({searchParams}:{searchParams:Promise<{tab?:string}>}) {
+  const initialTab=(await searchParams).tab;
   const supabase = await createClient();
   const {data:claims,error:authError} = await supabase.auth.getClaims();
   if (authError || !claims?.claims) redirect('/login');
@@ -27,5 +30,7 @@ export default async function TechAIPage() {
       if ((result.data?.length??0)<1000) break;
     }
   }
-  return <main><TrackerNav/><Tracker swingSuggestions={await loadSwingSuggestions()} asOfDate={marketDate()} tech groups={TECH_GROUPS} title="Tech & AI rotation" bars={buildTechBars(bars)} updatedAt={latest?.completed_at??null} latestSession={latest?.latest_session??null} runStatus={runs?.[0]?.status??'NOT_STARTED'} error={error}/></main>;
+  const tfmSymbols=[...new Set(TECH_GROUPS.flatMap(g=>g.members??[g.symbol]))];
+  const tfm=await loadTFM(supabase,tfmSymbols);
+  return <main><TrackerNav/><Tracker initialTab={initialTab} tfmPanel={<TFMDashboard {...tfm} asOf={marketDate()} scopeLabel="Tech &amp; AI" scopeNote="IGV and actual member stocks from the Tech & AI groups; overlapping stocks count once. Synthetic basket indices are not scored."/>} swingSuggestions={await loadSwingSuggestions()} asOfDate={marketDate()} tech groups={TECH_GROUPS} title="Tech & AI rotation" bars={buildTechBars(bars)} updatedAt={latest?.completed_at??null} latestSession={latest?.latest_session??null} runStatus={runs?.[0]?.status??'NOT_STARTED'} error={error}/></main>;
 }

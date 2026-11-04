@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'sector_rotation'))
 from collect import request_json
-from engine import RULES, VERSION, SYMBOLS, SECTORS, STOCKS, digest, evaluate
+from engine import RULES, VERSION, SYMBOLS, SECTORS, STOCKS, TECH_STOCKS, TECH_ETFS, digest, evaluate
 
 MWE_UUID='19dd7129-0d19-4c1b-a65b-03480a925b8d'
 
@@ -44,7 +44,7 @@ def scan(db, sha, external_id=None, now=None):
         raise ValueError('PAGINATION_LIMIT')
     try:
         rows=[]
-        for source,symbols in [('v_sector_daily_latest',('SPY',)+SECTORS),('v_stock_daily_latest',STOCKS)]:
+        for source,symbols in [('v_sector_daily_latest',('SPY',)+SECTORS),('v_stock_daily_latest',tuple(s for s in STOCKS if s not in TECH_STOCKS)),('v_tech_daily_latest',TECH_ETFS+TECH_STOCKS)]:
             select='symbol,trade_date,open,high,low,close,run_id,collected_at,response_sha256'
             source_rows=load(source+'?select='+select+'&symbol=in.('+','.join(symbols)+')&order=symbol,trade_date')
             for row in source_rows:row['source_view']=source

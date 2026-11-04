@@ -11,7 +11,9 @@ RULES = json.loads(Path(__file__).with_name('rules.json').read_text())
 VERSION = RULES['version']
 SECTORS = tuple(RULES['universe']['sector_etfs'])
 STOCKS = tuple(RULES['universe']['stocks'])
-SYMBOLS = SECTORS + STOCKS
+TECH_STOCKS = tuple(RULES['universe']['tech_stocks'])
+TECH_ETFS = tuple(RULES['universe']['tech_etfs'])
+SYMBOLS = SECTORS + TECH_ETFS + STOCKS
 
 
 def digest(value):
@@ -110,7 +112,7 @@ def regime(index, friday):
 def observation(symbol, friday, target, cohort, thursday_bar, friday_bar, now, market):
     setup={
         'rule_version':VERSION,'symbol':symbol,'friday':friday.isoformat(),'target_date':target.isoformat(),
-        'cohort':cohort,'asset_class':'SECTOR_ETF' if symbol in SECTORS else 'STOCK',
+        'cohort':cohort,'asset_class':'SECTOR_ETF' if symbol in SECTORS else 'ETF' if symbol in TECH_ETFS else 'STOCK',
         'qualifies':Decimal(str(friday_bar['high']))<Decimal(str(thursday_bar['high'])),
         'market_condition':market,
         'thursday_high':float(thursday_bar['high']),'friday_high':float(friday_bar['high']),
