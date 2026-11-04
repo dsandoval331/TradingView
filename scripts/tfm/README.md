@@ -69,3 +69,7 @@ Routine scans begin at the earliest already-recorded Friday when records exist. 
 ## Monthly instances and release authorization
 
 User explicitly authorized production/main release and showing the October 29–30 / November 2 historical instances in the current month. Monthly assignment now uses the nominal Monday (Friday + 3 days), including when the observed outcome is on holiday Tuesday. Thus May 31 Monday / June 1 Tuesday belongs to May. Monthly tracking starts with Monday 2026-11-02. Those imported historical records remain immutable HISTORICAL and stay out of forward-only lifetime statistics; they remain visible in the monthly archive after the month rolls over. Older backtest instances remain aggregate-only.
+
+## Live-results population correction
+
+User clarified that the monthly tracking period must populate Live Results and must be excluded from Historical Results. Live Results now includes every eligible symbol-week whose nominal Monday is November 2, 2026 or later, irrespective of recording origin. Historical Results includes only nominal Mondays before that boundary. These are disjoint time cohorts. Imported instances keep HISTORICAL origin, collection provenance and actual recording timestamps; UI explicitly states that the tracking totals include imports and are not a wholly prospective signal-performance record. Pattern, baseline and excursion formulas are unchanged.

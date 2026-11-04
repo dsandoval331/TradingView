@@ -28,10 +28,10 @@ export function mondayDate(row:Pick<Setup,'friday'>){
 }
 export function trackingMonth(row:Pick<Setup,'friday'>){return mondayDate(row).slice(0,7);}
 export function trackingSections(rows:Setup[],asOf:string){
- const live=rows.filter(r=>r.origin==='PROSPECTIVE');
- const tracked=rows.filter(r=>r.origin==='PROSPECTIVE'||mondayDate(r)>=MONTHLY_TRACKING_START);
+ const live=rows.filter(r=>mondayDate(r)>=MONTHLY_TRACKING_START);
+ const tracked=live;
  const month=asOf.slice(0,7);
- return {live,historical:rows.filter(r=>r.origin==='HISTORICAL'),current:tracked.filter(r=>r.qualifies&&trackingMonth(r)===month),older:tracked.filter(r=>trackingMonth(r)<month)};
+ return {live,historical:rows.filter(r=>mondayDate(r)<MONTHLY_TRACKING_START),current:tracked.filter(r=>r.qualifies&&trackingMonth(r)===month),older:tracked.filter(r=>trackingMonth(r)<month)};
 }
 export function monthGroups(rows:Setup[]){
  return [...new Set(rows.map(trackingMonth))].sort().reverse().map(month=>({month,rows:rows.filter(r=>trackingMonth(r)===month)}));
