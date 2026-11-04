@@ -1,3 +1,5 @@
+# Trigger the read-only Massive feed probe
+
 name: Massive Sector Feed Probe
 on:
   push:
