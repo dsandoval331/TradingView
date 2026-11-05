@@ -58,3 +58,15 @@ export function summarizeAlternate(rows:Setup[],rules:AlternateRules=DEFAULT_ALT
  const valid=validAlternateRules(rules);
  return {n:completed.length,alternate,combined:hits+alternate,alternateRate:valid&&completed.length?alternate/completed.length*100:null,combinedRate:valid&&completed.length?(hits+alternate)/completed.length*100:null,prospectiveN:prospective.length,prospectiveAlternate,prospectiveRate:valid&&prospective.length?prospectiveAlternate/prospective.length*100:null};
 }
+
+// Outcome groups overlap deliberately: alternate successes are a subset of primary misses.
+export function summarizeExcursions(rows:Setup[],rules:AlternateRules=DEFAULT_ALTERNATE_RULES){
+ const completed=rows.filter(r=>r.qualifies&&r.outcome!==null);
+ const group=(items:Setup[])=>({n:items.length,
+  mfe:items.length?items.reduce((sum,r)=>sum+r.outcome!.mfe_pct,0)/items.length:null,
+  mae:items.length?items.reduce((sum,r)=>sum+r.outcome!.mae_pct,0)/items.length:null});
+ return {hits:group(completed.filter(r=>r.outcome!.hit)),
+  misses:group(completed.filter(r=>!r.outcome!.hit)),
+  alternate:validAlternateRules(rules)?group(completed.filter(r=>alternateSuccess(r,rules))):null,
+  all:group(completed)};
+}
