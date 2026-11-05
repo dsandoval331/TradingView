@@ -1,0 +1,1644 @@
+{
+  "buckets": [
+    {
+      "feature": "Close vs Thursday",
+      "bucket": "HIGHER_OR_EQUAL",
+      "phases": {
+        "DEV": {
+          "n": 73,
+          "mae": 1.46,
+          "mfe": 1.87,
+          "alts": 10,
+          "hits": 36,
+          "rate": 63.01,
+          "wins": 46,
+          "weeks": 11,
+          "weekly_lift": -17.9
+        },
+        "CHECK": {
+          "n": 116,
+          "mae": 1.34,
+          "mfe": 1.11,
+          "alts": 11,
+          "hits": 45,
+          "rate": 48.28,
+          "wins": 56,
+          "weeks": 11,
+          "weekly_lift": -6.01
+        }
+      }
+    },
+    {
+      "feature": "Close vs Thursday",
+      "bucket": "LOWER",
+      "phases": {
+        "DEV": {
+          "n": 255,
+          "mae": 1.55,
+          "mfe": 2.55,
+          "alts": 22,
+          "hits": 151,
+          "rate": 67.84,
+          "wins": 173,
+          "weeks": 11,
+          "weekly_lift": 0.63
+        },
+        "CHECK": {
+          "n": 211,
+          "mae": 1.33,
+          "mfe": 1.32,
+          "alts": 18,
+          "hits": 103,
+          "rate": 57.35,
+          "wins": 121,
+          "weeks": 11,
+          "weekly_lift": 4.67
+        },
+        "LAST_WEEK": {
+          "n": 38,
+          "mae": 1.09,
+          "mfe": 4.07,
+          "alts": 2,
+          "hits": 23,
+          "rate": 65.79,
+          "wins": 25,
+          "weeks": 1,
+          "weekly_lift": 0
+        }
+      }
+    },
+    {
+      "feature": "Combo lower-low red",
+      "bucket": "NO",
+      "phases": {
+        "DEV": {
+          "n": 157,
+          "mae": 1.61,
+          "mfe": 2.07,
+          "alts": 22,
+          "hits": 80,
+          "rate": 64.97,
+          "wins": 102,
+          "weeks": 11,
+          "weekly_lift": -3.55
+        },
+        "CHECK": {
+          "n": 183,
+          "mae": 1.45,
+          "mfe": 1.22,
+          "alts": 15,
+          "hits": 69,
+          "rate": 45.9,
+          "wins": 84,
+          "weeks": 11,
+          "weekly_lift": -6.79
+        },
+        "LAST_WEEK": {
+          "n": 8,
+          "mae": 2.15,
+          "mfe": 3.18,
+          "alts": 0,
+          "hits": 4,
+          "rate": 50,
+          "wins": 4,
+          "weeks": 1,
+          "weekly_lift": -15.79
+        }
+      }
+    },
+    {
+      "feature": "Combo lower-low red",
+      "bucket": "YES",
+      "phases": {
+        "DEV": {
+          "n": 171,
+          "mae": 1.46,
+          "mfe": 2.71,
+          "alts": 10,
+          "hits": 107,
+          "rate": 68.42,
+          "wins": 117,
+          "weeks": 11,
+          "weekly_lift": -2.45
+        },
+        "CHECK": {
+          "n": 144,
+          "mae": 1.18,
+          "mfe": 1.28,
+          "alts": 14,
+          "hits": 79,
+          "rate": 64.58,
+          "wins": 93,
+          "weeks": 11,
+          "weekly_lift": 11.86
+        },
+        "LAST_WEEK": {
+          "n": 30,
+          "mae": 0.81,
+          "mfe": 4.31,
+          "alts": 2,
+          "hits": 19,
+          "rate": 70,
+          "wins": 21,
+          "weeks": 1,
+          "weekly_lift": 4.21
+        }
+      }
+    },
+    {
+      "feature": "Combo SMA20 lower-third",
+      "bucket": "NO",
+      "phases": {
+        "DEV": {
+          "n": 241,
+          "mae": 1.56,
+          "mfe": 2.34,
+          "alts": 27,
+          "hits": 129,
+          "rate": 64.73,
+          "wins": 156,
+          "weeks": 11,
+          "weekly_lift": -1.4
+        },
+        "CHECK": {
+          "n": 239,
+          "mae": 1.37,
+          "mfe": 1.16,
+          "alts": 18,
+          "hits": 105,
+          "rate": 51.46,
+          "wins": 123,
+          "weeks": 11,
+          "weekly_lift": -1.41
+        },
+        "LAST_WEEK": {
+          "n": 24,
+          "mae": 1.2,
+          "mfe": 4.1,
+          "alts": 2,
+          "hits": 11,
+          "rate": 54.17,
+          "wins": 13,
+          "weeks": 1,
+          "weekly_lift": -11.62
+        }
+      }
+    },
+    {
+      "feature": "Combo SMA20 lower-third",
+      "bucket": "YES",
+      "phases": {
+        "DEV": {
+          "n": 87,
+          "mae": 1.45,
+          "mfe": 2.57,
+          "alts": 5,
+          "hits": 58,
+          "rate": 72.41,
+          "wins": 63,
+          "weeks": 11,
+          "weekly_lift": -5.35
+        },
+        "CHECK": {
+          "n": 88,
+          "mae": 1.24,
+          "mfe": 1.46,
+          "alts": 11,
+          "hits": 43,
+          "rate": 61.36,
+          "wins": 54,
+          "weeks": 11,
+          "weekly_lift": 12.7
+        },
+        "LAST_WEEK": {
+          "n": 14,
+          "mae": 0.9,
+          "mfe": 4.02,
+          "alts": 0,
+          "hits": 12,
+          "rate": 85.71,
+          "wins": 12,
+          "weeks": 1,
+          "weekly_lift": 19.92
+        }
+      }
+    },
+    {
+      "feature": "Distance to Friday low",
+      "bucket": "<=0.5%",
+      "phases": {
+        "DEV": {
+          "n": 80,
+          "mae": 1.39,
+          "mfe": 1.56,
+          "alts": 5,
+          "hits": 48,
+          "rate": 66.25,
+          "wins": 53,
+          "weeks": 11,
+          "weekly_lift": 5.28
+        },
+        "CHECK": {
+          "n": 103,
+          "mae": 0.91,
+          "mfe": 1.39,
+          "alts": 9,
+          "hits": 66,
+          "rate": 72.82,
+          "wins": 75,
+          "weeks": 11,
+          "weekly_lift": 18.91
+        },
+        "LAST_WEEK": {
+          "n": 1,
+          "mae": 0.04,
+          "mfe": 1.98,
+          "alts": 0,
+          "hits": 1,
+          "rate": 100,
+          "wins": 1,
+          "weeks": 1,
+          "weekly_lift": 34.21
+        }
+      }
+    },
+    {
+      "feature": "Distance to Friday low",
+      "bucket": ">1.5%",
+      "phases": {
+        "DEV": {
+          "n": 114,
+          "mae": 1.55,
+          "mfe": 3.42,
+          "alts": 21,
+          "hits": 62,
+          "rate": 72.81,
+          "wins": 83,
+          "weeks": 11,
+          "weekly_lift": 5.5
+        },
+        "CHECK": {
+          "n": 66,
+          "mae": 2.36,
+          "mfe": 1.3,
+          "alts": 7,
+          "hits": 11,
+          "rate": 27.27,
+          "wins": 18,
+          "weeks": 11,
+          "weekly_lift": -21.49
+        },
+        "LAST_WEEK": {
+          "n": 22,
+          "mae": 1.27,
+          "mfe": 4.96,
+          "alts": 2,
+          "hits": 13,
+          "rate": 68.18,
+          "wins": 15,
+          "weeks": 1,
+          "weekly_lift": 2.39
+        }
+      }
+    },
+    {
+      "feature": "Distance to Friday low",
+      "bucket": "0.5-1.5%",
+      "phases": {
+        "DEV": {
+          "n": 134,
+          "mae": 1.6,
+          "mfe": 2.04,
+          "alts": 6,
+          "hits": 77,
+          "rate": 61.94,
+          "wins": 83,
+          "weeks": 11,
+          "weekly_lift": -6.08
+        },
+        "CHECK": {
+          "n": 158,
+          "mae": 1.18,
+          "mfe": 1.13,
+          "alts": 13,
+          "hits": 71,
+          "rate": 53.16,
+          "wins": 84,
+          "weeks": 11,
+          "weekly_lift": -1.97
+        },
+        "LAST_WEEK": {
+          "n": 15,
+          "mae": 0.9,
+          "mfe": 2.9,
+          "alts": 0,
+          "hits": 9,
+          "rate": 60,
+          "wins": 9,
+          "weeks": 1,
+          "weekly_lift": -5.79
+        }
+      }
+    },
+    {
+      "feature": "Friday candle",
+      "bucket": "GREEN_OR_FLAT",
+      "phases": {
+        "DEV": {
+          "n": 116,
+          "mae": 1.44,
+          "mfe": 2.22,
+          "alts": 21,
+          "hits": 53,
+          "rate": 63.79,
+          "wins": 74,
+          "weeks": 11,
+          "weekly_lift": -6.52
+        },
+        "CHECK": {
+          "n": 130,
+          "mae": 1.46,
+          "mfe": 1.02,
+          "alts": 13,
+          "hits": 43,
+          "rate": 43.08,
+          "wins": 56,
+          "weeks": 11,
+          "weekly_lift": -8.25
+        },
+        "LAST_WEEK": {
+          "n": 8,
+          "mae": 2.15,
+          "mfe": 3.18,
+          "alts": 0,
+          "hits": 4,
+          "rate": 50,
+          "wins": 4,
+          "weeks": 1,
+          "weekly_lift": -15.79
+        }
+      }
+    },
+    {
+      "feature": "Friday candle",
+      "bucket": "RED",
+      "phases": {
+        "DEV": {
+          "n": 212,
+          "mae": 1.58,
+          "mfe": 2.5,
+          "alts": 11,
+          "hits": 134,
+          "rate": 68.4,
+          "wins": 145,
+          "weeks": 11,
+          "weekly_lift": 0.59
+        },
+        "CHECK": {
+          "n": 197,
+          "mae": 1.25,
+          "mfe": 1.39,
+          "alts": 16,
+          "hits": 105,
+          "rate": 61.42,
+          "wins": 121,
+          "weeks": 11,
+          "weekly_lift": 5.69
+        },
+        "LAST_WEEK": {
+          "n": 30,
+          "mae": 0.81,
+          "mfe": 4.31,
+          "alts": 2,
+          "hits": 19,
+          "rate": 70,
+          "wins": 21,
+          "weeks": 1,
+          "weekly_lift": 4.21
+        }
+      }
+    },
+    {
+      "feature": "Friday close location",
+      "bucket": "LOWER THIRD",
+      "phases": {
+        "DEV": {
+          "n": 141,
+          "mae": 1.73,
+          "mfe": 2.53,
+          "alts": 8,
+          "hits": 90,
+          "rate": 69.5,
+          "wins": 98,
+          "weeks": 11,
+          "weekly_lift": 4.61
+        },
+        "CHECK": {
+          "n": 136,
+          "mae": 1.11,
+          "mfe": 1.49,
+          "alts": 12,
+          "hits": 84,
+          "rate": 70.59,
+          "wins": 96,
+          "weeks": 11,
+          "weekly_lift": 20.48
+        },
+        "LAST_WEEK": {
+          "n": 16,
+          "mae": 0.93,
+          "mfe": 3.56,
+          "alts": 0,
+          "hits": 12,
+          "rate": 75,
+          "wins": 12,
+          "weeks": 1,
+          "weekly_lift": 9.21
+        }
+      }
+    },
+    {
+      "feature": "Friday close location",
+      "bucket": "MIDDLE THIRD",
+      "phases": {
+        "DEV": {
+          "n": 104,
+          "mae": 1.45,
+          "mfe": 2.17,
+          "alts": 7,
+          "hits": 55,
+          "rate": 59.62,
+          "wins": 62,
+          "weeks": 11,
+          "weekly_lift": -5.84
+        },
+        "CHECK": {
+          "n": 103,
+          "mae": 1.57,
+          "mfe": 1.19,
+          "alts": 6,
+          "hits": 43,
+          "rate": 47.57,
+          "wins": 49,
+          "weeks": 11,
+          "weekly_lift": -7.13
+        },
+        "LAST_WEEK": {
+          "n": 17,
+          "mae": 0.89,
+          "mfe": 4.91,
+          "alts": 1,
+          "hits": 10,
+          "rate": 64.71,
+          "wins": 11,
+          "weeks": 1,
+          "weekly_lift": -1.08
+        }
+      }
+    },
+    {
+      "feature": "Friday close location",
+      "bucket": "UPPER THIRD",
+      "phases": {
+        "DEV": {
+          "n": 83,
+          "mae": 1.31,
+          "mfe": 2.47,
+          "alts": 17,
+          "hits": 42,
+          "rate": 71.08,
+          "wins": 59,
+          "weeks": 10,
+          "weekly_lift": -0.68
+        },
+        "CHECK": {
+          "n": 88,
+          "mae": 1.41,
+          "mfe": 0.92,
+          "alts": 11,
+          "hits": 21,
+          "rate": 36.36,
+          "wins": 32,
+          "weeks": 11,
+          "weekly_lift": -13.82
+        },
+        "LAST_WEEK": {
+          "n": 5,
+          "mae": 2.25,
+          "mfe": 2.84,
+          "alts": 1,
+          "hits": 1,
+          "rate": 40,
+          "wins": 2,
+          "weeks": 1,
+          "weekly_lift": -25.79
+        }
+      }
+    },
+    {
+      "feature": "Friday low",
+      "bucket": "INSIDE DAY",
+      "phases": {
+        "DEV": {
+          "n": 69,
+          "mae": 1.87,
+          "mfe": 1.5,
+          "alts": 4,
+          "hits": 40,
+          "rate": 63.77,
+          "wins": 44,
+          "weeks": 11,
+          "weekly_lift": -3.13
+        },
+        "CHECK": {
+          "n": 110,
+          "mae": 1.37,
+          "mfe": 1.36,
+          "alts": 7,
+          "hits": 49,
+          "rate": 50.91,
+          "wins": 56,
+          "weeks": 11,
+          "weekly_lift": -3.33
+        }
+      }
+    },
+    {
+      "feature": "Friday low",
+      "bucket": "LOWER LOW",
+      "phases": {
+        "DEV": {
+          "n": 259,
+          "mae": 1.44,
+          "mfe": 2.64,
+          "alts": 28,
+          "hits": 147,
+          "rate": 67.57,
+          "wins": 175,
+          "weeks": 11,
+          "weekly_lift": -0.09
+        },
+        "CHECK": {
+          "n": 217,
+          "mae": 1.32,
+          "mfe": 1.18,
+          "alts": 22,
+          "hits": 99,
+          "rate": 55.76,
+          "wins": 121,
+          "weeks": 11,
+          "weekly_lift": 2.69
+        },
+        "LAST_WEEK": {
+          "n": 38,
+          "mae": 1.09,
+          "mfe": 4.07,
+          "alts": 2,
+          "hits": 23,
+          "rate": 65.79,
+          "wins": 25,
+          "weeks": 1,
+          "weekly_lift": 0
+        }
+      }
+    },
+    {
+      "feature": "Friday opening gap",
+      "bucket": "GAP DOWN >=0.5%",
+      "phases": {
+        "DEV": {
+          "n": 179,
+          "mae": 1.57,
+          "mfe": 3.16,
+          "alts": 26,
+          "hits": 101,
+          "rate": 70.95,
+          "wins": 127,
+          "weeks": 11,
+          "weekly_lift": 11.79
+        },
+        "CHECK": {
+          "n": 108,
+          "mae": 1.5,
+          "mfe": 1.18,
+          "alts": 13,
+          "hits": 34,
+          "rate": 43.52,
+          "wins": 47,
+          "weeks": 10,
+          "weekly_lift": -2.21
+        },
+        "LAST_WEEK": {
+          "n": 34,
+          "mae": 1.15,
+          "mfe": 4.36,
+          "alts": 2,
+          "hits": 21,
+          "rate": 67.65,
+          "wins": 23,
+          "weeks": 1,
+          "weekly_lift": 1.86
+        }
+      }
+    },
+    {
+      "feature": "Friday opening gap",
+      "bucket": "GAP UP >=0.5%",
+      "phases": {
+        "DEV": {
+          "n": 37,
+          "mae": 2.25,
+          "mfe": 1.93,
+          "alts": 0,
+          "hits": 24,
+          "rate": 64.86,
+          "wins": 24,
+          "weeks": 11,
+          "weekly_lift": 1.02
+        },
+        "CHECK": {
+          "n": 79,
+          "mae": 1.47,
+          "mfe": 1.52,
+          "alts": 6,
+          "hits": 43,
+          "rate": 62.03,
+          "wins": 49,
+          "weeks": 11,
+          "weekly_lift": 2.06
+        }
+      }
+    },
+    {
+      "feature": "Friday opening gap",
+      "bucket": "NEUTRAL",
+      "phases": {
+        "DEV": {
+          "n": 112,
+          "mae": 1.23,
+          "mfe": 1.35,
+          "alts": 6,
+          "hits": 62,
+          "rate": 60.71,
+          "wins": 68,
+          "weeks": 11,
+          "weekly_lift": -5.62
+        },
+        "CHECK": {
+          "n": 140,
+          "mae": 1.13,
+          "mfe": 1.14,
+          "alts": 10,
+          "hits": 71,
+          "rate": 57.86,
+          "wins": 81,
+          "weeks": 11,
+          "weekly_lift": -0.07
+        },
+        "LAST_WEEK": {
+          "n": 4,
+          "mae": 0.6,
+          "mfe": 1.61,
+          "alts": 0,
+          "hits": 2,
+          "rate": 50,
+          "wins": 2,
+          "weeks": 1,
+          "weekly_lift": -15.79
+        }
+      }
+    },
+    {
+      "feature": "Friday range",
+      "bucket": "<=2%",
+      "phases": {
+        "DEV": {
+          "n": 77,
+          "mae": 1.12,
+          "mfe": 1.03,
+          "alts": 4,
+          "hits": 42,
+          "rate": 59.74,
+          "wins": 46,
+          "weeks": 10,
+          "weekly_lift": -2.2
+        },
+        "CHECK": {
+          "n": 160,
+          "mae": 0.97,
+          "mfe": 0.89,
+          "alts": 14,
+          "hits": 73,
+          "rate": 54.38,
+          "wins": 87,
+          "weeks": 11,
+          "weekly_lift": -2.01
+        }
+      }
+    },
+    {
+      "feature": "Friday range",
+      "bucket": ">4%",
+      "phases": {
+        "DEV": {
+          "n": 113,
+          "mae": 2.02,
+          "mfe": 3.95,
+          "alts": 21,
+          "hits": 60,
+          "rate": 71.68,
+          "wins": 81,
+          "weeks": 10,
+          "weekly_lift": 14.16
+        },
+        "CHECK": {
+          "n": 53,
+          "mae": 2.2,
+          "mfe": 1.66,
+          "alts": 7,
+          "hits": 18,
+          "rate": 47.17,
+          "wins": 25,
+          "weeks": 9,
+          "weekly_lift": -4.97
+        },
+        "LAST_WEEK": {
+          "n": 26,
+          "mae": 1.11,
+          "mfe": 5.18,
+          "alts": 1,
+          "hits": 19,
+          "rate": 76.92,
+          "wins": 20,
+          "weeks": 1,
+          "weekly_lift": 11.13
+        }
+      }
+    },
+    {
+      "feature": "Friday range",
+      "bucket": "2-4%",
+      "phases": {
+        "DEV": {
+          "n": 138,
+          "mae": 1.36,
+          "mfe": 1.9,
+          "alts": 7,
+          "hits": 85,
+          "rate": 66.67,
+          "wins": 92,
+          "weeks": 11,
+          "weekly_lift": -2.15
+        },
+        "CHECK": {
+          "n": 114,
+          "mae": 1.44,
+          "mfe": 1.55,
+          "alts": 8,
+          "hits": 57,
+          "rate": 57.02,
+          "wins": 65,
+          "weeks": 11,
+          "weekly_lift": 10.84
+        },
+        "LAST_WEEK": {
+          "n": 12,
+          "mae": 1.05,
+          "mfe": 1.67,
+          "alts": 1,
+          "hits": 4,
+          "rate": 41.67,
+          "wins": 5,
+          "weeks": 1,
+          "weekly_lift": -24.12
+        }
+      }
+    },
+    {
+      "feature": "Lower high depth",
+      "bucket": "<=0.5%",
+      "phases": {
+        "DEV": {
+          "n": 65,
+          "mae": 1.38,
+          "mfe": 1.44,
+          "alts": 4,
+          "hits": 36,
+          "rate": 61.54,
+          "wins": 40,
+          "weeks": 11,
+          "weekly_lift": -4.65
+        },
+        "CHECK": {
+          "n": 77,
+          "mae": 1.1,
+          "mfe": 1.13,
+          "alts": 6,
+          "hits": 43,
+          "rate": 63.64,
+          "wins": 49,
+          "weeks": 11,
+          "weekly_lift": 10.54
+        },
+        "LAST_WEEK": {
+          "n": 3,
+          "mae": 1.61,
+          "mfe": 0.33,
+          "alts": 0,
+          "hits": 0,
+          "rate": 0,
+          "wins": 0,
+          "weeks": 1,
+          "weekly_lift": -65.79
+        }
+      }
+    },
+    {
+      "feature": "Lower high depth",
+      "bucket": ">1.5%",
+      "phases": {
+        "DEV": {
+          "n": 163,
+          "mae": 1.67,
+          "mfe": 3.17,
+          "alts": 20,
+          "hits": 97,
+          "rate": 71.78,
+          "wins": 117,
+          "weeks": 11,
+          "weekly_lift": 12.09
+        },
+        "CHECK": {
+          "n": 121,
+          "mae": 1.51,
+          "mfe": 1.33,
+          "alts": 11,
+          "hits": 51,
+          "rate": 51.24,
+          "wins": 62,
+          "weeks": 11,
+          "weekly_lift": -10.05
+        },
+        "LAST_WEEK": {
+          "n": 31,
+          "mae": 1.05,
+          "mfe": 4.73,
+          "alts": 1,
+          "hits": 21,
+          "rate": 70.97,
+          "wins": 22,
+          "weeks": 1,
+          "weekly_lift": 5.18
+        }
+      }
+    },
+    {
+      "feature": "Lower high depth",
+      "bucket": "0.5-1.5%",
+      "phases": {
+        "DEV": {
+          "n": 100,
+          "mae": 1.41,
+          "mfe": 1.77,
+          "alts": 8,
+          "hits": 54,
+          "rate": 62,
+          "wins": 62,
+          "weeks": 11,
+          "weekly_lift": -10.59
+        },
+        "CHECK": {
+          "n": 129,
+          "mae": 1.31,
+          "mfe": 1.23,
+          "alts": 12,
+          "hits": 54,
+          "rate": 51.16,
+          "wins": 66,
+          "weeks": 11,
+          "weekly_lift": -2.03
+        },
+        "LAST_WEEK": {
+          "n": 4,
+          "mae": 0.98,
+          "mfe": 1.76,
+          "alts": 1,
+          "hits": 2,
+          "rate": 75,
+          "wins": 3,
+          "weeks": 1,
+          "weekly_lift": 9.21
+        }
+      }
+    },
+    {
+      "feature": "Range compression",
+      "bucket": "<=0.75",
+      "phases": {
+        "DEV": {
+          "n": 106,
+          "mae": 1.77,
+          "mfe": 1.9,
+          "alts": 4,
+          "hits": 66,
+          "rate": 66.04,
+          "wins": 70,
+          "weeks": 11,
+          "weekly_lift": -2.16
+        },
+        "CHECK": {
+          "n": 177,
+          "mae": 1.26,
+          "mfe": 1.25,
+          "alts": 12,
+          "hits": 79,
+          "rate": 51.41,
+          "wins": 91,
+          "weeks": 11,
+          "weekly_lift": -1.02
+        },
+        "LAST_WEEK": {
+          "n": 2,
+          "mae": 0.69,
+          "mfe": 3.41,
+          "alts": 0,
+          "hits": 2,
+          "rate": 100,
+          "wins": 2,
+          "weeks": 1,
+          "weekly_lift": 34.21
+        }
+      }
+    },
+    {
+      "feature": "Range compression",
+      "bucket": ">1.25",
+      "phases": {
+        "DEV": {
+          "n": 69,
+          "mae": 1.16,
+          "mfe": 2.72,
+          "alts": 13,
+          "hits": 37,
+          "rate": 72.46,
+          "wins": 50,
+          "weeks": 10,
+          "weekly_lift": 0.96
+        },
+        "CHECK": {
+          "n": 26,
+          "mae": 1.35,
+          "mfe": 1.1,
+          "alts": 1,
+          "hits": 17,
+          "rate": 69.23,
+          "wins": 18,
+          "weeks": 10,
+          "weekly_lift": 21.74
+        },
+        "LAST_WEEK": {
+          "n": 24,
+          "mae": 1.09,
+          "mfe": 3.91,
+          "alts": 2,
+          "hits": 13,
+          "rate": 62.5,
+          "wins": 15,
+          "weeks": 1,
+          "weekly_lift": -3.29
+        }
+      }
+    },
+    {
+      "feature": "Range compression",
+      "bucket": "0.75-1.25",
+      "phases": {
+        "DEV": {
+          "n": 153,
+          "mae": 1.53,
+          "mfe": 2.61,
+          "alts": 15,
+          "hits": 84,
+          "rate": 64.71,
+          "wins": 99,
+          "weeks": 11,
+          "weekly_lift": -2.76
+        },
+        "CHECK": {
+          "n": 124,
+          "mae": 1.44,
+          "mfe": 1.27,
+          "alts": 16,
+          "hits": 52,
+          "rate": 54.84,
+          "wins": 68,
+          "weeks": 11,
+          "weekly_lift": 1.39
+        },
+        "LAST_WEEK": {
+          "n": 12,
+          "mae": 1.16,
+          "mfe": 4.5,
+          "alts": 0,
+          "hits": 8,
+          "rate": 66.67,
+          "wins": 8,
+          "weeks": 1,
+          "weekly_lift": 0.88
+        }
+      }
+    },
+    {
+      "feature": "SPY EMA20",
+      "bucket": "SPY_ABOVE_EMA20",
+      "phases": {
+        "DEV": {
+          "n": 185,
+          "mae": 1.27,
+          "mfe": 2.14,
+          "alts": 12,
+          "hits": 122,
+          "rate": 72.43,
+          "wins": 134,
+          "weeks": 7,
+          "weekly_lift": 0
+        },
+        "CHECK": {
+          "n": 191,
+          "mae": 1.18,
+          "mfe": 1.26,
+          "alts": 8,
+          "hits": 103,
+          "rate": 58.12,
+          "wins": 111,
+          "weeks": 7,
+          "weekly_lift": 0
+        }
+      }
+    },
+    {
+      "feature": "SPY EMA20",
+      "bucket": "SPY_BELOW_EMA20",
+      "phases": {
+        "DEV": {
+          "n": 143,
+          "mae": 1.87,
+          "mfe": 2.74,
+          "alts": 20,
+          "hits": 65,
+          "rate": 59.44,
+          "wins": 85,
+          "weeks": 4,
+          "weekly_lift": 0
+        },
+        "CHECK": {
+          "n": 136,
+          "mae": 1.56,
+          "mfe": 1.23,
+          "alts": 21,
+          "hits": 45,
+          "rate": 48.53,
+          "wins": 66,
+          "weeks": 4,
+          "weekly_lift": 0
+        },
+        "LAST_WEEK": {
+          "n": 38,
+          "mae": 1.09,
+          "mfe": 4.07,
+          "alts": 2,
+          "hits": 23,
+          "rate": 65.79,
+          "wins": 25,
+          "weeks": 1,
+          "weekly_lift": 0
+        }
+      }
+    },
+    {
+      "feature": "Stock SMA20",
+      "bucket": "ABOVE",
+      "phases": {
+        "DEV": {
+          "n": 137,
+          "mae": 1.73,
+          "mfe": 2.56,
+          "alts": 9,
+          "hits": 79,
+          "rate": 64.23,
+          "wins": 88,
+          "weeks": 11,
+          "weekly_lift": -1.15
+        },
+        "CHECK": {
+          "n": 138,
+          "mae": 1.34,
+          "mfe": 1.25,
+          "alts": 8,
+          "hits": 67,
+          "rate": 54.35,
+          "wins": 75,
+          "weeks": 11,
+          "weekly_lift": -0.79
+        },
+        "LAST_WEEK": {
+          "n": 7,
+          "mae": 1.43,
+          "mfe": 1.68,
+          "alts": 1,
+          "hits": 1,
+          "rate": 28.57,
+          "wins": 2,
+          "weeks": 1,
+          "weekly_lift": -37.22
+        }
+      }
+    },
+    {
+      "feature": "Stock SMA20",
+      "bucket": "BELOW",
+      "phases": {
+        "DEV": {
+          "n": 191,
+          "mae": 1.39,
+          "mfe": 2.29,
+          "alts": 23,
+          "hits": 108,
+          "rate": 68.59,
+          "wins": 131,
+          "weeks": 11,
+          "weekly_lift": -0.48
+        },
+        "CHECK": {
+          "n": 189,
+          "mae": 1.33,
+          "mfe": 1.24,
+          "alts": 21,
+          "hits": 81,
+          "rate": 53.97,
+          "wins": 102,
+          "weeks": 11,
+          "weekly_lift": -0.1
+        },
+        "LAST_WEEK": {
+          "n": 31,
+          "mae": 1.01,
+          "mfe": 4.61,
+          "alts": 1,
+          "hits": 22,
+          "rate": 74.19,
+          "wins": 23,
+          "weeks": 1,
+          "weekly_lift": 8.4
+        }
+      }
+    },
+    {
+      "feature": "Stock SMA50",
+      "bucket": "ABOVE",
+      "phases": {
+        "DEV": {
+          "n": 178,
+          "mae": 1.71,
+          "mfe": 2.66,
+          "alts": 13,
+          "hits": 109,
+          "rate": 68.54,
+          "wins": 122,
+          "weeks": 11,
+          "weekly_lift": 3.93
+        },
+        "CHECK": {
+          "n": 140,
+          "mae": 1.15,
+          "mfe": 1.26,
+          "alts": 13,
+          "hits": 69,
+          "rate": 58.57,
+          "wins": 82,
+          "weeks": 11,
+          "weekly_lift": 4.83
+        },
+        "LAST_WEEK": {
+          "n": 4,
+          "mae": 1.55,
+          "mfe": 2.08,
+          "alts": 1,
+          "hits": 1,
+          "rate": 50,
+          "wins": 2,
+          "weeks": 1,
+          "weekly_lift": -15.79
+        }
+      }
+    },
+    {
+      "feature": "Stock SMA50",
+      "bucket": "BELOW",
+      "phases": {
+        "DEV": {
+          "n": 150,
+          "mae": 1.32,
+          "mfe": 2.1,
+          "alts": 19,
+          "hits": 78,
+          "rate": 64.67,
+          "wins": 97,
+          "weeks": 11,
+          "weekly_lift": -2.82
+        },
+        "CHECK": {
+          "n": 187,
+          "mae": 1.47,
+          "mfe": 1.24,
+          "alts": 16,
+          "hits": 79,
+          "rate": 50.8,
+          "wins": 95,
+          "weeks": 11,
+          "weekly_lift": -2.66
+        },
+        "LAST_WEEK": {
+          "n": 34,
+          "mae": 1.03,
+          "mfe": 4.3,
+          "alts": 1,
+          "hits": 22,
+          "rate": 67.65,
+          "wins": 23,
+          "weeks": 1,
+          "weekly_lift": 1.86
+        }
+      }
+    },
+    {
+      "feature": "Thursday candle",
+      "bucket": "GREEN_OR_FLAT",
+      "phases": {
+        "DEV": {
+          "n": 128,
+          "mae": 1.38,
+          "mfe": 2.95,
+          "alts": 15,
+          "hits": 79,
+          "rate": 73.44,
+          "wins": 94,
+          "weeks": 11,
+          "weekly_lift": 6.18
+        },
+        "CHECK": {
+          "n": 107,
+          "mae": 1.59,
+          "mfe": 1.27,
+          "alts": 8,
+          "hits": 41,
+          "rate": 45.79,
+          "wins": 49,
+          "weeks": 11,
+          "weekly_lift": -4.66
+        },
+        "LAST_WEEK": {
+          "n": 18,
+          "mae": 1.05,
+          "mfe": 4.43,
+          "alts": 1,
+          "hits": 13,
+          "rate": 77.78,
+          "wins": 14,
+          "weeks": 1,
+          "weekly_lift": 11.99
+        }
+      }
+    },
+    {
+      "feature": "Thursday candle",
+      "bucket": "RED",
+      "phases": {
+        "DEV": {
+          "n": 200,
+          "mae": 1.63,
+          "mfe": 2.05,
+          "alts": 17,
+          "hits": 108,
+          "rate": 62.5,
+          "wins": 125,
+          "weeks": 11,
+          "weekly_lift": -6.43
+        },
+        "CHECK": {
+          "n": 220,
+          "mae": 1.21,
+          "mfe": 1.23,
+          "alts": 21,
+          "hits": 107,
+          "rate": 58.18,
+          "wins": 128,
+          "weeks": 11,
+          "weekly_lift": 3.38
+        },
+        "LAST_WEEK": {
+          "n": 20,
+          "mae": 1.13,
+          "mfe": 3.75,
+          "alts": 1,
+          "hits": 10,
+          "rate": 55,
+          "wins": 11,
+          "weeks": 1,
+          "weekly_lift": -10.79
+        }
+      }
+    }
+  ],
+  "baseline": [
+    {
+      "phase": "CHECK",
+      "n": 327,
+      "weeks": 11,
+      "pattern_hits": 148,
+      "alternate_hits": 29,
+      "wins": 177,
+      "rate": "54.13"
+    },
+    {
+      "phase": "DEV",
+      "n": 328,
+      "weeks": 11,
+      "pattern_hits": 187,
+      "alternate_hits": 32,
+      "wins": 219,
+      "rate": "66.77"
+    },
+    {
+      "phase": "LAST_WEEK",
+      "n": 38,
+      "weeks": 1,
+      "pattern_hits": 23,
+      "alternate_hits": 2,
+      "wins": 25,
+      "rate": "65.79"
+    }
+  ],
+  "outcome_classes": [
+    {
+      "outcome": "ALTERNATE",
+      "n": 61,
+      "avg_close_location_pct": "53.6",
+      "median_distance_pct": "1.35",
+      "red_friday_pct": "44.3",
+      "lower_low_pct": "82.0",
+      "avg_mfe": "2.27",
+      "avg_mae": "0.47"
+    },
+    {
+      "outcome": "FAILURE",
+      "n": 259,
+      "avg_close_location_pct": "49.3",
+      "median_distance_pct": "1.03",
+      "red_friday_pct": "55.2",
+      "lower_low_pct": "69.5",
+      "avg_mfe": "0.72",
+      "avg_mae": "2.24"
+    },
+    {
+      "outcome": "PATTERN",
+      "n": 335,
+      "avg_close_location_pct": "37.5",
+      "median_distance_pct": "0.83",
+      "red_friday_pct": "71.3",
+      "lower_low_pct": "73.4",
+      "avg_mfe": "2.60",
+      "avg_mae": "0.98"
+    }
+  ],
+  "last_week_lower_third": [
+    {
+      "symbol": "AMAT",
+      "friday_high": "405.2",
+      "friday_low": "382.62",
+      "friday_close": "390.09",
+      "close_location_pct": "33.1",
+      "distance_pct": "1.91",
+      "hit": true,
+      "alt": false,
+      "win": true,
+      "mfe": "5.57",
+      "mae": "0.99"
+    },
+    {
+      "symbol": "ANET",
+      "friday_high": "174.99",
+      "friday_low": "166.8601",
+      "friday_close": "168.86",
+      "close_location_pct": "24.6",
+      "distance_pct": "1.18",
+      "hit": true,
+      "alt": false,
+      "win": true,
+      "mfe": "4.31",
+      "mae": "0.23"
+    },
+    {
+      "symbol": "BAC",
+      "friday_high": "51.3366",
+      "friday_low": "49.78",
+      "friday_close": "50.01",
+      "close_location_pct": "14.8",
+      "distance_pct": "0.46",
+      "hit": true,
+      "alt": false,
+      "win": true,
+      "mfe": "1.98",
+      "mae": "0.04"
+    },
+    {
+      "symbol": "CAT",
+      "friday_high": "637.7",
+      "friday_low": "616.66",
+      "friday_close": "622.75",
+      "close_location_pct": "28.9",
+      "distance_pct": "0.98",
+      "hit": true,
+      "alt": false,
+      "win": true,
+      "mfe": "3.19",
+      "mae": "0.32"
+    },
+    {
+      "symbol": "CSCO",
+      "friday_high": "108.77",
+      "friday_low": "103.1446",
+      "friday_close": "104.51",
+      "close_location_pct": "24.3",
+      "distance_pct": "1.31",
+      "hit": true,
+      "alt": false,
+      "win": true,
+      "mfe": "3.80",
+      "mae": "0.00"
+    },
+    {
+      "symbol": "GE",
+      "friday_high": "312.9395",
+      "friday_low": "299.98",
+      "friday_close": "301.8",
+      "close_location_pct": "14.0",
+      "distance_pct": "0.60",
+      "hit": false,
+      "alt": false,
+      "win": false,
+      "mfe": "0.33",
+      "mae": "2.45"
+    },
+    {
+      "symbol": "GEV",
+      "friday_high": "886.07",
+      "friday_low": "844.08",
+      "friday_close": "857.87",
+      "close_location_pct": "32.8",
+      "distance_pct": "1.61",
+      "hit": false,
+      "alt": false,
+      "win": false,
+      "mfe": "0.82",
+      "mae": "3.48"
+    },
+    {
+      "symbol": "JPM",
+      "friday_high": "345.29",
+      "friday_low": "335.12",
+      "friday_close": "337.04",
+      "close_location_pct": "18.9",
+      "distance_pct": "0.57",
+      "hit": false,
+      "alt": false,
+      "win": false,
+      "mfe": "0.30",
+      "mae": "0.44"
+    },
+    {
+      "symbol": "KLAC",
+      "friday_high": "164.25",
+      "friday_low": "156.03",
+      "friday_close": "157.91",
+      "close_location_pct": "22.9",
+      "distance_pct": "1.19",
+      "hit": true,
+      "alt": false,
+      "win": true,
+      "mfe": "5.08",
+      "mae": "0.75"
+    },
+    {
+      "symbol": "META",
+      "friday_high": "626.37",
+      "friday_low": "610.13",
+      "friday_close": "614.99",
+      "close_location_pct": "29.9",
+      "distance_pct": "0.79",
+      "hit": true,
+      "alt": false,
+      "win": true,
+      "mfe": "1.31",
+      "mae": "1.18"
+    },
+    {
+      "symbol": "ORCL",
+      "friday_high": "135.2",
+      "friday_low": "129",
+      "friday_close": "130.67",
+      "close_location_pct": "26.9",
+      "distance_pct": "1.28",
+      "hit": true,
+      "alt": false,
+      "win": true,
+      "mfe": "5.92",
+      "mae": "0.49"
+    },
+    {
+      "symbol": "PLTR",
+      "friday_high": "193.92",
+      "friday_low": "180.81",
+      "friday_close": "184.11",
+      "close_location_pct": "25.2",
+      "distance_pct": "1.79",
+      "hit": true,
+      "alt": false,
+      "win": true,
+      "mfe": "4.50",
+      "mae": "0.55"
+    },
+    {
+      "symbol": "QCOM",
+      "friday_high": "176.1701",
+      "friday_low": "161.72",
+      "friday_close": "164.79",
+      "close_location_pct": "21.2",
+      "distance_pct": "1.86",
+      "hit": true,
+      "alt": false,
+      "win": true,
+      "mfe": "2.99",
+      "mae": "1.85"
+    },
+    {
+      "symbol": "SNDK",
+      "friday_high": "1239",
+      "friday_low": "1115.16",
+      "friday_close": "1150.89",
+      "close_location_pct": "28.9",
+      "distance_pct": "3.10",
+      "hit": true,
+      "alt": false,
+      "win": true,
+      "mfe": "7.82",
+      "mae": "0.11"
+    },
+    {
+      "symbol": "WDC",
+      "friday_high": "377.99",
+      "friday_low": "361.11",
+      "friday_close": "366.11",
+      "close_location_pct": "29.6",
+      "distance_pct": "1.37",
+      "hit": true,
+      "alt": false,
+      "win": true,
+      "mfe": "8.64",
+      "mae": "0.09"
+    },
+    {
+      "symbol": "WFC",
+      "friday_high": "85.21",
+      "friday_low": "82.965",
+      "friday_close": "83.4",
+      "close_location_pct": "19.4",
+      "distance_pct": "0.52",
+      "hit": false,
+      "alt": false,
+      "win": false,
+      "mfe": "0.36",
+      "mae": "1.93"
+    }
+  ],
+  "sensitivity": [
+    {
+      "group_name": "LOWER THIRD",
+      "n": 277,
+      "pattern_hits": 174,
+      "alternates": 20,
+      "combined": 194,
+      "gap_throughs": 55,
+      "favorable_excursion_cases": 126
+    },
+    {
+      "group_name": "OTHER CLOSES",
+      "n": 378,
+      "pattern_hits": 161,
+      "alternates": 41,
+      "combined": 202,
+      "gap_throughs": 33,
+      "favorable_excursion_cases": 138
+    }
+  ]
+}
