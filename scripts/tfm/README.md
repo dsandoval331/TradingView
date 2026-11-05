@@ -73,3 +73,9 @@ User explicitly authorized production/main release and showing the October 29–
 ## Live-results population correction
 
 User clarified that the monthly tracking period must populate Live Results and must be excluded from Historical Results. Live Results now includes every eligible symbol-week whose nominal Monday is November 2, 2026 or later, irrespective of recording origin. Historical Results includes only nominal Mondays before that boundary. These are disjoint time cohorts. Imported instances keep HISTORICAL origin, collection provenance and actual recording timestamps; UI explicitly states that the tracking totals include imports and are not a wholly prospective signal-performance record. Pattern, baseline and excursion formulas are unchanged.
+
+## Alternate success — user approved 2026-11-04
+
+Exploratory secondary measure `tfm-alternate-v1-exploratory`: a qualifying setup is an alternate success only if the original Friday-low test failed, whole-target-session MFE >= 0.5% and MFE/MAE >= 2. Primary success always takes precedence; combined counts cannot double count. Positive MFE / zero MAE has infinite ratio; zero/zero is undefined. Invalid data or thresholds cannot qualify. Pending outcomes are excluded from denominators.
+
+Thresholds are configurable per view, reset on reload to approved defaults, and apply uniformly to live, historical and archived monthly summaries and instance classifications. Source outcomes, original hit flags, immutable origins, dates and provenance are not rewritten. Retrospective statistics are explicitly exploratory because criteria were selected after outcome inspection; prospective-origin alternate performance is shown separately. Daily OHLC cannot establish excursion order, fills, stop behavior or realized profitability.
