@@ -10,6 +10,7 @@ from datetime import date, datetime, timezone
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'sector_rotation'))
 from collect import request_json
+from ranking_checks import validate_ranking_api
 from engine import RULES, VERSION, SYMBOLS, SECTORS, STOCKS, TECH_STOCKS, TECH_ETFS, digest, evaluate
 
 MWE_UUID='19dd7129-0d19-4c1b-a65b-03480a925b8d'
@@ -77,7 +78,11 @@ def main():
     secret=os.environ['SUPABASE_SECRET_KEY']
     headers={'apikey':secret,'Authorization':'Bearer '+secret}
     def db(path,method='GET',data=None):return request_json(base+path,headers,method,data)[0]
-    print(json.dumps(scan(db,os.environ['GITHUB_SHA'],os.environ.get('GITHUB_RUN_ID')),allow_nan=False))
+    result=scan(db,os.environ['GITHUB_SHA'],os.environ.get('GITHUB_RUN_ID'))
+    # Ranking is a separate atomic transaction. A failure must not unpublish a valid scan.
+    result['ranking_contract']=validate_ranking_api(db)
+    result['ranking']=db('rpc/tfm_process_rankings','POST',{'p_run_id':result['run_id']})
+    print(json.dumps(result,allow_nan=False))
 
 if __name__=='__main__':
     try:main()

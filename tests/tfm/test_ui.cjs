@@ -29,3 +29,15 @@ for(const scopeLabel of ['Sector ETFs','Tech & AI','S&P 500 Top 50']){
  assert.ok(html.includes('Alternate success')&&html.includes('Prospective alternate success'));
 }
 console.log('TFM SSR: three scopes, current-month live rows, collapsed prior months, aggregate-only history PASS');
+
+const Ranking=require(path.join(app,'app/dashboard/sector-rotation/tfm/RankingPanel.tsx')).default;
+const candidate={setup_key:'frozen',symbol:'FROZEN_RANK',rank:1,score:86,close_points:56,red_points:20,below_points:10,distance_pct:0.61,lower_third:true,status:'RANKED',reference_bars:[]};
+const snapshot={snapshot_id:'fixture',model_version:'tfm-rank-v1',scope:'tech',monday:'2026-11-09',target_date:'2026-11-09',frozen_at:'2026-11-07T13:15:00Z',payload:{n:1,k:1,complete:true,candidates:[candidate],model_sha256:'model',source_sha256:'source',universe_sha256:'universe'},review:{n:1,k:1,complete:true,top_rate:100,top_hit_rate:0,pool_rate:100,lift:0,ndcg:100,median_mfe:0.5,median_mae:0.25,gaps:0,instances:[{...candidate,classification:'ALTERNATE',outcome:{hit:false,mfe_pct:0.5,mae_pct:0.25}}],groups:{top:{n:1,wins:1,rate:100}}}};
+const html=renderToStaticMarkup(React.createElement(Ranking,{game:{snapshots:[snapshot],xp:[{monday:'2026-11-09',kind:'freeze',points:10}],reflections:[],error:null}}));
+assert.ok(html.includes('FROZEN_RANK')&&html.includes('86.00 / 100'));
+assert.ok(html.includes('Hidden until revealed')&&!html.includes('ALTERNATE</td>'));
+assert.ok(html.includes('10 / 30 XP')&&html.includes('First Frozen Week'));
+assert.ok(html.includes('disabled=')&&html.includes('Save reflection'));
+const empty=renderToStaticMarkup(React.createElement(Ranking,{game:{snapshots:[],xp:[],reflections:[],error:null}}));
+assert.ok(empty.includes('Rankings not available yet')&&empty.includes('0 / 30 XP'));
+console.log('TFM rankings SSR: frozen reasons, separate XP, blind review, locked reflection, truthful empty state PASS');
