@@ -50,3 +50,17 @@ const combined=summarizeAlternate([alt(1,.1,true),alt(.5,.25),alt(.2,.2),alt(.8,
 assert.equal(combined.alternate,2);assert.equal(combined.combined,3);assert.equal(combined.combinedRate,75);assert.equal(combined.prospectiveRate,100);
 assert.equal(summarizeAlternate([]).alternateRate,null);
 console.log('Alternate success: exact thresholds, primary exclusion, zero MAE, pending/invalid data, combined denominator and prospective split PASS');
+
+const {summarizeExcursions}=await import('../../apps/trading-research-web/app/dashboard/sector-rotation/tfm/model.ts');
+const excursionRows=[alt(3,1,true),alt(.8,.2),alt(.2,1),{...alt(100,100),qualifies:false},{...alt(99,99),outcome:null}];
+const e=summarizeExcursions(excursionRows);
+assert.deepEqual(e.hits,{n:1,mfe:3,mae:1});
+assert.deepEqual(e.misses,{n:2,mfe:.5,mae:.6});
+assert.deepEqual(e.alternate,{n:1,mfe:.8,mae:.2});
+assert.equal(e.all.n,3);assert.ok(Math.abs(e.all.mfe-4/3)<1e-12);assert.ok(Math.abs(e.all.mae-2.2/3)<1e-12);
+assert.deepEqual(summarizeExcursions([]).all,{n:0,mfe:null,mae:null});
+assert.deepEqual(summarizeExcursions([alt(3,1,true)]).misses,{n:0,mfe:null,mae:null});
+assert.equal(summarizeExcursions(excursionRows,{minMfePct:NaN,minRatio:2}).alternate,null);
+assert.deepEqual(summarizeExcursions(excursionRows,{minMfePct:1,minRatio:2}).alternate,{n:0,mfe:null,mae:null});
+assert.deepEqual(summarizeExcursions(excursionRows,{minMfePct:1,minRatio:2}).all,e.all);
+console.log('TFM excursion groups: hits, overlapping misses/alternates, all, pending/control exclusion, empty/invalid/custom thresholds PASS');

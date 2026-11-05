@@ -41,3 +41,16 @@ assert.ok(html.includes('disabled=')&&html.includes('Save reflection'));
 const empty=renderToStaticMarkup(React.createElement(Ranking,{game:{snapshots:[],xp:[],reflections:[],error:null}}));
 assert.ok(empty.includes('Rankings not available yet')&&empty.includes('0 / 30 XP'));
 console.log('TFM rankings SSR: frozen reasons, separate XP, blind review, locked reflection, truthful empty state PASS');
+for(const scopeLabel of ['Sector ETFs','Tech & AI','S&P 500 Top 50']){
+ const html=renderToStaticMarkup(React.createElement(Dashboard,{rows,scans:[],asOf:'2026-11-03',error:null,scopeLabel}));
+ assert.ok(html.includes('All qualifying · mean MFE / MAE'));
+ assert.ok(html.includes('MFE and MAE by qualifying outcome'));
+ for(const label of ['Pattern hits','Did not hit Friday low','Alternate successes','All qualifying instances'])assert.ok(html.includes(label));
+ assert.ok(html.includes('these groups overlap'));
+ const live=html.slice(html.indexOf('Live results'),html.indexOf('Historical results'));
+ assert.ok(live.includes('<th scope="row">Pattern hits</th><td>1</td><td>10.00%</td><td>10.00%</td>'));
+ assert.ok(live.includes('<th scope="row">Did not hit Friday low</th><td>1</td><td>4.00%</td><td>10.00%</td>'));
+ assert.ok(live.includes('<th scope="row">Alternate successes</th><td>0</td><td>—</td><td>—</td>'));
+ assert.ok(live.includes('<th scope="row">All qualifying instances</th><td>2</td><td>7.00%</td><td>10.00%</td>'));
+}
+console.log('TFM excursion table SSR: three scopes, exact group counts/means, overlapping-group explanation and empty state PASS');
