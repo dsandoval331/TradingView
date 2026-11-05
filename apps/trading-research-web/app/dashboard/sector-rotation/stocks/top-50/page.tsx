@@ -12,7 +12,7 @@ export const metadata={title:'S&P 500 Top 50 Index | MULtipLY'};
 export default async function Top50Page({searchParams}:{searchParams:Promise<{tab?:string}>}){
  const initialTab=(await searchParams).tab;
  const client=await stockClient();
- const tfm=await loadTFM(client,TOP_50_STOCKS.map(g=>g.symbol));
+ const tfm=await loadTFM(client,TOP_50_STOCKS.map(g=>g.symbol),'top50');
  const data=await loadStockHistory(TOP_50_STOCKS.map(g=>g.symbol));
  const loaded=new Set(data.bars.map(b=>b.symbol));
  const missing=TOP_50_STOCKS.filter(g=>!loaded.has(g.symbol)).map(g=>g.symbol);

@@ -31,6 +31,6 @@ export default async function TechAIPage({searchParams}:{searchParams:Promise<{t
     }
   }
   const tfmSymbols=[...new Set(TECH_GROUPS.flatMap(g=>g.members??[g.symbol]))];
-  const tfm=await loadTFM(supabase,tfmSymbols);
+  const tfm=await loadTFM(supabase,tfmSymbols,'tech');
   return <main><TrackerNav/><Tracker initialTab={initialTab} tfmPanel={<TFMDashboard {...tfm} asOf={marketDate()} scopeLabel="Tech &amp; AI" scopeNote="IGV and actual member stocks from the Tech & AI groups; overlapping stocks count once. Synthetic basket indices are not scored."/>} swingSuggestions={await loadSwingSuggestions()} asOfDate={marketDate()} tech groups={TECH_GROUPS} title="Tech & AI rotation" bars={buildTechBars(bars)} updatedAt={latest?.completed_at??null} latestSession={latest?.latest_session??null} runStatus={runs?.[0]?.status??'NOT_STARTED'} error={error}/></main>;
 }
