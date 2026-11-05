@@ -36,3 +36,25 @@ export function trackingSections(rows:Setup[],asOf:string){
 export function monthGroups(rows:Setup[]){
  return [...new Set(rows.map(trackingMonth))].sort().reverse().map(month=>({month,rows:rows.filter(r=>trackingMonth(r)===month)}));
 }
+
+export type AlternateRules={minMfePct:number;minRatio:number};
+export const DEFAULT_ALTERNATE_RULES:AlternateRules={minMfePct:0.5,minRatio:2};
+export const ALTERNATE_VERSION='tfm-alternate-v1-exploratory';
+export function validAlternateRules(r:AlternateRules){return Number.isFinite(r.minMfePct)&&r.minMfePct>0&&Number.isFinite(r.minRatio)&&r.minRatio>0;}
+export function excursionRatio(o:OutcomePayload|null){
+ if(!o||!Number.isFinite(o.mfe_pct)||!Number.isFinite(o.mae_pct)||o.mfe_pct<0||o.mae_pct<0)return null;
+ return o.mae_pct===0?(o.mfe_pct>0?Infinity:null):o.mfe_pct/o.mae_pct;
+}
+export function alternateSuccess(row:Setup,rules:AlternateRules=DEFAULT_ALTERNATE_RULES){
+ const ratio=excursionRatio(row.outcome);
+ return validAlternateRules(rules)&&row.qualifies&&!!row.outcome&&!row.outcome.hit&&row.outcome.mfe_pct>=rules.minMfePct&&ratio!==null&&ratio>=rules.minRatio;
+}
+export function summarizeAlternate(rows:Setup[],rules:AlternateRules=DEFAULT_ALTERNATE_RULES){
+ const completed=rows.filter(r=>r.qualifies&&r.outcome!==null);
+ const alternate=completed.filter(r=>alternateSuccess(r,rules)).length;
+ const hits=completed.filter(r=>r.outcome!.hit).length;
+ const prospective=completed.filter(r=>r.origin==='PROSPECTIVE');
+ const prospectiveAlternate=prospective.filter(r=>alternateSuccess(r,rules)).length;
+ const valid=validAlternateRules(rules);
+ return {n:completed.length,alternate,combined:hits+alternate,alternateRate:valid&&completed.length?alternate/completed.length*100:null,combinedRate:valid&&completed.length?(hits+alternate)/completed.length*100:null,prospectiveN:prospective.length,prospectiveAlternate,prospectiveRate:valid&&prospective.length?prospectiveAlternate/prospective.length*100:null};
+}
