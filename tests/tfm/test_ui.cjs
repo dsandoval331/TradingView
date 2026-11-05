@@ -24,6 +24,8 @@ for(const scopeLabel of ['Sector ETFs','Tech & AI','S&P 500 Top 50']){
  assert.ok(html.indexOf('Live results')<html.indexOf('Historical results'));
  assert.ok(!html.includes('Current candidates'));
  assert.ok(!html.includes('Symbol search')&&!html.includes('<select'),'Symbol search and target-session controls must remain absent');
+ assert.ok(html.includes('<span>Combined Success</span><strong>1</strong>'));
+ assert.ok(html.includes('<span>Combined Success Rate</span><strong>50.00%</strong>'));
  assert.ok(html.includes('Alternate success')&&html.includes('Prospective alternate success'));
 }
 console.log('TFM SSR: three scopes, current-month live rows, collapsed prior months, aggregate-only history PASS');
