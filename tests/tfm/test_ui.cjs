@@ -54,3 +54,18 @@ for(const scopeLabel of ['Sector ETFs','Tech & AI','S&P 500 Top 50']){
  assert.ok(live.includes('<th scope="row">All qualifying instances</th><td>2</td><td>7.00%</td><td>10.00%</td>'));
 }
 console.log('TFM excursion table SSR: three scopes, exact group counts/means, overlapping-group explanation and empty state PASS');
+
+const League=require(path.join(app,'app/dashboard/sector-rotation/tfm/LeaguePanel.tsx')).default;
+const leagueHtml=renderToStaticMarkup(React.createElement(League,{league:{error:false,matches:[
+ {champion_id:'first',monday:'2026-11-16',target_date:'2026-11-16',picks:[
+  {symbol:'AAA',rank:1,challenger_rank:2,room_to_stop:1},
+  {symbol:'BBB',rank:2,challenger_rank:1,room_to_stop:2}],
+  result:{k:2,missing:0,ambiguous:1,champion_lo:-.25,champion_hi:.75,
+   challenger_lo:-.25,challenger_hi:.75,champion_hits:1,challenger_hits:1,winner:'TIE'}},
+ {champion_id:'holiday',monday:'2027-01-18',target_date:'2027-01-19',picks:[],result:null}
+]}}));
+assert.ok(leagueHtml.includes('Tie · half a point each'));
+assert.ok(leagueHtml.includes('-0.25% to 0.75%'));
+assert.ok(leagueHtml.includes('Holiday Tuesday standings'));
+assert.ok(leagueHtml.includes('Champion picks: AAA, BBB'));
+console.log('TFM league SSR: paired picks, tied points, ambiguity bounds and holiday cohort PASS');
