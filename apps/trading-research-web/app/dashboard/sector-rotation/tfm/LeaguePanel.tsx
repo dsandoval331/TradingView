@@ -68,7 +68,7 @@ export default function LeaguePanel({league}: {league: League}) {
       <Standings matches={league.matches.filter(m => m.monday === m.target_date)} title="Monday standings"/>
       {league.matches.some(m => m.monday !== m.target_date) &&
         <Standings matches={league.matches.filter(m => m.monday !== m.target_date)} title="Holiday Tuesday standings"/>}
-      {league.matches.length === 0 && <p>First eligible target is November 16, 2026. Picks appear after the first paired freeze.</p>}
+      {league.matches.length === 0 && <p>First eligible target is November 9, 2026. Picks appear after the first paired freeze.</p>}
       {league.matches.map(match => {
         const r = match.result;
         const champion = match.picks.filter(p => p.rank <= 5).sort((a,b) => a.rank-b.rank);
