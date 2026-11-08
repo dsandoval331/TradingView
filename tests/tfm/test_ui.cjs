@@ -69,3 +69,15 @@ assert.ok(leagueHtml.includes('-0.25% to 0.75%'));
 assert.ok(leagueHtml.includes('Holiday Tuesday standings'));
 assert.ok(leagueHtml.includes('Champion picks: AAA, BBB'));
 console.log('TFM league SSR: paired picks, tied points, ambiguity bounds and holiday cohort PASS');
+
+const pairedRanking=renderToStaticMarkup(React.createElement(Ranking,{
+ game:{snapshots:[snapshot],xp:[],reflections:[],error:null},
+ league:{error:false,matches:[{champion_id:snapshot.snapshot_id,picks:[
+  {setup_key:candidate.setup_key,symbol:candidate.symbol,rank:1,challenger_rank:7,room_to_stop:.81}
+ ]}]}
+}));
+assert.match(pairedRanking,/aria-pressed="false">Room to Target<\/button>/);
+assert.match(pairedRanking,/<th>Room to Target rank<\/th>/);
+assert.match(pairedRanking,/<td>1<\/td><th scope="row">FROZEN_RANK<\/th><td>7<\/td>/);
+assert.ok(!pairedRanking.includes('Room to Target frozen rankings'));
+console.log('TFM ranking tabs SSR: shared snapshot, alternate rank and single active table PASS');

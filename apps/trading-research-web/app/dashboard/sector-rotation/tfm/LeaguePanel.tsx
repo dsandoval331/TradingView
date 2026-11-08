@@ -1,6 +1,6 @@
 import styles from './tfm.module.css';
 
-type Pick = {symbol: string; rank: number; challenger_rank: number; room_to_stop: number};
+type Pick = {setup_key: string; symbol: string; rank: number; challenger_rank: number; room_to_stop: number};
 type Result = {
   k: number;
   missing: number;
