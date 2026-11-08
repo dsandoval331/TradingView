@@ -13,7 +13,7 @@
 
 .rankingTabs button {
   background: #cbd5e1;
-  color: #111827;
+  color: var(--bg);
   border: 1px solid #94a3b8;
 }
 
