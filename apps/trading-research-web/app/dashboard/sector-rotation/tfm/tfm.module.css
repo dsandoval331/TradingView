@@ -3,3 +3,15 @@
 .pagination{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:20px;font-size:12px;color:var(--soft)}.pagination button{background:#1c2a3c;color:#dce8f7;font-size:12px}.pagination button:disabled{opacity:.35;cursor:default}
 
 .root textarea{display:block;box-sizing:border-box;width:100%;max-width:52rem;margin:12px 0;padding:12px;background:var(--surface,#111827);color:inherit;border:1px solid #465164;border-radius:8px;font:inherit}
+
+.rankingTabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  margin: .75rem 0;
+}
+
+.rankingTabs button[aria-pressed="true"] {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
