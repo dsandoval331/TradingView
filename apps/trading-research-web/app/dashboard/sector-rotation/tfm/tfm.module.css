@@ -11,7 +11,19 @@
   margin: .75rem 0;
 }
 
+.rankingTabs button {
+  background: #cbd5e1;
+  color: #111827;
+  border: 1px solid #94a3b8;
+}
+
 .rankingTabs button[aria-pressed="true"] {
-  outline: 2px solid currentColor;
-  outline-offset: 2px;
+  background: var(--gold);
+  border-color: #111827;
+  box-shadow: 0 0 0 2px #f9d98e;
+}
+
+.rankingTabs button:focus-visible {
+  outline: 2px solid #7dd3fc;
+  outline-offset: 4px;
 }
