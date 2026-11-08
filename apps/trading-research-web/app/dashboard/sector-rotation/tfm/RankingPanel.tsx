@@ -3,6 +3,7 @@ import {useState} from 'react';
 import {createClient} from '../../../../lib/supabase/client';
 import type {League, LeagueMatch} from './LeaguePanel';
 import styles from './tfm.module.css';
+import trackerStyles from '../tracker.module.css';
 export type RankCandidate={setup_key:string;symbol:string;rank:number|null;score:number|null;close_points:number|null;red_points:number|null;below_points:number|null;distance_pct:number|null;lower_third:boolean|null;status:string;reason:string|null;reference_bars:{trade_date:string;response_sha256:string}[]};
 export type RankInstance=RankCandidate&{classification:string;outcome:{hit:boolean;gap_through:boolean;mfe_pct:number;mae_pct:number;close_return_pct:number}|null};
 export type RankReview={n:number;k:number;complete:boolean;top_rate:number|null;top_hit_rate:number|null;pool_rate:number|null;lift:number|null;ndcg:number|null;median_mfe:number|null;median_mae:number|null;gaps:number;instances:RankInstance[];groups:Record<string,{n:number;wins:number;rate:number|null}>};
@@ -23,7 +24,7 @@ function FrozenWeek({snapshot:s, match}:{snapshot:RankSnapshot; match?:LeagueMat
  <div className={styles.metrics}><div><span>Top-{s.payload.k} Combined Success Rate</span><strong>{num(r?.top_rate,'%')}</strong><small>Pattern hit rate: {num(r?.top_hit_rate,'%')}</small></div><div><span>Qualifying-pool baseline</span><strong>{num(r?.pool_rate,'%')}</strong><small>All {s.payload.n} frozen qualifiers</small></div><div><span>Selection lift</span><strong>{num(r?.lift,' pp')}</strong><small>Top group minus full pool</small></div><div><span>Ranking quality</span><strong>{num(r?.ndcg,' / 100')}</strong><small>NDCG@{s.payload.k} · no successful ideal = N/A</small></div></div>
  <p>{r?`Verified full-pool review · median MFE ${num(r.median_mfe,'%')} / MAE ${num(r.median_mae,'%')} · ${r.gaps} gap-through hits.`:'Review pending verified target-session data. No missing result is treated as a loss.'}</p>
  {r&&<><button type="button" aria-pressed={reveal} onClick={()=>setReveal(!reveal)}>{reveal?'Hide instance outcomes':'Reveal instance outcomes'}</button><p className={styles.footnote}>Top / middle / bottom: {Object.entries(r.groups).map(([g,v])=>`${g} ${v.wins}/${v.n} (${num(v.rate,'%')})`).join(' · ')}. Top and bottom use up to five nonoverlapping ranks.</p></>}
- <div className={styles.rankingTabs} role="group" aria-label="Ranking system">
+ <div className={`${trackerStyles.pageTabs} ${styles.rankingTabs}`} role="group" aria-label="Ranking system">
   <button type="button" aria-pressed={!challenger} onClick={()=>setSelected('champion')}>Champion</button>
   <button type="button" aria-pressed={challenger} disabled={!match} onClick={()=>setSelected('challenger')}>Room to Target</button>
  </div>
