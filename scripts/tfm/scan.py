@@ -82,6 +82,7 @@ def main():
     # Ranking is a separate atomic transaction. A failure must not unpublish a valid scan.
     result['ranking_contract']=validate_ranking_api(db)
     result['ranking']=db('rpc/tfm_process_rankings','POST',{'p_run_id':result['run_id']})
+    db('rpc/tfm_process_league','POST',{})
     print(json.dumps(result,allow_nan=False))
 
 if __name__=='__main__':
